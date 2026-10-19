@@ -98,7 +98,7 @@ src/
   layouts/      Base.astro, the frame around every page
   components/   Header, Footer, Button, PageHero, CtaBand, AtlanticMap, CanadaMap,
                 IndustryMatrix, JobRow, Photo
-  data/         site facts, team, industries, jobs, blog posts, map shapes
+  data/         site facts, team, industries, jobs, office areas, blog posts, map shapes
   lib/          url.js, the internal-link helper
   styles/       tokens.css (design knobs) and global.css (base styles)
 scripts/        generate-maps.mjs (rebuilds the map shapes)
@@ -131,6 +131,8 @@ The same snapshot feeds the job lists on the homepage and Find work page (`src/d
 - **The request form** on `/hire/` shows a confirmation but doesn't send anything yet.
 - **Team roles** in `team.js` are mostly blank.
 - **The logo and badge images** load from Squarespace's image server. Before this ever goes live, download them into a `public/` folder.
+- **Office areas** in `src/data/areas.js` decide which towns count as "near" each office for the Jobs near links. Check them with each office.
+- **The scam notice** in the footer is placeholder wording for ISL to approve.
 - Items marked `TODO` in the code need a decision: which Moncton address is current, and which retention and review numbers are right.
 
 ## Previews

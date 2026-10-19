@@ -1,7 +1,7 @@
 ---
 // HOMEPAGE  →  /
-// Six sections, each built from the shared section system in global.css:
-// hero, two ways to hire, where we are, proof, open roles, closing call to action.
+// Built from the shared section system in global.css:
+// hero (with job search), employer situations, where we are, proof, open roles, free tools, call to action.
 import Base from '../layouts/Base.astro';
 import Button from '../components/Button.astro';
 import AtlanticMap from '../components/AtlanticMap.astro';
@@ -11,12 +11,37 @@ import Photo from '../components/Photo.astro';
 import { photos } from '../data/photos.js';
 import { testimonials, stats, brand } from '../data/site.js';
 import { jobs } from '../data/jobs.js';
+import { posts } from '../data/posts.js';
 import { url } from '../lib/url.js';
 
 const quote = testimonials[0];
 const retention = stats.find((s) => s.label.includes('retention'))?.value ?? '92%';
 const reviews = stats.find((s) => s.label.includes('reviews'))?.value ?? '200+';
 const latest = jobs.slice(0, 5);
+
+// Situations employers call about, grouped by the service that answers them.
+// Every answer restates a claim from the live site (hours, try-before-you-hire,
+// proactive sourcing, national permanent search).
+const situations = {
+  contract: [
+    ["Someone's on leave next week.", 'A pre-screened worker covers the shift, often within hours of your call.'],
+    ['Orders just doubled for the season.', 'Add people for the peak and scale back when it settles.'],
+    ["We'd like to see someone work before we hire.", 'Start them on contract, then bring them onto your team when you\u2019re sure.'],
+  ],
+  direct: [
+    ['Our controller just gave notice.', 'A targeted search for the permanent replacement, led by a recruiter in your field.'],
+    ["This role has been posted for months.", 'We reach people who aren\u2019t answering job ads, through targeted outreach.'],
+    ["We're hiring outside Atlantic Canada.", 'Our permanent searches reach every province.'],
+  ],
+};
+
+// ISL's own tools, from the blog (they live on the current site).
+const toolSlugs = [
+  ['wage-guide-atlantic-canada-2026', 'For employers and job seekers', 'Pick an industry and role to see entry-level, experienced and top-of-market hourly rates, with the annual equivalent.', 'Open the wage guide'],
+  ['resume-audit', 'For job seekers', 'A 42-item checklist across eight sections that scores your resume and shows where to focus.', 'Audit your resume'],
+  ['why-new-brunswick-a-practical-guide-for-canadians-considering-a-move', 'For job seekers', 'Jobs, cities and quality of life, with a calculator that shows what your salary is worth in Moncton, Fredericton or Saint John.', 'Read the guide'],
+];
+const tools = toolSlugs.map(([slug, who, d, cta]) => ({ ...posts.find((p) => p.slug === slug), who, d, cta }));
 ---
 <Base>
   <!-- 1. HERO: the promise on the left, ISL's own photo running off the right edge -->
@@ -32,6 +57,13 @@ const latest = jobs.slice(0, 5);
           <Button href="/hire/" size="lg">Request talent</Button>
           <Button href="/find-work/" variant="outline" size="lg">Find work</Button>
         </div>
+        <form class="search" action={url('/find-work/')} method="get" role="search">
+          <label for="hero-q">Search {jobs.length} open jobs</label>
+          <div class="search-bar">
+            <input id="hero-q" name="q" type="search" placeholder="Job title, skill or city" autocomplete="off" />
+            <button type="submit">Search</button>
+          </div>
+        </form>
       </div>
     </div>
     <div class="hero-photo">
@@ -39,25 +71,28 @@ const latest = jobs.slice(0, 5);
     </div>
   </section>
 
-  <!-- 2. TWO WAYS TO HIRE: each service with the one fact that sells it -->
+  <!-- 2. SITUATIONS: what employers call about, answered by the right service -->
   <section class="section services">
     <div class="wrap">
       <div class="section-head">
-        <h2>Two ways to hire.</h2>
+        <h2>Sound familiar?</h2>
+        <p class="lead">Tell us what's happening and we'll match the right service to it.</p>
       </div>
       <div class="items items--2">
         <div class="item">
           <p class="svc svc--contract">Contract staffing</p>
           <p class="fact"><span class="figure">Within hours</span>from your request to workers on site</p>
-          <h3>Cover a gap, a leave or a busy season.</h3>
-          <p>Pre-screened workers for one all-inclusive hourly rate. We handle payroll and workers' compensation.</p>
+          <ul class="sits">
+            {situations.contract.map(([q, a]) => <li><p class="q">{q}</p><p class="a">{a}</p></li>)}
+          </ul>
           <a class="more" href={url('/contract/')}>How contract staffing works</a>
         </div>
         <div class="item item--direct">
           <p class="svc svc--direct">Direct hire</p>
           <p class="fact"><span class="figure">{retention}</span>of our direct hire placements stay</p>
-          <h3>Find a permanent hire, anywhere in Canada.</h3>
-          <p>A targeted search for hard-to-fill roles. If a hire doesn't work out in the first 90 days, we replace them at no extra cost.</p>
+          <ul class="sits">
+            {situations.direct.map(([q, a]) => <li><p class="q">{q}</p><p class="a">{a}</p></li>)}
+          </ul>
           <a class="more" href={url('/direct-hire/')}>How direct hire works</a>
         </div>
       </div>
@@ -108,6 +143,26 @@ const latest = jobs.slice(0, 5);
     </div>
   </section>
 
+  <!-- 6. FREE TOOLS: ISL's own guides and tools -->
+  <section class="section section--rule tools">
+    <div class="wrap">
+      <div class="section-head">
+        <h2>Free tools from our team</h2>
+        <p class="lead">Built by ISL from what our recruiters see across Atlantic Canada.</p>
+      </div>
+      <ul class="items">
+        {tools.map((t) => (
+          <li class="item">
+            <p class="who">{t.who}</p>
+            <h3>{t.title}</h3>
+            <p>{t.d}</p>
+            <a class="more" href={t.url}>{t.cta}</a>
+          </li>
+        ))}
+      </ul>
+    </div>
+  </section>
+
   <CtaBand />
 </Base>
 
@@ -125,6 +180,14 @@ const latest = jobs.slice(0, 5);
   .line--direct { text-decoration-color: var(--direct); }
   .hero .lead { margin-top: var(--s6); max-width: 40ch; }
   .actions { display: flex; flex-wrap: wrap; gap: var(--s3); margin-top: var(--s7); }
+  /* Job search: the job seeker's way in, right in the hero (most site visitors are job seekers) */
+  .search { margin-top: var(--s6); max-width: 32rem; }
+  .search label { display: block; font-size: var(--fs-small); font-weight: 500; margin-bottom: var(--s2); }
+  .search-bar { display: flex; border: 1.5px solid var(--ink); background: var(--paper); }
+  .search-bar input { flex: 1; min-width: 0; font: inherit; font-size: 1rem; padding: 0.8rem 1rem; border: 0; background: transparent; color: var(--ink); }
+  .search-bar input:focus { outline: 2px solid var(--isl-blue); outline-offset: -2px; }
+  .search-bar button { font: inherit; font-weight: 600; cursor: pointer; padding: 0 1.4rem; border: 0; background: var(--ink); color: #fff; }
+  .search-bar button:hover { background: var(--isl-blue); }
 
   /* The one deliberate break in the site's grid: the photo runs off the right edge
      and drops past the hero into the next section. */
@@ -145,7 +208,11 @@ const latest = jobs.slice(0, 5);
   .services { padding-top: calc(clamp(4rem, 8vw, 6.5rem) + 3rem); }
   @media (min-width: 901px) { .services .section-head { max-width: 52%; } .services .items { grid-template-columns: 1fr 1fr; } }
   .item--direct { border-top-color: var(--direct); }
-  .item h3 { font-size: 1.4rem; letter-spacing: -0.02em; margin-top: var(--s2); }
+  /* Situations: the employer's words, then the answer */
+  .sits { list-style: none; margin: 0 0 var(--s5); padding: 0; }
+  .sits li { padding-block: var(--s4); border-top: 1px solid var(--line); }
+  .sits .q { color: var(--ink); font-size: 1.25rem; font-weight: 500; letter-spacing: -0.015em; line-height: 1.3; margin-bottom: var(--s1); }
+  .sits .a { color: var(--ink-soft); font-size: var(--fs-small); }
   /* The one number that sells each service, in the brand's light display weight */
   .fact { margin: var(--s2) 0 var(--s5); color: var(--ink-soft); font-size: var(--fs-small); }
   .fact .figure { display: block; font-size: clamp(2.6rem, 1.6rem + 2.6vw, 3.9rem); color: var(--ink); margin-bottom: var(--s2); }
@@ -170,5 +237,9 @@ const latest = jobs.slice(0, 5);
   .jobs-intro { color: var(--ink-soft); max-width: 44ch; justify-self: end; }
   .job-list { border-top: 1.5px solid var(--ink); }
   .jobs-foot { margin-top: var(--s6); }
+
+  /* ---------- 6. Tools ---------- */
+  .who { font-size: var(--fs-tiny); font-weight: 500; color: var(--ink-soft); margin-bottom: var(--s2); }
+  .tools h3 { font-size: 1.25rem; }
   @media (max-width: 860px) { .jobs-intro { justify-self: start; } }
 </style>

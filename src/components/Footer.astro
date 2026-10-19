@@ -3,8 +3,10 @@
 // The offices row is the most useful thing in a staffing footer: a direct line to each office.
 import { brand, nav, offices, social, images } from '../data/site.js';
 import { url } from '../lib/url.js';
+import { areas } from '../data/areas.js';
 const year = new Date().getFullYear(); // never goes stale
 const tel = (n) => `tel:+1${n.replaceAll('-', '')}`;
+const areaKey = (city) => areas.find((a) => a.label === city)?.key;
 ---
 <footer class="footer on-dark">
   <div class="wrap">
@@ -14,6 +16,7 @@ const tel = (n) => `tel:+1${n.replaceAll('-', '')}`;
           <p class="city">{o.city}<span>{o.province}</span></p>
           <a class="phone" href={tel(o.phone)}>{o.phone}</a>
           <p class="addr">{o.address.replace(/,\s*(NS|NB|PE|NL)\s.*$/, '')}</p>
+          {areaKey(o.city) && <a class="near" href={url(`/find-work/?area=${areaKey(o.city)}`)}>Jobs near {o.city}</a>}
         </div>
       ))}
     </div>
@@ -32,6 +35,8 @@ const tel = (n) => `tel:+1${n.replaceAll('-', '')}`;
       </nav>
     </div>
 
+    <!-- TODO: confirm this wording with ISL before going live -->
+    <p class="scam"><strong>Recruitment scam alert.</strong> {brand.name} never charges job seekers a fee and never asks for banking details to apply. If someone claiming to be us does, call your nearest office.</p>
     <p class="legal">© {year} {brand.name}. All rights reserved.</p>
   </div>
 </footer>
@@ -45,7 +50,7 @@ const tel = (n) => `tel:+1${n.replaceAll('-', '')}`;
     display: grid; grid-template-columns: repeat(5, 1fr);
     border-top: 1px solid var(--line-dark);
   }
-  .office { padding: var(--s5) var(--s4) var(--s5) 0; }
+  .office { display: flex; flex-direction: column; align-items: flex-start; padding: var(--s5) var(--s4) var(--s5) 0; }
   .office + .office { padding-left: var(--s4); border-left: 1px solid var(--line-dark); }
   .city { font-weight: 700;
     font-size: 1.15rem; letter-spacing: -0.01em; margin-bottom: var(--s2);
@@ -63,7 +68,11 @@ const tel = (n) => `tel:+1${n.replaceAll('-', '')}`;
   .badges img { height: 56px; width: auto; }
   nav { display: grid; grid-template-columns: 1fr 1fr; gap: var(--s5); }
   ul { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--s2); align-content: start; }
-  .legal { margin-top: var(--s7); font-size: var(--fs-tiny); color: var(--on-dark-soft); }
+  .near { display: inline-block; margin-top: auto; padding-top: var(--s3); font-size: var(--fs-small); text-decoration: underline !important; text-underline-offset: 0.2em; color: var(--on-dark-soft); }
+  .near:hover { color: #fff; }
+  .scam { margin-top: var(--s7); padding-top: var(--s4); border-top: 1px solid var(--line-dark); font-size: var(--fs-small); color: var(--on-dark-soft); }
+  .scam strong { color: #fff; font-weight: 600; }
+  .legal { margin-top: var(--s4); font-size: var(--fs-tiny); color: var(--on-dark-soft); }
 
   @media (max-width: 900px) {
     .offices { grid-template-columns: 1fr 1fr; }
