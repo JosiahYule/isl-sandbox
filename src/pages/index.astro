@@ -5,7 +5,6 @@
 import Base from '../layouts/Base.astro';
 import Button from '../components/Button.astro';
 import AtlanticMap from '../components/AtlanticMap.astro';
-import HireClock from '../components/HireClock.astro';
 import JobRow from '../components/JobRow.astro';
 import CtaBand from '../components/CtaBand.astro';
 import Photo from '../components/Photo.astro';
@@ -15,6 +14,7 @@ import { jobs } from '../data/jobs.js';
 import { url } from '../lib/url.js';
 
 const quote = testimonials[0];
+const retention = stats.find((s) => s.label.includes('retention'))?.value ?? '92%';
 const reviews = stats.find((s) => s.label.includes('reviews'))?.value ?? '200+';
 const latest = jobs.slice(0, 5);
 ---
@@ -39,7 +39,7 @@ const latest = jobs.slice(0, 5);
     </div>
   </section>
 
-  <!-- 2. TWO WAYS TO HIRE: the two services, then both on one timeline -->
+  <!-- 2. TWO WAYS TO HIRE: each service with the one fact that sells it -->
   <section class="section services">
     <div class="wrap">
       <div class="section-head">
@@ -48,19 +48,18 @@ const latest = jobs.slice(0, 5);
       <div class="items items--2">
         <div class="item">
           <p class="svc svc--contract">Contract staffing</p>
+          <p class="fact"><span class="figure">Within hours</span>from your request to workers on site</p>
           <h3>Cover a gap, a leave or a busy season.</h3>
-          <p>Pre-screened workers on site within hours of your request, for one all-inclusive hourly rate.</p>
+          <p>Pre-screened workers for one all-inclusive hourly rate. We handle payroll and workers' compensation.</p>
           <a class="more" href={url('/contract/')}>How contract staffing works</a>
         </div>
         <div class="item item--direct">
           <p class="svc svc--direct">Direct hire</p>
+          <p class="fact"><span class="figure">{retention}</span>of our direct hire placements stay</p>
           <h3>Find a permanent hire, anywhere in Canada.</h3>
-          <p>A targeted search for hard-to-fill roles, with retainer pricing and a 90-day replacement guarantee.</p>
+          <p>A targeted search for hard-to-fill roles. If a hire doesn't work out in the first 90 days, we replace them at no extra cost.</p>
           <a class="more" href={url('/direct-hire/')}>How direct hire works</a>
         </div>
-      </div>
-      <div class="timeline">
-        <HireClock />
       </div>
     </div>
   </section>
@@ -147,7 +146,10 @@ const latest = jobs.slice(0, 5);
   @media (min-width: 901px) { .services .section-head { max-width: 52%; } .services .items { grid-template-columns: 1fr 1fr; } }
   .item--direct { border-top-color: var(--direct); }
   .item h3 { font-size: 1.4rem; letter-spacing: -0.02em; margin-top: var(--s2); }
-  .timeline { margin-top: clamp(3rem, 6vw, 5rem); }
+  /* The one number that sells each service, in the brand's light display weight */
+  .fact { margin: var(--s2) 0 var(--s5); color: var(--ink-soft); font-size: var(--fs-small); }
+  .fact .figure { display: block; font-size: clamp(2.6rem, 1.6rem + 2.6vw, 3.9rem); color: var(--ink); margin-bottom: var(--s2); }
+  .item--direct .fact .figure { color: var(--direct); }
 
   /* ---------- 3. Local ---------- */
   .local-grid { display: grid; grid-template-columns: 7fr 4fr; gap: clamp(2rem, 5vw, 5rem); align-items: start; }

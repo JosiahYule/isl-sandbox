@@ -85,7 +85,6 @@ Everything follows the ISL brand (the same tokens as the "editorial minimal" blo
 | --- | --- |
 | `AtlanticMap` | Real province shapes with the five offices pinned. Clicking a pin shows that office's address and phone. |
 | `CanadaMap` | Atlantic provinces filled (offices), the rest outlined (where permanent searches reach). |
-| `HireClock` | Both services on one time axis, to scale: contract within hours, direct hire averaging 47 days, then the 90-day guarantee. |
 | `IndustryMatrix` | Every industry, with a marker for each service that covers it. The filter buttons dim what a service doesn't cover. |
 | `JobRow` | One job listing, with a coloured edge for its service. |
 
@@ -98,7 +97,7 @@ src/
   pages/        one file per page (file name = URL)
   layouts/      Base.astro, the frame around every page
   components/   Header, Footer, Button, PageHero, CtaBand, AtlanticMap, CanadaMap,
-                HireClock, IndustryMatrix, JobRow
+                IndustryMatrix, JobRow, Photo
   data/         site facts, team, industries, jobs, blog posts, map shapes
   lib/          url.js, the internal-link helper
   styles/       tokens.css (design knobs) and global.css (base styles)

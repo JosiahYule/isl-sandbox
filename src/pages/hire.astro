@@ -5,7 +5,6 @@
 // Linking with ?service=contract or ?service=direct preselects that service.
 import Base from '../layouts/Base.astro';
 import PageHero from '../components/PageHero.astro';
-import HireClock from '../components/HireClock.astro';
 import { brand } from '../data/site.js';
 
 const sectors = ['Construction and trades', 'Warehousing and logistics', 'Manufacturing', 'Energy and natural resources',
@@ -13,6 +12,13 @@ const sectors = ['Construction and trades', 'Warehousing and logistics', 'Manufa
   'Technology and IT', 'Healthcare', 'Other'];
 const locations = ['Nova Scotia', 'New Brunswick', 'Prince Edward Island', 'Newfoundland and Labrador', 'Elsewhere in Canada'];
 const tel = `tel:+1${brand.mainPhone.replaceAll('-', '')}`;
+// From the live /hire page: the four steps from request to filled position.
+const afterSteps = [
+  ['A recruiter replies', 'Within one business day, to confirm the role, the timing and the rate.'],
+  ['We search our network', 'Recruiters screen candidates against your requirements.'],
+  ['You meet the candidates', 'A shortlist of pre-screened people, ready to interview or start.'],
+  ['Your position is filled', 'We handle the paperwork and follow up after placement.'],
+];
 ---
 <Base assistant={false} title="Request talent" description="Request contract workers or start a permanent search. A recruiter replies within one business day.">
   <PageHero title="Tell us who you need." lead="Contract workers or a permanent hire, anywhere we work. A recruiter replies within one business day." />
@@ -104,7 +110,9 @@ const tel = `tel:+1${brand.mainPhone.replaceAll('-', '')}`;
   <section class="section section--tint after">
     <div class="wrap">
       <div class="section-head"><h2>What happens after you send it</h2></div>
-      <HireClock />
+      <ol class="items steps">
+        {afterSteps.map(([t, d], i) => <li class="item"><span class="num">{i + 1}</span><h3>{t}</h3><p>{d}</p></li>)}
+      </ol>
     </div>
   </section>
 </Base>
@@ -240,5 +248,7 @@ const tel = `tel:+1${brand.mainPhone.replaceAll('-', '')}`;
     .options, .fields { grid-template-columns: 1fr; }
   }
 
-  /* After-send timeline */
+  /* After-send steps */
+  .steps { padding: 0; }
+  .num { display: block; font-size: 2.6rem; font-weight: 300; letter-spacing: -0.04em; line-height: 1; color: var(--isl-blue); margin-bottom: var(--s3); }
 </style>

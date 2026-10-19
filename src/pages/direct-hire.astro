@@ -3,7 +3,6 @@
 import Base from '../layouts/Base.astro';
 import Button from '../components/Button.astro';
 import PageHero from '../components/PageHero.astro';
-import HireClock from '../components/HireClock.astro';
 import IndustryMatrix from '../components/IndustryMatrix.astro';
 import CanadaMap from '../components/CanadaMap.astro';
 import CtaBand from '../components/CtaBand.astro';
@@ -50,15 +49,8 @@ const phones = { 'Zowie Tucker': '902-471-0166' };
     <div class="wrap">
       <div class="section-head section-head--split">
         <h2>{retention} of our placements stay.</h2>
-        <p class="lead">The guarantee covers the rest. Here's the timeline, next to contract staffing for comparison.</p>
+        <p class="lead">For the rest, there's the guarantee: if a hire doesn't work out in the first 90 days, we find a replacement at no extra cost. Searches average 47 days from brief to hire.</p>
       </div>
-      <HireClock focus="direct" />
-    </div>
-  </section>
-
-  <section class="section">
-    <div class="wrap">
-      <div class="section-head"><h2>How we work with you</h2></div>
       <ul class="items">
         {terms.map(([t, d]) => <li class="item item--blue"><h3>{t}</h3><p>{d}</p></li>)}
       </ul>
