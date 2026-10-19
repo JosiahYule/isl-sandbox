@@ -38,8 +38,25 @@ export const PEOPLE = {
   zowie: {
     name: "Zowie Tucker", first: "Zowie", office: "halifax",
     handles: "Leads our direct hire team",
-    phone: "902-471-0166", email: "", // TODO: confirm Zowie's email before showing it
+    phone: "902-471-0166", email: "zowie@integratedstaffing.ca",
     photo: cdn("471bd9d6-a42f-4bdd-84bc-47ae0b3f7e5d/Integrated+Staffing+Zowie+Tucker_1+%281%29.jpg"),
+  },
+  // No phone on these three: the card shows the line for the office the request is routed to.
+  // No headshot on the live site yet, so the card shows initials. Add `email` and `photo` when ready.
+  kelli: {
+    name: "Kelli Wetmore", first: "Kelli", office: "moncton",
+    handles: "New client requests, Moncton and Saint John offices",
+    phone: "", email: "", photo: "",
+  },
+  chance: {
+    name: "Chance Skauge", first: "Chance", office: "charlottetown",
+    handles: "New client requests, Charlottetown office",
+    phone: "", email: "", photo: "",
+  },
+  crystal: {
+    name: "Crystal Murphy", first: "Crystal", office: "st-johns",
+    handles: "New client requests, St. John's office",
+    phone: "", email: "", photo: "",
   },
   skylar: {
     name: "Skylar Hardwick", first: "Skylar", office: "halifax",
@@ -53,9 +70,11 @@ export const PEOPLE = {
 // Leave a field out to match anything.
 export const RULES = [
   { audience: "employer", service: "direct", person: "zowie" },   // every permanent search, anywhere in Canada
-  { audience: "employer", office: "halifax", person: "meg" },     // contract (or unsure) in Nova Scotia
-  // TODO: add the person who takes new client calls at each of these offices, e.g.
-  // { audience: "employer", office: "moncton", person: "someone" },
+  { audience: "employer", office: "halifax", person: "meg" },          // contract (or unsure) in Nova Scotia
+  { audience: "employer", office: "moncton", person: "kelli" },        // New Brunswick
+  { audience: "employer", office: "saint-john", person: "kelli" },
+  { audience: "employer", office: "charlottetown", person: "chance" }, // PEI
+  { audience: "employer", office: "st-johns", person: "crystal" },     // Newfoundland and Labrador
   { audience: "seeker", office: "halifax", person: "skylar" },
   // Anything else falls through to the office's main line.
 ];
@@ -153,7 +172,7 @@ export function toContact({ person, office }, action) {
     name: person?.name || `${office.city} office`,
     first: person?.first || "",
     handles: person ? person.handles : `${office.address}`,
-    phone: person?.phone || office.phone,
+    phone: person?.phone || office?.phone || "",
     email: person?.email || "",
     photo: person?.photo || "",
     office: office?.city || "",

@@ -27,13 +27,13 @@ A chat window for integratedstaffing.ca with two jobs:
 |---|---|
 | Permanent (direct hire), anywhere | Zowie Tucker |
 | Contract, Nova Scotia | Meg Antonick (Halifax office) |
-| Contract, New Brunswick | Moncton office line, or Saint John for Saint John, Quispamsis, Rothesay, Sussex, Fredericton |
-| Contract, PEI | Charlottetown office line |
-| Contract, Newfoundland and Labrador | St. John's office line |
+| Contract, New Brunswick | Kelli Wetmore (Moncton line; Saint John line for Saint John, Quispamsis, Rothesay, Sussex, Fredericton) |
+| Contract, PEI | Chance Skauge (Charlottetown office) |
+| Contract, Newfoundland and Labrador | Crystal Murphy (St. John's office) |
 | Contract outside Atlantic Canada | Not offered; the bot suggests a permanent search |
 | Job seeker questions, Halifax | Skylar Hardwick |
 
-**To name a person at another office**, add them to `PEOPLE` and add a line to `RULES`, for example:
+**To change who handles an office**, edit `PEOPLE` and the matching line in `RULES`, for example:
 
 ```js
 { audience: "employer", office: "moncton", person: "jane" },

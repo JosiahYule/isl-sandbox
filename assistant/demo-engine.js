@@ -421,7 +421,9 @@ export function createEngine({ loadJobs, siteUrl = (path) => SITE.base + path })
     if (service === 'direct') {
       reply = `${first} leads our direct hire team, so a permanent search starts there.`;
     } else if (r.person) {
-      const covers = h.place.province === 'NS' ? `Our Halifax office covers all of Nova Scotia, and ${first} handles new client requests there.` : `${first} handles new client requests at our ${r.office.city} office.`;
+      const covers = h.place.province === 'NS' ? `Our Halifax office covers all of Nova Scotia, and ${first} handles new client requests there.`
+        : h.place.province === 'NB' ? `${first} handles new client requests for our Moncton and Saint John offices.`
+        : `${first} handles new client requests at our ${r.office.city} office.`;
       reply = h.service === 'unsure' ? `${covers} ${first} can also help you choose between contract and permanent.` : covers;
     } else {
       reply = h.place.city
