@@ -30,9 +30,9 @@ const auditRows = audit.map(([name, n]) => ({ name, ticks: Array.from({ length: 
 const homes = [['Toronto', 1100, '$1.1M+'], ['Moncton', 340, '$340K'], ['Fredericton', 310, '$310K'], ['Saint John', 255, '$255K']];
 
 const tools = [
-  { key: 'wage', who: 'For employers and job seekers', ...post('wage-guide-atlantic-canada-2026'), d: 'Pick an industry and role to see entry-level, experienced and top-of-market hourly rates.', cta: 'Open the wage guide' },
-  { key: 'audit', who: 'For job seekers', ...post('resume-audit'), d: 'A 42-point checklist that scores your resume and shows where to focus first.', cta: 'Audit your resume' },
-  { key: 'nb', who: 'For job seekers', ...post('why-new-brunswick-a-practical-guide-for-canadians-considering-a-move'), d: 'Jobs, cities and cost of living, with a calculator for what your salary is worth in New Brunswick.', cta: 'Read the guide' },
+  { key: 'wage', who: 'For employers and job seekers', ...post('wage-guide-atlantic-canada-2026'), d: 'Entry-level to top-of-market hourly rates, by industry and role.', cta: 'Open the wage guide' },
+  { key: 'audit', who: 'For job seekers', ...post('resume-audit'), d: 'Score your resume and see where to focus first.', cta: 'Audit your resume' },
+  { key: 'nb', who: 'For job seekers', ...post('why-new-brunswick-a-practical-guide-for-canadians-considering-a-move'), d: 'Jobs, cities and a calculator for what your salary is worth there.', cta: 'Read the guide' },
 ];
 ---
 <ul class="tools">

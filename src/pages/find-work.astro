@@ -20,8 +20,8 @@ const areaLinks = areas.map((a) => ({ ...a, n: jobs.filter((j) => j.area === a.k
 const count = { contract: jobs.filter((j) => j.type === 'contract').length, direct: jobs.filter((j) => j.type === 'direct').length };
 ---
 <Base title="Find work" description="Contract and permanent jobs across Atlantic Canada and beyond.">
-  <PageHero title="Find your next job." lead="Contract and permanent roles across Atlantic Canada. Search the list, or describe what you're after and the job assistant will find matches.">
-    <button type="button" class="textlink" data-open-assistant>Ask the job assistant</button>
+  <PageHero title="Find your next job." lead="Contract and permanent roles across Atlantic Canada.">
+    <button type="button" class="textlink" data-open-assistant>Or describe what you want to the job assistant</button>
     <Fragment slot="aside">
       <HeroFigure figure={String(jobs.length)} label="roles open right now">
         <div class="split" aria-hidden="true">
@@ -75,7 +75,7 @@ const count = { contract: jobs.filter((j) => j.type === 'contract').length, dire
     <div class="wrap general-grid">
       <h2>Don't see the right role?</h2>
       <div>
-        <p class="lead">Send your resume once. A recruiter will contact you when a role that fits your skills opens.</p>
+        <p class="lead">Send your resume and we'll contact you when something fits.</p>
         <a class="apply" href="https://www.integratedstaffing.ca/careers/general-apply">Send your resume</a>
       </div>
     </div>

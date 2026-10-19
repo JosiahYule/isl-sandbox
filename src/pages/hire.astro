@@ -16,14 +16,14 @@ const locations = ['Nova Scotia', 'New Brunswick', 'Prince Edward Island', 'Newf
 const tel = `tel:+1${brand.mainPhone.replaceAll('-', '')}`;
 // From the live /hire page: the four steps from request to filled position.
 const afterSteps = [
-  ['A recruiter replies', 'Within one business day, to confirm the role, the timing and the rate.'],
+  ['A recruiter replies', 'To confirm the role, timing and rate.'],
   ['We search our network', 'Recruiters screen candidates against your requirements.'],
-  ['You meet the candidates', 'A shortlist of pre-screened people, ready to interview or start.'],
+  ['You meet the candidates', 'A shortlist, ready to interview or start.'],
   ['Your position is filled', 'We handle the paperwork and follow up after placement.'],
 ];
 ---
 <Base assistant={false} title="Request talent" description="Request contract workers or start a permanent search. A recruiter replies within one business day.">
-  <PageHero title="Tell us who you need." lead="Contract workers or a permanent hire, anywhere we work. Fill in the form below, or call and talk it through.">
+  <PageHero title="Tell us who you need." lead="Contract workers or a permanent hire, anywhere we work.">
     <Fragment slot="aside">
       <HeroFigure figure="1" label="business day for a recruiter to reply">
         <p class="hf-extra">Prefer to talk? <a href={tel}>{brand.mainPhone}</a></p>
@@ -83,7 +83,7 @@ const afterSteps = [
 
       <aside class="picker" aria-labelledby="picker-title">
         <h2 id="picker-title">Not sure which service fits?</h2>
-        <p class="picker-intro">Answer three questions and we'll select the right option in the form.</p>
+        <p class="picker-intro">Answer three questions and we'll choose for you.</p>
         <div class="progress" aria-hidden="true"><span></span><span></span><span></span></div>
 
         <div class="q" data-q="length">

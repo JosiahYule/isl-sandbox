@@ -9,9 +9,9 @@ import { url } from '../lib/url.js';
 
 const tel = (n) => `tel:+1${n.replaceAll('-', '')}`;
 const routes = [
-  { t: "I'm hiring", d: 'Contract workers or a permanent hire. A recruiter replies within one business day.', href: url('/hire/'), cta: 'Request talent', kind: 'primary' },
-  { t: "I'm looking for work", d: 'Browse open roles, or send your resume to be matched as roles open.', href: url('/find-work/'), cta: 'Browse jobs' },
-  { t: 'I know a company that’s hiring', d: 'Refer them to our team and we’ll take it from there.', href: 'https://www.integratedstaffing.ca/referrals', cta: 'Make a referral' },
+  { t: "I'm hiring", d: 'Contract workers or a permanent hire.', href: url('/hire/'), cta: 'Request talent', kind: 'primary' },
+  { t: "I'm looking for work", d: 'Browse open roles or send your resume.', href: url('/find-work/'), cta: 'Browse jobs' },
+  { t: 'I know a company that’s hiring', d: 'Refer them to our team.', href: 'https://www.integratedstaffing.ca/referrals', cta: 'Make a referral' },
 ];
 ---
 <Base title="Contact" footerOffices={false} description="Contact Integrated Staffing in Halifax, Moncton, Saint John, Charlottetown and St. John's.">

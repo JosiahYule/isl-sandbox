@@ -12,31 +12,29 @@ import Photo from '../components/Photo.astro';
 import { stock } from '../data/photos.js';
 import { team } from '../data/team.js';
 import { stats } from '../data/site.js';
-import { industries } from '../data/industries.js';
 import { sized } from '../lib/img.js';
 
 const recruiters = team.filter((p) => p.team === 'Direct Hire');
 const retention = stats.find((s) => s.label.includes('retention'))?.value ?? '92%';
 const retentionN = parseInt(retention, 10);
-const directIndustries = industries.filter((i) => i.direct).length;
 // A real sequence, so it's numbered.
 const steps = [
   ['Brief', 'We learn the role, the team and what you need from the hire.'],
   ['Search', 'Recruiters reach out through targeted networks instead of waiting for applicants.'],
-  ['Shortlist', 'You meet candidates screened for capability, culture fit and genuine interest.'],
+  ['Shortlist', 'You meet candidates screened for skill, fit and real interest.'],
   ['Hire', 'We handle the paperwork through to the start date, then follow up after placement.'],
-  ['Guarantee', 'If the hire doesn’t work out within 90 days, we replace them at no extra cost.'],
+  ['Guarantee', 'If the hire doesn’t work out within 90 days, we replace them.'],
 ];
 const terms = [
-  ['Retainer-based, agreed upfront', 'Clear pricing with no surprise fees or shifting terms.'],
-  ['Industry-focused recruiters', 'Each search is led by someone who works in your industry every day.'],
-  ['One invoice', 'Based on a percentage of the hire’s annual salary.'],
+  ['Retainer-based', 'Terms agreed before the search starts.'],
+  ['Industry recruiters', 'Each search is led by a recruiter in your field.'],
+  ['One invoice', 'A percentage of the hire’s annual salary.'],
 ];
 const initials = (n) => n.split(' ').map((x) => x[0]).join('');
 const phones = { 'Zowie Tucker': '902-471-0166' };
 ---
 <Base assistant={false} title="Direct hire recruitment" description="Permanent recruitment for hard-to-fill roles anywhere in Canada, with a 90-day replacement guarantee.">
-  <PageHero title="Permanent hires, searched coast to coast." lead="Targeted recruitment for hard-to-fill, full-time roles. Our offices are in Atlantic Canada; our searches reach every province.">
+  <PageHero title="Permanent hires, searched coast to coast." lead="Targeted recruitment for hard-to-fill, full-time roles.">
     <Button href="/hire/?service=direct" size="lg">Start a search</Button>
     <Fragment slot="aside"><CanadaMap /></Fragment>
   </PageHero>
@@ -56,10 +54,9 @@ const phones = { 'Zowie Tucker': '902-471-0166' };
         <div>
           <div class="section-head">
             <h2>Hires that last.</h2>
-            <p class="lead">Of every 100 people we place permanently, {retentionN} stay. For the rest, there's the guarantee: if a hire doesn't work out in the first 90 days, we find a replacement at no extra cost.</p>
+            <p class="lead">Of every 100 people we place permanently, {retentionN} stay.</p>
           </div>
           <ul class="figs" data-stagger>
-            <li><span class="figure" data-countup>{retention}</span>of placements stay</li>
             <li><span class="figure" data-countup>90</span>days of replacement guarantee</li>
             <li><span class="figure" data-countup>47</span>days, on average, from brief to hire</li>
           </ul>
@@ -95,7 +92,7 @@ const phones = { 'Zowie Tucker': '902-471-0166' };
     <div class="wrap">
       <div class="section-head section-head--split">
         <h2>Specialties</h2>
-        <p class="lead"><span data-countup>{directIndustries}</span> industries, from agriculture to executive search.</p>
+        <p class="lead">From agriculture to executive search.</p>
       </div>
       <IndustryMatrix only="direct" />
     </div>
@@ -110,7 +107,7 @@ const phones = { 'Zowie Tucker': '902-471-0166' };
   /* Retention: the dot chart beside three figures */
   .stay { display: grid; grid-template-columns: minmax(220px, 300px) 1fr; gap: clamp(2.5rem, 7vw, 7rem); align-items: center; margin-bottom: var(--s8); }
   .stay .section-head { margin-bottom: var(--s6); }
-  .figs { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--s5); }
+  .figs { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--s5); max-width: 34rem; }
   .figs li { --rule: var(--direct); background: linear-gradient(var(--rule), var(--rule)) no-repeat left top / 100% 1.5px; padding-top: var(--s4); color: var(--ink-soft); font-size: var(--fs-small); }
   .figs .figure { display: block; font-size: clamp(2.4rem, 1.6rem + 2vw, 3.4rem); color: var(--direct); margin-bottom: var(--s2); }
   :global(.motion) .figs > li { background-size: 0% 1.5px; }

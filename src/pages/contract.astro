@@ -6,21 +6,8 @@ import PageHero from '../components/PageHero.astro';
 import IndustryMatrix from '../components/IndustryMatrix.astro';
 import CtaBand from '../components/CtaBand.astro';
 import Photo from '../components/Photo.astro';
-import Facts from '../components/Facts.astro';
 import { stock } from '../data/photos.js';
-import { offices } from '../data/site.js';
-import { industries } from '../data/industries.js';
 
-const contractIndustries = industries.filter((i) => i.contract).length;
-
-// Three facts in large type, right under the intro. Each restates a claim from the live site.
-const facts = [
-  ['Within hours', 'from your request to a worker on site'],
-  ['One rate', 'per hour, with payroll and workers’ compensation inside it'],
-  [String(offices.length), 'local offices across Atlantic Canada'],
-];
-
-// The four reasons employers call, each with the length of the need it covers
 const uses = [
   ['Vacation and leave cover', 'Keep the work moving while someone is away, from a week of vacation to a full maternity leave.'],
   ['Seasonal peaks', 'Add people when orders climb and scale back when they settle.'],
@@ -30,20 +17,17 @@ const uses = [
 
 // What the single hourly rate covers (from the live About page).
 const covered = [
-  ['The worker’s wages', 'Paid by us, on our payroll.'],
+  ['The worker’s wages', 'Paid on our payroll.'],
   ['Payroll remittances', 'Handled and filed for every hour worked.'],
   ['Workers’ compensation', 'Coverage, claims, and safe, timely return to work.'],
   ['Screening', 'Including typing and dexterity tests where the role calls for them.'],
-  ['Orientation', 'Company-specific orientations at no extra cost.'],
+  ['Orientation', 'Specific to your company and site.'],
 ];
 ---
 <Base assistant={false} title="Contract staffing" description="Pre-screened contract workers across Atlantic Canada, on site within hours of your request, for one all-inclusive hourly rate.">
-  <PageHero photo={{ ...stock.welder, position: 'center' }} title="Pre-screened workers, on site within hours." lead="For leaves, peaks and growth. One hourly rate covers everything, and the people work on our payroll, not yours.">
+  <PageHero photo={{ ...stock.welder, position: 'center' }} title="Pre-screened workers, on site within hours." lead="They work for you and stay on our payroll, recruited by the office nearest you.">
     <Button href="/hire/?service=contract" size="lg">Request workers</Button>
   </PageHero>
-
-  <!-- The three facts that define the service -->
-  <Facts facts={facts} />
 
   <section class="section">
     <div class="wrap">
@@ -60,14 +44,14 @@ const covered = [
       <div class="rate-copy">
         <div class="section-head">
           <h2>One rate. Everything inside it.</h2>
-          <p class="lead">Hiring directly, each of these is yours to arrange and pay for. With us, they're already in a single hourly rate per worker.</p>
+          <p class="lead">Hire directly and each of these is yours to arrange and pay for. With us, it's one rate.</p>
         </div>
         <div class="rate-photo">
           <Photo src={stock.construction.src} alt={stock.construction.alt} ratio="3/2" sizes="(max-width: 900px) 100vw, 40vw" />
         </div>
       </div>
       <div class="stack" data-animate>
-        <p class="stack-head"><span>One hourly rate</span><span class="stack-sub">per worker, includes</span></p>
+        <p class="stack-head"><span>One hourly rate</span><span class="stack-sub">per worker</span></p>
         <ul>
           {covered.map(([t, d], i) => (
             <li style={`--i:${i}`}>
@@ -85,7 +69,7 @@ const covered = [
     <div class="wrap">
       <div class="section-head section-head--split">
         <h2>Where we place contract workers</h2>
-        <p class="lead"><span data-countup>{contractIndustries}</span> industries, from warehouse floors to contact centres.</p>
+        <p class="lead">From warehouse floors to contact centres.</p>
       </div>
       <IndustryMatrix only="contract" />
     </div>

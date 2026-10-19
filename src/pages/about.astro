@@ -14,7 +14,7 @@ const years = new Date().getFullYear() - brand.since;
 const provinces = new Set(offices.map((o) => o.province)).size;
 const reviews = stats.find((s) => s.label.includes('reviews'))?.value ?? '200+';
 const facts = [
-  [String(years), `years in Atlantic Canada, since ${brand.since}`],
+  [String(years), 'years in Atlantic Canada'],
   [String(offices.length), 'local offices'],
   [String(provinces), 'Atlantic provinces'],
   [String(team.length), 'recruiters and staff'],
@@ -36,7 +36,7 @@ const gallery = [
 ];
 ---
 <Base title="About" description="Locally owned and operated recruiting and staffing in Atlantic Canada since 2013.">
-  <PageHero title="The right fit, for both sides of the hire." lead={`${brand.name} is locally owned and operated. For ${years} years we've matched Atlantic Canadian employers with the people they need, on contract and permanently.`}>
+  <PageHero title="The right fit, for both sides of the hire." lead="We match Atlantic Canadian employers with the people they need, on contract and permanently.">
     <Button href="/hire/">I'm hiring</Button>
     <Button href="/find-work/" variant="outline">I'm looking for work</Button>
   </PageHero>
@@ -74,7 +74,7 @@ const gallery = [
       <ul class="items recognition">
         <li class="item rec">
           <img src={images.badgeBestPlaces} alt="" width="56" height="56" loading="lazy" onerror="this.remove()" />
-          <div><h3>Best Places to Work</h3><p>Named one of the Best Places to Work.</p></div>
+          <div><h3>Best Places to Work</h3></div>
         </li>
         <li class="item rec">
           <img src={images.badgeCor} alt="" width="56" height="56" loading="lazy" onerror="this.remove()" />

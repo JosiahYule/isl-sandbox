@@ -1,11 +1,10 @@
 ---
 // HOMEPAGE  →  /
 // Built from the shared section system in global.css:
-// hero (with job search), employer situations, where we are, proof, open roles, free tools, call to action.
+// hero (job search + now hiring strip), situation picker, offices, proof, free tools, call to action.
 import Base from '../layouts/Base.astro';
 import Button from '../components/Button.astro';
 import AtlanticMap from '../components/AtlanticMap.astro';
-import JobRow from '../components/JobRow.astro';
 import CtaBand from '../components/CtaBand.astro';
 import Photo from '../components/Photo.astro';
 import ToolCards from '../components/ToolCards.astro';
@@ -17,76 +16,91 @@ import { url } from '../lib/url.js';
 const quote = testimonials[0];
 const retention = stats.find((s) => s.label.includes('retention'))?.value ?? '92%';
 const reviews = stats.find((s) => s.label.includes('reviews'))?.value ?? '200+';
-const latest = jobs.slice(0, 5);
 
-// Situations employers call about, grouped by the service that answers them.
-// Every answer restates a claim from the live site (hours, try-before-you-hire,
-// proactive sourcing, national permanent search).
-const situations = {
-  contract: [
-    ["Someone's on leave next week.", 'A pre-screened worker covers the shift, often within hours of your call.'],
-    ['Orders just doubled for the season.', 'Add people for the peak and scale back when it settles.'],
-    ["We'd like to see someone work before we hire.", 'Start them on contract, then bring them onto your team when you\u2019re sure.'],
-  ],
-  direct: [
-    ['Our controller just gave notice.', 'A targeted search for the permanent replacement, led by a recruiter in your field.'],
-    ["This role has been posted for months.", 'We reach people who aren\u2019t answering job ads, through targeted outreach.'],
-    ["We're hiring outside Atlantic Canada.", 'Our permanent searches reach every province.'],
-  ],
-};
+// Situations employers call about, each answered by the service that fits, with one figure
+// that backs the answer. Every claim restates the live site (hours, one rate, temp to perm,
+// retention, average search time, national search).
+const situations = [
+  { svc: 'contract', q: "Someone's on leave next week.", fig: 'Within hours', figLabel: 'from your call to a worker on site', a: 'A pre-screened worker covers the role for as long as the leave lasts.' },
+  { svc: 'contract', q: 'Orders just doubled for the season.', fig: 'One rate', figLabel: 'per worker, with payroll and workers\u2019 compensation included', a: 'Add people for the peak and scale back when it settles.' },
+  { svc: 'contract', q: "We'd like to see someone work before we hire.", fig: 'Temp to perm', figLabel: 'start on contract, hire when you\u2019re sure', a: 'See them on the job before you make an offer.' },
+  { svc: 'direct', q: 'Our controller just gave notice.', fig: retention, figLabel: 'of our permanent placements stay', a: 'A targeted search led by a recruiter in your field, with a 90-day guarantee.' },
+  { svc: 'direct', q: 'This role has been posted for months.', fig: '47 days', figLabel: 'on average, from brief to hire', a: 'We go after the people who aren\u2019t answering job ads.' },
+  { svc: 'direct', q: "We're hiring outside Atlantic Canada.", fig: 'Every province', figLabel: 'reached by our permanent searches', a: 'Our offices are in Atlantic Canada. Our searches aren\u2019t limited to it.' },
+];
+const svcName = { contract: 'Contract staffing', direct: 'Direct hire' };
+const svcLink = { contract: '/contract/', direct: '/direct-hire/' };
+// The "Now hiring" strip in the hero: the newest real postings
+const ticker = jobs.slice(0, 14);
 
 ---
 <Base>
-  <!-- 1. HERO: the promise on the left, ISL's own photo running off the right edge -->
+  <!-- 1. HERO: ISL's own photo across the full width, the promise over it,
+       one way in for each audience, and a live strip of real open jobs -->
   <section class="hero">
-    <div class="wrap hero-grid">
+    <div class="hero-bg" data-animate>
+      <Photo src={photos.warehouse.src} alt="" ratio="16/9" sizes="100vw" position="65% center" eager />
+    </div>
+    <div class="wrap hero-inner">
       <div class="hero-copy" data-stagger>
         <h1 class="hero-title">
           <span class="line line--contract"><span class="u">Workers in hours.</span></span>{" "}
           <span class="line line--direct"><span class="u">Hires that stay.</span></span>
         </h1>
-        <p class="lead">Contract and permanent staffing from five offices across Atlantic Canada, with permanent searches anywhere in the country. Locally owned since {brand.since}.</p>
-        <div class="actions">
-          <Button href="/hire/" size="lg">Request talent</Button>
-          <Button href="/find-work/" variant="outline" size="lg">Find work</Button>
-        </div>
+        <p class="hero-lead">Contract and permanent staffing across Atlantic Canada. Locally owned since {brand.since}.</p>
         <form class="search" action={url('/find-work/')} method="get" role="search">
-          <label for="hero-q">Search {jobs.length} open jobs</label>
+          <label for="hero-q">Looking for work? Search {jobs.length} open jobs</label>
           <div class="search-bar">
             <input id="hero-q" name="q" type="search" placeholder="Job title, skill or city" autocomplete="off" />
             <button type="submit">Search</button>
           </div>
         </form>
+        <p class="employer">Hiring? <Button href="/hire/" variant="light">Request talent</Button></p>
       </div>
     </div>
-    <div class="hero-photo" data-animate>
-      <Photo src={photos.warehouse.src} alt={photos.warehouse.alt} ratio="4/5" sizes="(max-width: 900px) 100vw, 46vw" position="70% center" eager />
+
+    <div class="ticker" aria-label="Now hiring">
+      <p class="ticker-label"><span class="pulse" aria-hidden="true"></span>Now hiring</p>
+      <div class="ticker-track">
+        {[0, 1].map((copy) => (
+          <ul class="ticker-list" aria-hidden={copy === 1 ? 'true' : undefined}>
+            {ticker.map((j) => (
+              <li><a href={url(`/find-work/?q=${encodeURIComponent(j.title)}`)} tabindex={copy === 1 ? -1 : undefined}><strong>{j.title.replace(/\s*\/\s*/g, ' / ')}</strong><span>{j.city}, {j.province}</span><span>{j.pay}</span></a></li>
+            ))}
+          </ul>
+        ))}
+      </div>
     </div>
   </section>
 
-  <!-- 2. SITUATIONS: what employers call about, answered by the right service -->
-  <section class="section services">
+  <!-- 2. SITUATIONS: the employer picks what's happening; one answer panel responds,
+       in the colour of the service that fits (near-black contract, ISL blue direct hire) -->
+  <section class="section sit-section">
     <div class="wrap">
       <div class="section-head">
-        <h2>Sound familiar?</h2>
-        <p class="lead">Tell us what's happening and we'll match the right service to it.</p>
+        <h2>What's happening at your company?</h2>
       </div>
-      <div class="items items--2">
-        <div class="item">
-          <h3 class="col-title">Contract staffing</h3>
-          <p class="fact"><span class="figure">Within hours</span>from your request to workers on site</p>
-          <ul class="sits" data-stagger>
-            {situations.contract.map(([q, a]) => <li><p class="q">{q}</p><p class="a">{a}</p></li>)}
-          </ul>
-          <a class="more" href={url('/contract/')}>How contract staffing works</a>
+      <div class="picker" data-sit>
+        <div class="sit-list" role="tablist" aria-label="Hiring situations" data-stagger>
+          {situations.map((x, i) => (
+            <button type="button" role="tab" id={`sit-${i}`} aria-controls="sit-panel" aria-selected={i === 0 ? 'true' : 'false'} tabindex={i === 0 ? 0 : -1} class:list={['sit', `sit--${x.svc}`]} data-i={i}>
+              <span class="sit-q">{x.q}</span>
+            </button>
+          ))}
         </div>
-        <div class="item item--direct">
-          <h3 class="col-title col-title--direct">Direct hire</h3>
-          <p class="fact"><span class="figure" data-countup>{retention}</span>of our direct hire placements stay</p>
-          <ul class="sits" data-stagger>
-            {situations.direct.map(([q, a]) => <li><p class="q">{q}</p><p class="a">{a}</p></li>)}
-          </ul>
-          <a class="more" href={url('/direct-hire/')}>How direct hire works</a>
+        <div class="panel" id="sit-panel" role="tabpanel" aria-labelledby="sit-0" data-svc={situations[0].svc}>
+          {situations.map((x, i) => (
+            <div class="answer" data-answer={i} hidden={i !== 0}>
+              <p class="p-svc">{svcName[x.svc]}</p>
+              <p class="p-fig figure">{x.fig}</p>
+              <p class="p-fig-label">{x.figLabel}</p>
+              <p class="p-a">{x.a}</p>
+              <div class="p-actions">
+                <Button href={`/hire/?service=${x.svc}`} variant="light">Request talent</Button>
+                <a class="p-more" href={url(svcLink[x.svc])}>How {x.svc === 'contract' ? 'contract staffing' : 'direct hire'} works</a>
+              </div>
+            </div>
+          ))}
         </div>
       </div>
     </div>
@@ -97,7 +111,7 @@ const situations = {
     <div class="wrap">
       <div class="section-head">
         <h2>Five offices across Atlantic Canada.</h2>
-        <p class="lead">Locally owned and operated. Select an office on the map for its address and phone number.</p>
+        <p class="lead">Select an office for its address and phone number.</p>
       </div>
     </div>
     <div class="wrap local-grid">
@@ -125,22 +139,6 @@ const situations = {
     </div>
   </section>
 
-  <!-- 5. OPEN ROLES: for job seekers -->
-  <section class="section section--rule jobs">
-    <div class="wrap">
-      <div class="section-head section-head--split">
-        <h2>Open roles</h2>
-        <p class="jobs-intro">{jobs.length} open now across Atlantic Canada. Not sure what to search for? <button type="button" class="textlink" data-open-assistant>Ask the job assistant</button>.</p>
-      </div>
-      <div class="job-list" data-stagger>
-        {latest.map((job) => <JobRow job={job} />)}
-      </div>
-      <div class="jobs-foot">
-        <Button href="/find-work/" variant="outline">See all {jobs.length} open roles</Button>
-      </div>
-    </div>
-  </section>
-
   <!-- 6. FREE TOOLS: ISL's own guides and tools -->
   <section class="section section--rule tools">
     <div class="wrap">
@@ -155,68 +153,133 @@ const situations = {
   <CtaBand />
 </Base>
 
+<script>
+  // Situation picker: selecting a situation shows its answer and recolours the panel
+  // for the service that fits. Arrow keys move between situations (standard tab behaviour).
+  const root = document.querySelector('[data-sit]');
+  if (root) {
+    const tabs = [...root.querySelectorAll('.sit')];
+    const panel = root.querySelector('.panel');
+    const answers = [...root.querySelectorAll('.answer')];
+    const show = (i, focus = false) => {
+      tabs.forEach((t, k) => { t.setAttribute('aria-selected', String(k === i)); t.tabIndex = k === i ? 0 : -1; });
+      answers.forEach((a, k) => (a.hidden = k !== i));
+      panel.dataset.svc = tabs[i].classList.contains('sit--direct') ? 'direct' : 'contract';
+      panel.setAttribute('aria-labelledby', tabs[i].id);
+      if (focus) tabs[i].focus();
+    };
+    tabs.forEach((t, i) => {
+      t.addEventListener('click', () => show(i));
+      t.addEventListener('keydown', (e) => {
+        const step = { ArrowDown: 1, ArrowRight: 1, ArrowUp: -1, ArrowLeft: -1 }[e.key];
+        if (step) { e.preventDefault(); show((i + step + tabs.length) % tabs.length, true); }
+      });
+    });
+  }
+</script>
+
 <style>
   /* ---------- 1. Hero ---------- */
-  .hero { position: relative; }
-  .hero-grid { min-height: min(84vh, 820px); display: grid; align-items: center; padding-block: var(--s8) var(--s9); }
-  .hero-copy { max-width: 600px; position: relative; z-index: 2; }
-  /* One sentence per line on desktop: each line is one service, underlined in that service's colour */
-  .hero-title { font-size: clamp(2.6rem, 0.9rem + 4.3vw, 4.9rem); font-weight: 700; letter-spacing: -0.02em; line-height: 1; }
+  /* The photo fills the hero; a dark wash from the left keeps the white text readable */
+  .hero { position: relative; isolation: isolate; color: #fff; background: var(--dark); min-height: min(calc(100svh - 72px), 880px); display: flex; flex-direction: column; overflow: hidden; }
+  .hero-bg { position: absolute; inset: 0; z-index: -1; }
+  .hero-bg :global(.photo), .hero-bg :global(.frame) { height: 100%; margin: 0; }
+  .hero-bg :global(.frame) { aspect-ratio: auto !important; }
+  .hero-bg::after { content: ''; position: absolute; inset: 0;
+    background:
+      linear-gradient(90deg, rgb(20 20 20 / 0.9) 0%, rgb(20 20 20 / 0.72) 38%, rgb(20 20 20 / 0.2) 75%, rgb(20 20 20 / 0.05) 100%),
+      linear-gradient(0deg, rgb(20 20 20 / 0.85) 0%, rgb(20 20 20 / 0) 30%); }
+  .hero-inner { flex: 1; display: flex; align-items: center; padding-block: var(--s8) var(--s7); }
+  .hero-copy { max-width: 660px; }
+
+  .hero-title { font-size: clamp(2.9rem, 1rem + 5.4vw, 6.2rem); font-weight: 700; letter-spacing: -0.03em; line-height: 0.98; color: #fff; }
   @media (min-width: 901px) { .line { white-space: nowrap; } }
-  /* Each line is underlined in its service colour. The underline is a background line
-     (not text-decoration) so it can draw itself across when the page loads. */
+  /* Each line is underlined in its service colour (on dark: white for contract, light blue for direct).
+     The underline is a background line so it can draw itself across on load. */
   .line { display: block; }
-  .line + .line { margin-top: 0.12em; }
-  .u { --c: var(--contract); padding-bottom: 0.1em; background: linear-gradient(var(--c), var(--c)) no-repeat left bottom / 100% 0.09em; -webkit-box-decoration-break: clone; box-decoration-break: clone; }
-  .line--direct .u { --c: var(--direct); }
-  :global(.motion) .u { background-size: 0% 0.09em; transition: background-size 0.9s var(--ease) 0.55s; }
-  :global(.motion) .line--direct .u { transition-delay: 0.8s; }
-  :global(.motion) .hero-copy.is-in .u { background-size: 100% 0.09em; }
-  /* The photo settles from slightly enlarged */
-  .hero-photo :global(.frame) { overflow: hidden; }
-  :global(.motion) .hero-photo :global(img) { transform: scale(1.06); opacity: 0; transition: transform 1.6s var(--ease), opacity 0.9s var(--ease); }
-  :global(.motion) .hero-photo.is-in :global(img) { transform: none; opacity: 1; }
-  .hero .lead { margin-top: var(--s6); max-width: 40ch; }
-  .actions { display: flex; flex-wrap: wrap; gap: var(--s3); margin-top: var(--s7); }
-  /* Job search: the job seeker's way in, right in the hero (most site visitors are job seekers) */
-  .search { margin-top: var(--s6); max-width: 32rem; }
-  .search label { display: block; font-size: var(--fs-small); font-weight: 500; margin-bottom: var(--s2); }
-  .search-bar { display: flex; border: 1.5px solid var(--ink); background: var(--paper); }
-  .search-bar input { flex: 1; min-width: 0; font: inherit; font-size: 1rem; padding: 0.8rem 1rem; border: 0; background: transparent; color: var(--ink); }
+  .line + .line { margin-top: 0.24em; }
+  .u { --c: #fff; padding-bottom: 0.08em; background: linear-gradient(var(--c), var(--c)) no-repeat left bottom / 100% 0.085em; -webkit-box-decoration-break: clone; box-decoration-break: clone; }
+  .line--direct .u { --c: var(--isl-blue-on-dark); }
+  :global(.motion) .u { background-size: 0% 0.085em; transition: background-size 0.9s var(--ease) 0.6s; }
+  :global(.motion) .line--direct .u { transition-delay: 0.85s; }
+  :global(.motion) .hero-copy.is-in .u { background-size: 100% 0.085em; }
+
+  .hero-lead { margin-top: var(--s6); font-size: var(--fs-lead); font-weight: 300; line-height: 1.55; color: rgb(255 255 255 / 0.86); max-width: 38ch; }
+
+  /* Job seekers: the search. Employers: one button. */
+  .search { margin-top: var(--s7); max-width: 36rem; }
+  .search label { display: block; font-size: var(--fs-small); font-weight: 500; margin-bottom: var(--s2); color: rgb(255 255 255 / 0.86); }
+  .search-bar { display: flex; background: #fff; }
+  .search-bar input { flex: 1; min-width: 0; font: inherit; font-size: 1.05rem; padding: 1rem 1.15rem; border: 0; background: transparent; color: var(--ink); }
   .search-bar input:focus { outline: 2px solid var(--isl-blue); outline-offset: -2px; }
-  .search-bar button { font: inherit; font-weight: 600; cursor: pointer; padding: 0 1.4rem; border: 0; background: var(--ink); color: #fff; }
-  .search-bar button:hover { background: var(--isl-blue); }
+  .search-bar button { font: inherit; font-weight: 600; cursor: pointer; padding: 0 1.6rem; border: 0; background: var(--isl-blue); color: #fff; }
+  .search-bar button:hover { background: var(--isl-blue-deep); }
+  .employer { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s3) var(--s4); margin-top: var(--s5); font-weight: 500; color: rgb(255 255 255 / 0.86); }
+  .employer a[href^='tel'] { color: #fff; font-size: var(--fs-small); }
 
-  /* The one deliberate break in the site's grid: the photo runs off the right edge
-     and drops past the hero into the next section. */
-  .hero-photo { position: absolute; z-index: 1; top: 0; bottom: -6rem; right: 0; width: min(46vw, 760px); }
-  .hero-photo :global(.photo), .hero-photo :global(.frame) { height: 100%; }
-  .hero-photo :global(.frame) { aspect-ratio: auto !important; }
+  /* The photo settles slowly from slightly enlarged */
+  :global(.motion) .hero-bg :global(img) { transform: scale(1.08); transition: transform 2.6s var(--ease); }
+  :global(.motion) .hero-bg.is-in :global(img) { transform: none; }
 
-  @media (max-width: 1100px) { .hero-copy { max-width: 470px; } .hero-photo { width: 44vw; } }
+  /* Now hiring: real postings scrolling along the bottom edge. Pauses on hover or focus. */
+  .ticker { position: relative; display: flex; min-width: 0; max-width: 100%; align-items: stretch; border-top: 1px solid rgb(255 255 255 / 0.16); background: rgb(20 20 20 / 0.55); backdrop-filter: blur(6px); }
+  .ticker-label { flex: none; display: flex; align-items: center; gap: var(--s2); margin: 0; padding: 0 var(--s5) 0 var(--gutter); font-size: var(--fs-small); font-weight: 600; background: var(--isl-blue); color: #fff; white-space: nowrap; }
+  .pulse { width: 8px; height: 8px; border-radius: 50%; background: #fff; }
+  :global(.motion) .pulse { animation: pulse 2s ease-out infinite; }
+  @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgb(255 255 255 / 0.7); } 70%, 100% { box-shadow: 0 0 0 8px rgb(255 255 255 / 0); } }
+  .ticker-track { display: flex; overflow: hidden; flex: 1; min-width: 0; mask-image: linear-gradient(90deg, transparent, #000 4%, #000 96%, transparent); }
+  .ticker-list { display: flex; flex: none; list-style: none; margin: 0; padding: 0; }
+  :global(.motion) .ticker-list { animation: ticker 70s linear infinite; }
+  .ticker:hover .ticker-list, .ticker:focus-within .ticker-list { animation-play-state: paused; }
+  @keyframes ticker { to { transform: translateX(-100%); } }
+  .ticker-list a { display: flex; gap: var(--s3); align-items: baseline; padding: var(--s4) var(--s6) var(--s4) 0; margin-left: var(--s6); color: #fff; text-decoration: none; white-space: nowrap; font-size: var(--fs-small); border-left: 1px solid rgb(255 255 255 / 0.16); padding-left: var(--s6); margin-left: 0; }
+  .ticker-list a span { color: rgb(255 255 255 / 0.66); }
+  .ticker-list a:hover strong { text-decoration: underline; }
+  @media (prefers-reduced-motion: reduce) { .ticker-track { overflow-x: auto; } }
+
   @media (max-width: 900px) {
-    .hero-grid { min-height: 0; padding-bottom: var(--s6); }
-    .hero-copy { max-width: none; }
-    .hero-photo { position: static; width: auto; }
-    .hero-photo :global(.photo), .hero-photo :global(.frame) { height: auto; }
-    .hero-photo :global(.frame) { aspect-ratio: 4 / 3 !important; }
+    .hero { min-height: 0; }
+    .hero-bg::after { background: linear-gradient(0deg, rgb(20 20 20 / 0.92) 0%, rgb(20 20 20 / 0.7) 55%, rgb(20 20 20 / 0.45) 100%); }
+    .hero-inner { padding-block: var(--s8) var(--s7); }
+    .search-bar button { padding: 0 1.1rem; }
+    .ticker-label { padding-left: var(--s4); padding-right: var(--s4); }
   }
 
-  /* ---------- 2. Services ---------- */
-  .col-title { font-size: 1.35rem; margin-bottom: var(--s5); }
-  .col-title--direct { color: var(--direct); }
-  .services { padding-top: calc(clamp(4rem, 8vw, 6.5rem) + 3rem); }
-  @media (min-width: 901px) { .services .section-head { max-width: 52%; } .services .items { grid-template-columns: 1fr 1fr; } }
-  
-  /* Situations: the employer's words, then the answer */
-  .sits { list-style: none; margin: 0 0 var(--s5); padding: 0; }
-  .sits li { padding-block: var(--s4); border-top: 1px solid var(--line); }
-  .sits .q { color: var(--ink); font-size: 1.25rem; font-weight: 500; letter-spacing: -0.015em; line-height: 1.3; margin-bottom: var(--s1); }
-  .sits .a { color: var(--ink-soft); font-size: var(--fs-small); }
-  /* The one number that sells each service, in the brand's light display weight */
-  .fact { margin: var(--s2) 0 var(--s5); color: var(--ink-soft); font-size: var(--fs-small); }
-  .fact .figure { display: block; font-size: clamp(2.6rem, 1.6rem + 2.6vw, 3.9rem); color: var(--ink); margin-bottom: var(--s2); }
-  .item--direct .fact .figure { color: var(--direct); }
+  /* ---------- 2. Situations ---------- */
+  .picker { display: grid; grid-template-columns: 5fr 6fr; gap: clamp(1.5rem, 4vw, 4rem); align-items: stretch; }
+  .sit-list { display: grid; align-content: start; border-top: 1.5px solid var(--ink); }
+  .sit {
+    position: relative; display: flex; justify-content: space-between; align-items: baseline; gap: var(--s4);
+    width: 100%; padding: var(--s5) var(--s4) var(--s5) var(--s5); text-align: left;
+    font: inherit; color: var(--ink-soft); background: none; border: 0; border-bottom: 1px solid var(--line); cursor: pointer;
+    transition: color 0.2s, background 0.2s;
+  }
+  .sit::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 4px; background: var(--contract); transform: scaleY(0); transition: transform 0.35s var(--ease); }
+  .sit--direct::before { background: var(--direct); }
+  .sit-q { font-size: clamp(1.1rem, 0.9rem + 0.6vw, 1.4rem); font-weight: 500; letter-spacing: -0.015em; line-height: 1.3; }
+  .sit:hover { color: var(--ink); background: var(--mist); }
+  .sit[aria-selected='true'] { color: var(--ink); }
+  .sit[aria-selected='true']::before { transform: none; }
+
+  /* The answer panel: near-black for contract, ISL blue for direct hire */
+  .panel { position: relative; color: #fff; background: var(--dark); padding: clamp(2rem, 4vw, 3.5rem); display: flex; transition: background 0.5s var(--ease); min-height: 26rem; }
+  .panel[data-svc='direct'] { background: var(--isl-blue); }
+  .answer { display: flex; flex-direction: column; width: 100%; }
+  .answer[hidden] { display: none; }
+  .answer:not([hidden]) { animation: answer 0.55s var(--ease); }
+  @keyframes answer { from { opacity: 0; transform: translateY(14px); } }
+  .p-svc { font-size: var(--fs-small); font-weight: 600; color: rgb(255 255 255 / 0.75); margin-bottom: var(--s5); }
+  .p-fig { font-size: clamp(3rem, 1.6rem + 4vw, 5.4rem); margin: 0 0 var(--s2); }
+  .p-fig-label { color: rgb(255 255 255 / 0.8); max-width: 30ch; }
+  .p-a { margin-top: auto; padding-top: var(--s6); font-size: var(--fs-lead); font-weight: 300; line-height: 1.5; max-width: 40ch; }
+  .p-actions { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s3) var(--s5); margin-top: var(--s6); }
+  .p-more { color: #fff; font-weight: 600; }
+  .p-more:hover { color: #fff; }
+
+  @media (max-width: 900px) {
+    .picker { grid-template-columns: 1fr; }
+    .panel { min-height: 0; }
+  }
 
   /* ---------- 3. Local ---------- */
   .local-grid { display: grid; grid-template-columns: 7fr 4fr; gap: clamp(2rem, 5vw, 5rem); align-items: start; }
@@ -236,11 +299,6 @@ const situations = {
   :global(.motion) .reviews.is-in .stars svg { transform: none; opacity: 1; }
   .reviews strong { display: block; color: var(--isl-blue); font-weight: 300; font-size: clamp(3.4rem, 2rem + 4vw, 5.2rem); letter-spacing: -0.05em; line-height: 0.95; margin-bottom: var(--s2); }
   @media (max-width: 900px) { .proof-grid { grid-template-columns: 1fr; } }
-
-  /* ---------- 5. Jobs ---------- */
-  .jobs-intro { color: var(--ink-soft); max-width: 44ch; justify-self: end; }
-  .job-list { border-top: 1.5px solid var(--ink); }
-  .jobs-foot { margin-top: var(--s6); }
 
   /* ---------- 6. Tools: see ToolCards.astro ---------- */
   @media (max-width: 860px) { .jobs-intro { justify-self: start; } }
