@@ -33,7 +33,7 @@ const terms = [
 const initials = (n) => n.split(' ').map((x) => x[0]).join('');
 const phones = { 'Zowie Tucker': '902-471-0166' };
 ---
-<Base assistant={false} title="Direct hire recruitment" description="Permanent recruitment for hard-to-fill roles anywhere in Canada, with a 90-day replacement guarantee.">
+<Base assistantMode="employer" title="Direct hire recruitment" description="Permanent recruitment for hard-to-fill roles anywhere in Canada, with a 90-day replacement guarantee.">
   <PageHero title="Permanent hires, searched coast to coast." lead="Targeted recruitment for hard-to-fill, full-time roles.">
     <Button href="/hire/?service=direct" size="lg">Start a search</Button>
     <Fragment slot="aside"><CanadaMap /></Fragment>

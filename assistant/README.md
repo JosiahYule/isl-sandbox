@@ -1,6 +1,9 @@
-# ISL Job Assistant (Phase 1)
+# ISL Assistant
 
-A chat bubble for integratedstaffing.ca that matches job seekers to open postings from the Avionte feed.
+A chat window for integratedstaffing.ca with two jobs:
+
+- **Job seekers:** match them to open postings from the Avionte feed, and get them to Apply.
+- **Employers:** take a request like "3 labourers in rural Nova Scotia", ask only for what's missing (role, place, contract or permanent, start date), then hand them to the right person at ISL with the request form already filled in.
 
 ## What's in here
 
@@ -8,10 +11,35 @@ A chat bubble for integratedstaffing.ca that matches job seekers to open posting
 |---|---|
 | `supabase/functions/isl-job-chat/index.ts` | The backend. Receives the chat, talks to Claude, runs the tools, sends back a reply and job cards. |
 | `supabase/functions/_shared/jobs.js` | Cleans the Avionte feed and searches it. No AI in here. |
-| `supabase/functions/_shared/assistant.js` | The bot's instructions and the three tools it may call. Edit the tone and rules here. |
+| `supabase/functions/_shared/assistant.js` | The bot's instructions and the tools it may call. Edit the tone and rules here. |
+| `supabase/functions/_shared/routing.js` | **Who handles what.** The offices, the people, and the rules that pick one for each request. |
+| `demo-engine.js` | The conversation without AI (rule-based), used until the backend is live. Same search and routing. |
+| `demo-mode.js` | Starts the widget in demo mode on the website. |
 | `widget/widget.js` | The chat bubble that goes on the website. |
-| `test/` | Tests you can run with Node against a saved copy of the feed. |
+| `test/` | Tests you can run with Node. `conversation.test.mjs` plays scripted chats through the demo engine. |
 | `demo/` | Builds the preview page (`node demo/build.mjs data/feed.json`). |
+
+## Who gets the request (routing)
+
+`routing.js` decides who an employer is handed to. It never guesses: the bot can only hand out people listed there.
+
+| Request | Goes to |
+|---|---|
+| Permanent (direct hire), anywhere | Zowie Tucker |
+| Contract, Nova Scotia | Meg Antonick (Halifax office) |
+| Contract, New Brunswick | Moncton office line, or Saint John for Saint John, Quispamsis, Rothesay, Sussex, Fredericton |
+| Contract, PEI | Charlottetown office line |
+| Contract, Newfoundland and Labrador | St. John's office line |
+| Contract outside Atlantic Canada | Not offered; the bot suggests a permanent search |
+| Job seeker questions, Halifax | Skylar Hardwick |
+
+**To name a person at another office**, add them to `PEOPLE` and add a line to `RULES`, for example:
+
+```js
+{ audience: "employer", office: "moncton", person: "jane" },
+```
+
+Rules are read top to bottom and the first match wins.
 
 ## The moving parts
 

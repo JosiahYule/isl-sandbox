@@ -1,13 +1,14 @@
 // =====================================================================
 // isl-job-chat — the backend for the website chat bubble.
 //
-// One request = one message from the visitor. What happens:
+// One request = one message from the visitor (a job seeker or an employer). What happens:
 //   1. The chat bubble sends the whole conversation so far.
 //   2. We load ISL's live jobs (cached for 10 minutes so we don't hammer Avionte).
 //   3. We send the conversation to Claude along with the tool list.
 //   4. If Claude asks to use a tool, we run it here and send the result back.
 //      This repeats until Claude writes a normal reply (usually 2 or 3 rounds).
-//   5. We send the reply text + any recommended job cards back to the bubble.
+//   5. We send back the reply text, plus anything the tools produced: job cards,
+//      a contact card, a request summary, and quick-reply buttons.
 //
 // Secrets (set in Supabase, never in this file):
 //   ANTHROPIC_API_KEY   your Claude API key
@@ -53,7 +54,7 @@ async function loadJobs() {
 }
 
 // ---- One call to the Claude API ----
-async function callClaude(messages: any[]) {
+async function callClaude(messages: any[], pageMode: string | null) {
   const res = await fetch("https://api.anthropic.com/v1/messages", {
     method: "POST",
     headers: {
@@ -64,7 +65,7 @@ async function callClaude(messages: any[]) {
     body: JSON.stringify({
       model: MODEL,
       max_tokens: 1024,
-      system: systemPrompt(),
+      system: systemPrompt(undefined, pageMode),
       tools: TOOLS,
       messages,
     }),
@@ -95,14 +96,18 @@ Deno.serve(async (req) => {
     const conversation = cleanConversation(body.messages);
     if (!conversation) return new Response(JSON.stringify({ error: "Send messages ending with a user message." }), { status: 400, headers });
 
+    // The widget sends its greeting first, with the page's mode (employer / seeker) in its memo.
+    const first = Array.isArray(body.messages) ? body.messages[0] : null;
+    const pageMode = first?.role === "assistant" && ["employer", "seeker"].includes(first?.meta?.mode) ? first.meta.mode : null;
+
     const jobs = await loadJobs();
-    const state: { cards?: any[] } = {};
+    const state: { cards?: any[]; contact?: any; summary?: any[]; choices?: string[] } = {};
     const messages: any[] = [...conversation];
     let reply = "";
 
     // The tool loop. Each pass is one round-trip to Claude.
     for (let round = 0; round <= MAX_TOOL_ROUNDS; round++) {
-      const result = await callClaude(messages);
+      const result = await callClaude(messages, pageMode);
       const text = result.content.filter((b: any) => b.type === "text").map((b: any) => b.text).join("\n").trim();
 
       if (result.stop_reason !== "tool_use") { reply = text; break; }
@@ -122,7 +127,14 @@ Deno.serve(async (req) => {
       if (round === MAX_TOOL_ROUNDS) reply = text || "Sorry, I got stuck there. Could you rephrase that?";
     }
 
-    return new Response(JSON.stringify({ reply, jobs: state.cards ?? [] }), { headers });
+    return new Response(JSON.stringify({
+      reply,
+      jobs: state.cards ?? [],
+      contact: state.contact ?? null,
+      summary: state.summary ?? null,
+      choices: state.choices ?? [],
+      meta: { mode: state.contact && state.summary ? "employer" : state.cards ? "seeker" : pageMode },
+    }), { headers });
   } catch (e) {
     console.error(e);
     return new Response(

@@ -19,6 +19,9 @@ export const SITE = {
   applyPath: "/careers/apply?rpid={PostId}&postid={PostId20}&webapp=1",
   detailPath: "/find-work/job?id={ReqID}",
   generalApplyPath: "/careers/general-apply",
+  // The employer request form. The assistant pre-fills it with ?service=, ?details= and ?where=.
+  // TODO: point this at the live site's request form once it exists there.
+  hirePath: "/hire/",
 };
 
 const PROVINCES = {
@@ -240,7 +243,8 @@ export function searchJobs(jobs, filters = {}) {
       else if (s.desc.includes(n)) score += 1;
     }
     const nearby = places.length > 0 && places.some((p) => norm(job.city).includes(norm(p)));
-    return { job, score, strong, nearby };
+    const match = !words.length ? undefined : strong ? (s.title && needles.some((n) => s.title.includes(n)) ? "title" : "category") : score > 0 ? "description" : undefined;
+    return { job, score, strong, nearby, match };
   });
 
   // Prefer jobs whose title or category matched. Description-only mentions
@@ -249,8 +253,9 @@ export function searchJobs(jobs, filters = {}) {
   const strongHits = keywordHits.filter((r) => r.strong);
   if (strongHits.length >= 3) keywordHits = strongHits;
   const usedFallback = words.length > 0 && keywordHits.length === 0;
+  // Title or category matches first; within those, nearby towns first; then the rest.
   const list = (usedFallback ? scored : keywordHits).sort((a, b) =>
-    (b.nearby - a.nearby) || (b.score - a.score) || String(b.job.posted).localeCompare(String(a.job.posted)));
+    (b.strong - a.strong) || (b.nearby - a.nearby) || (b.score - a.score) || String(b.job.posted).localeCompare(String(a.job.posted)));
 
   return {
     total_open_jobs: jobs.length,
@@ -258,7 +263,7 @@ export function searchJobs(jobs, filters = {}) {
     note: usedFallback
       ? "No postings matched those keywords. These are the other open jobs that fit the location and job-type filters, newest first."
       : undefined,
-    results: list.slice(0, limit).map((r) => brief(r.job, { near_requested_city: places.length ? r.nearby : undefined })),
+    results: list.slice(0, limit).map((r) => brief(r.job, { near_requested_city: places.length ? r.nearby : undefined, matched_in: usedFallback ? undefined : r.match })),
   };
 }
 

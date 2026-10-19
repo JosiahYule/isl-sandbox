@@ -8,13 +8,14 @@ import Footer from '../components/Footer.astro';
 import { brand } from '../data/site.js';
 import { url } from '../lib/url.js';
 
-// assistant: false hides the job assistant (used on employer pages, where "Find a job" doesn't apply)
+// assistant: false hides the assistant entirely
+// assistantMode: "employer" (hiring pages) or "seeker" (job pages) opens it ready for that visitor; leave out to let it ask
 // footerOffices: false hides the footer's office row (the contact page already lists the offices)
-const { title, description = brand.scope, assistant = true, footerOffices = true } = Astro.props;
+const { title, description = brand.scope, assistant = true, assistantMode, footerOffices = true } = Astro.props;
 const fullTitle = title ? `${title} | ${brand.name}` : `${brand.name} | Contract and permanent staffing in Atlantic Canada`;
 ---
 <!doctype html>
-<html lang="en-CA">
+<html lang="en-CA" data-assistant-mode={assistantMode}>
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />

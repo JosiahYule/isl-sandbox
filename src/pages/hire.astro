@@ -22,7 +22,7 @@ const afterSteps = [
   ['Your position is filled', 'We handle the paperwork and follow up after placement.'],
 ];
 ---
-<Base assistant={false} title="Request talent" description="Request contract workers or start a permanent search. A recruiter replies within one business day.">
+<Base assistantMode="employer" title="Request talent" description="Request contract workers or start a permanent search. A recruiter replies within one business day.">
   <PageHero title="Tell us who you need." lead="Contract workers or a permanent hire, anywhere we work.">
     <Fragment slot="aside">
       <HeroFigure figure="1" label="business day for a recruiter to reply">
@@ -132,6 +132,12 @@ const afterSteps = [
   // ?service=contract|direct from links elsewhere on the site
   const fromUrl = new URLSearchParams(location.search).get('service');
   if (fromUrl === 'contract' || fromUrl === 'direct') select(fromUrl);
+  // ?details= and ?where= come from the assistant, so the visitor doesn't retype what they told it
+  const params = new URLSearchParams(location.search);
+  if (params.get('details')) form.querySelector('[name="role"]').value = params.get('details');
+  const where = params.get('where');
+  const loc = form.querySelector('[name="location"]');
+  if (where && [...loc.options].some((o) => o.value === where || o.text === where)) loc.value = where;
 
   // Recommendation logic for the three questions
   const answers = {};

@@ -19,7 +19,7 @@ const PAGE = 15; // rows shown before "Show all"; search and filters always show
 const areaLinks = areas.map((a) => ({ ...a, n: jobs.filter((j) => j.area === a.key).length }));
 const count = { contract: jobs.filter((j) => j.type === 'contract').length, direct: jobs.filter((j) => j.type === 'direct').length };
 ---
-<Base title="Find work" description="Contract and permanent jobs across Atlantic Canada and beyond.">
+<Base assistantMode="seeker" title="Find work" description="Contract and permanent jobs across Atlantic Canada and beyond.">
   <PageHero title="Find your next job." lead="Contract and permanent roles across Atlantic Canada.">
     <button type="button" class="textlink" data-open-assistant>Or describe what you want to the job assistant</button>
     <Fragment slot="aside">
