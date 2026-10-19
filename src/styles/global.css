@@ -98,11 +98,18 @@ a[href^="tel:"] { white-space: nowrap; }
 
 .items { display: grid; gap: var(--s6) var(--s5); grid-template-columns: repeat(auto-fit, minmax(min(100%, 230px), 1fr)); margin: 0; padding: 0; list-style: none; }
 .items--2 { grid-template-columns: repeat(auto-fit, minmax(min(100%, 340px), 1fr)); }
-.item { border-top: 1.5px solid var(--ink); padding-top: var(--s4); }
+.item {
+  /* The rule is drawn as a background line (not a border) so it can grow in from the left.
+     Set --rule to change its colour. */
+  --rule: var(--ink);
+  background: linear-gradient(var(--rule), var(--rule)) no-repeat left top / 100% 1.5px;
+  padding-top: calc(var(--s4) + 1.5px);
+}
+.item--blue, .item--direct { --rule: var(--direct); }
 .item h3 { margin-bottom: var(--s2); }
 .item p { color: var(--ink-soft); }
 .item .more { display: inline-block; margin-top: var(--s3); font-weight: 600; }
-.on-dark .item { border-top-color: var(--on-dark); }
+.on-dark .item { --rule: var(--on-dark); }
 .on-dark .item p { color: var(--on-dark-soft); }
 
 /* Plain text link that is really a button (opens the job assistant, etc.) */
@@ -114,6 +121,30 @@ a[href^="tel:"] { white-space: nowrap; }
 .svc--direct { color: var(--direct); }
 .on-dark .svc { color: #fff; }
 .on-dark .svc--direct { color: var(--isl-blue-on-dark); }
+
+/* ---------- Motion ----------
+   One small set of entrance effects, used the same way on every page:
+   - section headings and [data-reveal] blocks rise gently into place
+   - .items and [data-stagger] lists bring their children in one after another,
+     and each item's rule draws itself in from the left
+   - [data-countup] numbers count up from zero (src/scripts/motion.js)
+   They only run when html has the "motion" class. Base.astro adds it only when the visitor's
+   device allows motion, so with reduced motion or no JavaScript everything is simply visible. */
+.motion .section-head, .motion [data-reveal] {
+  opacity: 0; transform: translateY(18px);
+  transition: opacity 0.8s var(--ease), transform 0.8s var(--ease);
+  transition-delay: calc(var(--i, 0) * 70ms);
+}
+.motion .section-head.is-in, .motion [data-reveal].is-in { opacity: 1; transform: none; }
+
+.motion .items > *, .motion [data-stagger] > * {
+  opacity: 0; transform: translateY(18px);
+  transition: opacity 0.7s var(--ease), transform 0.7s var(--ease), background-size 1.1s var(--ease);
+  transition-delay: calc(var(--i, 0) * 90ms);
+}
+.motion .items > .item, .motion [data-stagger] > .item { background-size: 0% 1.5px; }
+.motion .items.is-in > *, .motion [data-stagger].is-in > * { opacity: 1; transform: none; }
+.motion .items.is-in > .item, .motion [data-stagger].is-in > .item { background-size: 100% 1.5px; }
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }

@@ -5,6 +5,8 @@
 // Linking with ?service=contract or ?service=direct preselects that service.
 import Base from '../layouts/Base.astro';
 import PageHero from '../components/PageHero.astro';
+import Steps from '../components/Steps.astro';
+import HeroFigure from '../components/HeroFigure.astro';
 import { brand } from '../data/site.js';
 
 const sectors = ['Construction and trades', 'Warehousing and logistics', 'Manufacturing', 'Energy and natural resources',
@@ -21,7 +23,13 @@ const afterSteps = [
 ];
 ---
 <Base assistant={false} title="Request talent" description="Request contract workers or start a permanent search. A recruiter replies within one business day.">
-  <PageHero title="Tell us who you need." lead="Contract workers or a permanent hire, anywhere we work. A recruiter replies within one business day." />
+  <PageHero title="Tell us who you need." lead="Contract workers or a permanent hire, anywhere we work. Fill in the form below, or call and talk it through.">
+    <Fragment slot="aside">
+      <HeroFigure figure="1" label="business day for a recruiter to reply">
+        <p class="hf-extra">Prefer to talk? <a href={tel}>{brand.mainPhone}</a></p>
+      </HeroFigure>
+    </Fragment>
+  </PageHero>
 
   <section class="section section--rule work">
     <div class="wrap layout">
@@ -76,6 +84,7 @@ const afterSteps = [
       <aside class="picker" aria-labelledby="picker-title">
         <h2 id="picker-title">Not sure which service fits?</h2>
         <p class="picker-intro">Answer three questions and we'll select the right option in the form.</p>
+        <div class="progress" aria-hidden="true"><span></span><span></span><span></span></div>
 
         <div class="q" data-q="length">
           <p class="q-label">How long do you need them?</p>
@@ -110,9 +119,7 @@ const afterSteps = [
   <section class="section section--tint after">
     <div class="wrap">
       <div class="section-head"><h2>What happens after you send it</h2></div>
-      <ol class="items steps">
-        {afterSteps.map(([t, d], i) => <li class="item"><span class="num">{i + 1}</span><h3>{t}</h3><p>{d}</p></li>)}
-      </ol>
+      <Steps steps={afterSteps} />
     </div>
   </section>
 </Base>
@@ -149,6 +156,9 @@ const afterSteps = [
         : 'A targeted search for the right long-term fit, backed by a 90-day replacement guarantee.';
     }
     select(svc);
+    // Briefly highlight the option we just chose in the form, so the link between the two is visible
+    const chosen = form.querySelector(`input[value="${svc}"]`)?.closest('.opt');
+    if (chosen) { chosen.classList.remove('flash'); void chosen.offsetWidth; chosen.classList.add('flash'); }
     result.dataset.svc = svc;
     nameEl.textContent = name;
     whyEl.textContent = why + ' We’ve selected it in the form.';
@@ -160,6 +170,9 @@ const afterSteps = [
     buttons.forEach((b) => b.addEventListener('click', () => {
       buttons.forEach((x) => x.setAttribute('aria-pressed', String(x === b)));
       answers[q.dataset.q] = b.dataset.v;
+      // Fill one segment of the progress bar per answered question
+      const done = Object.keys(answers).length;
+      document.querySelectorAll('.progress span').forEach((s, i) => s.classList.toggle('on', i < done));
       recommend();
     }));
   });
@@ -233,6 +246,16 @@ const afterSteps = [
   }
   .seg button:hover { border-color: var(--ink); }
   .seg button[aria-pressed='true'] { background: var(--ink); border-color: var(--ink); color: #fff; }
+  .progress { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; margin-top: var(--s4); }
+  .progress span { height: 4px; background: var(--line); position: relative; overflow: hidden; }
+  .progress span::after { content: ''; position: absolute; inset: 0; background: var(--ink); transform: scaleX(0); transform-origin: left; transition: transform 0.4s var(--ease); }
+  .progress span.on::after { transform: none; }
+  .result:not([hidden]) { animation: rise 0.5s var(--ease); }
+  @keyframes rise { from { opacity: 0; transform: translateY(10px); } }
+  .opt.flash { animation: flash 1.2s var(--ease); }
+  @keyframes flash { 0% { box-shadow: 0 0 0 0 rgb(0 112 202 / 0.45); } 100% { box-shadow: 0 0 0 14px rgb(0 112 202 / 0); } }
+
+
   .result { margin-top: var(--s5); padding-top: var(--s4); border-top: 1.5px solid var(--ink); }
   .result-name { font-weight: 700; font-size: 1.45rem; line-height: 1.15; }
   .result[data-svc='direct'] .result-name { color: var(--direct); }
@@ -247,6 +270,5 @@ const afterSteps = [
   }
 
   /* After-send steps */
-  .steps { padding: 0; }
-  .num { display: block; font-size: 2.6rem; font-weight: 300; letter-spacing: -0.04em; line-height: 1; color: var(--isl-blue); margin-bottom: var(--s3); }
+
 </style>

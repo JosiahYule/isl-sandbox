@@ -4,13 +4,14 @@
 import { brand, nav, offices, social, images } from '../data/site.js';
 import { url } from '../lib/url.js';
 import { areas } from '../data/areas.js';
+const { offices: showOffices = true } = Astro.props;
 const year = new Date().getFullYear(); // never goes stale
 const tel = (n) => `tel:+1${n.replaceAll('-', '')}`;
 const areaKey = (city) => areas.find((a) => a.label === city)?.key;
 ---
 <footer class="footer on-dark">
   <div class="wrap">
-    <div class="offices">
+    {showOffices && <div class="offices">
       {offices.map((o) => (
         <div class="office">
           <p class="city">{o.city}<span>{o.province}</span></p>
@@ -19,9 +20,9 @@ const areaKey = (city) => areas.find((a) => a.label === city)?.key;
           {areaKey(o.city) && <a class="near" href={url(`/find-work/?area=${areaKey(o.city)}`)}>Jobs near {o.city}</a>}
         </div>
       ))}
-    </div>
+    </div>}
 
-    <div class="lower">
+    <div class:list={['lower', !showOffices && 'lower--top']}>
       <div class="about">
         <p>{brand.name} has connected employers and job seekers since {brand.since}. Locally owned and operated.</p>
         <div class="badges">
@@ -63,6 +64,7 @@ const areaKey = (city) => areas.find((a) => a.label === city)?.key;
     display: grid; grid-template-columns: 1.4fr 1fr; gap: var(--s7);
     margin-top: var(--s7); padding-top: var(--s6); border-top: 1px solid var(--line-dark);
   }
+  .lower--top { margin-top: 0; }
   .about p { color: var(--on-dark-soft); max-width: 42ch; }
   .badges { display: flex; gap: var(--s4); margin-top: var(--s5); }
   .badges img { height: 56px; width: auto; }

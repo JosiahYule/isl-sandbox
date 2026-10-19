@@ -3,6 +3,8 @@
 // Lists posts from src/data/posts.js. Posts still live on the real site.
 import Base from '../layouts/Base.astro';
 import PageHero from '../components/PageHero.astro';
+import HeroFigure from '../components/HeroFigure.astro';
+import ToolCards from '../components/ToolCards.astro';
 import { posts } from '../data/posts.js';
 
 const fmt = (d) => new Date(d + 'T12:00:00').toLocaleDateString('en-CA', { month: 'long', day: 'numeric', year: 'numeric' });
@@ -16,11 +18,21 @@ const filters = [
 const [featured, ...rest] = posts;
 ---
 <Base title="Learn" description="Hiring advice, career guides and Atlantic Canada job market insights.">
-  <PageHero title="Hiring advice and career guides." lead="Written by our team for Atlantic Canadian employers and job seekers." />
+  <PageHero title="Hiring advice and career guides." lead="Written by our team for Atlantic Canadian employers and job seekers.">
+    <Fragment slot="aside"><HeroFigure figure={String(posts.length)} label="guides, tools and market updates" /></Fragment>
+  </PageHero>
 
-  <section class="section section--rule posts" data-posts>
+  <section class="section section--rule">
     <div class="wrap">
-      <a class="featured" href={featured.url}>
+      <div class="section-head"><h2>Start with a tool</h2></div>
+      <ToolCards />
+    </div>
+  </section>
+
+  <section class="section section--tint posts" data-posts>
+    <div class="wrap">
+      <a class="featured" href={featured.url} data-reveal>
+        <span class="new">Latest</span>
         <span class="aud">{audienceLabel[featured.audience]}</span>
         <span class="f-title">{featured.title}</span>
         <time datetime={featured.date}>{fmt(featured.date)}</time>
@@ -37,6 +49,7 @@ const [featured, ...rest] = posts;
               <time datetime={p.date}>{fmt(p.date)}</time>
               <span class="title">{p.title}</span>
               <span class="aud">{audienceLabel[p.audience]}</span>
+              <span class="arrow" aria-hidden="true">→</span>
             </a>
           </li>
         ))}
@@ -60,6 +73,7 @@ const [featured, ...rest] = posts;
   .featured { display: grid; gap: var(--s3); padding-bottom: var(--s7); color: var(--ink); text-decoration: none; }
   .featured:hover .f-title { text-decoration: underline; text-decoration-thickness: 2px; }
   .featured .aud { color: var(--isl-blue); }
+  .new { font-size: var(--fs-tiny); font-weight: 600; color: var(--ink-soft); }
   .f-title { font-weight: 700; letter-spacing: -0.025em; line-height: 1.05; font-size: clamp(2rem, 1rem + 3vw, 3.6rem); max-width: 20ch; }
   .featured time { color: var(--ink-soft); font-size: var(--fs-small); }
 
@@ -73,10 +87,12 @@ const [featured, ...rest] = posts;
   .list { list-style: none; margin: 0; padding: 0; border-top: 1.5px solid var(--ink); }
   .list li[hidden] { display: none; }
   .list a {
-    display: grid; grid-template-columns: 11rem 1fr 10rem; gap: var(--s5); align-items: baseline;
+    display: grid; grid-template-columns: 11rem 1fr 10rem 1.5rem; gap: var(--s5); align-items: baseline;
     padding-block: var(--s5); border-bottom: 1px solid var(--line); color: var(--ink); text-decoration: none;
   }
   .list a:hover .title { text-decoration: underline; text-decoration-thickness: 2px; }
+  .arrow { color: var(--isl-blue); font-weight: 600; opacity: 0; transform: translateX(-8px); transition: opacity 0.25s, transform 0.3s var(--ease); }
+  .list a:hover .arrow, .list a:focus-visible .arrow { opacity: 1; transform: none; }
   time { font-size: var(--fs-small); color: var(--ink-soft); font-variant-numeric: tabular-nums; }
   .title { font-weight: 600; font-size: 1.25rem; letter-spacing: -0.01em; line-height: 1.25; }
   .aud { font-size: var(--fs-small); font-weight: 500; color: var(--ink-soft); }
@@ -85,5 +101,6 @@ const [featured, ...rest] = posts;
   @media (max-width: 760px) {
     .list a { grid-template-columns: 1fr; gap: var(--s1); }
     .list .aud { text-align: left; }
+    .arrow { display: none; }
   }
 </style>

@@ -8,10 +8,10 @@ import AtlanticMap from '../components/AtlanticMap.astro';
 import JobRow from '../components/JobRow.astro';
 import CtaBand from '../components/CtaBand.astro';
 import Photo from '../components/Photo.astro';
+import ToolCards from '../components/ToolCards.astro';
 import { photos } from '../data/photos.js';
 import { testimonials, stats, brand } from '../data/site.js';
 import { jobs } from '../data/jobs.js';
-import { posts } from '../data/posts.js';
 import { url } from '../lib/url.js';
 
 const quote = testimonials[0];
@@ -35,22 +35,15 @@ const situations = {
   ],
 };
 
-// ISL's own tools, from the blog (they live on the current site).
-const toolSlugs = [
-  ['wage-guide-atlantic-canada-2026', 'For employers and job seekers', 'Pick an industry and role to see entry-level, experienced and top-of-market hourly rates, with the annual equivalent.', 'Open the wage guide'],
-  ['resume-audit', 'For job seekers', 'A 42-item checklist across eight sections that scores your resume and shows where to focus.', 'Audit your resume'],
-  ['why-new-brunswick-a-practical-guide-for-canadians-considering-a-move', 'For job seekers', 'Jobs, cities and quality of life, with a calculator that shows what your salary is worth in Moncton, Fredericton or Saint John.', 'Read the guide'],
-];
-const tools = toolSlugs.map(([slug, who, d, cta]) => ({ ...posts.find((p) => p.slug === slug), who, d, cta }));
 ---
 <Base>
   <!-- 1. HERO: the promise on the left, ISL's own photo running off the right edge -->
   <section class="hero">
     <div class="wrap hero-grid">
-      <div class="hero-copy">
+      <div class="hero-copy" data-stagger>
         <h1 class="hero-title">
-          <span class="line line--contract">Workers in hours.</span>{" "}
-          <span class="line line--direct">Hires that stay.</span>
+          <span class="line line--contract"><span class="u">Workers in hours.</span></span>{" "}
+          <span class="line line--direct"><span class="u">Hires that stay.</span></span>
         </h1>
         <p class="lead">Contract and permanent staffing from five offices across Atlantic Canada, with permanent searches anywhere in the country. Locally owned since {brand.since}.</p>
         <div class="actions">
@@ -66,7 +59,7 @@ const tools = toolSlugs.map(([slug, who, d, cta]) => ({ ...posts.find((p) => p.s
         </form>
       </div>
     </div>
-    <div class="hero-photo">
+    <div class="hero-photo" data-animate>
       <Photo src={photos.warehouse.src} alt={photos.warehouse.alt} ratio="4/5" sizes="(max-width: 900px) 100vw, 46vw" position="70% center" eager />
     </div>
   </section>
@@ -82,15 +75,15 @@ const tools = toolSlugs.map(([slug, who, d, cta]) => ({ ...posts.find((p) => p.s
         <div class="item">
           <h3 class="col-title">Contract staffing</h3>
           <p class="fact"><span class="figure">Within hours</span>from your request to workers on site</p>
-          <ul class="sits">
+          <ul class="sits" data-stagger>
             {situations.contract.map(([q, a]) => <li><p class="q">{q}</p><p class="a">{a}</p></li>)}
           </ul>
           <a class="more" href={url('/contract/')}>How contract staffing works</a>
         </div>
         <div class="item item--direct">
           <h3 class="col-title col-title--direct">Direct hire</h3>
-          <p class="fact"><span class="figure">{retention}</span>of our direct hire placements stay</p>
-          <ul class="sits">
+          <p class="fact"><span class="figure" data-countup>{retention}</span>of our direct hire placements stay</p>
+          <ul class="sits" data-stagger>
             {situations.direct.map(([q, a]) => <li><p class="q">{q}</p><p class="a">{a}</p></li>)}
           </ul>
           <a class="more" href={url('/direct-hire/')}>How direct hire works</a>
@@ -123,7 +116,12 @@ const tools = toolSlugs.map(([slug, who, d, cta]) => ({ ...posts.find((p) => p.s
         <blockquote>{quote.quote}</blockquote>
         <figcaption>{quote.who}</figcaption>
       </figure>
-      <p class="reviews"><strong>{reviews}</strong> five-star reviews on Google from clients and candidates.</p>
+      <div class="reviews" data-animate>
+        <p class="stars" aria-hidden="true">{[0, 1, 2, 3, 4].map((i) => (
+          <svg viewBox="0 0 24 24" style={`--s:${i}`}><path d="M12 2.5l2.9 6.1 6.6.8-4.9 4.6 1.3 6.6L12 17.3l-5.9 3.3 1.3-6.6-4.9-4.6 6.6-.8z" /></svg>
+        ))}</p>
+        <p><strong data-countup>{reviews}</strong> five-star reviews on Google from clients and candidates.</p>
+      </div>
     </div>
   </section>
 
@@ -134,7 +132,7 @@ const tools = toolSlugs.map(([slug, who, d, cta]) => ({ ...posts.find((p) => p.s
         <h2>Open roles</h2>
         <p class="jobs-intro">{jobs.length} open now across Atlantic Canada. Not sure what to search for? <button type="button" class="textlink" data-open-assistant>Ask the job assistant</button>.</p>
       </div>
-      <div class="job-list">
+      <div class="job-list" data-stagger>
         {latest.map((job) => <JobRow job={job} />)}
       </div>
       <div class="jobs-foot">
@@ -150,16 +148,7 @@ const tools = toolSlugs.map(([slug, who, d, cta]) => ({ ...posts.find((p) => p.s
         <h2>Free tools from our team</h2>
         <p class="lead">Built by ISL from what our recruiters see across Atlantic Canada.</p>
       </div>
-      <ul class="items">
-        {tools.map((t) => (
-          <li class="item">
-            <p class="who">{t.who}</p>
-            <h3>{t.title}</h3>
-            <p>{t.d}</p>
-            <a class="more" href={t.url}>{t.cta}</a>
-          </li>
-        ))}
-      </ul>
+      <ToolCards />
     </div>
   </section>
 
@@ -174,10 +163,19 @@ const tools = toolSlugs.map(([slug, who, d, cta]) => ({ ...posts.find((p) => p.s
   /* One sentence per line on desktop: each line is one service, underlined in that service's colour */
   .hero-title { font-size: clamp(2.6rem, 0.9rem + 4.3vw, 4.9rem); font-weight: 700; letter-spacing: -0.02em; line-height: 1; }
   @media (min-width: 901px) { .line { white-space: nowrap; } }
-  .line { display: block; width: fit-content; text-decoration-line: underline; text-decoration-thickness: 0.09em; text-underline-offset: 0.13em; text-decoration-skip-ink: none; }
+  /* Each line is underlined in its service colour. The underline is a background line
+     (not text-decoration) so it can draw itself across when the page loads. */
+  .line { display: block; }
   .line + .line { margin-top: 0.12em; }
-  .line--contract { text-decoration-color: var(--contract); }
-  .line--direct { text-decoration-color: var(--direct); }
+  .u { --c: var(--contract); padding-bottom: 0.1em; background: linear-gradient(var(--c), var(--c)) no-repeat left bottom / 100% 0.09em; -webkit-box-decoration-break: clone; box-decoration-break: clone; }
+  .line--direct .u { --c: var(--direct); }
+  :global(.motion) .u { background-size: 0% 0.09em; transition: background-size 0.9s var(--ease) 0.55s; }
+  :global(.motion) .line--direct .u { transition-delay: 0.8s; }
+  :global(.motion) .hero-copy.is-in .u { background-size: 100% 0.09em; }
+  /* The photo settles from slightly enlarged */
+  .hero-photo :global(.frame) { overflow: hidden; }
+  :global(.motion) .hero-photo :global(img) { transform: scale(1.06); opacity: 0; transition: transform 1.6s var(--ease), opacity 0.9s var(--ease); }
+  :global(.motion) .hero-photo.is-in :global(img) { transform: none; opacity: 1; }
   .hero .lead { margin-top: var(--s6); max-width: 40ch; }
   .actions { display: flex; flex-wrap: wrap; gap: var(--s3); margin-top: var(--s7); }
   /* Job search: the job seeker's way in, right in the hero (most site visitors are job seekers) */
@@ -209,7 +207,7 @@ const tools = toolSlugs.map(([slug, who, d, cta]) => ({ ...posts.find((p) => p.s
   .col-title--direct { color: var(--direct); }
   .services { padding-top: calc(clamp(4rem, 8vw, 6.5rem) + 3rem); }
   @media (min-width: 901px) { .services .section-head { max-width: 52%; } .services .items { grid-template-columns: 1fr 1fr; } }
-  .item--direct { border-top-color: var(--direct); }
+  
   /* Situations: the employer's words, then the answer */
   .sits { list-style: none; margin: 0 0 var(--s5); padding: 0; }
   .sits li { padding-block: var(--s4); border-top: 1px solid var(--line); }
@@ -232,6 +230,10 @@ const tools = toolSlugs.map(([slug, who, d, cta]) => ({ ...posts.find((p) => p.s
   .quote blockquote { margin: 0; font-size: clamp(1.4rem, 1rem + 1.4vw, 2.1rem); font-weight: 300; line-height: 1.35; letter-spacing: -0.015em; }
   .quote figcaption { margin-top: var(--s5); color: var(--ink-soft); font-weight: 500; }
   .reviews { font-size: var(--fs-small); color: var(--ink-soft); border-top: 1.5px solid var(--ink); padding-top: var(--s4); }
+  .stars { display: flex; gap: 4px; margin-bottom: var(--s4); }
+  .stars svg { width: 22px; height: 22px; fill: var(--isl-blue); }
+  :global(.motion) .stars svg { transform: scale(0.4); opacity: 0; transition: transform 0.45s var(--ease), opacity 0.3s; transition-delay: calc(var(--s) * 90ms); }
+  :global(.motion) .reviews.is-in .stars svg { transform: none; opacity: 1; }
   .reviews strong { display: block; color: var(--isl-blue); font-weight: 300; font-size: clamp(3.4rem, 2rem + 4vw, 5.2rem); letter-spacing: -0.05em; line-height: 0.95; margin-bottom: var(--s2); }
   @media (max-width: 900px) { .proof-grid { grid-template-columns: 1fr; } }
 
@@ -240,8 +242,6 @@ const tools = toolSlugs.map(([slug, who, d, cta]) => ({ ...posts.find((p) => p.s
   .job-list { border-top: 1.5px solid var(--ink); }
   .jobs-foot { margin-top: var(--s6); }
 
-  /* ---------- 6. Tools ---------- */
-  .who { font-size: var(--fs-tiny); font-weight: 500; color: var(--ink-soft); margin-bottom: var(--s2); }
-  .tools h3 { font-size: 1.25rem; }
+  /* ---------- 6. Tools: see ToolCards.astro ---------- */
   @media (max-width: 860px) { .jobs-intro { justify-self: start; } }
 </style>

@@ -1,0 +1,68 @@
+---
+// STEPS: a numbered sequence on one continuous line.
+// The line fills from the first step to the last when it scrolls into view, and each step's
+// dot lights up as the line reaches it, so the order is something you see, not just read.
+// On phones the line runs down the left side instead.
+//
+// <Steps steps={[['Brief', 'We learn the role...'], ...]} tone="direct" dashedLast />
+//   tone:       "ink" (default) | "direct" (ISL blue, for permanent placement)
+//   dashedLast: draw the last stretch dashed (used for the guarantee, which only applies if needed)
+const { steps = [], tone = 'ink', dashedLast = false } = Astro.props;
+---
+<ol class:list={['steps', `steps--${tone}`, dashedLast && 'steps--dashed']} data-animate style={`--n:${steps.length}`}>
+  {steps.map(([t, d], i) => (
+    <li style={`--i:${i}`}>
+      <span class="dot" aria-hidden="true"></span>
+      <span class="num figure" aria-hidden="true">{String(i + 1).padStart(2, '0')}</span>
+      <h3><span class="visually-hidden">Step {i + 1}: </span>{t}</h3>
+      <p>{d}</p>
+    </li>
+  ))}
+</ol>
+
+<style>
+  .steps {
+    --c: var(--ink);
+    --step: 0.42s; /* how long the line takes to cross one step */
+    list-style: none; margin: 0; padding: 0;
+    display: grid; grid-template-columns: repeat(var(--n), 1fr);
+  }
+  .steps--direct { --c: var(--direct); }
+
+  li { position: relative; padding: var(--s6) var(--s5) 0 0; }
+  /* The track: a grey hairline under every step, and a coloured line on top that fills */
+  li::before, li::after { content: ''; position: absolute; left: 0; right: 0; top: 0; height: 2px; }
+  li::before { background: var(--line); }
+  li::after { background: var(--c); transform-origin: left; }
+  .steps--dashed li:last-child::after { background: repeating-linear-gradient(90deg, var(--c) 0 6px, transparent 6px 11px); }
+
+  .dot {
+    position: absolute; left: 0; top: 1px; z-index: 1;
+    width: 13px; height: 13px; border-radius: 50%; transform: translate(0, -50%);
+    background: var(--c); box-shadow: 0 0 0 4px var(--paper);
+  }
+  :global(.section--tint) .dot { box-shadow: 0 0 0 4px var(--mist); }
+  .num { display: block; font-size: 2.4rem; color: var(--c); margin-bottom: var(--s3); }
+  h3 { margin-bottom: var(--s2); }
+  p { color: var(--ink-soft); max-width: 30ch; }
+
+  /* Motion: line and dots start empty, then fill one step after another */
+  :global(.motion) .steps li::after { transform: scaleX(0); transition: transform var(--step) linear calc(var(--i) * var(--step)); }
+  :global(.motion) .steps .dot { background: var(--paper); outline: 2px solid var(--line); outline-offset: -2px; transition: background 0.2s, outline-color 0.2s; transition-delay: calc(var(--i) * var(--step)); }
+  :global(.motion) .steps .num, :global(.motion) .steps h3, :global(.motion) .steps p { opacity: 0; transform: translateY(10px); transition: opacity 0.6s var(--ease), transform 0.6s var(--ease); transition-delay: calc(var(--i) * var(--step) + 0.05s); }
+  :global(.motion) .steps:global(.is-in) li::after { transform: none; }
+  :global(.motion) .steps:global(.is-in) .dot { background: var(--c); outline-color: transparent; }
+  :global(.motion) .steps:global(.is-in) .num, :global(.motion) .steps:global(.is-in) h3, :global(.motion) .steps:global(.is-in) p { opacity: 1; transform: none; }
+
+  @media (max-width: 900px) {
+    .steps { grid-template-columns: 1fr; }
+    li { padding: 0 0 var(--s6) var(--s6); }
+    li:last-child { padding-bottom: 0; }
+    li::before, li::after { left: 6px; right: auto; top: 0; bottom: 0; width: 2px; height: auto; }
+    li::after { transform-origin: top; }
+    .steps--dashed li:last-child::after { background: repeating-linear-gradient(180deg, var(--c) 0 6px, transparent 6px 11px); }
+    .dot { top: 0.35rem; transform: none; }
+    :global(.motion) .steps li::after { transform: scaleY(0); }
+    .num { font-size: 1.6rem; margin-bottom: var(--s1); }
+  }
+</style>

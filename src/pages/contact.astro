@@ -3,6 +3,7 @@
 import Base from '../layouts/Base.astro';
 import AtlanticMap from '../components/AtlanticMap.astro';
 import PageHero from '../components/PageHero.astro';
+import HeroFigure from '../components/HeroFigure.astro';
 import { brand, offices } from '../data/site.js';
 import { url } from '../lib/url.js';
 
@@ -13,8 +14,14 @@ const routes = [
   { t: 'I know a company that’s hiring', d: 'Refer them to our team and we’ll take it from there.', href: 'https://www.integratedstaffing.ca/referrals', cta: 'Make a referral' },
 ];
 ---
-<Base title="Contact" description="Contact Integrated Staffing in Halifax, Moncton, Saint John, Charlottetown and St. John's.">
-  <PageHero title="Talk to the office nearest you." lead="Or start with what you need, and we'll route you to the right recruiter." />
+<Base title="Contact" footerOffices={false} description="Contact Integrated Staffing in Halifax, Moncton, Saint John, Charlottetown and St. John's.">
+  <PageHero title="Talk to the office nearest you." lead="Or start with what you need, and we'll route you to the right recruiter.">
+    <Fragment slot="aside">
+      <HeroFigure figure={String(offices.length)} label={`offices in ${new Set(offices.map((o) => o.province)).size} provinces`}>
+        <p class="hf-extra">Head office <a href={tel(brand.mainPhone)}>{brand.mainPhone}</a></p>
+      </HeroFigure>
+    </Fragment>
+  </PageHero>
 
   <section class="section section--rule">
     <div class="wrap">
@@ -33,44 +40,58 @@ const routes = [
 
   <section class="section section--tint">
     <div class="wrap off-grid">
-      <AtlanticMap id="contact-map" />
+      <AtlanticMap id="contact-map" card={false} />
       <div>
-        <div class="section-head"><h2>Our offices</h2></div>
-        <table>
-          <caption class="visually-hidden">Office addresses and phone numbers</caption>
-          <tbody>
-            {offices.map((o, i) => (
-              <tr>
-                <th scope="row">{o.city}, {o.province}{i === 0 && <span>Head office</span>}</th>
-                <td>{o.address}</td>
-                <td><a href={tel(o.phone)}>{o.phone}</a></td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+        <div class="section-head">
+          <h2>Our offices</h2>
+          <p class="lead">Select an office to find it on the map.</p>
+        </div>
+        <ul class="offices" data-stagger>
+          {offices.map((o, i) => (
+            <li data-row={i} aria-current={i === 0 ? 'true' : undefined}>
+              <button type="button" class="o-city" data-select={i}>{o.city}, {o.province}{i === 0 && <span>Head office</span>}</button>
+              <span class="o-addr">{o.address}</span>
+              <a class="o-tel" href={tel(o.phone)}>{o.phone}</a>
+            </li>
+          ))}
+        </ul>
       </div>
     </div>
   </section>
 </Base>
 
+<script>
+  // The office list and the map pins select each other
+  const map = document.getElementById('contact-map');
+  const rows = document.querySelectorAll('.offices li');
+  const mark = (i) => rows.forEach((r) => (r.dataset.row === String(i) ? r.setAttribute('aria-current', 'true') : r.removeAttribute('aria-current')));
+  document.querySelectorAll('[data-select]').forEach((b) => b.addEventListener('click', () => {
+    map.querySelector(`.pin[data-index="${b.dataset.select}"]`)?.click();
+  }));
+  map.querySelectorAll('.pin').forEach((pin) => pin.addEventListener('click', () => mark(pin.dataset.index)));
+</script>
+
 <style>
   .r-title { font-size: 1.4rem; letter-spacing: -0.02em; margin-bottom: var(--s2); }
-  .item--blue { border-top-color: var(--isl-blue); }
   .email { margin-top: var(--s7); color: var(--ink-soft); }
 
   .off-grid { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(2rem, 5vw, 5rem); align-items: center; }
-  table { width: 100%; border-collapse: collapse; border-top: 1.5px solid var(--ink); }
-  th, td { text-align: left; vertical-align: top; padding: var(--s4) var(--s3) var(--s4) 0; border-bottom: 1px solid var(--line); font-size: var(--fs-small); }
-  th { font-weight: 700; font-size: 1.05rem; white-space: nowrap; }
-  th span { display: block; font-weight: 400; font-size: var(--fs-tiny); color: var(--ink-soft); }
-  td:last-child { padding-right: 0; font-weight: 600; }
-  td a { color: var(--ink); }
-
-  @media (max-width: 900px) {
-    .off-grid { grid-template-columns: 1fr; }
-    tr { display: grid; grid-template-columns: 1fr auto; border-bottom: 1px solid var(--line); }
-    th, td { border: 0; padding-block: var(--s2); }
-    td:nth-child(2) { grid-column: 1 / -1; grid-row: 2; padding-top: 0; }
-    td:last-child { grid-row: 1; grid-column: 2; }
+  .offices { list-style: none; margin: 0; padding: 0; border-top: 1.5px solid var(--ink); }
+  .offices li {
+    position: relative; display: grid; grid-template-columns: 1fr auto; gap: 2px var(--s4);
+    padding: var(--s4) var(--s4) var(--s4) var(--s5); border-bottom: 1px solid var(--line);
+    transition: background 0.25s;
   }
+  /* A bar on the left marks the selected office, matching the selected pin */
+  .offices li::before { content: ''; position: absolute; left: 0; top: var(--s4); bottom: var(--s4); width: 3px; background: var(--ink); transform: scaleY(0); transition: transform 0.3s var(--ease); }
+  .offices li[aria-current='true'] { background: var(--paper); }
+  .offices li[aria-current='true']::before { transform: none; }
+  .o-city { font: inherit; font-weight: 700; font-size: 1.05rem; text-align: left; padding: 0; border: 0; background: none; color: var(--ink); cursor: pointer; }
+  .o-city::after { content: ''; position: absolute; inset: 0; } /* the whole row is clickable */
+  .o-city span { margin-left: var(--s2); font-weight: 500; font-size: var(--fs-tiny); color: var(--ink-soft); }
+  .o-city:hover { text-decoration: underline; }
+  .o-addr { grid-column: 1; font-size: var(--fs-small); color: var(--ink-soft); }
+  .o-tel { position: relative; z-index: 1; grid-column: 2; grid-row: 1 / span 2; align-self: center; font-weight: 700; color: var(--ink); font-variant-numeric: tabular-nums; }
+
+  @media (max-width: 900px) { .off-grid { grid-template-columns: 1fr; } }
 </style>

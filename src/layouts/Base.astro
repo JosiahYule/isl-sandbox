@@ -9,7 +9,8 @@ import { brand } from '../data/site.js';
 import { url } from '../lib/url.js';
 
 // assistant: false hides the job assistant (used on employer pages, where "Find a job" doesn't apply)
-const { title, description = brand.scope, assistant = true } = Astro.props;
+// footerOffices: false hides the footer's office row (the contact page already lists the offices)
+const { title, description = brand.scope, assistant = true, footerOffices = true } = Astro.props;
 const fullTitle = title ? `${title} | ${brand.name}` : `${brand.name} | Contract and permanent staffing in Atlantic Canada`;
 ---
 <!doctype html>
@@ -21,6 +22,11 @@ const fullTitle = title ? `${title} | ${brand.name}` : `${brand.name} | Contract
     <meta name="description" content={description} />
     <meta name="theme-color" content="#1a1a1a" />
     <meta name="robots" content="noindex" /><!-- sandbox: keep search engines out -->
+    <!-- Turn on the entrance animations only when the visitor's device allows motion.
+         This runs before the page paints, so nothing flashes. (See src/scripts/motion.js) -->
+    <script is:inline>
+      if (!matchMedia('(prefers-reduced-motion: reduce)').matches) document.documentElement.classList.add('motion');
+    </script>
   </head>
   <body>
     <a class="skip" href="#main">Skip to content</a>
@@ -28,7 +34,8 @@ const fullTitle = title ? `${title} | ${brand.name}` : `${brand.name} | Contract
     <main id="main">
       <slot />
     </main>
-    <Footer />
+    <Footer offices={footerOffices} />
+    <script>import '../scripts/motion.js';</script>
     <!-- Job assistant: the chat widget, running in demo mode (see assistant/README.md and assistant/demo-mode.js) -->
     {assistant && <script is:inline defer src={url('/assistant/widget.js')}></script>}
     {assistant && <script is:inline type="module" src={url('/assistant/demo-mode.js')}></script>}

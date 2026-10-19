@@ -6,16 +6,26 @@ import PageHero from '../components/PageHero.astro';
 import IndustryMatrix from '../components/IndustryMatrix.astro';
 import CtaBand from '../components/CtaBand.astro';
 import Photo from '../components/Photo.astro';
+import Facts from '../components/Facts.astro';
 import { stock } from '../data/photos.js';
 import { offices } from '../data/site.js';
 import { industries } from '../data/industries.js';
 
 const contractIndustries = industries.filter((i) => i.contract).length;
+
 // Three facts in large type, right under the intro. Each restates a claim from the live site.
 const facts = [
   ['Within hours', 'from your request to a worker on site'],
-  ['One rate', 'per hour, with payroll and workers\u2019 compensation inside it'],
+  ['One rate', 'per hour, with payroll and workers’ compensation inside it'],
   [String(offices.length), 'local offices across Atlantic Canada'],
+];
+
+// The four reasons employers call, each with the length of the need it covers
+const uses = [
+  ['Vacation and leave cover', 'Keep the work moving while someone is away, from a week of vacation to a full maternity leave.'],
+  ['Seasonal peaks', 'Add people when orders climb and scale back when they settle.'],
+  ['Steady growth', 'Staff up ahead of a new contract without committing to permanent headcount.'],
+  ['Try before you hire', 'See someone on the job first, then bring them onto your team.'],
 ];
 
 // What the single hourly rate covers (from the live About page).
@@ -26,25 +36,14 @@ const covered = [
   ['Screening', 'Including typing and dexterity tests where the role calls for them.'],
   ['Orientation', 'Company-specific orientations at no extra cost.'],
 ];
-const uses = [
-  ['Vacation and leave cover', 'Keep the work moving while someone is away, from a week of vacation to a full maternity leave.'],
-  ['Seasonal peaks', 'Add people when orders climb and scale back when they settle.'],
-  ['Steady growth', 'Staff up ahead of a new contract without committing to permanent headcount.'],
-  ['Try before you hire', 'See someone on the job first, then bring them onto your team.'],
-];
 ---
 <Base assistant={false} title="Contract staffing" description="Pre-screened contract workers across Atlantic Canada, on site within hours of your request, for one all-inclusive hourly rate.">
   <PageHero photo={{ ...stock.welder, position: 'center' }} title="Pre-screened workers, on site within hours." lead="For leaves, peaks and growth. One hourly rate covers everything, and the people work on our payroll, not yours.">
     <Button href="/hire/?service=contract" size="lg">Request workers</Button>
   </PageHero>
 
-  <section class="facts-band">
-    <div class="wrap">
-      <ul class="facts">
-        {facts.map(([f, d]) => <li><span class="figure">{f}</span><span class="fd">{d}</span></li>)}
-      </ul>
-    </div>
-  </section>
+  <!-- The three facts that define the service -->
+  <Facts facts={facts} />
 
   <section class="section">
     <div class="wrap">
@@ -55,27 +54,38 @@ const uses = [
     </div>
   </section>
 
+  <!-- One rate: five separate costs gather into a single rate card as it scrolls into view -->
   <section class="section section--tint">
     <div class="wrap rate-grid">
-      <Photo src={stock.construction.src} alt={stock.construction.alt} ratio="4/5" sizes="(max-width: 900px) 100vw, 40vw" />
-      <div>
+      <div class="rate-copy">
         <div class="section-head">
           <h2>One rate. Everything inside it.</h2>
-          <p class="lead">You get a single hourly rate per worker. These costs are already in it, so there's nothing else to track, file or pay.</p>
+          <p class="lead">Hiring directly, each of these is yours to arrange and pay for. With us, they're already in a single hourly rate per worker.</p>
         </div>
-        <ul class="covered">
-          {covered.map(([t, d]) => <li><span class="c-t">{t}</span><span class="c-d">{d}</span></li>)}
+        <div class="rate-photo">
+          <Photo src={stock.construction.src} alt={stock.construction.alt} ratio="3/2" sizes="(max-width: 900px) 100vw, 40vw" />
+        </div>
+      </div>
+      <div class="stack" data-animate>
+        <p class="stack-head"><span>One hourly rate</span><span class="stack-sub">per worker, includes</span></p>
+        <ul>
+          {covered.map(([t, d], i) => (
+            <li style={`--i:${i}`}>
+              <svg class="check" viewBox="0 0 20 20" aria-hidden="true"><path d="M4 10.5l4 4 8-9" pathLength="1" /></svg>
+              <span class="c-t">{t}</span>
+              <span class="c-d">{d}</span>
+            </li>
+          ))}
         </ul>
       </div>
     </div>
   </section>
 
-
-  <section class="section section--rule">
-    <div class="wrap ind-grid">
-      <div class="section-head">
+  <section class="section">
+    <div class="wrap">
+      <div class="section-head section-head--split">
         <h2>Where we place contract workers</h2>
-        <p class="lead">{contractIndustries} industries, from warehouse floors to contact centres.</p>
+        <p class="lead"><span data-countup>{contractIndustries}</span> industries, from warehouse floors to contact centres.</p>
       </div>
       <IndustryMatrix only="contract" />
     </div>
@@ -85,24 +95,38 @@ const uses = [
 </Base>
 
 <style>
-  .facts-band { border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
-  .facts { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, 1fr); }
-  .facts li { padding: var(--s6) var(--s5) var(--s6) 0; }
-  .facts li + li { padding-left: var(--s5); border-left: 1px solid var(--line); }
-  .facts .figure { display: block; font-size: clamp(2.2rem, 1.4rem + 2.2vw, 3.4rem); margin-bottom: var(--s2); }
-  .fd { display: block; color: var(--ink-soft); max-width: 24ch; }
+  .rate-grid { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(2rem, 6vw, 6rem); align-items: start; }
+  .rate-copy .section-head { margin-bottom: var(--s6); }
 
-  .rate-grid { display: grid; grid-template-columns: 5fr 7fr; gap: clamp(2rem, 6vw, 6rem); align-items: center; }
-  .ind-grid { display: grid; grid-template-columns: 5fr 7fr; gap: clamp(2rem, 6vw, 6rem); align-items: start; }
-  .covered { list-style: none; margin: 0; padding: 0; border-top: 1.5px solid var(--ink); }
-  .covered li { display: grid; grid-template-columns: 14rem 1fr; gap: var(--s4); padding-block: var(--s4); border-bottom: 1px solid var(--line); }
+  /* The rate card */
+  .stack { background: var(--paper); border: 1.5px solid var(--ink); }
+  .stack-head {
+    display: flex; justify-content: space-between; align-items: baseline; gap: var(--s4);
+    margin: 0; padding: var(--s4) var(--s5); background: var(--ink); color: #fff;
+    font-weight: 700; font-size: 1.15rem;
+  }
+  .stack-sub { font-weight: 400; font-size: var(--fs-small); color: rgb(255 255 255 / 0.7); }
+  .stack ul { list-style: none; margin: 0; padding: 0 var(--s5); }
+  .stack li { display: grid; grid-template-columns: 20px 1fr; column-gap: var(--s3); padding-block: var(--s4); }
+  .stack li + li { border-top: 1px solid var(--line); }
+  .check { width: 20px; height: 20px; grid-row: span 2; margin-top: 2px; }
+  .check path { fill: none; stroke: var(--isl-blue); stroke-width: 2.4; stroke-linecap: square; }
   .c-t { font-weight: 600; }
-  .c-d { color: var(--ink-soft); }
+  .c-d { grid-column: 2; color: var(--ink-soft); font-size: var(--fs-small); }
+
+  /* Motion: the costs start spread apart as separate pieces, then close into the card */
+  :global(.motion) .stack { border-color: transparent; background: transparent; transition: border-color 0.5s, background 0.5s; transition-delay: 0.9s; }
+  :global(.motion) .stack-head { transform: scaleX(0); transform-origin: left; transition: transform 0.6s var(--ease) 0.9s; }
+  :global(.motion) .stack-head > span { opacity: 0; transition: opacity 0.4s 1.3s; }
+  :global(.motion) .stack li { transform: translateY(calc(var(--i) * 14px)); opacity: 0; transition: transform 0.9s var(--ease), opacity 0.5s; transition-delay: calc(var(--i) * 90ms); }
+  :global(.motion) .check path { stroke-dasharray: 1; stroke-dashoffset: 1; transition: stroke-dashoffset 0.4s var(--ease); transition-delay: calc(1.2s + var(--i) * 120ms); }
+  :global(.motion) .stack.is-in { border-color: var(--ink); background: var(--paper); }
+  :global(.motion) .stack.is-in .stack-head { transform: none; }
+  :global(.motion) .stack.is-in .stack-head > span { opacity: 1; }
+  :global(.motion) .stack.is-in li { transform: none; opacity: 1; }
+  :global(.motion) .stack.is-in .check path { stroke-dashoffset: 0; }
+
   @media (max-width: 900px) {
-    .rate-grid, .ind-grid { grid-template-columns: 1fr; }
-    .facts { grid-template-columns: 1fr; }
-    .facts li, .facts li + li { padding: var(--s5) 0; border-left: 0; }
-    .facts li + li { border-top: 1px solid var(--line); }
-    .covered li { grid-template-columns: 1fr; gap: var(--s1); }
+    .rate-grid { grid-template-columns: 1fr; }
   }
 </style>

@@ -6,14 +6,19 @@ import PageHero from '../components/PageHero.astro';
 import IndustryMatrix from '../components/IndustryMatrix.astro';
 import CanadaMap from '../components/CanadaMap.astro';
 import CtaBand from '../components/CtaBand.astro';
+import Steps from '../components/Steps.astro';
+import UnitChart from '../components/UnitChart.astro';
 import Photo from '../components/Photo.astro';
 import { stock } from '../data/photos.js';
 import { team } from '../data/team.js';
 import { stats } from '../data/site.js';
+import { industries } from '../data/industries.js';
 import { sized } from '../lib/img.js';
 
 const recruiters = team.filter((p) => p.team === 'Direct Hire');
 const retention = stats.find((s) => s.label.includes('retention'))?.value ?? '92%';
+const retentionN = parseInt(retention, 10);
+const directIndustries = industries.filter((i) => i.direct).length;
 // A real sequence, so it's numbered.
 const steps = [
   ['Brief', 'We learn the role, the team and what you need from the hire.'],
@@ -39,22 +44,25 @@ const phones = { 'Zowie Tucker': '902-471-0166' };
   <section class="section section--rule">
     <div class="wrap">
       <div class="section-head"><h2>How a search runs</h2></div>
-      <ol class="items steps">
-        {steps.map(([t, d], i) => (
-          <li class="item"><span class="num">{i + 1}</span><h3>{t}</h3><p>{d}</p></li>
-        ))}
-      </ol>
-      <div class="wide"><Photo src={stock.interview.src} alt={stock.interview.alt} ratio="21/9" sizes="(max-width: 1320px) 100vw, 1240px" position="center 40%" /></div>
+      <Steps steps={steps} tone="direct" dashedLast />
+      <div class="wide" data-reveal><Photo src={stock.interview.src} alt={stock.interview.alt} ratio="21/9" sizes="(max-width: 1320px) 100vw, 1240px" position="center 40%" /></div>
     </div>
   </section>
 
   <section class="section section--tint">
     <div class="wrap">
       <div class="stay">
-        <p class="big figure" aria-hidden="true">{retention}</p>
+        <UnitChart value={retentionN} label={`${retentionN} of every 100 direct hire placements stay`} />
         <div>
-          <h2>Hires that last.</h2>
-          <p class="lead">{retention} of our direct hire placements stay. For the rest, there's the guarantee: if a hire doesn't work out in the first 90 days, we find a replacement at no extra cost. Searches average 47 days from brief to hire.</p>
+          <div class="section-head">
+            <h2>Hires that last.</h2>
+            <p class="lead">Of every 100 people we place permanently, {retentionN} stay. For the rest, there's the guarantee: if a hire doesn't work out in the first 90 days, we find a replacement at no extra cost.</p>
+          </div>
+          <ul class="figs" data-stagger>
+            <li><span class="figure" data-countup>{retention}</span>of placements stay</li>
+            <li><span class="figure" data-countup>90</span>days of replacement guarantee</li>
+            <li><span class="figure" data-countup>47</span>days, on average, from brief to hire</li>
+          </ul>
         </div>
       </div>
       <ul class="items">
@@ -66,7 +74,7 @@ const phones = { 'Zowie Tucker': '902-471-0166' };
   <section class="section section--rule">
     <div class="wrap">
       <div class="section-head"><h2>Your direct hire recruiters</h2></div>
-      <ul class="people">
+      <ul class="people" data-stagger>
         {recruiters.map((r) => (
           <li>
             <a href={`https://www.integratedstaffing.ca/${r.slug}`}>
@@ -84,10 +92,10 @@ const phones = { 'Zowie Tucker': '902-471-0166' };
   </section>
 
   <section class="section section--rule">
-    <div class="wrap ind-grid">
-      <div class="section-head">
+    <div class="wrap">
+      <div class="section-head section-head--split">
         <h2>Specialties</h2>
-        <p class="lead">Twelve industries, from agriculture to executive search.</p>
+        <p class="lead"><span data-countup>{directIndustries}</span> industries, from agriculture to executive search.</p>
       </div>
       <IndustryMatrix only="direct" />
     </div>
@@ -97,35 +105,32 @@ const phones = { 'Zowie Tucker': '902-471-0166' };
 </Base>
 
 <style>
-  .steps { grid-template-columns: repeat(5, 1fr); }
-  .steps .item { border-top-color: var(--direct); }
-  .steps .item:last-child { border-top-style: dashed; }
-  .num { display: block; font-size: 2.6rem; font-weight: 300; letter-spacing: -0.04em; line-height: 1; color: var(--direct); margin-bottom: var(--s3); }
-  .item--blue { border-top-color: var(--direct); }
   .wide { margin-top: clamp(3rem, 6vw, 5rem); }
 
-  /* The retention figure as the visual: one very large number beside the explanation */
-  .stay { display: grid; grid-template-columns: auto 1fr; gap: clamp(2rem, 6vw, 6rem); align-items: center; margin-bottom: var(--s8); }
-  .big { margin: 0; font-size: clamp(6rem, 3rem + 10vw, 13rem); color: var(--direct); }
-  .stay h2 { max-width: 18ch; }
-  .stay .lead { margin-top: var(--s4); max-width: 46ch; }
+  /* Retention: the dot chart beside three figures */
+  .stay { display: grid; grid-template-columns: minmax(220px, 300px) 1fr; gap: clamp(2.5rem, 7vw, 7rem); align-items: center; margin-bottom: var(--s8); }
+  .stay .section-head { margin-bottom: var(--s6); }
+  .figs { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--s5); }
+  .figs li { --rule: var(--direct); background: linear-gradient(var(--rule), var(--rule)) no-repeat left top / 100% 1.5px; padding-top: var(--s4); color: var(--ink-soft); font-size: var(--fs-small); }
+  .figs .figure { display: block; font-size: clamp(2.4rem, 1.6rem + 2vw, 3.4rem); color: var(--direct); margin-bottom: var(--s2); }
+  :global(.motion) .figs > li { background-size: 0% 1.5px; }
+  :global(.motion) .figs.is-in > li { background-size: 100% 1.5px; }
 
   .people { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--s5); }
   .people a { display: grid; gap: 2px; color: var(--ink); text-decoration: none; }
   .people a:hover .pname { text-decoration: underline; }
   .shot { position: relative; display: block; aspect-ratio: 4 / 5; overflow: hidden; background: var(--mist); margin-bottom: var(--s3); }
-  .shot img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center 20%; }
+  .shot img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center 20%; transition: transform 0.6s var(--ease); }
+  .people a:hover .shot img { transform: scale(1.03); }
   .ini { position: absolute; inset: 0; display: grid; place-items: center; font-size: 2rem; font-weight: 300; color: var(--ink-soft); }
   .pname { font-weight: 700; font-size: 1.1rem; }
   .prole, .pphone { font-size: var(--fs-small); color: var(--ink-soft); }
 
-  .ind-grid { display: grid; grid-template-columns: 5fr 7fr; gap: clamp(2rem, 6vw, 6rem); align-items: start; }
-
   @media (max-width: 960px) {
-    .steps { grid-template-columns: 1fr; }
-    .stay { grid-template-columns: 1fr; gap: var(--s4); }
-    .wide :global(.frame) { aspect-ratio: 3 / 2 !important; }
+    .stay { grid-template-columns: 1fr; }
+    .stay :global(.units) { max-width: 240px; }
     .people { grid-template-columns: 1fr 1fr; }
-    .ind-grid { grid-template-columns: 1fr; }
+    .wide :global(.frame) { aspect-ratio: 3 / 2 !important; }
   }
+  @media (max-width: 640px) { .figs { grid-template-columns: 1fr; } }
 </style>

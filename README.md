@@ -87,8 +87,22 @@ Everything follows the ISL brand (the same tokens as the "editorial minimal" blo
 | `CanadaMap` | Atlantic provinces filled (offices), the rest outlined (where permanent searches reach). |
 | `IndustryMatrix` | Every industry, with a marker for each service that covers it. The filter buttons dim what a service doesn't cover. |
 | `JobRow` | One job listing, with a coloured edge for its service. |
+| `Steps` | A numbered sequence on one line that fills from first step to last (hire process, direct hire search). |
+| `UnitChart` | 100 dots with 92 filled: the retention figure as something you can see. |
+| `Facts` | A row of key figures that count up (contract page, About). |
+| `HeroFigure` | The one number on the right of an inner page's intro (Hire, Find work, Team, Learn, Contact). |
+| `ToolCards` | The three free tools, each previewed with real numbers from the tool itself. |
 
 The map shapes are generated data in `src/data/maps.js` (Natural Earth boundaries). `scripts/generate-maps.mjs` rebuilds them if the framing ever needs to change.
+
+## Motion
+
+All the entrance animations come from one small system, so they feel like one family:
+
+- **What moves:** section headings rise into place; rows of items come in one after another while the rule above each one draws in from the left; numbers marked `data-countup` count up from zero.
+- **How:** `src/scripts/motion.js` watches for elements scrolling into view (an IntersectionObserver, which is the browser telling us, instead of us checking on every scroll) and adds the class `is-in`. The CSS in `global.css` and each component does the animating.
+- **Accessibility:** it only runs when `<html>` has the class `motion`. `Base.astro` adds that only if the visitor hasn't asked their device to reduce motion. Without it, or without JavaScript, everything is simply shown in its final state.
+- **To animate something new:** add `data-reveal` (rises in), `data-stagger` (its children come in one by one) or `data-countup` (a number counts up).
 
 ## Folder map
 

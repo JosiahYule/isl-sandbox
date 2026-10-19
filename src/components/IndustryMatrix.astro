@@ -20,7 +20,7 @@ const filters = [
 ];
 ---
 {only ? (
-<ul class="list">
+<ul class="list" data-stagger>
   {listed.map((i) => (
     <li>
       <span class="name">{i.name}</span>
@@ -116,8 +116,10 @@ const filters = [
   [data-filter='contract'] tbody tr[data-contract='false'],
   [data-filter='direct'] tbody tr[data-direct='false'] { opacity: 0.28; }
 
-  .list { list-style: none; margin: 0; padding: 0; border-top: 1.5px solid var(--ink); }
-  .list li { display: grid; grid-template-columns: minmax(0, 1fr) auto; column-gap: var(--s5); padding-block: var(--s4); border-bottom: 1px solid var(--line); }
+  /* Service pages: two columns of industries, each opened by a rule like .item */
+  .list { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: 1fr 1fr; column-gap: clamp(2rem, 5vw, 5rem); }
+  .list li { display: grid; grid-template-columns: minmax(0, 1fr) auto; column-gap: var(--s5); align-content: start; padding-block: var(--s4) var(--s5); border-top: 1px solid var(--line); }
+  @media (max-width: 900px) { .list { grid-template-columns: 1fr; } }
   .list .note { grid-column: 1; }
   .also { grid-column: 2; grid-row: 1; align-self: start; font-size: var(--fs-tiny); color: var(--ink-soft); font-weight: 500; white-space: nowrap; }
 

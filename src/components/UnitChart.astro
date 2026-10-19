@@ -1,0 +1,27 @@
+---
+// UNIT CHART: 100 dots, one per placement, with `value` of them filled.
+// "92 of every 100" is easier to feel as dots than as a percentage.
+// When it scrolls into view the dots fill one after another, row by row.
+//
+// <UnitChart value={92} label="92 of every 100 direct hire placements stay" />
+const { value = 92, label } = Astro.props;
+const dots = Array.from({ length: 100 }, (_, i) => ({ i, on: i < value, x: (i % 10) * 10 + 5, y: Math.floor(i / 10) * 10 + 5 }));
+---
+<figure class="units" data-animate>
+  <svg viewBox="0 0 100 100" role="img" aria-label={label}>
+    {dots.map((d) => <circle cx={d.x} cy={d.y} r="3.4" class:list={[d.on ? 'on' : 'off']} style={`--i:${d.i}`} />)}
+  </svg>
+</figure>
+
+<style>
+  .units { margin: 0; width: 100%; max-width: 300px; }
+  svg { width: 100%; height: auto; overflow: visible; }
+  circle { transform-box: fill-box; transform-origin: center; }
+  .on { fill: var(--direct); }
+  .off { fill: none; stroke: var(--direct); stroke-width: 0.9; }
+
+  :global(.motion) .units circle { transform: scale(0.35); opacity: 0.25; fill: var(--line); stroke: none;
+    transition: transform 0.45s var(--ease), opacity 0.3s, fill 0.3s; transition-delay: calc(var(--i) * 12ms); }
+  :global(.motion) .units.is-in .on { transform: none; opacity: 1; fill: var(--direct); }
+  :global(.motion) .units.is-in .off { transform: none; opacity: 1; fill: none; stroke: var(--direct); }
+</style>

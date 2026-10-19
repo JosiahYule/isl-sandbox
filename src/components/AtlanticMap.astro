@@ -20,7 +20,7 @@ const pins = map.offices.map((p) => {
 });
 const tel = (n) => `tel:+1${n.replaceAll('-', '')}`;
 ---
-<figure class:list={['amap', `amap--${tone}`, bleed && 'amap--bleed']} id={id} data-amap>
+<figure class:list={['amap', `amap--${tone}`, bleed && 'amap--bleed']} id={id} data-amap data-animate>
   <div class="canvas">
   <svg viewBox={`0 0 ${map.width} ${map.height}`} aria-hidden="true" focusable="false">
     <g class="context">{map.context.map((p) => <path d={p.d} />)}</g>
@@ -29,7 +29,7 @@ const tel = (n) => `tel:+1${n.replaceAll('-', '')}`;
 
   <ul class="pins" aria-label="Our offices">
     {pins.map((p, i) => (
-      <li style={`left:${p.left}%;top:${p.top}%`}>
+      <li style={`left:${p.left}%;top:${p.top}%;--o:${i}`}>
         <button type="button" class:list={['pin', `pin--${p.side}`]} aria-pressed={i === 0 ? 'true' : 'false'} data-index={i}>
           <span class="dot" aria-hidden="true"></span>
           <span class="label">{p.city}</span>
@@ -120,6 +120,12 @@ const tel = (n) => `tel:+1${n.replaceAll('-', '')}`;
   .hq { display: block; font-weight: 500; font-size: var(--fs-tiny); color: var(--ink-soft); }
   .office-addr { font-size: var(--fs-small); color: var(--ink-soft); line-height: 1.45; margin-bottom: var(--s2); }
   .office-tel { font-weight: 700; font-size: 1.05rem; color: var(--ink); font-variant-numeric: tabular-nums; }
+
+  /* Motion: the pins drop onto the map one after another, then the office card appears */
+  :global(.motion) .amap .pin { opacity: 0; margin-top: -14px; transition: opacity 0.4s var(--ease), margin-top 0.5s var(--ease); transition-delay: calc(0.2s + var(--o) * 120ms); }
+  :global(.motion) .amap.is-in .pin { opacity: 1; margin-top: 0; }
+  :global(.motion) .amap .card { opacity: 0; transition: opacity 0.6s var(--ease) 0.9s; }
+  :global(.motion) .amap.is-in .card { opacity: 1; }
 
   @media (max-width: 900px) { .amap--bleed svg { overflow: hidden; } }
   @media (max-width: 640px) {

@@ -3,12 +3,17 @@
 // the rest of Canada outlined (where permanent searches reach).
 import { canadaMap as map } from '../data/maps.js';
 const { tone = 'light' } = Astro.props;
+// Animation order: the outlines draw from east to west, "coast to coast"
+const westward = ['QC', 'NU', 'ON', 'MB', 'SK', 'NT', 'AB', 'BC', 'YT'];
+const order = (id) => Math.max(0, westward.indexOf(id));
 ---
-<figure class:list={['cmap', `cmap--${tone}`]}>
+<figure class:list={['cmap', `cmap--${tone}`]} data-animate>
   <svg viewBox={`0 0 ${map.width} ${map.height}`} role="img" aria-labelledby="cmap-title">
     <title id="cmap-title">Map of Canada. Offices in the four Atlantic provinces; permanent searches in every province and territory.</title>
-    {map.provinces.map((p) => <path d={p.d} class:list={[p.atlantic ? 'atl' : 'rest']} />)}
-    {map.offices.map((o) => <circle cx={o.x} cy={o.y} r="6" />)}
+    {map.provinces.map((p) => p.atlantic
+      ? <path d={p.d} class="atl" />
+      : <path d={p.d} class="rest" pathLength="1" style={`--o:${order(p.id)}`} />)}
+    {map.offices.map((o, i) => <circle cx={o.x} cy={o.y} r="6" style={`--o:${i}`} />)}
   </svg>
   <figcaption>
     <span class="key key--atl">Offices</span>
@@ -24,6 +29,15 @@ const { tone = 'light' } = Astro.props;
   circle { fill: #fff; stroke: var(--ink); stroke-width: 2.5; }
   .cmap--dark .rest { stroke: var(--isl-blue-on-dark); }
   .cmap--dark .atl { fill: var(--isl-blue-on-dark); stroke: var(--dark); }
+  /* Motion: Atlantic fills, offices appear, then the rest of Canada draws in westward */
+  circle { transform-box: fill-box; transform-origin: center; }
+  :global(.motion) .cmap .atl { opacity: 0; transition: opacity 0.7s var(--ease); }
+  :global(.motion) .cmap circle { transform: scale(0); transition: transform 0.4s var(--ease); transition-delay: calc(0.4s + var(--o) * 80ms); }
+  :global(.motion) .cmap .rest { stroke-dasharray: 1; stroke-dashoffset: 1; transition: stroke-dashoffset 1.1s var(--ease); transition-delay: calc(0.8s + var(--o) * 140ms); }
+  :global(.motion) .cmap.is-in .atl { opacity: 1; }
+  :global(.motion) .cmap.is-in circle { transform: none; }
+  :global(.motion) .cmap.is-in .rest { stroke-dashoffset: 0; }
+
   figcaption { display: flex; gap: var(--s5); margin-top: var(--s3); font-size: var(--fs-small); font-weight: 500; }
   .key { display: inline-flex; align-items: center; gap: var(--s2); }
   .key::before { content: ''; width: 14px; height: 14px; border-radius: 1px; }
