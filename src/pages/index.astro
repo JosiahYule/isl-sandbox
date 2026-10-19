@@ -1,69 +1,119 @@
 ---
 // HOMEPAGE  →  /
-// Each file in src/pages becomes a page. The file name is the URL.
 import Base from '../layouts/Base.astro';
 import Button from '../components/Button.astro';
-import Stats from '../components/Stats.astro';
-import Testimonials from '../components/Testimonials.astro';
+import AtlanticMap from '../components/AtlanticMap.astro';
+import HireClock from '../components/HireClock.astro';
+import IndustryMatrix from '../components/IndustryMatrix.astro';
+import JobRow from '../components/JobRow.astro';
 import CtaBand from '../components/CtaBand.astro';
-import { brand, images } from '../data/site.js';
+import { testimonials, stats, brand } from '../data/site.js';
+import { jobs } from '../data/jobs.js';
 import { url } from '../lib/url.js';
+
+const [lead, ...others] = testimonials;
+const reviews = stats.find((s) => s.label.includes('reviews'))?.value ?? '200+';
+const latest = jobs.slice(0, 5);
 ---
 <Base>
+  <!-- HERO: the promise on the left, the map of where we work on the right -->
   <section class="hero">
-    <img class="hero-img" src={images.hero} alt="Worker in an industrial warehouse reviewing a tablet" width="2500" height="1400" />
-    <div class="container hero-copy">
-      <span class="eyebrow">Integrated Staffing</span>
-      <h1>Employment solutions on demand.</h1>
-      <p class="lead">Industrial contract staffing and professional permanent placement. {brand.scope}</p>
-      <div class="actions">
-        <Button href="/hire/">Hire talent</Button>
-        <Button href="/find-work/" variant="light">Find work</Button>
+    <div class="wrap hero-grid">
+      <div class="hero-copy">
+        <h1 class="hero-title">
+          <span class="line line--contract">Workers in hours.</span>
+          <span class="line line--direct">Hires that stay.</span>
+        </h1>
+        <p class="lead">Contract and permanent staffing from five offices across Atlantic Canada, with permanent searches anywhere in the country. Locally owned since {brand.since}.</p>
+
+        <div class="doors">
+          <div class="door door--hire">
+            <h2 class="door-title">I'm hiring</h2>
+            <a class="route route--contract" href={url('/hire/?service=contract')}>
+              <span class="route-name">Contract workers</span>
+              <span class="route-meta">On site within hours</span>
+            </a>
+            <a class="route route--direct" href={url('/hire/?service=direct')}>
+              <span class="route-name">A permanent hire</span>
+              <span class="route-meta">Backed by a 90-day guarantee</span>
+            </a>
+          </div>
+          <form class="door door--work" action={url('/find-work/')} method="get" role="search">
+            <h2 class="door-title"><label for="hero-q">I'm looking for work</label></h2>
+            <input id="hero-q" name="q" type="search" placeholder="Job title, skill or city" autocomplete="off" />
+            <button type="submit">Search jobs</button>
+            <a class="browse" href={url('/find-work/')}>Or browse all {jobs.length} open roles</a>
+          </form>
+        </div>
       </div>
     </div>
-  </section>
-
-  <section class="section">
-    <div class="container">
-      <Stats />
+    <div class="hero-map">
+      <AtlanticMap id="hero-map" bleed />
     </div>
   </section>
 
-  <section class="section section--tint">
-    <div class="container">
-      <span class="eyebrow">For employers</span>
-      <h2>Two ways to hire.</h2>
-      <div class="grid two">
-        <article class="card">
-          <h3>Contract staffing</h3>
-          <p>Pre-screened workers available within hours of your request, for vacations, leaves, seasonal peaks and growth. One all-inclusive hourly rate.</p>
+  <!-- THE CLOCK: both services on one time axis -->
+  <section class="clock-section">
+    <div class="wrap">
+      <div class="section-head">
+        <h2>Two services. Two very different clocks.</h2>
+        <p class="lead">Contract staffing closes a gap fast. A permanent search takes longer because it goes deeper, and the guarantee keeps covering you after your new hire starts.</p>
+      </div>
+      <HireClock />
+    </div>
+  </section>
+
+  <!-- INDUSTRIES: which service covers what -->
+  <section class="industries">
+    <div class="wrap ind-grid">
+      <div class="ind-head">
+        <h2>Fifteen industries, and how we staff each one.</h2>
+        <p>Five industries use both services. Filter to see where contract staffing or direct hire fits on its own.</p>
+        <div class="ind-links">
           <a href={url('/contract/')}>How contract staffing works</a>
-        </article>
-        <article class="card">
-          <h3>Direct hire</h3>
-          <p>Targeted searches for hard-to-fill permanent roles, anywhere in Canada. Retainer-based pricing and a 90-day replacement guarantee.</p>
           <a href={url('/direct-hire/')}>How direct hire works</a>
-        </article>
+        </div>
+      </div>
+      <IndustryMatrix />
+    </div>
+  </section>
+
+  <!-- PROOF: one quote carries the weight; the review count sits beside it -->
+  <section class="proof">
+    <div class="wrap proof-grid">
+      <figure class="big-quote on-dark">
+        <blockquote>{lead.quote}</blockquote>
+        <figcaption>{lead.who}</figcaption>
+      </figure>
+      <div class="proof-side">
+        <p class="reviews"><strong>{reviews}</strong> five-star reviews on Google from clients and candidates.</p>
+        {others.map((t) => (
+          <figure class="small-quote">
+            <blockquote>{t.quote}</blockquote>
+            <figcaption>{t.who}</figcaption>
+          </figure>
+        ))}
       </div>
     </div>
   </section>
 
-  <section class="section">
-    <div class="container">
-      <span class="eyebrow">What clients say</span>
-      <h2>Trusted by employers across the region.</h2>
-      <Testimonials />
-    </div>
-  </section>
-
-  <section class="section section--tint">
-    <div class="container seeker">
-      <div>
-        <span class="eyebrow">For job seekers</span>
-        <h2>Looking for work?</h2>
-        <p class="lead">We match people to assignments that fit their skills, interests and career goals. See what's open now.</p>
+  <!-- JOBS: for job seekers -->
+  <section class="jobs">
+    <div class="wrap">
+      <div class="jobs-head">
+        <h2>Open roles</h2>
+        <div class="key" aria-label="Colour key">
+          <span class="svc svc--contract">Contract</span>
+          <span class="svc svc--direct">Direct hire</span>
+        </div>
       </div>
-      <Button href="/find-work/">Browse jobs</Button>
+      <div class="job-list">
+        {latest.map((job) => <JobRow job={job} />)}
+      </div>
+      <div class="jobs-foot">
+        <Button href="/find-work/" variant="outline">See all open roles</Button>
+        <p>Nothing that fits yet? <a href="https://www.integratedstaffing.ca/careers/general-apply">Send us your resume</a> and we'll match you when the right role opens.</p>
+      </div>
     </div>
   </section>
 
@@ -71,13 +121,108 @@ import { url } from '../lib/url.js';
 </Base>
 
 <style>
-  .hero { position: relative; min-height: min(78vh, 720px); display: grid; align-items: end; color: #fff; }
-  .hero-img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
-  .hero::after { content: ''; position: absolute; inset: 0; background: linear-gradient(180deg, rgb(0 0 0 / 0.1), rgb(0 0 0 / 0.65)); }
-  .hero-copy { position: relative; z-index: 1; padding-block: var(--space-16); }
-  .hero .eyebrow, .hero .lead { color: #fff; }
-  .hero h1 { max-width: 14ch; }
-  .actions { display: flex; flex-wrap: wrap; gap: var(--space-3); margin-top: var(--space-6); }
-  .two { grid-template-columns: repeat(auto-fit, minmax(min(100%, 380px), 1fr)); }
-  .seeker { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--space-6); }
+  /* ---------- Hero ---------- */
+  .hero { position: relative; overflow: hidden; border-bottom: 1px solid var(--line); }
+  .hero-grid { position: relative; z-index: 2; min-height: min(88vh, 860px); display: grid; align-items: center; padding-block: var(--s7) var(--s8); pointer-events: none; }
+  .hero-copy { max-width: 660px; pointer-events: auto; }
+  /* One sentence per line on desktop: each line is one service, underlined in that service's colour */
+  .hero-title { font-size: clamp(2.5rem, 0.9rem + 3.9vw, 4.45rem); font-stretch: 108%; font-weight: 830; letter-spacing: -0.035em; line-height: 0.98; }
+  @media (min-width: 901px) { .line { white-space: nowrap; } }
+  .line { display: block; width: fit-content; text-decoration-line: underline; text-decoration-thickness: 0.09em; text-underline-offset: 0.13em; text-decoration-skip-ink: none; }
+  .line + .line { margin-top: 0.12em; }
+  .line--contract { text-decoration-color: var(--contract); }
+  .line--direct { text-decoration-color: var(--direct); }
+  .hero .lead { margin-top: var(--s6); max-width: 38ch; }
+
+  /* The map bleeds off the top edge (Labrador runs out of frame) but keeps the east coast in view */
+  .hero-map {
+    position: absolute; z-index: 1; top: -4%; right: 0;
+    width: min(50vw, 900px);
+  }
+
+  .doors { display: grid; grid-template-columns: 1.15fr 1fr; gap: var(--s3); margin-top: var(--s7); }
+  .door { border-radius: var(--radius); padding: var(--s5); }
+  .door-title { font-family: var(--font-body); font-stretch: 100%; font-size: var(--fs-small); font-weight: 650; letter-spacing: 0; margin-bottom: var(--s3); }
+  .door--hire { background: var(--navy); color: #fff; display: grid; gap: var(--s2); align-content: start; }
+  .route {
+    display: grid; gap: 2px; padding: var(--s3) var(--s4); border-radius: var(--radius);
+    background: var(--navy-raised); color: #fff; text-decoration: none; border-left: 4px solid;
+    transition: background-color 150ms var(--ease);
+  }
+  .route:hover { background: #1b4167; }
+  .route--contract { border-left-color: var(--contract); }
+  .route--direct { border-left-color: var(--direct-light); }
+  .route-name { font-family: var(--font-display); font-stretch: 112%; font-weight: 720; font-size: 1.08rem; }
+  .route-meta { font-size: var(--fs-small); color: var(--on-dark-soft); }
+
+  .door--work { background: var(--paper); border: 1.5px solid var(--ink); display: grid; gap: var(--s2); align-content: start; }
+  .door--work input {
+    font: inherit; font-size: 1rem; padding: 0.75rem 0.85rem; width: 100%;
+    border: 1.5px solid var(--line); border-radius: var(--radius); background: var(--paper);
+  }
+  .door--work input:focus { border-color: var(--ink); outline: none; box-shadow: 0 0 0 3px var(--contract); }
+  .door--work button {
+    font: inherit; font-weight: 650; cursor: pointer; padding: 0.75rem; border-radius: var(--radius);
+    background: var(--ink); color: #fff; border: 0;
+  }
+  .door--work button:hover { background: var(--isl-blue); }
+  .browse { margin-top: var(--s2); font-size: var(--fs-small); font-weight: 600; color: var(--ink); }
+
+  @media (min-width: 901px) { .hero-map :global(.card) { right: 3.5%; } }
+  @media (min-width: 901px) and (max-width: 1180px) {
+    .hero-copy { max-width: 500px; }
+    .hero-map { width: 50vw; top: 10%; right: 0; }
+    .hero-map :global(.card) { width: 40%; padding: var(--s3) var(--s4); }
+  }
+  @media (max-width: 900px) {
+    .hero-grid { min-height: 0; padding-bottom: var(--s5); }
+    .hero-copy { max-width: none; }
+    .hero-map { position: relative; top: 0; width: auto; margin: 0 var(--gutter) var(--s6); }
+    .doors { grid-template-columns: 1fr; }
+  }
+
+  /* ---------- Clock ---------- */
+  .clock-section { padding-block: var(--s9) var(--s8); }
+  .section-head { display: grid; grid-template-columns: 1fr 1fr; gap: var(--s7); align-items: end; margin-bottom: var(--s7); }
+  .section-head h2 { max-width: 14ch; }
+  @media (max-width: 860px) { .section-head { grid-template-columns: 1fr; gap: var(--s4); } }
+
+  /* ---------- Industries ---------- */
+  .industries { background: var(--mist); padding-block: var(--s8) calc(var(--s9) + 4rem); }
+  .ind-grid { display: grid; grid-template-columns: 4fr 7fr; gap: clamp(2rem, 6vw, 6rem); align-items: start; }
+  .ind-head { position: sticky; top: 110px; }
+  .ind-head h2 { margin-bottom: var(--s5); }
+  .ind-head p { color: var(--ink-soft); max-width: 36ch; }
+  .ind-links { display: grid; gap: var(--s2); margin-top: var(--s5); font-weight: 600; }
+  @media (max-width: 900px) { .ind-grid { grid-template-columns: 1fr; } .ind-head { position: static; } }
+
+  /* ---------- Proof ---------- */
+  /* The quote block rises into the section above on purpose: it bridges "what we do" and "what clients say". */
+  .proof { padding-bottom: var(--s8); }
+  .proof-grid { display: grid; grid-template-columns: 7fr 5fr; gap: clamp(2rem, 5vw, 5rem); align-items: start; }
+  .big-quote { margin: -8rem 0 0; padding: clamp(2rem, 4vw, 3.5rem); border-radius: var(--radius); }
+  .big-quote blockquote { margin: 0; font-size: clamp(1.4rem, 1rem + 1.5vw, 2.15rem); line-height: 1.3; font-weight: 400; letter-spacing: -0.01em; }
+  .big-quote figcaption { margin-top: var(--s5); color: var(--on-dark-soft); font-weight: 600; }
+  .proof-side { padding-top: var(--s7); display: grid; gap: var(--s6); }
+  .reviews { font-size: var(--fs-lead); color: var(--ink-soft); line-height: 1.4; }
+  .reviews strong {
+    display: block; color: var(--ink);
+    font-family: var(--font-display); font-stretch: 120%; font-weight: 820; font-size: clamp(3rem, 2rem + 3vw, 4.8rem); letter-spacing: -0.04em; line-height: 0.9;
+  }
+  .small-quote { margin: 0; padding-top: var(--s5); border-top: 1px solid var(--line); }
+  .small-quote blockquote { margin: 0; font-size: 1.05rem; }
+  .small-quote figcaption { margin-top: var(--s2); font-size: var(--fs-small); color: var(--ink-soft); font-weight: 600; }
+  @media (max-width: 900px) {
+    .proof-grid { grid-template-columns: 1fr; }
+    .big-quote { margin-top: -5rem; }
+    .proof-side { padding-top: 0; }
+  }
+
+  /* ---------- Jobs ---------- */
+  .jobs { padding-block: var(--s8) var(--s9); border-top: 1px solid var(--line); }
+  .jobs-head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: end; gap: var(--s4); margin-bottom: var(--s5); }
+  .key { display: flex; gap: var(--s5); }
+  .job-list { border-top: 1.5px solid var(--ink); }
+  .jobs-foot { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s5); margin-top: var(--s6); }
+  .jobs-foot p { color: var(--ink-soft); max-width: 50ch; }
 </style>

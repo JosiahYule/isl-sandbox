@@ -1,15 +1,15 @@
 ---
-// BASE LAYOUT
-// Every page is wrapped in this. It holds the <head>, header and footer,
-// and the page's own content drops in where <slot /> is.
+// BASE LAYOUT: the frame around every page (<head>, header, footer).
+// The page's own content drops in where <slot /> is.
+import '@fontsource-variable/dm-sans/opsz.css';   // body face (brand), self-hosted
+import '@fontsource-variable/archivo/wdth.css';   // display face, with its width axis
 import '../styles/global.css';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
 import { brand } from '../data/site.js';
 
-// "Props" are the inputs a page passes in, like function arguments.
 const { title, description = brand.scope } = Astro.props;
-const fullTitle = title ? `${title} | ${brand.name}` : `${brand.name} | ${brand.tagline}`;
+const fullTitle = title ? `${title} | ${brand.name}` : `${brand.name} | Contract and permanent staffing in Atlantic Canada`;
 ---
 <!doctype html>
 <html lang="en-CA">
@@ -18,10 +18,11 @@ const fullTitle = title ? `${title} | ${brand.name}` : `${brand.name} | ${brand.
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{fullTitle}</title>
     <meta name="description" content={description} />
+    <meta name="theme-color" content="#0a2036" />
     <meta name="robots" content="noindex" /><!-- sandbox: keep search engines out -->
   </head>
   <body>
-    <a class="skip visually-hidden" href="#main">Skip to content</a>
+    <a class="skip" href="#main">Skip to content</a>
     <Header />
     <main id="main">
       <slot />
@@ -31,10 +32,10 @@ const fullTitle = title ? `${title} | ${brand.name}` : `${brand.name} | ${brand.
 </html>
 
 <style>
-  .skip:focus {
-    position: fixed; top: 1rem; left: 1rem; z-index: 100;
-    width: auto; height: auto; clip: auto;
-    background: var(--color-bg); padding: var(--space-3) var(--space-4);
-    border-radius: var(--radius);
+  .skip {
+    position: absolute; left: var(--s4); top: -100px; z-index: 100;
+    background: var(--contract); color: var(--ink); font-weight: 600;
+    padding: var(--s2) var(--s4); border-radius: var(--radius);
   }
+  .skip:focus { top: var(--s4); }
 </style>

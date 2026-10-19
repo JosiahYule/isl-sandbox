@@ -1,0 +1,48 @@
+---
+// JOB ROW: one listing. The coloured edge says contract (amber) or direct hire (blue).
+import { url } from '../lib/url.js';
+const { job } = Astro.props;
+const typeLabel = job.type === 'contract' ? 'Contract' : 'Direct hire';
+const posted = job.posted === 1 ? 'Posted yesterday' : `Posted ${job.posted} days ago`;
+---
+<article class:list={['job', `job--${job.type}`]}
+  data-type={job.type} data-province={job.province}
+  data-search={`${job.title} ${job.category} ${job.city}`.toLowerCase()}>
+  <div class="main">
+    <h3><a href={url(`/find-work/#job-${job.id}`)} id={`job-${job.id}`}>{job.title}</a></h3>
+    <p class="where">{job.city}, {job.province}</p>
+  </div>
+  <p class:list={['svc', `svc--${job.type}`]}>{typeLabel}</p>
+  <p class="pay">{job.pay}<span>{job.schedule}</span></p>
+  <p class="posted">{posted}</p>
+</article>
+
+<style>
+  .job {
+    position: relative;
+    display: grid; grid-template-columns: minmax(0, 2.2fr) 0.9fr 1.3fr 0.8fr; gap: var(--s4); align-items: center;
+    padding: var(--s5) var(--s4) var(--s5) var(--s5);
+    border-bottom: 1px solid var(--line);
+    transition: background-color 150ms var(--ease);
+  }
+  .job::before { content: ''; position: absolute; left: 0; top: var(--s4); bottom: var(--s4); width: 4px; border-radius: 1px; }
+  .job--contract::before { background: var(--contract); }
+  .job--direct::before { background: var(--direct); }
+  .job:hover { background: var(--mist); }
+
+  h3 { font-size: 1.15rem; }
+  h3 a { color: var(--ink); text-decoration: none; }
+  h3 a::after { content: ''; position: absolute; inset: 0; } /* whole row is clickable */
+  h3 a:hover { text-decoration: underline; }
+  .where { color: var(--ink-soft); font-size: var(--fs-small); margin-top: var(--s1); }
+  .pay { font-weight: 600; font-variant-numeric: tabular-nums; }
+  .pay span { display: block; font-weight: 400; font-size: var(--fs-small); color: var(--ink-soft); }
+  .posted { font-size: var(--fs-small); color: var(--ink-soft); text-align: right; }
+
+  @media (max-width: 760px) {
+    .job { grid-template-columns: 1fr auto; row-gap: var(--s2); }
+    .pay { grid-column: 1; }
+    .posted { grid-column: 2; grid-row: 2; align-self: end; }
+    .svc { grid-column: 2; grid-row: 1; align-self: start; }
+  }
+</style>

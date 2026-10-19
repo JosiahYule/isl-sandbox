@@ -1,54 +1,159 @@
 ---
 // JOB BOARD  →  /find-work/
-// Placeholder listings so you can design the layout. Later, these come from the Avionte feed.
-// Edit `sampleJobs` to test long titles, many results, empty states, etc.
+// Search and filters run in the browser over the listings on the page.
+// Jobs are samples for now (src/data/jobs.js); later they come from the Avionte feed.
+// Linking with ?q=forklift pre-fills the search (the homepage search does this).
 import Base from '../layouts/Base.astro';
-import PageHero from '../components/PageHero.astro';
-import Button from '../components/Button.astro';
+import JobRow from '../components/JobRow.astro';
+import { jobs, provinces } from '../data/jobs.js';
 
-const sampleJobs = [
-  { title: 'General Labourer', type: 'Contract', category: 'Warehousing', city: 'Dartmouth, NS', pay: '$18.50/hr' },
-  { title: 'Forklift Operator', type: 'Contract', category: 'Logistics', city: 'Moncton, NB', pay: '$20/hr' },
-  { title: 'Staff Accountant', type: 'Permanent', category: 'Finance', city: 'Halifax, NS', pay: '$65,000 to $75,000' },
-  { title: 'Millwright', type: 'Contract', category: 'Skilled Trades', city: "St. John's, NL", pay: '$34/hr' },
-  { title: 'Operations Manager', type: 'Permanent', category: 'Manufacturing', city: 'Charlottetown, PE', pay: '$85,000 to $95,000' },
-  { title: 'Customer Service Representative', type: 'Contract', category: 'Contact Centres', city: 'Saint John, NB', pay: '$17.50/hr' },
-];
+const provinceOptions = [...new Set(jobs.map((j) => j.province))]
+  .map((code) => ({ code, name: provinces[code] ?? code }))
+  .sort((a, b) => a.name.localeCompare(b.name));
+const count = { contract: jobs.filter((j) => j.type === 'contract').length, direct: jobs.filter((j) => j.type === 'direct').length };
 ---
 <Base title="Find work" description="Contract and permanent jobs across Atlantic Canada and beyond.">
-  <PageHero eyebrow="For job seekers" title="Find your next opportunity." lead="Every day we meet candidates and match them to roles that fit their skills and goals." />
+  <section class="top">
+    <div class="wrap">
+      <h1>Find your next job.</h1>
+      <p class="lead">Contract roles across Atlantic Canada and permanent roles across the country. Our recruiters meet candidates every day and match them to roles that fit.</p>
 
-  <section class="section">
-    <div class="container">
-      <p class="note">Sandbox: these are sample jobs for layout only.</p>
-      <div class="jobs">
-        {sampleJobs.map((j) => (
-          <article class="card job">
-            <div>
-              <h3>{j.title}</h3>
-              <p class="meta">{j.city} · {j.category}</p>
-            </div>
-            <span class:list={['pill', j.type.toLowerCase()]}>{j.type}</span>
-            <p class="pay">{j.pay}</p>
-          </article>
-        ))}
+      <form class="search" role="search" data-search>
+        <label class="visually-hidden" for="q">Search jobs</label>
+        <input id="q" name="q" type="search" placeholder="Job title, skill or city" autocomplete="off" />
+        <label class="visually-hidden" for="prov">Province</label>
+        <select id="prov" name="province">
+          <option value="">All provinces</option>
+          {provinceOptions.map((p) => <option value={p.code}>{p.name}</option>)}
+        </select>
+        <div class="types" role="group" aria-label="Job type">
+          <button type="button" class="t" data-type="" aria-pressed="true">All</button>
+          <button type="button" class="t t--contract" data-type="contract" aria-pressed="false">Contract <span>{count.contract}</span></button>
+          <button type="button" class="t t--direct" data-type="direct" aria-pressed="false">Direct hire <span>{count.direct}</span></button>
+        </div>
+      </form>
+    </div>
+  </section>
+
+  <section class="results">
+    <div class="wrap">
+      <p class="count" aria-live="polite"><strong data-count>{jobs.length}</strong> <span data-count-label>open roles</span></p>
+      <div class="list" data-list>
+        {jobs.map((job) => <JobRow job={job} />)}
       </div>
-      <div class="general">
-        <p>Don't see the right job?</p>
-        <Button href="https://www.integratedstaffing.ca/careers/general-apply" variant="secondary">Apply for future positions</Button>
+      <div class="empty" data-empty hidden>
+        <p class="empty-title">No roles match that search.</p>
+        <p>Try a broader term or another province. Or <a href="https://www.integratedstaffing.ca/careers/general-apply">send us your resume</a> and we'll contact you when something fits.</p>
+        <button type="button" data-reset>Clear search and filters</button>
+      </div>
+      <p class="note">Sandbox preview: these listings are samples for layout.</p>
+    </div>
+  </section>
+
+  <section class="general on-dark">
+    <div class="wrap general-grid">
+      <h2>Don't see the right role?</h2>
+      <div>
+        <p class="lead">Send your resume once. A recruiter will contact you when a role that fits your skills opens.</p>
+        <a class="apply" href="https://www.integratedstaffing.ca/careers/general-apply">Send your resume</a>
       </div>
     </div>
   </section>
 </Base>
 
+<script>
+  const form = document.querySelector('[data-search]');
+  const q = form.querySelector('#q');
+  const prov = form.querySelector('#prov');
+  const typeButtons = form.querySelectorAll('.t');
+  const rows = [...document.querySelectorAll('[data-list] > *')];
+  const countEl = document.querySelector('[data-count]');
+  const labelEl = document.querySelector('[data-count-label]');
+  const empty = document.querySelector('[data-empty]');
+  let type = '';
+
+  function apply() {
+    const term = q.value.trim().toLowerCase();
+    let shown = 0;
+    rows.forEach((r) => {
+      const ok = (!term || r.dataset.search.includes(term))
+        && (!prov.value || r.dataset.province === prov.value)
+        && (!type || r.dataset.type === type);
+      r.hidden = !ok;
+      if (ok) shown++;
+    });
+    countEl.textContent = shown;
+    labelEl.textContent = shown === 1 ? 'open role' : 'open roles';
+    empty.hidden = shown > 0;
+  }
+
+  q.value = new URLSearchParams(location.search).get('q') ?? '';
+  form.addEventListener('submit', (e) => { e.preventDefault(); apply(); });
+  q.addEventListener('input', apply);
+  prov.addEventListener('change', apply);
+  typeButtons.forEach((b) => b.addEventListener('click', () => {
+    type = b.dataset.type;
+    typeButtons.forEach((x) => x.setAttribute('aria-pressed', String(x === b)));
+    apply();
+  }));
+  document.querySelector('[data-reset]').addEventListener('click', () => {
+    q.value = ''; prov.value = ''; type = '';
+    typeButtons.forEach((x, i) => x.setAttribute('aria-pressed', String(i === 0)));
+    apply(); q.focus();
+  });
+  apply();
+</script>
+
 <style>
-  .note { font-size: var(--text-sm); color: var(--color-ink-muted); }
-  .jobs { display: grid; gap: var(--space-4); }
-  .job { display: grid; grid-template-columns: 1fr auto; gap: var(--space-2) var(--space-6); align-items: start; }
-  .job h3 { margin-bottom: var(--space-1); }
-  .meta, .pay { margin: 0; color: var(--color-ink-muted); }
-  .pill { font-size: var(--text-sm); font-weight: 600; padding: var(--space-1) var(--space-3); border-radius: var(--radius-pill); background: var(--color-surface); }
-  .permanent { background: var(--color-brand); color: var(--color-brand-ink); }
-  .general { margin-top: var(--space-12); display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-4); }
-  .general p { margin: 0; font-weight: 600; }
+  .top { padding-block: clamp(3rem, 7vw, 6rem) var(--s6); background: var(--mist); }
+  .top h1 { font-size: var(--fs-hero); font-weight: 830; letter-spacing: -0.035em; }
+  .top .lead { margin-top: var(--s4); }
+
+  .search {
+    display: grid; grid-template-columns: 1fr 14rem auto; gap: var(--s2);
+    margin-top: var(--s7); padding: var(--s2); background: var(--paper);
+    border: 1.5px solid var(--ink); border-radius: var(--radius);
+  }
+  .search input, .search select {
+    font: inherit; font-size: 1.05rem; padding: 0.85rem 1rem; border: 0; background: transparent; color: var(--ink); min-width: 0;
+  }
+  .search select { border-left: 1px solid var(--line); cursor: pointer; }
+  .search input:focus, .search select:focus { outline: 3px solid var(--contract); outline-offset: -3px; }
+  .types { display: flex; gap: 4px; background: var(--mist); padding: 4px; border-radius: var(--radius); }
+  .t {
+    font: inherit; font-size: var(--fs-small); font-weight: 650; cursor: pointer; white-space: nowrap;
+    display: inline-flex; align-items: center; gap: var(--s2);
+    padding: 0.55rem 0.9rem; border: 0; border-radius: 2px; background: transparent; color: var(--ink);
+  }
+  .t span { font-weight: 500; color: var(--ink-soft); font-variant-numeric: tabular-nums; }
+  .t[aria-pressed='true'] { background: var(--ink); color: #fff; }
+  .t[aria-pressed='true'] span { color: rgb(255 255 255 / 0.7); }
+  .t--contract[aria-pressed='true'] { background: var(--contract); color: var(--ink); }
+  .t--contract[aria-pressed='true'] span { color: var(--contract-ink); }
+  .t--direct[aria-pressed='true'] { background: var(--direct); }
+
+  .results { padding-block: var(--s6) var(--s8); }
+  .count { font-size: var(--fs-small); color: var(--ink-soft); margin-bottom: var(--s3); }
+  .count strong { font-family: var(--font-display); font-stretch: 116%; font-weight: 800; font-size: 1.4rem; color: var(--ink); margin-right: 0.2em; }
+  .list { border-top: 1.5px solid var(--ink); }
+  .list > [hidden] { display: none; }
+  .empty { padding: var(--s7) 0; border-top: 1.5px solid var(--ink); max-width: 46rem; }
+  .empty-title { font-family: var(--font-display); font-stretch: 112%; font-weight: 760; font-size: 1.4rem; }
+  .empty button {
+    margin-top: var(--s4); font: inherit; font-weight: 650; cursor: pointer;
+    padding: 0.7rem 1.1rem; border: 2px solid var(--ink); border-radius: var(--radius); background: transparent;
+  }
+  .note { margin-top: var(--s5); font-size: var(--fs-tiny); color: var(--ink-soft); }
+
+  .general { padding-block: var(--s8); }
+  .general-grid { display: grid; grid-template-columns: 1fr 1fr; gap: var(--s7); align-items: end; }
+  .apply { display: inline-block; margin-top: var(--s5); font-weight: 650; background: #fff; color: var(--navy) !important; text-decoration: none; padding: 0.9rem 1.4rem; border-radius: var(--radius); }
+  .apply:hover { background: var(--contract); }
+
+  @media (max-width: 860px) {
+    .search { grid-template-columns: 1fr; }
+    .search select { border-left: 0; border-top: 1px solid var(--line); }
+    .types { overflow-x: auto; }
+    .general-grid { grid-template-columns: 1fr; }
+  }
 </style>

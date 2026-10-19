@@ -3,9 +3,9 @@
 // TODO: add each person's role and photo. Roles below are only the ones shown on the live Direct Hire page.
 
 export const team = [
-  { name: 'Greg White', slug: 'greg-white', role: 'CEO' },
-  { name: 'Ross Argante', slug: 'ross-argante', role: '' },
-  { name: 'Chance Skauge', slug: 'chance-skauge', role: 'Director of Business Development' },
+  { name: 'Greg White', slug: 'greg-white', role: 'CEO', team: 'Leadership' },
+  { name: 'Ross Argante', slug: 'ross-argante', role: 'Partner', team: 'Leadership' },
+  { name: 'Chance Skauge', slug: 'chance-skauge', role: 'Director of Business Development', team: 'Leadership' },
   { name: 'Zowie Tucker', slug: 'zowie-tucker', role: 'Senior Recruitment Consultant', team: 'Direct Hire' },
   { name: 'Shane Ico', slug: 'shane-ico', role: 'Recruitment Consultant', team: 'Direct Hire' },
   { name: 'Lisa Laviolette', slug: 'lisa-laviolette', role: 'Recruitment Consultant', team: 'Direct Hire' },

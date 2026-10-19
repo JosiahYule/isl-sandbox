@@ -1,46 +1,136 @@
 ---
 // ABOUT  →  /about/
 import Base from '../layouts/Base.astro';
-import PageHero from '../components/PageHero.astro';
 import Button from '../components/Button.astro';
+import AtlanticMap from '../components/AtlanticMap.astro';
 import CtaBand from '../components/CtaBand.astro';
-import { brand } from '../data/site.js';
+import { brand, offices, images } from '../data/site.js';
 
+const years = new Date().getFullYear() - brand.since;
+const practices = [
+  { t: 'Screening built for the role', d: 'Typing and dexterity tests and company-specific orientations, at no extra cost.', wide: true },
+  { t: 'Contract: one hourly rate', d: 'A single, all-inclusive rate per worker.' },
+  { t: 'Direct hire: one invoice', d: 'A percentage of the hire’s annual salary, agreed upfront.' },
+  { t: 'Workers’ compensation, handled', d: 'Payroll remittances, claims, and safe, timely return to work with the Workers’ Compensation Board.', wide: true },
+];
 const values = [
-  ['Impact', 'Every placement should make a measurable difference for the client and the candidate.'],
-  ['Passion', 'We care about the people we place and the businesses we support.'],
-  ['Honesty', 'Clear terms, straight answers, no surprises.'],
-  ['Communication', 'Responsive before, during and after every placement.'],
+  ['Impact', 'A placement should make a measurable difference for the employer and the person hired.'],
+  ['Passion', 'We care about the people we place and the businesses that hire them.'],
+  ['Honesty', 'Clear terms and straight answers, before and after the hire.'],
+  ['Communication', 'Responsive at every stage, including after someone starts.'],
 ];
 ---
-<Base title="About" description="Locally owned and operated recruiting and staffing since 2013.">
-  <PageHero eyebrow="About us" title="The right fit, for both sides of the hire." lead={`Locally owned and operated since ${brand.since}. ${brand.scope}`}>
-    <Button href="/hire/">For employers</Button>
-    <Button href="/find-work/" variant="secondary">For job seekers</Button>
-  </PageHero>
-
-  <section class="section">
-    <div class="container">
-      <h2>How we work</h2>
-      <div class="grid">
-        <article class="card"><h3>Tailored screening</h3><p>Typing and dexterity tests and company-specific orientations, at no extra cost.</p></article>
-        <article class="card"><h3>Direct hire</h3><p>A single invoice based on a percentage of the candidate's annual salary.</p></article>
-        <article class="card"><h3>Contract hourly</h3><p>One all-inclusive hourly rate.</p></article>
-        <article class="card"><h3>Workers' compensation</h3><p>Payroll remittances, claims and safe, timely return-to-work, handled end to end.</p></article>
+<Base title="About" description="Locally owned and operated recruiting and staffing in Atlantic Canada since 2013.">
+  <section class="hero">
+    <div class="wrap">
+      <h1>The right fit, for both sides of the hire.</h1>
+      <div class="hero-foot">
+        <p class="lead">{brand.name} is locally owned and operated. For {years} years we've matched Atlantic Canadian employers with the people they need, on contract and permanently.</p>
+        <div class="actions">
+          <Button href="/hire/">I'm hiring</Button>
+          <Button href="/find-work/" variant="outline">I'm looking for work</Button>
+        </div>
       </div>
     </div>
   </section>
 
-  <section class="section section--tint">
-    <div class="container">
-      <h2>Our values</h2>
-      <div class="grid">
-        {values.map(([t, d], i) => (
-          <article class="card"><span class="eyebrow">0{i + 1}</span><h3>{t}</h3><p>{d}</p></article>
+  <section class="where on-dark">
+    <div class="wrap where-grid">
+      <div class="where-copy">
+        <h2>Five offices across four provinces.</h2>
+        <p class="lead">Headquartered in Dartmouth, with teams in New Brunswick, Prince Edward Island, and Newfoundland and Labrador. Select an office on the map for its address and phone number.</p>
+        <ul class="office-list">
+          {offices.map((o) => <li><span>{o.city}</span><span>{o.province}</span></li>)}
+        </ul>
+      </div>
+      <AtlanticMap tone="dark" id="about-map" />
+    </div>
+  </section>
+
+  <section class="how">
+    <div class="wrap">
+      <h2>How we work</h2>
+      <div class="how-grid">
+        {practices.map((p) => (
+          <article class:list={['practice', p.wide && 'practice--wide']}>
+            <h3>{p.t}</h3>
+            <p>{p.d}</p>
+          </article>
         ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="values">
+    <div class="wrap">
+      <h2 class="visually-hidden">Our values</h2>
+      <dl>
+        {values.map(([t, d]) => (
+          <div class="value"><dt>{t}</dt><dd>{d}</dd></div>
+        ))}
+      </dl>
+    </div>
+  </section>
+
+  <section class="recognition">
+    <div class="wrap rec-grid">
+      <div class="rec">
+        <img src={images.badgeBestPlaces} alt="" width="72" height="72" loading="lazy" onerror="this.remove()" />
+        <div><h3>Best Places to Work</h3><p>Named one of the Best Places to Work.</p></div>
+      </div>
+      <div class="rec">
+        <img src={images.badgeCor} alt="" width="72" height="72" loading="lazy" onerror="this.remove()" />
+        <div><h3>COR certified</h3><p>Certificate of Recognition for occupational health and safety.</p></div>
       </div>
     </div>
   </section>
 
   <CtaBand />
 </Base>
+
+<style>
+  .hero { padding-block: clamp(3rem, 7vw, 6rem) var(--s8); }
+  .hero h1 { font-size: var(--fs-hero); font-weight: 830; letter-spacing: -0.035em; max-width: 14ch; }
+  .hero-foot { display: grid; grid-template-columns: 1fr auto; gap: var(--s6); align-items: end; margin-top: var(--s6); }
+  .actions { display: flex; flex-wrap: wrap; gap: var(--s3); }
+
+  .where { padding-block: var(--s8); overflow: hidden; }
+  .where-copy { position: relative; z-index: 2; }
+  .where-grid { display: grid; grid-template-columns: 1fr 1.2fr; gap: clamp(2rem, 5vw, 5rem); align-items: center; }
+  .where h2 { margin-bottom: var(--s5); max-width: 12ch; }
+  .office-list { list-style: none; padding: 0; margin: var(--s6) 0 0; border-top: 1px solid var(--line-dark); }
+  .office-list li {
+    display: flex; justify-content: space-between; padding-block: var(--s3); border-bottom: 1px solid var(--line-dark);
+    font-family: var(--font-display); font-stretch: 112%; font-weight: 700; font-size: 1.15rem;
+  }
+  .office-list li span:last-child { font-family: var(--font-body); font-stretch: 100%; font-weight: 500; color: var(--on-dark-soft); font-size: var(--fs-small); }
+
+  .how { padding-block: var(--s9) var(--s8); }
+  .how h2 { margin-bottom: var(--s6); }
+  .how-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--s3); }
+  .practice { background: var(--mist); padding: var(--s6) var(--s5); border-radius: var(--radius); }
+  .practice--wide { grid-column: span 2; }
+  .practice h3 { margin-bottom: var(--s2); font-size: 1.35rem; }
+  .practice p { color: var(--ink-soft); }
+
+  /* Values as large type, not cards: each word carries the line */
+  .values { padding-block: var(--s6) var(--s9); }
+  dl { margin: 0; border-top: 1.5px solid var(--ink); }
+  .value { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: var(--s6); align-items: baseline; padding-block: var(--s5); border-bottom: 1px solid var(--line); }
+  dt { font-family: var(--font-display); font-stretch: 122%; font-weight: 820; font-size: clamp(1.9rem, 0.8rem + 3.4vw, 3.7rem); letter-spacing: -0.035em; line-height: 1; overflow-wrap: anywhere; }
+  dd { margin: 0; color: var(--ink-soft); font-size: var(--fs-lead); max-width: 40ch; }
+
+  .recognition { padding-block: 0 var(--s9); }
+  .rec-grid { display: grid; grid-template-columns: 1fr 1fr; gap: var(--s6); }
+  .rec { display: flex; gap: var(--s5); align-items: center; padding: var(--s5); border: 1.5px solid var(--line); border-radius: var(--radius); }
+  .rec img { width: 72px; height: 72px; object-fit: contain; flex: none; }
+  .rec h3 { margin-bottom: var(--s1); }
+  .rec p { color: var(--ink-soft); font-size: var(--fs-small); }
+
+  @media (max-width: 900px) {
+    .hero-foot, .where-grid, .rec-grid { grid-template-columns: 1fr; }
+    .how-grid { grid-template-columns: 1fr; }
+    .practice--wide { grid-column: auto; }
+    .value { grid-template-columns: 1fr; gap: var(--s2); }
+  }
+</style>

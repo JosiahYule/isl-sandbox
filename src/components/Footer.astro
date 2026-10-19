@@ -1,54 +1,74 @@
 ---
 // SITE FOOTER
+// The offices row is the most useful thing in a staffing footer: a direct line to each office.
 import { brand, nav, offices, social, images } from '../data/site.js';
 import { url } from '../lib/url.js';
 const year = new Date().getFullYear(); // never goes stale
+const tel = (n) => `tel:+1${n.replaceAll('-', '')}`;
 ---
-<footer class="footer section--dark">
-  <div class="container cols">
-    <div class="about">
-      <strong>{brand.name}</strong>
-      <p>{brand.scope} Connecting employers and job seekers since {brand.since}.</p>
-      <div class="badges">
-        <img src={images.badgeBestPlaces} alt="Best Places to Work" width="80" height="80" loading="lazy" />
-        <img src={images.badgeCor} alt="COR Certified" width="80" height="80" loading="lazy" />
+<footer class="footer on-dark">
+  <div class="wrap">
+    <div class="offices">
+      {offices.map((o) => (
+        <div class="office">
+          <p class="city">{o.city}<span>{o.province}</span></p>
+          <a class="phone" href={tel(o.phone)}>{o.phone}</a>
+          <p class="addr">{o.address.replace(/,\s*(NS|NB|PE|NL)\s.*$/, '')}</p>
+        </div>
+      ))}
+    </div>
+
+    <div class="lower">
+      <div class="about">
+        <p>{brand.name} has connected employers and job seekers since {brand.since}. Locally owned and operated.</p>
+        <div class="badges">
+          <img src={images.badgeBestPlaces} alt="Best Places to Work" width="64" height="64" loading="lazy" onerror="this.remove()" />
+          <img src={images.badgeCor} alt="COR certified" width="64" height="64" loading="lazy" onerror="this.remove()" />
+        </div>
       </div>
+      <nav aria-label="Footer">
+        <ul>{nav.map((i) => <li><a href={url(i.href)}>{i.label}</a></li>)}</ul>
+        <ul>{social.map((s) => <li><a href={s.href}>{s.label}</a></li>)}</ul>
+      </nav>
     </div>
 
-    <nav aria-label="Footer">
-      <strong>Explore</strong>
-      <ul>{nav.map((i) => <li><a href={url(i.href)}>{i.label}</a></li>)}</ul>
-    </nav>
-
-    <div>
-      <strong>Offices</strong>
-      <ul>
-        {offices.map((o) => (
-          <li>{o.city}, {o.province} <a href={`tel:+1${o.phone.replaceAll('-', '')}`}>{o.phone}</a></li>
-        ))}
-      </ul>
-    </div>
-
-    <div>
-      <strong>Follow</strong>
-      <ul>{social.map((s) => <li><a href={s.href}>{s.label}</a></li>)}</ul>
-    </div>
+    <p class="legal">© {year} {brand.name}. All rights reserved.</p>
   </div>
-  <div class="container legal">© {year} {brand.name}. All rights reserved.</div>
 </footer>
 
 <style>
-  .footer { background: var(--color-dark); color: var(--color-dark-ink); padding-block: var(--space-16) var(--space-8); }
-  .footer a { color: inherit; }
-  .cols {
-    display: grid; gap: var(--space-8);
-    grid-template-columns: 2fr repeat(3, 1fr);
+  .footer { padding-block: var(--s8) var(--s6); }
+  .footer a { text-decoration: none; }
+  .footer a:hover { text-decoration: underline; }
+
+  .offices {
+    display: grid; grid-template-columns: repeat(5, 1fr);
+    border-top: 1px solid var(--line-dark);
   }
-  strong { display: block; margin-bottom: var(--space-3); }
-  ul { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--space-2); }
-  .about p { opacity: 0.8; max-width: 36ch; }
-  .badges { display: flex; gap: var(--space-4); }
+  .office { padding: var(--s5) var(--s4) var(--s5) 0; }
+  .office + .office { padding-left: var(--s4); border-left: 1px solid var(--line-dark); }
+  .city {
+    font-family: var(--font-display); font-stretch: 115%; font-weight: 750;
+    font-size: 1.15rem; letter-spacing: -0.01em; margin-bottom: var(--s2);
+  }
+  .city span { margin-left: 0.4em; color: var(--on-dark-soft); font-weight: 500; font-size: 0.8em; }
+  .phone { font-weight: 600; color: #fff; font-variant-numeric: tabular-nums; }
+  .addr { color: var(--on-dark-soft); font-size: var(--fs-small); margin-top: var(--s2); line-height: 1.45; }
+
+  .lower {
+    display: grid; grid-template-columns: 1.4fr 1fr; gap: var(--s7);
+    margin-top: var(--s7); padding-top: var(--s6); border-top: 1px solid var(--line-dark);
+  }
+  .about p { color: var(--on-dark-soft); max-width: 42ch; }
+  .badges { display: flex; gap: var(--s4); margin-top: var(--s5); }
   .badges img { height: 56px; width: auto; }
-  .legal { margin-top: var(--space-12); font-size: var(--text-sm); opacity: 0.6; }
-  @media (max-width: 800px) { .cols { grid-template-columns: 1fr 1fr; } .about { grid-column: 1 / -1; } }
+  nav { display: grid; grid-template-columns: 1fr 1fr; gap: var(--s5); }
+  ul { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--s2); align-content: start; }
+  .legal { margin-top: var(--s7); font-size: var(--fs-tiny); color: var(--on-dark-soft); }
+
+  @media (max-width: 900px) {
+    .offices { grid-template-columns: 1fr 1fr; }
+    .office, .office + .office { padding: var(--s4) var(--s3) var(--s4) 0; border-left: 0; border-bottom: 1px solid var(--line-dark); }
+    .lower { grid-template-columns: 1fr; gap: var(--s6); }
+  }
 </style>

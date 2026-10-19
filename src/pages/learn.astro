@@ -1,39 +1,104 @@
 ---
 // LEARN (BLOG INDEX)  →  /learn/
-// Lists posts from src/data/posts.js, grouped by audience. Posts still live on the real site.
+// Lists posts from src/data/posts.js. Posts still live on the real site.
 import Base from '../layouts/Base.astro';
-import PageHero from '../components/PageHero.astro';
 import { posts } from '../data/posts.js';
 
-const fmt = (d) => new Date(d + 'T12:00:00').toLocaleDateString('en-CA', { month: 'short', day: 'numeric', year: 'numeric' });
-const groups = [
-  ['For employers', posts.filter((p) => p.audience === 'employers')],
-  ['For job seekers', posts.filter((p) => p.audience === 'job seekers')],
-  ['Market insights', posts.filter((p) => p.audience === 'everyone')],
+const fmt = (d) => new Date(d + 'T12:00:00').toLocaleDateString('en-CA', { month: 'long', day: 'numeric', year: 'numeric' });
+const audienceLabel = { employers: 'For employers', 'job seekers': 'For job seekers', everyone: 'Market insights' };
+const filters = [
+  { key: '', label: 'All posts' },
+  { key: 'employers', label: 'For employers' },
+  { key: 'job seekers', label: 'For job seekers' },
+  { key: 'everyone', label: 'Market insights' },
 ];
+const [featured, ...rest] = posts;
 ---
 <Base title="Learn" description="Hiring advice, career guides and Atlantic Canada job market insights.">
-  <PageHero eyebrow="Learn" title="Insights for employers and job seekers." lead="Hiring advice, career guides and what's happening in the Atlantic Canada job market." />
+  <section class="hero">
+    <div class="wrap">
+      <h1>Hiring advice and career guides.</h1>
+      <p class="lead">Written by our team for Atlantic Canadian employers and job seekers.</p>
+    </div>
+  </section>
 
-  {groups.map(([label, list], i) => (
-    <section class:list={['section', i % 2 === 1 && 'section--tint']}>
-      <div class="container">
-        <h2>{label}</h2>
-        <div class="grid">
-          {list.map((p) => (
-            <a class="card post" href={p.url}>
-              <time datetime={p.date}>{fmt(p.date)}</time>
-              <strong>{p.title}</strong>
-            </a>
-          ))}
-        </div>
+  <section class="posts" data-posts>
+    <div class="wrap">
+      <a class="featured" href={featured.url}>
+        <span class="aud">{audienceLabel[featured.audience]}</span>
+        <span class="f-title">{featured.title}</span>
+        <time datetime={featured.date}>{fmt(featured.date)}</time>
+      </a>
+
+      <div class="filters" role="group" aria-label="Filter posts">
+        {filters.map((f, i) => <button type="button" data-key={f.key} aria-pressed={String(i === 0)}>{f.label}</button>)}
       </div>
-    </section>
-  ))}
+
+      <ul class="list">
+        {rest.map((p) => (
+          <li data-aud={p.audience}>
+            <a href={p.url}>
+              <time datetime={p.date}>{fmt(p.date)}</time>
+              <span class="title">{p.title}</span>
+              <span class="aud">{audienceLabel[p.audience]}</span>
+            </a>
+          </li>
+        ))}
+      </ul>
+    </div>
+  </section>
 </Base>
 
+<script>
+  const root = document.querySelector('[data-posts]');
+  const buttons = root.querySelectorAll('.filters button');
+  const items = root.querySelectorAll('.list li');
+  buttons.forEach((b) => b.addEventListener('click', () => {
+    buttons.forEach((x) => x.setAttribute('aria-pressed', String(x === b)));
+    items.forEach((li) => (li.hidden = !!b.dataset.key && li.dataset.aud !== b.dataset.key));
+  }));
+</script>
+
 <style>
-  .post { display: grid; gap: var(--space-2); text-decoration: none; color: var(--color-ink); }
-  .post:hover strong { color: var(--color-brand); }
-  time { font-size: var(--text-sm); color: var(--color-ink-muted); }
+  .hero { padding-block: clamp(3rem, 7vw, 6rem) var(--s7); }
+  .hero h1 { font-size: var(--fs-hero); font-weight: 830; letter-spacing: -0.035em; max-width: 13ch; }
+  .hero .lead { margin-top: var(--s4); }
+
+  .posts { padding-bottom: var(--s9); }
+  .featured {
+    display: grid; gap: var(--s3); padding: clamp(2rem, 5vw, 4rem);
+    background: var(--navy); color: #fff; text-decoration: none; border-radius: var(--radius);
+    transition: background-color 150ms var(--ease);
+  }
+  .featured:hover { background: var(--navy-raised); }
+  .featured .aud { color: var(--on-dark-soft); }
+  .f-title {
+    font-family: var(--font-display); font-stretch: 118%; font-weight: 800; letter-spacing: -0.03em; line-height: 1;
+    font-size: clamp(2rem, 1rem + 3.4vw, 4rem); max-width: 18ch;
+  }
+  .featured time { color: var(--on-dark-soft); font-size: var(--fs-small); margin-top: var(--s3); }
+
+  .filters { display: flex; flex-wrap: wrap; gap: var(--s2); margin: var(--s8) 0 var(--s4); }
+  .filters button {
+    font: inherit; font-size: var(--fs-small); font-weight: 600; cursor: pointer;
+    padding: 0.5rem 0.95rem; border-radius: var(--radius-round); background: transparent; color: var(--ink); border: 1.5px solid var(--line);
+  }
+  .filters button[aria-pressed='true'] { background: var(--ink); border-color: var(--ink); color: #fff; }
+
+  .list { list-style: none; margin: 0; padding: 0; border-top: 1.5px solid var(--ink); }
+  .list li[hidden] { display: none; }
+  .list a {
+    display: grid; grid-template-columns: 11rem 1fr 10rem; gap: var(--s5); align-items: baseline;
+    padding-block: var(--s5); border-bottom: 1px solid var(--line); color: var(--ink); text-decoration: none;
+  }
+  .list a:hover .title { text-decoration: underline; text-decoration-thickness: 2px; }
+  time { font-size: var(--fs-small); color: var(--ink-soft); font-variant-numeric: tabular-nums; }
+  .title { font-family: var(--font-display); font-stretch: 110%; font-weight: 700; font-size: 1.3rem; letter-spacing: -0.01em; line-height: 1.2; }
+  .aud { font-size: var(--fs-small); font-weight: 600; color: var(--ink-soft); }
+  .list .aud { text-align: right; }
+
+  @media (max-width: 760px) {
+    .list a { grid-template-columns: 1fr; gap: var(--s1); }
+    .list .aud { text-align: left; }
+  }
 </style>

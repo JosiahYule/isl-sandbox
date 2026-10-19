@@ -1,53 +1,69 @@
 /*
   DESIGN TOKENS
   -------------
-  These variables are the "knobs" of the whole design. Every component reads
-  its colours, fonts and spacing from here, so changing one value here restyles
-  the entire site. Start your redesign by editing this file.
+  The "knobs" of the whole design. Components read colours, type and spacing from here,
+  so changing a value here restyles the entire site.
 
-  The colours below are neutral placeholders, not ISL's brand colours.
-  Swap them for the real brand values.
+  COLOUR HAS A JOB ON THIS SITE:
+    --contract (hi-vis amber)  = contract / temporary staffing
+    --direct   (ISL blue)      = direct hire / permanent placement
+  Anywhere a job, industry or timeline appears, its colour tells you which service it is.
+  Buttons and chrome stay navy so those two colours keep their meaning.
 */
 
 :root {
-  /* Colour */
-  --color-bg: #ffffff;
-  --color-surface: #f4f5f7;      /* light panels and cards */
-  --color-ink: #14171c;          /* main text */
-  --color-ink-muted: #5a6270;    /* secondary text */
-  --color-line: #dde1e7;         /* borders and dividers */
-  --color-brand: #0b4f8a;        /* primary brand colour: buttons, links */
-  --color-brand-ink: #ffffff;    /* text that sits on the brand colour */
-  --color-accent: #f2a900;       /* highlight colour, used sparingly */
-  --color-dark: #101820;         /* dark sections and footer */
-  --color-dark-ink: #e9edf2;     /* text on dark sections */
+  /* Surfaces */
+  --paper: #ffffff;
+  --mist: #edf2f7;          /* cool light panels */
+  --navy: #0a2036;          /* dark sections, map land */
+  --navy-raised: #12304d;   /* raised elements on navy */
+
+  /* Ink */
+  --ink: #0c1b2a;           /* headings and body text */
+  --ink-soft: #4a5b6c;      /* secondary text (passes AA on paper and mist) */
+  --on-dark: #e8eef5;       /* text on navy */
+  --on-dark-soft: #a9bbcd;  /* secondary text on navy */
+  --line: #d3dce6;          /* hairlines on light */
+  --line-dark: #24425f;     /* hairlines on navy */
+
+  /* Brand + meaning */
+  --isl-blue: #0070ca;      /* ISL brand blue */
+  --isl-blue-deep: #005aaa;
+  --direct: var(--isl-blue);
+  --direct-light: #6cb6ff;  /* direct hire colour when it sits on navy */
+  --contract: #ffc20e;      /* hi-vis amber */
+  --contract-ink: #6b4b00;  /* readable amber-family text on light surfaces */
 
   /* Type */
-  --font-body: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
-  --font-display: var(--font-body);
-  --text-sm: 0.875rem;
-  --text-base: 1.0625rem;
-  --text-lg: 1.25rem;
-  --text-xl: clamp(1.5rem, 1.2rem + 1.2vw, 2rem);
-  --text-2xl: clamp(2rem, 1.4rem + 2.4vw, 3rem);
-  --text-3xl: clamp(2.5rem, 1.6rem + 3.6vw, 4.25rem);
-  --leading-tight: 1.1;
-  --leading-body: 1.6;
+  --font-display: 'Archivo Variable', 'Arial Narrow', sans-serif;
+  --font-body: 'DM Sans Variable', system-ui, sans-serif;
+  --display-stretch: 118%;  /* Archivo width axis: 100% normal, 125% widest */
 
-  /* Space (one scale for padding, margins and gaps) */
-  --space-1: 0.25rem;
-  --space-2: 0.5rem;
-  --space-3: 0.75rem;
-  --space-4: 1rem;
-  --space-6: 1.5rem;
-  --space-8: 2rem;
-  --space-12: 3rem;
-  --space-16: 4rem;
-  --space-24: 6rem;
+  --fs-hero: clamp(2.6rem, 1rem + 6.4vw, 6.6rem);
+  --fs-h1: clamp(2.3rem, 1.2rem + 4.2vw, 4.8rem);
+  --fs-h2: clamp(1.9rem, 1.2rem + 2.6vw, 3.4rem);
+  --fs-h3: 1.3125rem;       /* 21px */
+  --fs-lead: clamp(1.125rem, 1rem + 0.4vw, 1.3125rem);
+  --fs-body: 1.0625rem;     /* 17px, the brand body size */
+  --fs-small: 0.875rem;
+  --fs-tiny: 0.78rem;
 
-  /* Shape and layout */
-  --radius: 10px;
-  --radius-pill: 999px;
-  --max-width: 1180px;
-  --gutter: clamp(1rem, 4vw, 2rem);
+  /* Space: a scale, used with judgment rather than mechanically */
+  --s1: 0.25rem;
+  --s2: 0.5rem;
+  --s3: 0.75rem;
+  --s4: 1rem;
+  --s5: 1.5rem;
+  --s6: 2rem;
+  --s7: 3rem;
+  --s8: 4.5rem;
+  --s9: 7rem;
+
+  /* Layout */
+  --max: 1280px;
+  --gutter: clamp(1.25rem, 4vw, 3rem);
+  --radius: 3px;            /* crisp, close to the brand's square editorial style */
+  --radius-round: 999px;    /* only for filters and pins, which are interactive */
+
+  --ease: cubic-bezier(0.2, 0.7, 0.1, 1);
 }

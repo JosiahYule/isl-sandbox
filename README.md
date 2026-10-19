@@ -62,11 +62,32 @@ import { url } from '../lib/url.js';
 
 `<Button>`, the header and the footer already do this for you. External links (`https://...`, `tel:`, `mailto:`) don't need it.
 
-## Where to start a redesign
+## The design system
 
-1. **`src/styles/tokens.css`**: the design "knobs": colours, fonts, sizes, spacing, corner rounding. The colours are neutral placeholders. Put in ISL's real brand colours first and the whole site picks them up.
-2. **`src/styles/global.css`**: base styles for headings, links and shared helpers like `.card` and `.section`.
-3. **Individual components and pages**: once the tokens feel right, reshape sections one at a time.
+**Colour has a job.** Two colours carry meaning everywhere on the site:
+
+| Colour | Means | Token |
+| --- | --- | --- |
+| Hi-vis amber `#FFC20E` | Contract staffing | `--contract` |
+| ISL blue `#0070CA` | Direct hire (permanent placement) | `--direct` |
+
+Jobs, industries, timelines and form options all use these two colours, so a visitor learns the key once. Buttons and other controls stay navy so the two colours keep their meaning. Deep harbour navy (`--navy`) carries dark sections and the map.
+
+**Type.** Archivo, set wide and heavy, for headings (its width axis is `--display-stretch`). DM Sans, the ISL brand face, for body text. Both are self-hosted from npm packages, so pages don't wait on Google Fonts.
+
+**All the knobs** live in `src/styles/tokens.css`. Change a value there and the whole site follows.
+
+## The signature pieces
+
+| Component | What it shows |
+| --- | --- |
+| `AtlanticMap` | Real province shapes with the five offices pinned. Clicking a pin shows that office's address and phone. |
+| `CanadaMap` | Atlantic provinces filled (offices), the rest outlined (where permanent searches reach). |
+| `HireClock` | Both services on one time axis, to scale: contract within hours, direct hire averaging 47 days, then the 90-day guarantee. |
+| `IndustryMatrix` | Every industry, with a marker for each service that covers it. The filter buttons dim what a service doesn't cover. |
+| `JobRow` | One job listing, with a coloured edge for its service. |
+
+The map shapes are generated data in `src/data/maps.js` (Natural Earth boundaries). `scripts/generate-maps.mjs` rebuilds them if the framing ever needs to change.
 
 ## Folder map
 
@@ -74,21 +95,23 @@ import { url } from '../lib/url.js';
 src/
   pages/        one file per page (file name = URL)
   layouts/      Base.astro, the frame around every page
-  components/   Header, Footer, Button, PageHero, Stats, Testimonials, CtaBand, Offices
-  data/         site facts, team, industries, blog posts
+  components/   Header, Footer, Button, PageHero, CtaBand, AtlanticMap, CanadaMap,
+                HireClock, IndustryMatrix, JobRow
+  data/         site facts, team, industries, jobs, blog posts, map shapes
+  lib/          url.js, the internal-link helper
   styles/       tokens.css (design knobs) and global.css (base styles)
+scripts/        generate-maps.mjs (rebuilds the map shapes)
 astro.config.mjs  Astro settings (rarely touched)
-package.json      project name, scripts, and the Astro dependency
+package.json      project name, scripts, Astro and the two font packages
 ```
 
 ## Things that are placeholders
 
-- **Brand colours and fonts** in `tokens.css`
-- **Job listings** on `/find-work/` are samples. The real Avionte feed comes later.
+- **Job listings** on `/find-work/` and the homepage are samples (`src/data/jobs.js`). The real Avionte feed comes later.
 - **The request form** on `/hire/` shows a confirmation but doesn't send anything yet.
-- **Team roles and photos** in `team.js` are mostly blank.
-- **Images** load from Squarespace's image server. Before this ever goes live, they should be downloaded into a `public/` folder.
-- Items marked `TODO` in the code need a decision (for example, which Moncton address is current).
+- **Team roles and photos** in `team.js` are mostly blank, so cards show initials.
+- **The logo and badge images** load from Squarespace's image server. Before this ever goes live, download them into a `public/` folder.
+- Items marked `TODO` in the code need a decision: which Moncton address is current, and which retention and review numbers are right.
 
 ## Previews
 

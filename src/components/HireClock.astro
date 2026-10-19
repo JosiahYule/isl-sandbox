@@ -1,0 +1,137 @@
+---
+// HIRE CLOCK
+// Both services on one time axis, drawn to scale, so the difference in speed is visible:
+// contract workers arrive within hours; a direct hire search averages 47 days and is then
+// covered by a 90-day replacement guarantee.
+// Props:
+//   focus: "both" (default) | "contract" | "direct"  (dims the other row)
+//   tone: "light" (default) | "dark"
+import { stats } from '../data/site.js';
+
+const { focus = 'both', tone = 'light' } = Astro.props;
+const AXIS = 140;                 // days shown on the axis
+const FILL = 47;                  // direct hire average time to fill (days)
+const GUARANTEE = 90;             // replacement guarantee (days)
+const pct = (d) => `${(d / AXIS) * 100}%`;
+const ticks = [0, 30, 60, 90, 120];
+const retention = stats.find((s) => s.label.includes('retention'))?.value ?? '92%';
+---
+<div class:list={['clock', `clock--${tone}`]} data-clock data-focus={focus}>
+  <div class="row row--contract" data-dim={focus === 'direct' ? 'true' : undefined}>
+    <div class="meta">
+      <p class="svc svc--contract">Contract staffing</p>
+      <p class="claim"><strong>Within hours</strong> of your request</p>
+    </div>
+    <div class="track">
+      <span class="bar bar--contract" style="--w:0.9%"></span>
+      <span class="flag" style="left:0.9%">Workers on site</span>
+    </div>
+  </div>
+
+  <div class="row row--direct" data-dim={focus === 'contract' ? 'true' : undefined}>
+    <div class="meta">
+      <p class="svc svc--direct">Direct hire</p>
+      <p class="claim"><strong>{FILL} days</strong> average time to fill</p>
+    </div>
+    <div class="track">
+      <span class="bar bar--direct" style={`--w:${pct(FILL)}`}></span>
+      <span class="bar bar--guarantee" style={`left:${pct(FILL)};--w:${pct(GUARANTEE)}`}></span>
+      <span class="flag flag--mid" style={`left:${pct(FILL)}`}>Hire starts</span>
+      <span class="flag flag--end" style={`left:${pct(FILL + GUARANTEE)}`}>Guarantee ends</span>
+    </div>
+    <p class="note"><span class="hatch-key" aria-hidden="true"></span>90-day replacement guarantee: if the hire doesn't work out, we replace them at no extra cost. {retention} of our direct hire placements stay.</p>
+  </div>
+
+  <div class="axis" aria-hidden="true">
+    <span class="axis-spacer"></span>
+    <div class="ticks">
+      {ticks.map((t) => <span style={`left:${pct(t)}`}>{t === 0 ? 'Request' : `Day ${t}`}</span>)}
+    </div>
+  </div>
+</div>
+
+<script>
+  // Bars grow to length the first time the clock scrolls into view (skipped with reduced motion).
+  const clocks = document.querySelectorAll('[data-clock]');
+  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (reduce || !('IntersectionObserver' in window)) {
+    clocks.forEach((c) => c.classList.add('is-drawn'));
+  } else {
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach((e) => { if (e.isIntersecting) { e.target.classList.add('is-drawn'); io.unobserve(e.target); } });
+    }, { threshold: 0.35 });
+    clocks.forEach((c) => { c.classList.add('will-draw'); io.observe(c); });
+  }
+</script>
+
+<style>
+  .clock { --track: var(--line); --label: var(--ink-soft); --label-strong: var(--ink); }
+  .clock--dark { --track: var(--line-dark); --label: var(--on-dark-soft); --label-strong: #fff; }
+
+  .row {
+    display: grid; grid-template-columns: minmax(180px, 15rem) 1fr; column-gap: var(--s6); align-items: center;
+    padding-block: var(--s5); border-top: 1px solid var(--track);
+    transition: opacity 300ms var(--ease);
+  }
+  .row[data-dim] { opacity: 0.38; }
+  .claim { margin-top: var(--s1); color: var(--label); font-size: var(--fs-small); }
+  .claim strong {
+    display: block; color: var(--label-strong);
+    font-family: var(--font-display); font-stretch: 116%; font-weight: 780; font-size: 1.7rem; letter-spacing: -0.02em; line-height: 1.1;
+  }
+  .clock--dark .svc { color: var(--on-dark); }
+
+  .track { position: relative; height: 44px; background: linear-gradient(var(--track), var(--track)) left 50% / 100% 1px no-repeat; }
+  .bar {
+    position: absolute; left: 0; top: 50%; height: 18px; width: var(--w); translate: 0 -50%;
+    transform-origin: left; border-radius: 1px;
+  }
+  .bar--contract { background: var(--contract); min-width: 6px; }
+  .bar--direct { background: var(--direct); }
+  .clock--dark .bar--direct { background: var(--direct-light); }
+  .bar--guarantee {
+    background: repeating-linear-gradient(135deg, var(--direct) 0 2px, transparent 2px 7px);
+    box-shadow: inset 0 0 0 2px var(--direct);
+  }
+  .clock--dark .bar--guarantee {
+    background: repeating-linear-gradient(135deg, var(--direct-light) 0 2px, transparent 2px 7px);
+    box-shadow: inset 0 0 0 2px var(--direct-light);
+  }
+
+  .flag {
+    position: absolute; bottom: calc(50% + 14px); translate: 6px 0;
+    font-size: var(--fs-tiny); font-weight: 600; color: var(--label-strong); white-space: nowrap;
+  }
+  .flag--mid { translate: -50% 0; }
+  .flag--end { translate: -100% 0; }
+
+  .note {
+    grid-column: 2; margin-top: var(--s3); font-size: var(--fs-small); color: var(--label); max-width: 62ch;
+  }
+  .hatch-key {
+    display: inline-block; width: 22px; height: 10px; margin-right: 8px; vertical-align: -1px;
+    background: repeating-linear-gradient(135deg, var(--direct) 0 2px, transparent 2px 7px);
+    box-shadow: inset 0 0 0 1.5px var(--direct);
+  }
+  .clock--dark .hatch-key { background: repeating-linear-gradient(135deg, var(--direct-light) 0 2px, transparent 2px 7px); box-shadow: inset 0 0 0 1.5px var(--direct-light); }
+
+  .axis { display: grid; grid-template-columns: minmax(180px, 15rem) 1fr; column-gap: var(--s6); border-top: 1px solid var(--track); padding-top: var(--s2); }
+  .ticks { position: relative; height: 1.4em; }
+  .ticks span { position: absolute; translate: -50% 0; font-size: var(--fs-tiny); color: var(--label); font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .ticks span:first-child { translate: 0 0; }
+
+  /* Draw-in: bars start collapsed and grow once visible */
+  .will-draw .bar { transform: scaleX(0); }
+  .will-draw .flag, .will-draw .note { opacity: 0; }
+  .is-drawn .bar { transform: scaleX(1); transition: transform 900ms var(--ease); }
+  .is-drawn .bar--guarantee { transition-delay: 700ms; transition-duration: 1200ms; }
+  .is-drawn .flag, .is-drawn .note { opacity: 1; transition: opacity 400ms var(--ease) 1200ms; }
+
+  @media (max-width: 720px) {
+    .row, .axis { grid-template-columns: 1fr; }
+    .axis-spacer { display: none; }
+    .track { margin-top: var(--s5); }
+    .note { grid-column: 1; }
+    .flag--end { display: none; }
+  }
+</style>

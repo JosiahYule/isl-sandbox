@@ -1,86 +1,262 @@
 ---
-// EMPLOYER LANDING PAGE  →  /hire/
-// The form is visual only in the sandbox: it doesn't send anywhere yet.
+// EMPLOYER REQUEST  →  /hire/
+// Left: the request form. Right: three questions that recommend a service and preselect it in the form.
+// The form is visual only in the sandbox: nothing is sent.
+// Linking with ?service=contract or ?service=direct preselects that service.
 import Base from '../layouts/Base.astro';
-import PageHero from '../components/PageHero.astro';
-import Stats from '../components/Stats.astro';
-import Testimonials from '../components/Testimonials.astro';
-import { brand } from '../data/site.js';
-import { url } from '../lib/url.js';
+import HireClock from '../components/HireClock.astro';
+import { brand, testimonials } from '../data/site.js';
 
-const sectors = [
-  'Construction & Trades', 'Manufacturing & Industrial', 'Transportation & Logistics',
-  'Office & Administrative', 'Finance & Accounting', 'Engineering & Technical',
-  'Healthcare & Life Services', 'Other',
-];
-const steps = [
-  ['Tell us the role', 'Share what you need, when, and for how long.'],
-  ['We search our network', 'Recruiters screen candidates against your requirements.'],
-  ['You meet the candidates', 'A shortlist of pre-screened people, ready to interview.'],
-  ['Your position is filled', 'We handle the paperwork and follow up after placement.'],
-];
+const sectors = ['Construction and trades', 'Warehousing and logistics', 'Manufacturing', 'Energy and natural resources',
+  'Hospitality and customer service', 'Office and administrative', 'Finance and accounting', 'Engineering and technical',
+  'Technology and IT', 'Healthcare', 'Other'];
+const locations = ['Nova Scotia', 'New Brunswick', 'Prince Edward Island', 'Newfoundland and Labrador', 'Elsewhere in Canada'];
+const tel = `tel:+1${brand.mainPhone.replaceAll('-', '')}`;
+const quote = testimonials[1];
 ---
-<Base title="Hire talent" description="Contract and permanent hiring for employers. Offices across Atlantic Canada, permanent search nationwide.">
-  <PageHero eyebrow="For employers" title="We find the people you're looking for." lead="Contract and permanent hiring across construction, industrial, office and more. A recruiter follows up within one business day." />
-
-  <section class="section">
-    <div class="container layout">
-      <form class="card form" onsubmit="event.preventDefault(); this.querySelector('.done').hidden = false;">
-        <h2>Tell us about your role</h2>
-        <label>Your name <input name="name" required autocomplete="name" /></label>
-        <label>Your email <input name="email" type="email" required autocomplete="email" /></label>
-        <label>Company <input name="company" autocomplete="organization" /></label>
-        <label>Sector
-          <select name="sector">{sectors.map((s) => <option>{s}</option>)}</select>
-        </label>
-        <label>What are you hiring for? <textarea name="role" rows="4"></textarea></label>
-        <button type="submit">Send my request</button>
-        <p class="done" hidden>Request received. (Sandbox: nothing was actually sent.)</p>
-        <p class="alt">Prefer to talk? Call <a href={`tel:+1${brand.mainPhone.replaceAll('-', '')}`}>{brand.mainPhone}</a> or <a href={`mailto:${brand.email}`}>email us</a>.</p>
-      </form>
-
-      <div>
-        <h2>From request to hire in days, not weeks.</h2>
-        <ol class="steps">
-          {steps.map(([t, d]) => <li><strong>{t}</strong><span>{d}</span></li>)}
-        </ol>
-        <p>Not sure which model fits? Compare <a href={url('/contract/')}>contract staffing</a> and <a href={url('/direct-hire/')}>direct hire</a>.</p>
-      </div>
+<Base title="Request talent" description="Request contract workers or start a permanent search. A recruiter replies within one business day.">
+  <section class="intro">
+    <div class="wrap">
+      <h1>Tell us who you need.</h1>
+      <p class="lead">Contract workers or a permanent hire, anywhere we work. A recruiter replies within one business day. Prefer the phone? Call <a href={tel}>{brand.mainPhone}</a>.</p>
     </div>
   </section>
 
-  <section class="section section--dark">
-    <div class="container"><Stats /></div>
+  <section class="work">
+    <div class="wrap layout">
+      <form class="form" id="request" novalidate>
+        <fieldset class="service">
+          <legend>What do you need?</legend>
+          <div class="options">
+            <label class="opt opt--contract">
+              <input type="radio" name="service" value="contract" />
+              <span class="opt-name">Contract workers</span>
+              <span class="opt-meta">Short or long term, on site within hours</span>
+            </label>
+            <label class="opt opt--direct">
+              <input type="radio" name="service" value="direct" />
+              <span class="opt-name">A permanent hire</span>
+              <span class="opt-meta">A targeted search with a 90-day guarantee</span>
+            </label>
+            <label class="opt opt--unsure">
+              <input type="radio" name="service" value="unsure" checked />
+              <span class="opt-name">Not sure yet</span>
+              <span class="opt-meta">We'll recommend the right fit</span>
+            </label>
+          </div>
+        </fieldset>
+
+        <div class="fields">
+          <label class="field">Your name <input name="name" autocomplete="name" required /></label>
+          <label class="field">Work email <input name="email" type="email" autocomplete="email" required /></label>
+          <label class="field">Company <input name="company" autocomplete="organization" /></label>
+          <label class="field"><span>Phone <span class="opt-tag">(optional)</span></span> <input name="phone" type="tel" autocomplete="tel" /></label>
+          <label class="field">Industry
+            <select name="sector">{sectors.map((s) => <option>{s}</option>)}</select>
+          </label>
+          <label class="field">Where's the work?
+            <select name="location">{locations.map((l) => <option>{l}</option>)}</select>
+          </label>
+          <label class="field field--wide">What are you hiring for?
+            <textarea name="role" rows="4" placeholder="The role, how many people, and when you need them to start"></textarea>
+          </label>
+        </div>
+
+        <div class="submit">
+          <button type="submit">Send request</button>
+          <p>We use your details only to respond to this request.</p>
+        </div>
+        <div class="sent" hidden tabindex="-1">
+          <p class="sent-title">Request sent.</p>
+          <p>A recruiter will reply within one business day. (Sandbox preview: nothing was actually sent.)</p>
+        </div>
+      </form>
+
+      <aside class="picker" aria-labelledby="picker-title">
+        <h2 id="picker-title">Not sure which service fits?</h2>
+        <p class="picker-intro">Answer three questions and we'll select the right option in the form.</p>
+
+        <div class="q" data-q="length">
+          <p class="q-label">How long do you need them?</p>
+          <div class="seg" role="group" aria-label="How long do you need them?">
+            <button type="button" data-v="temp" aria-pressed="false">Days to months</button>
+            <button type="button" data-v="perm" aria-pressed="false">Permanently</button>
+          </div>
+        </div>
+        <div class="q" data-q="start">
+          <p class="q-label">When do they need to start?</p>
+          <div class="seg" role="group" aria-label="When do they need to start?">
+            <button type="button" data-v="now" aria-pressed="false">This week</button>
+            <button type="button" data-v="later" aria-pressed="false">In a few weeks or more</button>
+          </div>
+        </div>
+        <div class="q" data-q="trial">
+          <p class="q-label">Would you like to see them on the job first?</p>
+          <div class="seg" role="group" aria-label="Would you like to see them on the job first?">
+            <button type="button" data-v="yes" aria-pressed="false">Yes</button>
+            <button type="button" data-v="no" aria-pressed="false">No</button>
+          </div>
+        </div>
+
+        <div class="result" aria-live="polite" hidden>
+          <p class="result-name"></p>
+          <p class="result-why"></p>
+        </div>
+      </aside>
+    </div>
   </section>
 
-  <section class="section">
-    <div class="container"><Testimonials limit={1} /></div>
+  <section class="after">
+    <div class="wrap">
+      <h2>What happens after you send it</h2>
+      <HireClock />
+      <figure class="quote">
+        <blockquote>{quote.quote}</blockquote>
+        <figcaption>{quote.who}</figcaption>
+      </figure>
+    </div>
   </section>
 </Base>
 
+<script>
+  const form = document.getElementById('request');
+  const radios = form.querySelectorAll('input[name="service"]');
+  const select = (v) => radios.forEach((r) => (r.checked = r.value === v));
+
+  // ?service=contract|direct from links elsewhere on the site
+  const fromUrl = new URLSearchParams(location.search).get('service');
+  if (fromUrl === 'contract' || fromUrl === 'direct') select(fromUrl);
+
+  // Recommendation logic for the three questions
+  const answers = {};
+  const result = document.querySelector('.result');
+  const nameEl = result.querySelector('.result-name');
+  const whyEl = result.querySelector('.result-why');
+
+  function recommend() {
+    const { length, start, trial } = answers;
+    if (!length || !start || !trial) return;
+    let svc, name, why;
+    if (length === 'temp') {
+      svc = 'contract'; name = 'Contract workers';
+      why = 'A fixed stretch of work is what contract staffing is built for: one hourly rate, and we handle payroll and workers’ compensation.';
+    } else if (trial === 'yes') {
+      svc = 'contract'; name = 'Contract, with the option to hire';
+      why = 'Start them on contract, see them on the job, then bring them onto your team when you’re sure.';
+    } else {
+      svc = 'direct'; name = 'A permanent hire';
+      why = start === 'now'
+        ? 'A permanent search averages 47 days. If the seat can’t wait, we can cover it with a contract worker while we search.'
+        : 'A targeted search for the right long-term fit, backed by a 90-day replacement guarantee.';
+    }
+    select(svc);
+    result.dataset.svc = svc;
+    nameEl.textContent = name;
+    whyEl.textContent = why + ' We’ve selected it in the form.';
+    result.hidden = false;
+  }
+
+  document.querySelectorAll('.q').forEach((q) => {
+    const buttons = q.querySelectorAll('button');
+    buttons.forEach((b) => b.addEventListener('click', () => {
+      buttons.forEach((x) => x.setAttribute('aria-pressed', String(x === b)));
+      answers[q.dataset.q] = b.dataset.v;
+      recommend();
+    }));
+  });
+
+  form.addEventListener('submit', (e) => {
+    e.preventDefault();
+    if (!form.checkValidity()) { form.reportValidity(); return; }
+    form.querySelector('.submit').hidden = true;
+    const sent = form.querySelector('.sent');
+    sent.hidden = false;
+    sent.focus();
+  });
+</script>
+
 <style>
-  .layout { display: grid; gap: var(--space-12); grid-template-columns: 1.1fr 1fr; align-items: start; }
-  @media (max-width: 860px) { .layout { grid-template-columns: 1fr; } }
-  .form { display: grid; gap: var(--space-4); }
-  .form h2 { font-size: var(--text-xl); }
-  label { display: grid; gap: var(--space-1); font-weight: 600; font-size: var(--text-sm); }
-  input, select, textarea {
-    font: inherit; font-weight: 400; padding: var(--space-3);
-    border: 1px solid var(--color-line); border-radius: calc(var(--radius) / 2);
+  .intro { padding-block: clamp(3rem, 7vw, 6rem) var(--s6); }
+  .intro h1 { font-size: var(--fs-hero); font-weight: 830; letter-spacing: -0.035em; max-width: 12ch; }
+  .intro .lead { margin-top: var(--s5); }
+
+  .work { padding-bottom: var(--s8); }
+  .layout { display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 4.5fr); gap: clamp(2rem, 5vw, 4.5rem); align-items: start; }
+
+  /* Form */
+  .form { border-top: 1.5px solid var(--ink); padding-top: var(--s6); }
+  fieldset { border: 0; margin: 0; padding: 0; }
+  legend, .field { font-weight: 600; font-size: var(--fs-small); }
+  legend { margin-bottom: var(--s3); }
+  .options { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--s2); }
+  .opt {
+    position: relative; display: grid; gap: 2px; cursor: pointer;
+    padding: var(--s4); padding-top: calc(var(--s4) + 6px);
+    border: 1.5px solid var(--line); border-radius: var(--radius);
+    transition: border-color 150ms var(--ease), background-color 150ms var(--ease);
   }
-  button {
-    font: inherit; font-weight: 600; cursor: pointer;
-    padding: var(--space-3) var(--space-6); border: 0; border-radius: var(--radius-pill);
-    background: var(--color-brand); color: var(--color-brand-ink);
+  .opt::before { content: ''; position: absolute; left: -1.5px; right: -1.5px; top: -1.5px; height: 6px; border-radius: var(--radius) var(--radius) 0 0; }
+  .opt--contract::before { background: var(--contract); }
+  .opt--direct::before { background: var(--direct); }
+  .opt--unsure::before { background: var(--line); }
+  .opt input { position: absolute; opacity: 0; pointer-events: none; }
+  .opt-name { font-family: var(--font-display); font-stretch: 110%; font-weight: 720; font-size: 1.02rem; }
+  .opt-meta { font-weight: 400; color: var(--ink-soft); font-size: var(--fs-small); line-height: 1.4; }
+  .opt:hover { border-color: var(--ink-soft); }
+  .opt:has(input:checked) { border-color: var(--ink); background: var(--mist); }
+  .opt:has(input:focus-visible) { outline: 3px solid var(--contract); outline-offset: 2px; }
+
+  .fields { display: grid; grid-template-columns: 1fr 1fr; gap: var(--s4) var(--s5); margin-top: var(--s6); }
+  .field { display: grid; gap: var(--s1); }
+  .field--wide { grid-column: 1 / -1; }
+  .opt-tag { font-weight: 400; color: var(--ink-soft); }
+  input:not([type='radio']), select, textarea {
+    font: inherit; font-size: 1rem; font-weight: 400; color: var(--ink);
+    padding: 0.75rem 0.85rem; border: 1.5px solid var(--line); border-radius: var(--radius); background: var(--paper); width: 100%;
   }
-  .done { color: var(--color-brand); font-weight: 600; }
-  .alt { font-size: var(--text-sm); color: var(--color-ink-muted); }
-  .steps { list-style: none; counter-reset: s; padding: 0; margin: 0 0 var(--space-6); display: grid; gap: var(--space-4); }
-  .steps li { counter-increment: s; display: grid; grid-template-columns: 2.5rem 1fr; column-gap: var(--space-3); }
-  .steps li::before {
-    content: counter(s); grid-row: span 2;
-    width: 2.5rem; height: 2.5rem; border-radius: 50%; display: grid; place-items: center;
-    background: var(--color-surface); font-weight: 700;
+  input:focus, select:focus, textarea:focus { outline: none; border-color: var(--ink); box-shadow: 0 0 0 3px var(--contract); }
+  .submit { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s5); margin-top: var(--s6); }
+  .submit button {
+    font: inherit; font-weight: 650; font-size: 1.0625rem; cursor: pointer;
+    padding: 1rem 1.8rem; border: 0; border-radius: var(--radius); background: var(--navy); color: #fff;
   }
-  .steps span { color: var(--color-ink-muted); }
+  .submit button:hover { background: var(--isl-blue); }
+  .submit p { font-size: var(--fs-small); color: var(--ink-soft); }
+  .sent { margin-top: var(--s6); padding: var(--s5); background: var(--mist); border-left: 4px solid var(--isl-blue); }
+  .sent-title { font-family: var(--font-display); font-stretch: 112%; font-weight: 760; font-size: 1.3rem; }
+
+  /* Picker */
+  .picker { background: var(--navy); color: var(--on-dark); padding: clamp(1.5rem, 3vw, 2.25rem); border-radius: var(--radius); position: sticky; top: 100px; }
+  .picker h2 { font-size: 1.6rem; }
+  .picker-intro { color: var(--on-dark-soft); font-size: var(--fs-small); margin-top: var(--s3); }
+  .q { margin-top: var(--s5); }
+  .q-label { font-weight: 600; font-size: var(--fs-small); margin-bottom: var(--s2); }
+  .seg { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; background: var(--navy-raised); padding: 4px; border-radius: var(--radius); }
+  .seg button {
+    font: inherit; font-size: var(--fs-small); font-weight: 600; cursor: pointer;
+    padding: 0.6rem 0.5rem; border: 0; border-radius: 2px; background: transparent; color: var(--on-dark);
+  }
+  .seg button:hover { background: rgb(255 255 255 / 0.08); }
+  .seg button[aria-pressed='true'] { background: #fff; color: var(--navy); }
+  .result { margin-top: var(--s6); padding-top: var(--s5); border-top: 1px solid var(--line-dark); }
+  .result-name { font-family: var(--font-display); font-stretch: 114%; font-weight: 780; font-size: 1.45rem; line-height: 1.15; display: flex; gap: var(--s3); align-items: baseline; }
+  .result-name::before { content: ''; width: 14px; height: 14px; flex: none; border-radius: 1px; }
+  .result[data-svc='contract'] .result-name::before { background: var(--contract); }
+  .result[data-svc='direct'] .result-name::before { background: var(--direct-light); }
+  .result-why { color: var(--on-dark-soft); font-size: var(--fs-small); margin-top: var(--s2); }
+
+  @media (max-width: 960px) {
+    .layout { grid-template-columns: 1fr; }
+    .picker { position: static; order: -1; }
+  }
+  @media (max-width: 620px) {
+    .options, .fields { grid-template-columns: 1fr; }
+  }
+
+  /* After-send timeline */
+  .after { padding-block: var(--s8) var(--s9); background: var(--mist); }
+  .after h2 { margin-bottom: var(--s6); max-width: 18ch; }
+  .quote { margin: var(--s8) 0 0 auto; max-width: 40rem; }
+  .quote blockquote { margin: 0; font-size: clamp(1.25rem, 1rem + 0.9vw, 1.7rem); line-height: 1.35; }
+  .quote figcaption { margin-top: var(--s3); color: var(--ink-soft); font-weight: 600; font-size: var(--fs-small); }
 </style>

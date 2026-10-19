@@ -1,27 +1,36 @@
-// Industries served, copied from the live Contract and Direct Hire pages.
+// Industries ISL places in, merged from the live Contract and Direct Hire pages.
+// `contract` / `direct` say which service covers it. This drives the industry matrix.
+// Descriptions are from the live site where one existed.
 
-export const contractIndustries = [
-  { name: 'Warehousing, Logistics & Transportation', text: 'Dependable, safety-focused talent that keeps inventory moving, shipments on schedule, and supply chains running efficiently.' },
-  { name: 'Skilled Trades, Mining & Energy', text: 'Experienced, safety-driven professionals who keep projects moving, assets maintained, and sites operating at peak performance.' },
-  { name: 'Production & Manufacturing', text: 'Reliable, detail-oriented talent that keeps lines running smoothly, quality standards met, and output on schedule.' },
-  { name: 'Construction', text: 'Dependable, safety-conscious trades and labour professionals who keep sites productive and timelines on track.' },
-  { name: 'Waste', text: 'Reliable, safety-focused personnel who keep collection, processing, and disposal running efficiently and in compliance.' },
-  { name: 'Hospitality', text: 'Front-of-house and back-of-house talent for hotels, restaurants, and tourism-focused employers.' },
-  { name: 'Contact Centres', text: 'Customer-focused professionals who deliver consistent service, meet performance targets, and represent your brand.' },
-  { name: 'Administrative', text: 'Detail-oriented professionals who keep offices organized, workflows efficient, and operations running smoothly.' },
-];
-
-export const directHireIndustries = [
-  'Agriculture & Farming',
-  'Construction & Trades',
-  'Energy, Utilities & Natural Resources',
-  'Engineering & Technical Services',
-  'Executive & Professional Services',
-  'Finance & Business Operations',
-  'Healthcare & Life Services',
-  'Logistics, Transportation & Warehousing',
-  'Manufacturing & Industrial',
-  'Public Sector & Education',
-  'Retail, Hospitality & Customer Service',
-  'Technology & IT Services',
+export const industries = [
+  { name: 'Construction and trades', contract: true, direct: true,
+    note: 'Trades and labour professionals who keep sites productive and timelines on track.' },
+  { name: 'Warehousing, logistics and transportation', contract: true, direct: true,
+    note: 'Safety-focused people who keep inventory moving and shipments on schedule.' },
+  { name: 'Manufacturing and production', contract: true, direct: true,
+    note: 'Detail-oriented people who keep lines running and quality standards met.' },
+  { name: 'Energy, mining and natural resources', contract: true, direct: true,
+    note: 'Experienced professionals who keep sites operating safely and assets maintained.' },
+  { name: 'Hospitality, retail and customer service', contract: true, direct: true,
+    note: 'Front-of-house and back-of-house talent, plus customer-facing roles that represent your brand.' },
+  { name: 'Contact centres', contract: true, direct: false,
+    note: 'Customer-focused people who deliver consistent service and meet performance targets.' },
+  { name: 'Administrative and office', contract: true, direct: false,
+    note: 'Organized professionals who keep offices and day-to-day operations running smoothly.' },
+  { name: 'Waste and recycling', contract: true, direct: false,
+    note: 'Personnel who keep collection, processing and disposal running efficiently and in compliance.' },
+  { name: 'Engineering and technical services', contract: false, direct: true,
+    note: 'Engineering and technical professionals who maintain compliance in complex operations.' },
+  { name: 'Finance and business operations', contract: false, direct: true,
+    note: 'Finance and operations professionals who improve processes and support decisions.' },
+  { name: 'Executive and professional services', contract: false, direct: true,
+    note: 'Senior leaders and specialists who provide direction and long-term impact.' },
+  { name: 'Technology and IT', contract: false, direct: true,
+    note: 'IT professionals who keep systems secure, scalable and aligned with the business.' },
+  { name: 'Healthcare and life services', contract: false, direct: true,
+    note: 'Professionals who balance technical expertise with strict regulatory and safety standards.' },
+  { name: 'Public sector and education', contract: false, direct: true,
+    note: 'People who serve public institutions with accountability and compliance in mind.' },
+  { name: 'Agriculture and farming', contract: false, direct: true,
+    note: 'Agricultural professionals who understand seasonal demands and modern farming operations.' },
 ];

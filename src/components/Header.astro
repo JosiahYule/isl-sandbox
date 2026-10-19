@@ -1,76 +1,108 @@
 ---
 // SITE HEADER
-// Reads the menu from src/data/site.js, so editing the nav never means touching this file.
-// The mobile menu uses <details>, a built-in HTML element that opens and closes with no JavaScript.
+// Menu items come from src/data/site.js. The mobile menu uses <details>, which opens
+// and closes with no JavaScript.
 import { brand, nav } from '../data/site.js';
 import Button from './Button.astro';
 import { url } from '../lib/url.js';
 
 const current = Astro.url.pathname;
+const isCurrent = (href) => current.startsWith(url(href));
 ---
 <header class="header">
-  <div class="container bar">
+  <div class="wrap bar">
     <a class="logo" href={url('/')} aria-label={`${brand.name} home`}>
-      <img src={brand.logo} alt={brand.name} width="200" height="48" />
+      <img src={brand.logo} alt="" width="190" height="46" onerror="this.parentElement.classList.add('no-img'); this.remove();" />
+      <span class="wordmark" aria-hidden="true">Integrated<br />Staffing</span>
     </a>
 
-    <nav class="desktop" aria-label="Main">
+    <nav class="primary" aria-label="Main">
       {nav.map((item) => (
-        <a href={url(item.href)} aria-current={current.startsWith(url(item.href)) ? 'page' : undefined}>{item.label}</a>
+        <a href={url(item.href)} aria-current={isCurrent(item.href) ? 'page' : undefined}>{item.label}</a>
       ))}
     </nav>
 
-    <div class="actions">
-      <a class="login" href={brand.loginUrl}>Login</a>
+    <div class="tools">
+      <a class="login" href={brand.loginUrl}>Log in</a>
       <Button href="/hire/" size="sm">Request talent</Button>
     </div>
 
     <details class="mobile">
-      <summary aria-label="Menu">Menu</summary>
-      <nav aria-label="Mobile">
-        {nav.map((item) => <a href={url(item.href)}>{item.label}</a>)}
-        <a href={brand.loginUrl}>Login</a>
-        <Button href="/hire/">Request talent</Button>
-      </nav>
+      <summary><span>Menu</span></summary>
+      <div class="sheet">
+        <nav aria-label="Mobile">
+          {nav.map((item) => (
+            <a href={url(item.href)} aria-current={isCurrent(item.href) ? 'page' : undefined}>{item.label}</a>
+          ))}
+        </nav>
+        <div class="sheet-tools">
+          <Button href="/hire/" size="lg">Request talent</Button>
+          <a class="login" href={brand.loginUrl}>Log in to your account</a>
+        </div>
+      </div>
     </details>
   </div>
 </header>
 
 <style>
   .header {
-    position: sticky; top: 0; z-index: 50;
-    background: var(--color-bg);
-    border-bottom: 1px solid var(--color-line);
+    position: sticky; top: 0; z-index: 60;
+    background: rgb(255 255 255 / 0.92);
+    backdrop-filter: saturate(1.4) blur(10px);
+    border-bottom: 1px solid var(--line);
   }
-  .bar {
-    display: flex; align-items: center; gap: var(--space-6);
-    min-height: 72px;
+  .bar { display: flex; align-items: center; gap: var(--s6); min-height: 72px; }
+
+  /* The logo image loads from Squarespace. The wordmark is a fallback that only shows if it fails. */
+  .logo { position: relative; display: block; color: var(--ink); text-decoration: none; }
+  .logo img { height: 38px; width: auto; }
+  .wordmark {
+    display: none; align-items: center;
+    font-family: var(--font-display); font-stretch: 115%; font-weight: 800;
+    font-size: 0.95rem; line-height: 1; letter-spacing: -0.01em; min-height: 38px;
   }
-  .logo img { height: 40px; width: auto; }
-  .desktop { display: flex; gap: var(--space-6); margin-left: auto; }
-  .desktop a, .login {
-    color: var(--color-ink); text-decoration: none; font-weight: 500;
+  .logo:global(.no-img) .wordmark { display: flex; }
+
+  .primary { display: flex; gap: clamp(var(--s4), 2vw, var(--s6)); margin-left: auto; }
+  .primary a {
+    position: relative; color: var(--ink); text-decoration: none; font-weight: 550; font-size: 0.98rem;
+    padding-block: var(--s2);
   }
-  .desktop a:hover, .desktop a[aria-current='page'] { color: var(--color-brand); }
-  .actions { display: flex; align-items: center; gap: var(--space-4); }
+  .primary a::after {
+    content: ''; position: absolute; left: 0; right: 0; bottom: 0; height: 2px;
+    background: var(--ink); transform: scaleX(0); transform-origin: left;
+    transition: transform 200ms var(--ease);
+  }
+  .primary a:hover::after, .primary a[aria-current='page']::after { transform: scaleX(1); }
+
+  .tools { display: flex; align-items: center; gap: var(--s5); }
+  .login { color: var(--ink-soft); font-size: var(--fs-small); font-weight: 550; text-decoration: none; }
+  .login:hover { color: var(--ink); text-decoration: underline; }
 
   .mobile { display: none; margin-left: auto; }
   .mobile summary {
-    list-style: none; cursor: pointer; font-weight: 600;
-    padding: var(--space-2) var(--space-3);
-    border: 1px solid var(--color-line); border-radius: var(--radius);
+    list-style: none; cursor: pointer; font-weight: 650;
+    padding: var(--s2) var(--s4); border: 2px solid var(--ink); border-radius: var(--radius);
   }
   .mobile summary::-webkit-details-marker { display: none; }
-  .mobile nav {
+  .mobile[open] summary { background: var(--ink); color: #fff; }
+  .sheet {
     position: absolute; left: 0; right: 0; top: 100%;
-    display: grid; gap: var(--space-4);
-    padding: var(--space-6) var(--gutter);
-    background: var(--color-bg); border-bottom: 1px solid var(--color-line);
+    height: calc(100dvh - 72px); overflow-y: auto;
+    background: var(--paper); padding: var(--s6) var(--gutter);
+    display: flex; flex-direction: column; justify-content: space-between; gap: var(--s6);
   }
-  .mobile nav a { color: var(--color-ink); text-decoration: none; font-size: var(--text-lg); }
+  .sheet nav { display: grid; }
+  .sheet nav a {
+    font-family: var(--font-display); font-stretch: 118%; font-weight: 780;
+    font-size: 2rem; letter-spacing: -0.02em; color: var(--ink); text-decoration: none;
+    padding-block: var(--s3); border-bottom: 1px solid var(--line);
+  }
+  .sheet nav a[aria-current='page'] { color: var(--isl-blue); }
+  .sheet-tools { display: grid; gap: var(--s4); padding-bottom: var(--s6); }
 
-  @media (max-width: 900px) {
-    .desktop, .actions { display: none; }
+  @media (max-width: 960px) {
+    .primary, .tools { display: none; }
     .mobile { display: block; }
   }
 </style>

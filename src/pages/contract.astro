@@ -1,46 +1,152 @@
 ---
 // CONTRACT STAFFING  →  /contract/
 import Base from '../layouts/Base.astro';
-import PageHero from '../components/PageHero.astro';
 import Button from '../components/Button.astro';
-import Testimonials from '../components/Testimonials.astro';
+import HireClock from '../components/HireClock.astro';
+import IndustryMatrix from '../components/IndustryMatrix.astro';
 import CtaBand from '../components/CtaBand.astro';
-import { contractIndustries } from '../data/industries.js';
+import { testimonials } from '../data/site.js';
 
-const benefits = [
-  ['Workers within hours', 'Qualified, pre-screened workers are never more than a phone call away.'],
-  ['One all-inclusive rate', 'A single hourly rate covers wages, remittances and administration.'],
-  ['Workers’ comp handled', 'We manage payroll remittances, claims and safe return-to-work.'],
-  ['Try before you hire', 'A smart way to see someone on the job before bringing them onto your team.'],
+// What the single hourly rate covers (from the live About page).
+const covered = [
+  ['The worker’s wages', 'Paid by us, on our payroll.'],
+  ['Payroll remittances', 'Handled and filed for every hour worked.'],
+  ['Workers’ compensation', 'Coverage, claims, and safe, timely return to work.'],
+  ['Screening', 'Including typing and dexterity tests where the role calls for them.'],
+  ['Orientation', 'Company-specific orientations at no extra cost.'],
+];
+const uses = [
+  { t: 'Vacation and leave cover', d: 'Keep the work moving while someone is away, from a week of vacation to a full maternity leave.', big: true },
+  { t: 'Seasonal peaks and volume swings', d: 'Add people when orders climb and scale back when they settle.' },
+  { t: 'Steady growth', d: 'Staff up ahead of a new contract without committing to permanent headcount.' },
+  { t: 'Try before you hire', d: 'See someone on the job first, then bring them onto your team.' },
 ];
 ---
-<Base title="Contract staffing" description="Pre-screened contract workers across Atlantic Canada, available within hours of your request.">
-  <PageHero eyebrow="Contract staffing" title="Flexible staffing, on your terms." lead="Vacations, maternity leaves, seasonal peaks or steady growth: our workers can be on site within hours of your request.">
-    <Button href="/hire/">Request workers</Button>
-  </PageHero>
-
-  <section class="section">
-    <div class="container">
-      <h2>Why employers use contract staffing</h2>
-      <div class="grid">
-        {benefits.map(([t, d]) => <article class="card"><h3>{t}</h3><p>{d}</p></article>)}
+<Base title="Contract staffing" description="Pre-screened contract workers across Atlantic Canada, on site within hours of your request, for one all-inclusive hourly rate.">
+  <section class="hero">
+    <div class="wrap">
+      <p class="svc svc--contract">Contract staffing</p>
+      <h1>Pre-screened workers, on site within hours.</h1>
+      <div class="hero-foot">
+        <p class="lead">For leaves, peaks and growth. One hourly rate covers everything, and the people work on our payroll, not yours.</p>
+        <Button href="/hire/?service=contract" size="lg">Request workers</Button>
       </div>
     </div>
   </section>
 
-  <section class="section section--tint">
-    <div class="container">
-      <span class="eyebrow">Industries</span>
-      <h2>Where we place contract workers</h2>
-      <div class="grid">
-        {contractIndustries.map((i) => <article class="card"><h3>{i.name}</h3><p>{i.text}</p></article>)}
+  <section class="rate">
+    <div class="wrap rate-grid">
+      <div>
+        <h2>One rate. Everything inside it.</h2>
+        <p class="lead">You get a single hourly rate per worker. These costs are already in it, so there's nothing else to track, file or pay.</p>
+      </div>
+      <div class="receipt" aria-label="What the hourly rate includes">
+        <p class="receipt-head">Your hourly rate includes</p>
+        <ul>
+          {covered.map(([t, d]) => (
+            <li><span class="item">{t}</span><span class="desc">{d}</span><span class="tick" aria-hidden="true"></span></li>
+          ))}
+        </ul>
+        <p class="receipt-total"><span>Extra invoices</span><span>None</span></p>
       </div>
     </div>
   </section>
 
-  <section class="section">
-    <div class="container"><Testimonials limit={2} /></div>
+  <section class="uses">
+    <div class="wrap">
+      <h2>When employers call us</h2>
+      <div class="use-grid">
+        {uses.map((u) => (
+          <article class:list={['use', u.big && 'use--big']}>
+            <h3>{u.t}</h3>
+            <p>{u.d}</p>
+          </article>
+        ))}
+      </div>
+    </div>
   </section>
 
-  <CtaBand title="Need workers this week?" label="Request workers" />
+  <section class="speed">
+    <div class="wrap">
+      <h2>Compared with a permanent search</h2>
+      <HireClock focus="contract" />
+    </div>
+  </section>
+
+  <section class="ind">
+    <div class="wrap ind-grid">
+      <div>
+        <h2>Where we place contract workers</h2>
+        <p class="lead">Eight industries, from warehouse floors to contact centres.</p>
+      </div>
+      <IndustryMatrix initial="contract" />
+    </div>
+  </section>
+
+  <section class="voice">
+    <div class="wrap">
+      <figure>
+        <blockquote>{testimonials[0].quote}</blockquote>
+        <figcaption>{testimonials[0].who}</figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <CtaBand title="Need people this week?" text="Tell us the role and the start date. A recruiter replies within one business day." href="/hire/?service=contract" label="Request workers" />
 </Base>
+
+<style>
+  .hero { padding-block: clamp(3rem, 7vw, 6rem) var(--s8); border-bottom: 1px solid var(--line); }
+  .hero h1 { font-size: var(--fs-hero); font-weight: 830; letter-spacing: -0.035em; max-width: 13ch; margin-top: var(--s4); }
+  .hero-foot { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: end; gap: var(--s6); margin-top: var(--s6); }
+
+  .rate { padding-block: var(--s9) var(--s8); }
+  .rate-grid { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(2rem, 6vw, 6rem); align-items: start; }
+  .rate h2 { margin-bottom: var(--s5); max-width: 12ch; }
+  /* A receipt: the familiar format makes "it's all included" concrete */
+  .receipt {
+    background: var(--paper); border: 1.5px solid var(--ink); border-radius: var(--radius);
+    padding: var(--s6); box-shadow: 10px 10px 0 var(--contract);
+  }
+  .receipt-head { font-family: var(--font-display); font-stretch: 112%; font-weight: 760; font-size: 1.2rem; padding-bottom: var(--s3); border-bottom: 1.5px dashed var(--ink); }
+  ul { list-style: none; margin: 0; padding: 0; }
+  li { display: grid; grid-template-columns: 1fr auto; column-gap: var(--s4); padding-block: var(--s4); border-bottom: 1px dashed var(--line); }
+  .item { font-weight: 650; }
+  .desc { grid-column: 1; font-size: var(--fs-small); color: var(--ink-soft); }
+  .tick { grid-column: 2; grid-row: 1 / span 2; align-self: center; width: 22px; height: 22px;
+    -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M4 12.5l5 5L20 6.5' fill='none' stroke='black' stroke-width='3.2'/%3E%3C/svg%3E") center / contain no-repeat;
+            mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M4 12.5l5 5L20 6.5' fill='none' stroke='black' stroke-width='3.2'/%3E%3C/svg%3E") center / contain no-repeat;
+    background: var(--ink); }
+  .receipt-total { display: flex; justify-content: space-between; margin-top: var(--s4); padding-top: var(--s3); border-top: 1.5px solid var(--ink); font-family: var(--font-display); font-stretch: 112%; font-weight: 780; font-size: 1.15rem; }
+
+  .uses { padding-block: var(--s8); background: var(--mist); }
+  .uses h2 { margin-bottom: var(--s6); }
+  .use-grid { display: grid; grid-template-columns: 1.4fr 1fr 1fr; grid-template-rows: auto auto; gap: var(--s3); }
+  .use { background: var(--paper); padding: var(--s5); border-radius: var(--radius); }
+  .use--big { grid-row: span 2; background: var(--navy); color: var(--on-dark); display: flex; flex-direction: column; justify-content: flex-end; min-height: 18rem; }
+  .use--big h3 { font-size: clamp(1.6rem, 1.2rem + 1.4vw, 2.3rem); font-stretch: 116%; }
+  .use--big p { color: var(--on-dark-soft); }
+  .use h3 { margin-bottom: var(--s2); }
+  .use p { color: var(--ink-soft); font-size: var(--fs-small); }
+  .use:last-child { grid-column: 2 / span 2; }
+
+  .speed { padding-block: var(--s9) var(--s8); }
+  .speed h2 { margin-bottom: var(--s6); }
+
+  .ind { padding-block: var(--s8); border-top: 1px solid var(--line); }
+  .ind-grid { display: grid; grid-template-columns: 4fr 7fr; gap: clamp(2rem, 6vw, 6rem); align-items: start; }
+  .ind h2 { margin-bottom: var(--s4); }
+
+  .voice { padding-block: var(--s8) var(--s9); }
+  .voice figure { margin: 0 0 0 auto; max-width: 46rem; }
+  .voice blockquote { margin: 0; font-size: clamp(1.4rem, 1rem + 1.4vw, 2.1rem); line-height: 1.3; letter-spacing: -0.01em; }
+  .voice figcaption { margin-top: var(--s4); color: var(--ink-soft); font-weight: 600; }
+
+  @media (max-width: 900px) {
+    .rate-grid, .ind-grid { grid-template-columns: 1fr; }
+    .use-grid { grid-template-columns: 1fr; }
+    .use--big { grid-row: auto; min-height: 12rem; }
+    .use:last-child { grid-column: auto; }
+    .receipt { box-shadow: 6px 6px 0 var(--contract); }
+  }
+</style>

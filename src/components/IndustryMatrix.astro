@@ -1,0 +1,101 @@
+---
+// INDUSTRY MATRIX
+// Every industry ISL places in, with a marker for each service that covers it.
+// The filter buttons dim the industries a service doesn't cover.
+// Props: initial: "all" (default) | "contract" | "direct"
+import { industries } from '../data/industries.js';
+
+const { initial = 'all' } = Astro.props;
+const count = { all: industries.length, contract: industries.filter((i) => i.contract).length, direct: industries.filter((i) => i.direct).length };
+const filters = [
+  { key: 'all', label: 'All industries' },
+  { key: 'contract', label: 'Contract' },
+  { key: 'direct', label: 'Direct hire' },
+];
+---
+<div class="matrix" data-matrix data-filter={initial}>
+  <div class="filters" role="group" aria-label="Show industries by service">
+    {filters.map((f) => (
+      <button type="button" class:list={['chip', `chip--${f.key}`]} data-key={f.key} aria-pressed={String(f.key === initial)}>
+        {f.label} <span class="n">{count[f.key]}</span>
+      </button>
+    ))}
+  </div>
+
+  <table>
+    <caption class="visually-hidden">Industries and the services that cover them</caption>
+    <thead>
+      <tr><th scope="col">Industry</th><th scope="col" class="c">Contract</th><th scope="col" class="c">Direct hire</th></tr>
+    </thead>
+    <tbody>
+      {industries.map((i) => (
+        <tr data-contract={String(i.contract)} data-direct={String(i.direct)}>
+          <th scope="row">
+            <span class="name">{i.name}</span>
+            <span class="note">{i.note}</span>
+          </th>
+          <td class="c">{i.contract ? <span class="mark mark--contract" role="img" aria-label="Yes"></span> : <span class="none" aria-label="No">No</span>}</td>
+          <td class="c">{i.direct ? <span class="mark mark--direct" role="img" aria-label="Yes"></span> : <span class="none" aria-label="No">No</span>}</td>
+        </tr>
+      ))}
+    </tbody>
+  </table>
+</div>
+
+<script>
+  document.querySelectorAll('[data-matrix]').forEach((m) => {
+    const chips = m.querySelectorAll('.chip');
+    chips.forEach((chip) => chip.addEventListener('click', () => {
+      m.dataset.filter = chip.dataset.key;
+      chips.forEach((c) => c.setAttribute('aria-pressed', String(c === chip)));
+    }));
+  });
+</script>
+
+<style>
+  .filters { display: flex; flex-wrap: wrap; gap: var(--s2); margin-bottom: var(--s5); }
+  .chip {
+    font: inherit; font-size: var(--fs-small); font-weight: 600; cursor: pointer;
+    display: inline-flex; align-items: center; gap: var(--s2);
+    padding: 0.5rem 0.95rem; border-radius: var(--radius-round);
+    background: transparent; color: var(--ink); border: 1.5px solid var(--line);
+    transition: background-color 150ms var(--ease), border-color 150ms var(--ease);
+  }
+  .chip:hover { border-color: var(--ink); }
+  .chip .n { font-variant-numeric: tabular-nums; color: var(--ink-soft); font-weight: 500; }
+  .chip[aria-pressed='true'] { background: var(--ink); border-color: var(--ink); color: #fff; }
+  .chip[aria-pressed='true'] .n { color: rgb(255 255 255 / 0.7); }
+  .chip--contract[aria-pressed='true'] { background: var(--contract); border-color: var(--contract); color: var(--ink); }
+  .chip--contract[aria-pressed='true'] .n { color: var(--contract-ink); }
+  .chip--direct[aria-pressed='true'] { background: var(--direct); border-color: var(--direct); }
+
+  table { width: 100%; border-collapse: collapse; }
+  thead th {
+    text-align: left; font-size: var(--fs-tiny); font-weight: 600; color: var(--ink-soft);
+    padding: 0 0 var(--s2); border-bottom: 1.5px solid var(--ink);
+  }
+  .c { text-align: center; width: 7.5rem; }
+  tbody th, tbody td { padding: 0.95rem 0; border-bottom: 1px solid var(--line); vertical-align: top; text-align: left; }
+  tbody td.c { text-align: center; }
+  tbody tr { transition: opacity 220ms var(--ease); }
+
+  .name {
+    display: block; font-family: var(--font-display); font-stretch: 110%; font-weight: 680;
+    font-size: 1.12rem; letter-spacing: -0.01em; line-height: 1.25;
+  }
+  .note { display: block; font-weight: 400; font-size: var(--fs-small); color: var(--ink-soft); margin-top: var(--s1); max-width: 56ch; }
+
+  .mark { display: inline-block; width: 16px; height: 16px; margin-top: 4px; border-radius: 1px; }
+  .mark--contract { background: var(--contract); }
+  .mark--direct { background: var(--direct); }
+  .none { display: inline-block; width: 16px; height: 2px; margin-top: 11px; background: var(--line); font-size: 0; overflow: hidden; }
+
+  [data-filter='contract'] tbody tr[data-contract='false'],
+  [data-filter='direct'] tbody tr[data-direct='false'] { opacity: 0.28; }
+
+  @media (max-width: 640px) {
+    .c { width: 4.5rem; }
+    thead th.c { font-size: 0.7rem; }
+    .note { display: none; }
+  }
+</style>

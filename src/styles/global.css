@@ -1,87 +1,93 @@
 /*
   GLOBAL STYLES
-  -------------
-  Base rules for plain HTML elements plus a few shared helper classes.
-  Styles for a single component live inside that component's .astro file,
-  where Astro scopes them so they can't leak onto other parts of the page.
+  Base rules for plain HTML elements and a handful of shared helpers.
+  Anything specific to one component lives inside that component's .astro file.
 */
 
 @import './tokens.css';
 
 *, *::before, *::after { box-sizing: border-box; }
-
-html { -webkit-text-size-adjust: 100%; }
+html { -webkit-text-size-adjust: 100%; scroll-padding-top: 88px; }
 
 body {
   margin: 0;
-  background: var(--color-bg);
-  color: var(--color-ink);
+  background: var(--paper);
+  color: var(--ink);
   font-family: var(--font-body);
-  font-size: var(--text-base);
-  line-height: var(--leading-body);
+  font-size: var(--fs-body);
+  line-height: 1.65;
+  font-optical-sizing: auto;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
 }
 
-img { max-width: 100%; height: auto; display: block; }
+img, svg { display: block; max-width: 100%; }
+img { height: auto; }
 
-h1, h2, h3 {
+/* Headings: Archivo, pushed wide and heavy, tight tracking */
+h1, h2, h3, .display {
   font-family: var(--font-display);
-  line-height: var(--leading-tight);
-  margin: 0 0 var(--space-4);
+  font-stretch: var(--display-stretch);
+  font-weight: 780;
+  line-height: 0.98;
+  letter-spacing: -0.025em;
+  margin: 0;
+  text-wrap: balance;
 }
-h1 { font-size: var(--text-3xl); letter-spacing: -0.02em; }
-h2 { font-size: var(--text-2xl); letter-spacing: -0.01em; }
-h3 { font-size: var(--text-lg); }
+h1 { font-size: var(--fs-h1); }
+h2 { font-size: var(--fs-h2); }
+h3 {
+  font-size: var(--fs-h3);
+  font-weight: 700;
+  font-stretch: 108%;
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+}
 
-p { margin: 0 0 var(--space-4); }
+p { margin: 0 0 var(--s4); text-wrap: pretty; }
+p:last-child { margin-bottom: 0; }
 
-a { color: var(--color-brand); }
+a { color: var(--isl-blue); text-underline-offset: 0.18em; text-decoration-thickness: 1px; }
 a:hover { text-decoration-thickness: 2px; }
-a[href^="tel:"] { white-space: nowrap; } /* keep phone numbers on one line */
+a[href^="tel:"] { white-space: nowrap; }
 
-:focus-visible { outline: 3px solid var(--color-accent); outline-offset: 2px; }
+:focus-visible { outline: 3px solid var(--contract); outline-offset: 3px; border-radius: 2px; }
 
-/* Helpers */
-.container {
+::selection { background: var(--contract); color: var(--ink); }
+
+/* ---------- Helpers ---------- */
+
+.wrap {
   width: 100%;
-  max-width: var(--max-width);
+  max-width: var(--max);
   margin-inline: auto;
   padding-inline: var(--gutter);
 }
 
-.section { padding-block: var(--space-16); }
-.section--tint { background: var(--color-surface); }
-.section--dark { background: var(--color-dark); color: var(--color-dark-ink); }
-.section--dark a { color: inherit; }
-
-.eyebrow {
-  display: block;
-  font-size: var(--text-sm);
-  font-weight: 600;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--color-ink-muted);
-  margin-bottom: var(--space-3);
-}
-.section--dark .eyebrow { color: var(--color-accent); }
-
-.lead { font-size: var(--text-lg); color: var(--color-ink-muted); max-width: 60ch; }
-.section--dark .lead { color: var(--color-dark-ink); opacity: 0.85; }
-
-.grid {
-  display: grid;
-  gap: var(--space-6);
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr));
+.lead {
+  font-size: var(--fs-lead);
+  line-height: 1.55;
+  color: var(--ink-soft);
+  max-width: 54ch;
 }
 
-.card {
-  background: var(--color-bg);
-  border: 1px solid var(--color-line);
-  border-radius: var(--radius);
-  padding: var(--space-6);
-}
-.card p:last-child { margin-bottom: 0; }
+.measure { max-width: 64ch; }
+
+.on-dark { background: var(--navy); color: var(--on-dark); }
+.on-dark .lead { color: var(--on-dark-soft); }
+.on-dark a { color: var(--on-dark); }
 
 .visually-hidden {
-  position: absolute; width: 1px; height: 1px; overflow: hidden;
+  position: absolute !important; width: 1px; height: 1px; overflow: hidden;
   clip: rect(0 0 0 0); white-space: nowrap;
+}
+
+/* Service markers: the colour key used everywhere */
+.svc { display: inline-flex; align-items: center; gap: 0.45em; font-weight: 600; font-size: var(--fs-small); }
+.svc::before { content: ''; width: 0.7em; height: 0.7em; border-radius: 1px; flex: none; }
+.svc--contract::before { background: var(--contract); }
+.svc--direct::before { background: var(--direct); }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
 }

@@ -1,19 +1,29 @@
 ---
-// PAGE HERO: the title band at the top of inner pages.
-// Usage: <PageHero eyebrow="For employers" title="..." lead="..."> optional buttons </PageHero>
-const { eyebrow, title, lead } = Astro.props;
+// PAGE HERO: the opening band of inner pages.
+// <PageHero title="..." lead="...">optional buttons</PageHero>
+// Add content to the "aside" slot to place a visual on the right:
+//   <PageHero ...><Fragment slot="aside"> ... </Fragment></PageHero>
+const { title, lead, tone = 'light' } = Astro.props;
+const hasAside = Astro.slots.has('aside');
 ---
-<section class="hero section section--tint">
-  <div class="container">
-    {eyebrow && <span class="eyebrow">{eyebrow}</span>}
-    <h1>{title}</h1>
-    {lead && <p class="lead">{lead}</p>}
-    <div class="actions"><slot /></div>
+<section class:list={['phero', tone === 'dark' && 'on-dark', hasAside && 'phero--aside']}>
+  <div class="wrap grid">
+    <div class="copy">
+      <h1>{title}</h1>
+      {lead && <p class="lead">{lead}</p>}
+      {Astro.slots.has('default') && <div class="actions"><slot /></div>}
+    </div>
+    {hasAside && <div class="aside"><slot name="aside" /></div>}
   </div>
 </section>
 
 <style>
-  .hero h1 { max-width: 18ch; }
-  .actions { display: flex; flex-wrap: wrap; gap: var(--space-3); margin-top: var(--space-6); }
-  .actions:empty { display: none; }
+  .phero { padding-block: clamp(3rem, 7vw, 6.5rem) clamp(2.5rem, 5vw, 4.5rem); border-bottom: 1px solid var(--line); }
+  .on-dark.phero { border-bottom: 0; }
+  .grid { display: grid; gap: var(--s7); }
+  .phero--aside .grid { grid-template-columns: 1.25fr 1fr; align-items: end; }
+  h1 { max-width: 15ch; }
+  .lead { margin-top: var(--s5); }
+  .actions { display: flex; flex-wrap: wrap; gap: var(--s3); margin-top: var(--s6); }
+  @media (max-width: 900px) { .phero--aside .grid { grid-template-columns: 1fr; } }
 </style>
