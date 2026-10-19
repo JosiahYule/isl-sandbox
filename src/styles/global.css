@@ -78,6 +78,37 @@ a[href^="tel:"] { white-space: nowrap; }
   clip: rect(0 0 0 0); white-space: nowrap;
 }
 
+/* ---------- The section system ----------
+   Every page is built from the same few pieces so the site reads as one system:
+   .section       a band of content with the standard vertical spacing
+   .section--tint the one light-grey band (use sparingly)
+   .section--rule a hairline at the top, to separate two white sections
+   .section-head  heading + optional lead, always top-left
+   .items/.item   content in a row, each item opened by a rule (the brand's hairline structure, no boxes) */
+
+.section { padding-block: clamp(4rem, 8vw, 6.5rem); }
+.section--tint { background: var(--mist); }
+.section--rule { border-top: 1px solid var(--line); }
+
+.section-head { max-width: 46rem; margin-bottom: clamp(2rem, 4vw, 3.25rem); }
+.section-head .lead { margin-top: var(--s4); }
+.section-head--split { max-width: none; display: grid; grid-template-columns: 1fr 1fr; gap: var(--s4) var(--s7); align-items: end; }
+.section-head--split .lead { margin-top: 0; }
+@media (max-width: 860px) { .section-head--split { grid-template-columns: 1fr; } }
+
+.items { display: grid; gap: var(--s6) var(--s5); grid-template-columns: repeat(auto-fit, minmax(min(100%, 230px), 1fr)); margin: 0; padding: 0; list-style: none; }
+.items--2 { grid-template-columns: repeat(auto-fit, minmax(min(100%, 340px), 1fr)); }
+.item { border-top: 1.5px solid var(--ink); padding-top: var(--s4); }
+.item h3 { margin-bottom: var(--s2); }
+.item p { color: var(--ink-soft); }
+.item .more { display: inline-block; margin-top: var(--s3); font-weight: 600; }
+.on-dark .item { border-top-color: var(--on-dark); }
+.on-dark .item p { color: var(--on-dark-soft); }
+
+/* Plain text link that is really a button (opens the job assistant, etc.) */
+.textlink { font: inherit; font-weight: 600; cursor: pointer; padding: 0; background: none; border: 0; color: var(--isl-blue); text-decoration: underline; text-underline-offset: 0.2em; }
+.textlink:hover { color: var(--isl-blue-deep); text-decoration-thickness: 2px; }
+
 /* Service markers: the colour key used everywhere */
 .svc { display: inline-flex; align-items: center; gap: 0.5em; font-weight: 600; font-size: var(--fs-small); }
 .svc::before { content: ''; width: 0.7em; height: 0.7em; flex: none; }

@@ -8,7 +8,8 @@ import Footer from '../components/Footer.astro';
 import { brand } from '../data/site.js';
 import { url } from '../lib/url.js';
 
-const { title, description = brand.scope } = Astro.props;
+// assistant: false hides the job assistant (used on employer pages, where "Find a job" doesn't apply)
+const { title, description = brand.scope, assistant = true } = Astro.props;
 const fullTitle = title ? `${title} | ${brand.name}` : `${brand.name} | Contract and permanent staffing in Atlantic Canada`;
 ---
 <!doctype html>
@@ -29,8 +30,8 @@ const fullTitle = title ? `${title} | ${brand.name}` : `${brand.name} | Contract
     </main>
     <Footer />
     <!-- Job assistant: the chat widget, running in demo mode (see assistant/README.md and assistant/demo-mode.js) -->
-    <script is:inline defer src={url('/assistant/widget.js')}></script>
-    <script is:inline type="module" src={url('/assistant/demo-mode.js')}></script>
+    {assistant && <script is:inline defer src={url('/assistant/widget.js')}></script>}
+    {assistant && <script is:inline type="module" src={url('/assistant/demo-mode.js')}></script>}
   </body>
 </html>
 

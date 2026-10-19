@@ -2,12 +2,13 @@
 // DIRECT HIRE (PERMANENT PLACEMENT)  →  /direct-hire/
 import Base from '../layouts/Base.astro';
 import Button from '../components/Button.astro';
+import PageHero from '../components/PageHero.astro';
 import HireClock from '../components/HireClock.astro';
 import IndustryMatrix from '../components/IndustryMatrix.astro';
 import CanadaMap from '../components/CanadaMap.astro';
 import CtaBand from '../components/CtaBand.astro';
 import { team } from '../data/team.js';
-import { testimonials, stats } from '../data/site.js';
+import { stats } from '../data/site.js';
 import { sized } from '../lib/img.js';
 
 const recruiters = team.filter((p) => p.team === 'Direct Hire');
@@ -26,87 +27,71 @@ const terms = [
   ['One invoice', 'Based on a percentage of the hire’s annual salary.'],
 ];
 const initials = (n) => n.split(' ').map((x) => x[0]).join('');
-const recruiterContact = { 'Zowie Tucker': { phone: '902-471-0166', email: 'zowie@integratedstaffing.ca' } };
+const phones = { 'Zowie Tucker': '902-471-0166' };
 ---
-<Base title="Direct hire recruitment" description="Permanent recruitment for hard-to-fill roles anywhere in Canada, with a 90-day replacement guarantee.">
-  <section class="hero on-dark">
-    <div class="wrap hero-grid">
-      <div>
-        <p class="svc svc--direct">Direct hire</p>
-        <h1>Permanent hires, searched coast to coast.</h1>
-        <p class="lead">Targeted recruitment for hard-to-fill, full-time roles. Our offices are in Atlantic Canada; our searches reach every province.</p>
-        <div class="actions">
-          <Button href="/hire/?service=direct" variant="light" size="lg">Start a search</Button>
-        </div>
-      </div>
-      <CanadaMap tone="dark" />
-    </div>
-  </section>
+<Base assistant={false} title="Direct hire recruitment" description="Permanent recruitment for hard-to-fill roles anywhere in Canada, with a 90-day replacement guarantee.">
+  <PageHero svc="direct" title="Permanent hires, searched coast to coast." lead="Targeted recruitment for hard-to-fill, full-time roles. Our offices are in Atlantic Canada; our searches reach every province.">
+    <Button href="/hire/?service=direct" size="lg">Start a search</Button>
+    <Fragment slot="aside"><CanadaMap /></Fragment>
+  </PageHero>
 
-  <section class="process">
+  <section class="section section--rule">
     <div class="wrap">
-      <h2>How a search runs</h2>
-      <ol class="steps">
+      <div class="section-head"><h2>How a search runs</h2></div>
+      <ol class="items steps">
         {steps.map(([t, d], i) => (
-          <li class:list={[i === steps.length - 1 && 'last']}>
-            <span class="num">{i + 1}</span>
-            <h3>{t}</h3>
-            <p>{d}</p>
-          </li>
+          <li class="item"><span class="num">{i + 1}</span><h3>{t}</h3><p>{d}</p></li>
         ))}
       </ol>
     </div>
   </section>
 
-  <section class="time">
+  <section class="section section--tint">
     <div class="wrap">
-      <div class="time-head">
+      <div class="section-head section-head--split">
         <h2>{retention} of our placements stay.</h2>
-        <p class="lead">The guarantee covers the other cases. Here's how the timeline runs, next to contract staffing for comparison.</p>
+        <p class="lead">The guarantee covers the rest. Here's the timeline, next to contract staffing for comparison.</p>
       </div>
       <HireClock focus="direct" />
     </div>
   </section>
 
-  <section class="terms">
-    <div class="wrap terms-grid">
-      {terms.map(([t, d]) => <div class="term"><h3>{t}</h3><p>{d}</p></div>)}
-    </div>
-  </section>
-
-  <section class="people">
+  <section class="section">
     <div class="wrap">
-      <h2>Your direct hire recruiters</h2>
-      <div class="people-grid">
-        {recruiters.map((r, i) => (
-          <a class:list={['person', i === 0 && 'person--lead']} href={`https://www.integratedstaffing.ca/${r.slug}`}>
-            <span class="shot">{r.photo
-              ? <img src={sized(r.photo, 750)} srcset={`${sized(r.photo, 500)} 500w, ${sized(r.photo, 750)} 750w, ${sized(r.photo, 1000)} 1000w`} sizes="(max-width: 960px) 50vw, 25vw" alt="" loading="lazy" decoding="async" onerror="this.remove()" />
-              : <span class="ini" aria-hidden="true">{initials(r.name)}</span>}</span>
-            <span class="pname">{r.name}</span>
-            <span class="prole">{r.role}</span>
-            {recruiterContact[r.name] && <span class="pcontact">{recruiterContact[r.name].phone}</span>}
-          </a>
-        ))}
-      </div>
+      <div class="section-head"><h2>How we work with you</h2></div>
+      <ul class="items">
+        {terms.map(([t, d]) => <li class="item item--blue"><h3>{t}</h3><p>{d}</p></li>)}
+      </ul>
     </div>
   </section>
 
-  <section class="ind">
+  <section class="section section--rule">
+    <div class="wrap">
+      <div class="section-head"><h2>Your direct hire recruiters</h2></div>
+      <ul class="people">
+        {recruiters.map((r) => (
+          <li>
+            <a href={`https://www.integratedstaffing.ca/${r.slug}`}>
+              <span class="shot">{r.photo
+                ? <img src={sized(r.photo, 750)} srcset={`${sized(r.photo, 500)} 500w, ${sized(r.photo, 750)} 750w`} sizes="(max-width: 900px) 50vw, 25vw" alt="" loading="lazy" decoding="async" onerror="this.remove()" />
+                : <span class="ini" aria-hidden="true">{initials(r.name)}</span>}</span>
+              <span class="pname">{r.name}</span>
+              <span class="prole">{r.role}</span>
+              {phones[r.name] && <span class="pphone">{phones[r.name]}</span>}
+            </a>
+          </li>
+        ))}
+      </ul>
+    </div>
+  </section>
+
+  <section class="section section--rule">
     <div class="wrap ind-grid">
-      <div>
+      <div class="section-head">
         <h2>Specialties</h2>
         <p class="lead">Twelve industries, from agriculture to executive search.</p>
       </div>
-      <IndustryMatrix initial="direct" />
-    </div>
-  </section>
-
-  <section class="voices">
-    <div class="wrap voices-grid">
-      {testimonials.slice(0, 2).map((t) => (
-        <figure><blockquote>{t.quote}</blockquote><figcaption>{t.who}</figcaption></figure>
-      ))}
+      <IndustryMatrix only="direct" />
     </div>
   </section>
 
@@ -114,70 +99,26 @@ const recruiterContact = { 'Zowie Tucker': { phone: '902-471-0166', email: 'zowi
 </Base>
 
 <style>
-  .hero { padding-block: clamp(3rem, 7vw, 6rem); }
-  .hero-grid { display: grid; grid-template-columns: 1fr 1.05fr; gap: clamp(2rem, 5vw, 5rem); align-items: center; }
-  .hero .svc { color: var(--on-dark); }
-  .hero .svc::before { background: var(--isl-blue-on-dark); }
-  .hero h1 { font-size: clamp(2.4rem, 1rem + 4.4vw, 5rem); font-weight: 700; letter-spacing: -0.035em; margin-top: var(--s4); max-width: 11ch; }
-  .hero .lead { margin-top: var(--s5); }
-  .actions { margin-top: var(--s6); }
+  .steps { grid-template-columns: repeat(5, 1fr); }
+  .steps .item { border-top-color: var(--direct); }
+  .steps .item:last-child { border-top-style: dashed; }
+  .num { display: block; font-size: 2.6rem; font-weight: 300; letter-spacing: -0.04em; line-height: 1; color: var(--direct); margin-bottom: var(--s3); }
+  .item--blue { border-top-color: var(--direct); }
 
-  .process { padding-block: var(--s9) var(--s8); }
-  .process h2 { margin-bottom: var(--s7); }
-  .steps { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(5, 1fr); }
-  .steps li { position: relative; padding: var(--s5) var(--s5) 0 0; border-top: 3px solid var(--direct); }
-  .steps li.last { border-top-style: dashed; }
-  .num { font-weight: 300; font-size: 3.2rem; letter-spacing: -0.04em; line-height: 1; color: var(--direct); display: block; margin-bottom: var(--s4); }
-  .steps h3 { margin-bottom: var(--s2); }
-  .steps p { color: var(--ink-soft); font-size: var(--fs-small); }
-
-  .time { padding-block: var(--s8); background: var(--mist); }
-  .time-head { display: grid; grid-template-columns: 1fr 1fr; gap: var(--s7); align-items: end; margin-bottom: var(--s7); }
-
-  .terms { padding-block: var(--s8) 0; }
-  .terms-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--s6); }
-  .term { border-left: 3px solid var(--direct); padding-left: var(--s5); }
-  .term h3 { margin-bottom: var(--s2); }
-  .term p { color: var(--ink-soft); font-size: var(--fs-small); }
-
-  .people { padding-block: var(--s9) var(--s8); }
-  .people h2 { margin-bottom: var(--s6); }
-  .people-grid { display: grid; grid-template-columns: 1.5fr 1fr 1fr 1fr; gap: var(--s3); align-items: start; }
-  .person {
-    display: grid; align-content: start; gap: 2px; padding: 0 0 var(--s5);
-    background: var(--mist); color: var(--ink); text-decoration: none; border-radius: var(--radius);
-    transition: background-color 150ms var(--ease);
-  }
-  .person:hover { background: #ececec; }
-  .person--lead { background: var(--dark); color: #fff; }
-  .person--lead:hover { background: var(--dark-raised); }
-  /* Headshots in a fixed frame, cropped from the top; the lead recruiter's frame is wider */
-  .shot { position: relative; display: block; aspect-ratio: 4 / 5; overflow: hidden; background: var(--line); margin-bottom: var(--s4); }
-  .person--lead .shot { aspect-ratio: 6 / 5; }
+  .people { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--s5); }
+  .people a { display: grid; gap: 2px; color: var(--ink); text-decoration: none; }
+  .people a:hover .pname { text-decoration: underline; }
+  .shot { position: relative; display: block; aspect-ratio: 4 / 5; overflow: hidden; background: var(--mist); margin-bottom: var(--s3); }
   .shot img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center 20%; }
   .ini { position: absolute; inset: 0; display: grid; place-items: center; font-size: 2rem; font-weight: 300; color: var(--ink-soft); }
-  .pname, .prole, .pcontact { padding-inline: var(--s4); }
-  .pname { font-weight: 700; font-size: 1.15rem; }
-  .prole { font-size: var(--fs-small); opacity: 0.75; }
-  .pcontact { font-size: var(--fs-small); font-weight: 500; margin-top: var(--s2); }
+  .pname { font-weight: 700; font-size: 1.1rem; }
+  .prole, .pphone { font-size: var(--fs-small); color: var(--ink-soft); }
 
-  .ind { padding-block: var(--s8); border-top: 1px solid var(--line); }
-  .ind-grid { display: grid; grid-template-columns: 4fr 7fr; gap: clamp(2rem, 6vw, 6rem); align-items: start; }
-  .ind h2 { margin-bottom: var(--s4); }
-
-  .voices { padding-block: var(--s8) var(--s9); }
-  .voices-grid { display: grid; grid-template-columns: 1.3fr 1fr; gap: var(--s7); align-items: start; }
-  .voices figure { margin: 0; }
-  .voices figure + figure { margin-top: var(--s8); }
-  .voices blockquote { margin: 0; font-size: clamp(1.2rem, 1rem + 0.8vw, 1.6rem); line-height: 1.35; }
-  .voices figcaption { margin-top: var(--s3); color: var(--ink-soft); font-weight: 500; font-size: var(--fs-small); }
+  .ind-grid { display: grid; grid-template-columns: 5fr 7fr; gap: clamp(2rem, 6vw, 6rem); align-items: start; }
 
   @media (max-width: 960px) {
-    .hero-grid, .time-head, .ind-grid, .voices-grid { grid-template-columns: 1fr; }
-    .steps { grid-template-columns: 1fr; gap: var(--s5); }
-    .terms-grid { grid-template-columns: 1fr; }
-    .people-grid { grid-template-columns: 1fr 1fr; }
-    .person--lead { grid-column: 1 / -1; }
-    .voices figure + figure { margin-top: 0; }
+    .steps { grid-template-columns: 1fr; }
+    .people { grid-template-columns: 1fr 1fr; }
+    .ind-grid { grid-template-columns: 1fr; }
   }
 </style>

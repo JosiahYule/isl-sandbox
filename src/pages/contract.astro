@@ -2,10 +2,10 @@
 // CONTRACT STAFFING  →  /contract/
 import Base from '../layouts/Base.astro';
 import Button from '../components/Button.astro';
+import PageHero from '../components/PageHero.astro';
 import HireClock from '../components/HireClock.astro';
 import IndustryMatrix from '../components/IndustryMatrix.astro';
 import CtaBand from '../components/CtaBand.astro';
-import { testimonials } from '../data/site.js';
 
 // What the single hourly rate covers (from the live About page).
 const covered = [
@@ -16,79 +16,54 @@ const covered = [
   ['Orientation', 'Company-specific orientations at no extra cost.'],
 ];
 const uses = [
-  { t: 'Vacation and leave cover', d: 'Keep the work moving while someone is away, from a week of vacation to a full maternity leave.', big: true },
-  { t: 'Seasonal peaks and volume swings', d: 'Add people when orders climb and scale back when they settle.' },
-  { t: 'Steady growth', d: 'Staff up ahead of a new contract without committing to permanent headcount.' },
-  { t: 'Try before you hire', d: 'See someone on the job first, then bring them onto your team.' },
+  ['Vacation and leave cover', 'Keep the work moving while someone is away, from a week of vacation to a full maternity leave.'],
+  ['Seasonal peaks', 'Add people when orders climb and scale back when they settle.'],
+  ['Steady growth', 'Staff up ahead of a new contract without committing to permanent headcount.'],
+  ['Try before you hire', 'See someone on the job first, then bring them onto your team.'],
 ];
 ---
-<Base title="Contract staffing" description="Pre-screened contract workers across Atlantic Canada, on site within hours of your request, for one all-inclusive hourly rate.">
-  <section class="hero">
+<Base assistant={false} title="Contract staffing" description="Pre-screened contract workers across Atlantic Canada, on site within hours of your request, for one all-inclusive hourly rate.">
+  <PageHero svc="contract" title="Pre-screened workers, on site within hours." lead="For leaves, peaks and growth. One hourly rate covers everything, and the people work on our payroll, not yours.">
+    <Button href="/hire/?service=contract" size="lg">Request workers</Button>
+  </PageHero>
+
+  <section class="section section--rule">
     <div class="wrap">
-      <p class="svc svc--contract">Contract staffing</p>
-      <h1>Pre-screened workers, on site within hours.</h1>
-      <div class="hero-foot">
-        <p class="lead">For leaves, peaks and growth. One hourly rate covers everything, and the people work on our payroll, not yours.</p>
-        <Button href="/hire/?service=contract" size="lg">Request workers</Button>
-      </div>
+      <div class="section-head"><h2>When employers call us</h2></div>
+      <ul class="items">
+        {uses.map(([t, d]) => <li class="item"><h3>{t}</h3><p>{d}</p></li>)}
+      </ul>
     </div>
   </section>
 
-  <section class="rate">
+  <section class="section section--tint">
     <div class="wrap rate-grid">
-      <div>
+      <div class="section-head">
         <h2>One rate. Everything inside it.</h2>
         <p class="lead">You get a single hourly rate per worker. These costs are already in it, so there's nothing else to track, file or pay.</p>
       </div>
-      <div class="receipt" aria-label="What the hourly rate includes">
-        <p class="receipt-head">Your hourly rate includes</p>
-        <ul>
-          {covered.map(([t, d]) => (
-            <li><span class="item">{t}</span><span class="desc">{d}</span><span class="tick" aria-hidden="true"></span></li>
-          ))}
-        </ul>
-        <p class="receipt-total"><span>Extra invoices</span><span>None</span></p>
-      </div>
+      <ul class="covered">
+        {covered.map(([t, d]) => <li><span class="c-t">{t}</span><span class="c-d">{d}</span></li>)}
+      </ul>
     </div>
   </section>
 
-  <section class="uses">
+  <section class="section">
     <div class="wrap">
-      <h2>When employers call us</h2>
-      <div class="use-grid">
-        {uses.map((u) => (
-          <article class:list={['use', u.big && 'use--big']}>
-            <h3>{u.t}</h3>
-            <p>{u.d}</p>
-          </article>
-        ))}
+      <div class="section-head">
+        <h2>Compared with a permanent search</h2>
       </div>
-    </div>
-  </section>
-
-  <section class="speed">
-    <div class="wrap">
-      <h2>Compared with a permanent search</h2>
       <HireClock focus="contract" />
     </div>
   </section>
 
-  <section class="ind">
+  <section class="section section--rule">
     <div class="wrap ind-grid">
-      <div>
+      <div class="section-head">
         <h2>Where we place contract workers</h2>
         <p class="lead">Eight industries, from warehouse floors to contact centres.</p>
       </div>
-      <IndustryMatrix initial="contract" />
-    </div>
-  </section>
-
-  <section class="voice">
-    <div class="wrap">
-      <figure>
-        <blockquote>{testimonials[0].quote}</blockquote>
-        <figcaption>{testimonials[0].who}</figcaption>
-      </figure>
+      <IndustryMatrix only="contract" />
     </div>
   </section>
 
@@ -96,56 +71,13 @@ const uses = [
 </Base>
 
 <style>
-  .hero { padding-block: clamp(3rem, 7vw, 6rem) var(--s8); border-bottom: 1px solid var(--line); }
-  .hero h1 { font-size: var(--fs-hero); font-weight: 700; letter-spacing: -0.025em; max-width: 13ch; margin-top: var(--s4); }
-  .hero-foot { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: end; gap: var(--s6); margin-top: var(--s6); }
-
-  .rate { padding-block: var(--s9) var(--s8); }
-  .rate-grid { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(2rem, 6vw, 6rem); align-items: start; }
-  .rate h2 { margin-bottom: var(--s5); max-width: 12ch; }
-  /* A receipt: the familiar format makes "it's all included" concrete */
-  .receipt {
-    background: var(--paper); border: 1.5px solid var(--ink); border-radius: var(--radius);
-    padding: var(--s6); border-top: 6px solid var(--ink);
-  }
-  .receipt-head { font-weight: 700; font-size: 1.2rem; padding-bottom: var(--s3); border-bottom: 1.5px dashed var(--ink); }
-  ul { list-style: none; margin: 0; padding: 0; }
-  li { display: grid; grid-template-columns: 1fr auto; column-gap: var(--s4); padding-block: var(--s4); border-bottom: 1px dashed var(--line); }
-  .item { font-weight: 600; }
-  .desc { grid-column: 1; font-size: var(--fs-small); color: var(--ink-soft); }
-  .tick { grid-column: 2; grid-row: 1 / span 2; align-self: center; width: 22px; height: 22px;
-    -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M4 12.5l5 5L20 6.5' fill='none' stroke='black' stroke-width='3.2'/%3E%3C/svg%3E") center / contain no-repeat;
-            mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M4 12.5l5 5L20 6.5' fill='none' stroke='black' stroke-width='3.2'/%3E%3C/svg%3E") center / contain no-repeat;
-    background: var(--ink); }
-  .receipt-total { display: flex; justify-content: space-between; margin-top: var(--s4); padding-top: var(--s3); border-top: 1.5px solid var(--ink); font-weight: 700; font-size: 1.15rem; }
-
-  .uses { padding-block: var(--s8); background: var(--mist); }
-  .uses h2 { margin-bottom: var(--s6); }
-  .use-grid { display: grid; grid-template-columns: 1.4fr 1fr 1fr; grid-template-rows: auto auto; gap: var(--s3); }
-  .use { background: var(--paper); padding: var(--s5); border-radius: var(--radius); }
-  .use--big { grid-row: span 2; background: var(--dark); color: var(--on-dark); display: flex; flex-direction: column; justify-content: flex-end; min-height: 18rem; }
-  .use--big h3 { font-size: clamp(1.6rem, 1.2rem + 1.4vw, 2.3rem); }
-  .use--big p { color: var(--on-dark-soft); }
-  .use h3 { margin-bottom: var(--s2); }
-  .use p { color: var(--ink-soft); font-size: var(--fs-small); }
-  .use:last-child { grid-column: 2 / span 2; }
-
-  .speed { padding-block: var(--s9) var(--s8); }
-  .speed h2 { margin-bottom: var(--s6); }
-
-  .ind { padding-block: var(--s8); border-top: 1px solid var(--line); }
-  .ind-grid { display: grid; grid-template-columns: 4fr 7fr; gap: clamp(2rem, 6vw, 6rem); align-items: start; }
-  .ind h2 { margin-bottom: var(--s4); }
-
-  .voice { padding-block: var(--s8) var(--s9); }
-  .voice figure { margin: 0 0 0 auto; max-width: 46rem; }
-  .voice blockquote { margin: 0; font-size: clamp(1.4rem, 1rem + 1.4vw, 2.1rem); line-height: 1.3; letter-spacing: -0.01em; }
-  .voice figcaption { margin-top: var(--s4); color: var(--ink-soft); font-weight: 500; }
-
+  .rate-grid, .ind-grid { display: grid; grid-template-columns: 5fr 7fr; gap: clamp(2rem, 6vw, 6rem); align-items: start; }
+  .covered { list-style: none; margin: 0; padding: 0; border-top: 1.5px solid var(--ink); }
+  .covered li { display: grid; grid-template-columns: 14rem 1fr; gap: var(--s4); padding-block: var(--s4); border-bottom: 1px solid var(--line); }
+  .c-t { font-weight: 600; }
+  .c-d { color: var(--ink-soft); }
   @media (max-width: 900px) {
     .rate-grid, .ind-grid { grid-template-columns: 1fr; }
-    .use-grid { grid-template-columns: 1fr; }
-    .use--big { grid-row: auto; min-height: 12rem; }
-    .use:last-child { grid-column: auto; }
+    .covered li { grid-template-columns: 1fr; gap: var(--s1); }
   }
 </style>

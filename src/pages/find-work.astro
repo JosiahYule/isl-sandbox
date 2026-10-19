@@ -5,20 +5,22 @@
 // Linking with ?q=forklift pre-fills the search (the homepage search does this).
 import Base from '../layouts/Base.astro';
 import JobRow from '../components/JobRow.astro';
+import PageHero from '../components/PageHero.astro';
 import { jobs, provinces, snapshotDate } from '../data/jobs.js';
 
 const provinceOptions = [...new Set(jobs.map((j) => j.province))]
   .map((code) => ({ code, name: provinces[code] ?? code }))
   .sort((a, b) => a.name.localeCompare(b.name));
+const PAGE = 15; // rows shown before "Show all"; search and filters always show every match
 const count = { contract: jobs.filter((j) => j.type === 'contract').length, direct: jobs.filter((j) => j.type === 'direct').length };
 ---
 <Base title="Find work" description="Contract and permanent jobs across Atlantic Canada and beyond.">
-  <section class="top">
-    <div class="wrap">
-      <h1>Find your next job.</h1>
-      <p class="lead">Contract and permanent roles across Atlantic Canada. Search below, or describe what you're after and the job assistant will find matches.</p>
-      <button type="button" class="ask" data-open-assistant>Ask the job assistant</button>
+  <PageHero title="Find your next job." lead="Contract and permanent roles across Atlantic Canada. Search the list, or describe what you're after and the job assistant will find matches.">
+    <button type="button" class="textlink" data-open-assistant>Ask the job assistant</button>
+  </PageHero>
 
+  <section class="results">
+    <div class="wrap">
       <form class="search" role="search" data-search>
         <label class="visually-hidden" for="q">Search jobs</label>
         <input id="q" name="q" type="search" placeholder="Job title, skill or city" autocomplete="off" />
@@ -33,15 +35,11 @@ const count = { contract: jobs.filter((j) => j.type === 'contract').length, dire
           <button type="button" class="t t--direct" data-type="direct" aria-pressed="false">Permanent <span>{count.direct}</span></button>
         </div>
       </form>
-    </div>
-  </section>
-
-  <section class="results">
-    <div class="wrap">
       <p class="count" aria-live="polite"><strong data-count>{jobs.length}</strong> <span data-count-label>open roles</span></p>
       <div class="list" data-list>
         {jobs.map((job) => <JobRow job={job} />)}
       </div>
+      <button type="button" class="more" data-more>Show all {jobs.length} roles</button>
       <div class="empty" data-empty hidden>
         <p class="empty-title">No roles match that search.</p>
         <p>Try a broader term or another province. Or <a href="https://www.integratedstaffing.ca/careers/general-apply">send us your resume</a> and we'll contact you when something fits.</p>
@@ -51,7 +49,7 @@ const count = { contract: jobs.filter((j) => j.type === 'contract').length, dire
     </div>
   </section>
 
-  <section class="general on-dark">
+  <section class="section section--tint general">
     <div class="wrap general-grid">
       <h2>Don't see the right role?</h2>
       <div>
@@ -71,18 +69,24 @@ const count = { contract: jobs.filter((j) => j.type === 'contract').length, dire
   const countEl = document.querySelector('[data-count]');
   const labelEl = document.querySelector('[data-count-label]');
   const empty = document.querySelector('[data-empty]');
+  const more = document.querySelector('[data-more]');
+  const PAGE = 15;
   let type = '';
+  let expanded = false;
 
   function apply() {
     const term = q.value.trim().toLowerCase();
+    const filtering = !!(term || prov.value || type);
     let shown = 0;
     rows.forEach((r) => {
       const ok = (!term || r.dataset.search.includes(term))
         && (!prov.value || r.dataset.province === prov.value)
         && (!type || r.dataset.type === type);
-      r.hidden = !ok;
       if (ok) shown++;
+      // Without a search or filter, show the newest PAGE roles until "Show all" is pressed
+      r.hidden = !ok || (!filtering && !expanded && shown > PAGE);
     });
+    more.hidden = filtering || expanded || shown <= PAGE;
     countEl.textContent = shown;
     labelEl.textContent = shown === 1 ? 'open role' : 'open roles';
     empty.hidden = shown > 0;
@@ -97,6 +101,7 @@ const count = { contract: jobs.filter((j) => j.type === 'contract').length, dire
     typeButtons.forEach((x) => x.setAttribute('aria-pressed', String(x === b)));
     apply();
   }));
+  more.addEventListener('click', () => { expanded = true; apply(); rows[PAGE]?.querySelector('a')?.focus(); });
   document.querySelector('[data-reset]').addEventListener('click', () => {
     q.value = ''; prov.value = ''; type = '';
     typeButtons.forEach((x, i) => x.setAttribute('aria-pressed', String(i === 0)));
@@ -106,18 +111,9 @@ const count = { contract: jobs.filter((j) => j.type === 'contract').length, dire
 </script>
 
 <style>
-  .top { padding-block: clamp(3rem, 7vw, 6rem) var(--s6); background: var(--mist); }
-  .top h1 { font-size: var(--fs-hero); font-weight: 700; letter-spacing: -0.025em; }
-  .top .lead { margin-top: var(--s4); }
-  .ask {
-    margin-top: var(--s4); font: inherit; font-weight: 600; cursor: pointer; padding: 0;
-    background: none; border: 0; color: var(--isl-blue); text-decoration: underline; text-underline-offset: 0.2em;
-  }
-  .ask:hover { color: var(--isl-blue-deep); text-decoration-thickness: 2px; }
-
   .search {
     display: grid; grid-template-columns: 1fr 14rem auto; gap: var(--s2);
-    margin-top: var(--s7); padding: var(--s2); background: var(--paper);
+    margin-bottom: var(--s6); padding: var(--s2); background: var(--paper);
     border: 1.5px solid var(--ink); border-radius: var(--radius);
   }
   .search input, .search select {
@@ -125,7 +121,7 @@ const count = { contract: jobs.filter((j) => j.type === 'contract').length, dire
   }
   .search select { border-left: 1px solid var(--line); cursor: pointer; }
   .search input:focus, .search select:focus { outline: 2px solid var(--isl-blue); outline-offset: -2px; }
-  .types { display: flex; gap: 4px; background: var(--mist); padding: 4px; border-radius: var(--radius); }
+  .types { display: flex; gap: 4px; padding: 4px; border-left: 1px solid var(--line); }
   .t {
     font: inherit; font-size: var(--fs-small); font-weight: 600; cursor: pointer; white-space: nowrap;
     display: inline-flex; align-items: center; gap: var(--s2);
@@ -138,7 +134,7 @@ const count = { contract: jobs.filter((j) => j.type === 'contract').length, dire
   .t--contract[aria-pressed='true'] span { color: rgb(255 255 255 / 0.7); }
   .t--direct[aria-pressed='true'] { background: var(--direct); }
 
-  .results { padding-block: var(--s6) var(--s8); }
+  .results { padding-block: 0 clamp(4rem, 8vw, 6.5rem); }
   .count { font-size: var(--fs-small); color: var(--ink-soft); margin-bottom: var(--s3); }
   .count strong { font-weight: 700; font-size: 1.4rem; color: var(--ink); margin-right: 0.2em; }
   .list { border-top: 1.5px solid var(--ink); }
@@ -149,17 +145,22 @@ const count = { contract: jobs.filter((j) => j.type === 'contract').length, dire
     margin-top: var(--s4); font: inherit; font-weight: 600; cursor: pointer;
     padding: 0.7rem 1.1rem; border: 2px solid var(--ink); border-radius: var(--radius); background: transparent;
   }
+  .more {
+    margin-top: var(--s5); font: inherit; font-weight: 600; cursor: pointer;
+    padding: 0.8rem 1.35rem; border: 2px solid var(--ink); background: transparent; color: var(--ink);
+  }
+  .more:hover { background: var(--ink); color: #fff; }
+  .more[hidden] { display: none; }
   .note { margin-top: var(--s5); font-size: var(--fs-tiny); color: var(--ink-soft); }
 
-  .general { padding-block: var(--s8); }
   .general-grid { display: grid; grid-template-columns: 1fr 1fr; gap: var(--s7); align-items: end; }
-  .apply { display: inline-block; margin-top: var(--s5); font-weight: 600; background: #fff; color: var(--dark) !important; text-decoration: none; padding: 0.9rem 1.4rem; border-radius: var(--radius); }
-  .apply:hover { background: var(--isl-blue-tint); }
+  .apply { display: inline-block; margin-top: var(--s5); font-weight: 600; background: var(--isl-blue); color: #fff; text-decoration: none; padding: 0.9rem 1.4rem; }
+  .apply:hover { background: var(--isl-blue-deep); color: #fff; }
 
   @media (max-width: 860px) {
     .search { grid-template-columns: 1fr; }
     .search select { border-left: 0; border-top: 1px solid var(--line); }
-    .types { overflow-x: auto; }
+    .types { overflow-x: auto; border-left: 0; border-top: 1px solid var(--line); }
     .general-grid { grid-template-columns: 1fr; }
   }
 </style>

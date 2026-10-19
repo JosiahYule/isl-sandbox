@@ -1,25 +1,25 @@
 ---
 // HOMEPAGE  →  /
+// Six sections, each built from the shared section system in global.css:
+// hero, two ways to hire, where we are, proof, open roles, closing call to action.
 import Base from '../layouts/Base.astro';
 import Button from '../components/Button.astro';
 import AtlanticMap from '../components/AtlanticMap.astro';
 import HireClock from '../components/HireClock.astro';
-import IndustryMatrix from '../components/IndustryMatrix.astro';
 import JobRow from '../components/JobRow.astro';
 import CtaBand from '../components/CtaBand.astro';
 import Photo from '../components/Photo.astro';
 import { photos } from '../data/photos.js';
-import { testimonials, stats, brand, offices } from '../data/site.js';
+import { testimonials, stats, brand } from '../data/site.js';
 import { jobs } from '../data/jobs.js';
 import { url } from '../lib/url.js';
 
-const [lead, ...others] = testimonials;
+const quote = testimonials[0];
 const reviews = stats.find((s) => s.label.includes('reviews'))?.value ?? '200+';
 const latest = jobs.slice(0, 5);
-const tel = (n) => `tel:+1${n.replaceAll('-', '')}`;
 ---
 <Base>
-  <!-- HERO: the promise on the left, ISL's own photo bleeding off the right edge -->
+  <!-- 1. HERO: the promise on the left, ISL's own photo running off the right edge -->
   <section class="hero">
     <div class="wrap hero-grid">
       <div class="hero-copy">
@@ -39,91 +39,72 @@ const tel = (n) => `tel:+1${n.replaceAll('-', '')}`;
     </div>
   </section>
 
-  <!-- THE CLOCK: both services on one time axis -->
-  <section class="clock-section">
+  <!-- 2. TWO WAYS TO HIRE: the two services, then both on one timeline -->
+  <section class="section services">
     <div class="wrap">
       <div class="section-head">
-        <h2>Two services. Two very different clocks.</h2>
-        <p class="lead">Contract staffing closes a gap fast. A permanent search takes longer because it goes deeper, and the guarantee keeps covering you after your new hire starts.</p>
+        <h2>Two ways to hire.</h2>
       </div>
-      <HireClock />
-    </div>
-  </section>
-
-  <!-- LOCAL: where the offices are, and the people in them -->
-  <section class="local">
-    <div class="wrap local-grid">
-      <div class="local-copy">
-        <h2>Five offices across Atlantic Canada.</h2>
-        <p class="lead">Locally owned and operated. Call the office nearest you and you'll talk to a recruiter who knows that market.</p>
-        <ul class="office-list">
-          {offices.map((o) => (
-            <li><span class="o-city">{o.city}, {o.province}</span><a href={tel(o.phone)}>{o.phone}</a></li>
-          ))}
-        </ul>
-      </div>
-      <AtlanticMap id="home-map" />
-    </div>
-    <div class="wrap people">
-      <Photo class="p-wide" src={photos.teamNL.src} alt={photos.teamNL.alt} ratio="3/2" sizes="(max-width: 900px) 100vw, 50vw" caption="Our Newfoundland and Labrador team, December 2025" />
-      <Photo class="p-tall" src={photos.chamberAwards.src} alt={photos.chamberAwards.alt} ratio="4/5" sizes="(max-width: 900px) 50vw, 25vw" caption="At the Chamber Awards" />
-      <div class="p-last">
-        <Photo src={photos.evanFirstYear.src} alt={photos.evanFirstYear.alt} ratio="1/1" sizes="(max-width: 900px) 50vw, 25vw" caption="Celebrating Evan's first year" />
-        <a class="meet" href={url('/team/')}>Meet the team</a>
-      </div>
-    </div>
-  </section>
-
-  <!-- INDUSTRIES: which service covers what -->
-  <section class="industries">
-    <div class="wrap ind-grid">
-      <div class="ind-head">
-        <h2>Fifteen industries, and how we staff each one.</h2>
-        <p>Five industries use both services. Filter to see where contract staffing or direct hire fits on its own.</p>
-        <div class="ind-links">
-          <a href={url('/contract/')}>How contract staffing works</a>
-          <a href={url('/direct-hire/')}>How direct hire works</a>
+      <div class="items items--2">
+        <div class="item">
+          <p class="svc svc--contract">Contract staffing</p>
+          <h3>Cover a gap, a leave or a busy season.</h3>
+          <p>Pre-screened workers on site within hours of your request, for one all-inclusive hourly rate.</p>
+          <a class="more" href={url('/contract/')}>How contract staffing works</a>
+        </div>
+        <div class="item item--direct">
+          <p class="svc svc--direct">Direct hire</p>
+          <h3>Find a permanent hire, anywhere in Canada.</h3>
+          <p>A targeted search for hard-to-fill roles, with retainer pricing and a 90-day replacement guarantee.</p>
+          <a class="more" href={url('/direct-hire/')}>How direct hire works</a>
         </div>
       </div>
-      <IndustryMatrix compact />
-    </div>
-  </section>
-
-  <!-- PROOF: one quote carries the weight; the review count sits beside it -->
-  <section class="proof">
-    <div class="wrap proof-grid">
-      <figure class="big-quote on-dark">
-        <blockquote>{lead.quote}</blockquote>
-        <figcaption>{lead.who}</figcaption>
-      </figure>
-      <div class="proof-side">
-        <p class="reviews"><strong>{reviews}</strong> five-star reviews on Google from clients and candidates.</p>
-        {others.map((t) => (
-          <figure class="small-quote">
-            <blockquote>{t.quote}</blockquote>
-            <figcaption>{t.who}</figcaption>
-          </figure>
-        ))}
+      <div class="timeline">
+        <HireClock />
       </div>
     </div>
   </section>
 
-  <!-- JOBS: for job seekers -->
-  <section class="jobs">
+  <!-- 3. WHERE WE ARE: the map and the people in those offices -->
+  <section class="section section--tint local">
     <div class="wrap">
-      <div class="jobs-head">
+      <div class="section-head">
+        <h2>Five offices across Atlantic Canada.</h2>
+        <p class="lead">Locally owned and operated. Select an office on the map for its address and phone number.</p>
+      </div>
+    </div>
+    <div class="wrap local-grid">
+      <AtlanticMap id="home-map" />
+      <div class="local-photo">
+        <Photo src={photos.teamNL.src} alt={photos.teamNL.alt} ratio="4/5" sizes="(max-width: 900px) 100vw, 36vw" caption="Our Newfoundland and Labrador team, December 2025" />
+        <a class="more" href={url('/team/')}>Meet the team</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4. PROOF: one client quote, with the review count beside it -->
+  <section class="section proof">
+    <div class="wrap proof-grid">
+      <figure class="quote">
+        <blockquote>{quote.quote}</blockquote>
+        <figcaption>{quote.who}</figcaption>
+      </figure>
+      <p class="reviews"><strong>{reviews}</strong> five-star reviews on Google from clients and candidates.</p>
+    </div>
+  </section>
+
+  <!-- 5. OPEN ROLES: for job seekers -->
+  <section class="section section--rule jobs">
+    <div class="wrap">
+      <div class="section-head section-head--split">
         <h2>Open roles</h2>
-        <div class="key" aria-label="Colour key">
-          <span class="svc svc--contract">Contract</span>
-          <span class="svc svc--direct">Permanent</span>
-        </div>
+        <p class="jobs-intro">{jobs.length} open now across Atlantic Canada. Not sure what to search for? <button type="button" class="textlink" data-open-assistant>Ask the job assistant</button>.</p>
       </div>
       <div class="job-list">
         {latest.map((job) => <JobRow job={job} />)}
       </div>
       <div class="jobs-foot">
-        <Button href="/find-work/" variant="outline">See all open roles</Button>
-        <p>Not sure what to search for? <button type="button" class="ask" data-open-assistant>Describe it to the job assistant</button> and it will find matches.</p>
+        <Button href="/find-work/" variant="outline">See all {jobs.length} open roles</Button>
       </div>
     </div>
   </section>
@@ -132,7 +113,7 @@ const tel = (n) => `tel:+1${n.replaceAll('-', '')}`;
 </Base>
 
 <style>
-  /* ---------- Hero ---------- */
+  /* ---------- 1. Hero ---------- */
   .hero { position: relative; }
   .hero-grid { min-height: min(84vh, 820px); display: grid; align-items: center; padding-block: var(--s8) var(--s9); }
   .hero-copy { max-width: 600px; position: relative; z-index: 2; }
@@ -146,11 +127,9 @@ const tel = (n) => `tel:+1${n.replaceAll('-', '')}`;
   .hero .lead { margin-top: var(--s6); max-width: 40ch; }
   .actions { display: flex; flex-wrap: wrap; gap: var(--s3); margin-top: var(--s7); }
 
-  /* The photo runs off the right edge and drops past the hero into the next section:
-     a deliberate break in the grid that ties the opening image to what follows. */
-  .hero-photo {
-    position: absolute; z-index: 1; top: 0; bottom: -6rem; right: 0; width: min(46vw, 760px);
-  }
+  /* The one deliberate break in the site's grid: the photo runs off the right edge
+     and drops past the hero into the next section. */
+  .hero-photo { position: absolute; z-index: 1; top: 0; bottom: -6rem; right: 0; width: min(46vw, 760px); }
   .hero-photo :global(.photo), .hero-photo :global(.frame) { height: 100%; }
   .hero-photo :global(.frame) { aspect-ratio: auto !important; }
 
@@ -163,66 +142,31 @@ const tel = (n) => `tel:+1${n.replaceAll('-', '')}`;
     .hero-photo :global(.frame) { aspect-ratio: 4 / 3 !important; }
   }
 
-  /* ---------- Clock ---------- */
-  .clock-section { padding-block: calc(var(--s9) + 2rem) var(--s8); }
-  @media (min-width: 901px) { .clock-section .section-head { max-width: 52%; grid-template-columns: 1fr; gap: var(--s4); } }
-  .section-head { display: grid; grid-template-columns: 1fr 1fr; gap: var(--s7); align-items: end; margin-bottom: var(--s7); }
-  .section-head h2 { max-width: 14ch; }
-  @media (max-width: 860px) { .section-head { grid-template-columns: 1fr; gap: var(--s4); } }
+  /* ---------- 2. Services ---------- */
+  .services { padding-top: calc(clamp(4rem, 8vw, 6.5rem) + 3rem); }
+  @media (min-width: 901px) { .services .section-head { max-width: 52%; } .services .items { grid-template-columns: 1fr 1fr; } }
+  .item--direct { border-top-color: var(--direct); }
+  .item h3 { font-size: 1.4rem; letter-spacing: -0.02em; margin-top: var(--s2); }
+  .timeline { margin-top: clamp(3rem, 6vw, 5rem); }
 
-  /* ---------- Local: offices + people ---------- */
-  .local { padding-block: var(--s8) var(--s9); border-top: 1px solid var(--line); }
-  .local-grid { display: grid; grid-template-columns: 5fr 6fr; gap: clamp(2rem, 5vw, 5rem); align-items: center; }
-  .local h2 { max-width: 12ch; margin-bottom: var(--s5); }
-  .office-list { list-style: none; margin: var(--s6) 0 0; padding: 0; border-top: 1.5px solid var(--ink); }
-  .office-list li { display: flex; justify-content: space-between; gap: var(--s4); padding-block: var(--s3); border-bottom: 1px solid var(--line); }
-  .o-city { font-weight: 600; }
-  .office-list a { color: var(--ink); font-variant-numeric: tabular-nums; }
-  .people { display: grid; grid-template-columns: 2fr 1fr 1fr; gap: var(--s4); align-items: end; margin-top: var(--s8); }
-  .p-last { display: grid; gap: var(--s4); }
-  .meet { font-weight: 600; }
-  @media (max-width: 900px) {
-    .local-grid { grid-template-columns: 1fr; }
-    .people { grid-template-columns: 1fr 1fr; }
-    .people :global(.p-wide) { grid-column: 1 / -1; }
-  }
+  /* ---------- 3. Local ---------- */
+  .local-grid { display: grid; grid-template-columns: 7fr 4fr; gap: clamp(2rem, 5vw, 5rem); align-items: start; }
+  .local-photo { display: grid; gap: var(--s4); }
+  .more { font-weight: 600; }
+  @media (max-width: 900px) { .local-grid { grid-template-columns: 1fr; } }
 
-  /* ---------- Industries ---------- */
-  .industries { background: var(--mist); padding-block: var(--s8) calc(var(--s9) + 4rem); }
-  .ind-grid { display: grid; grid-template-columns: 4fr 7fr; gap: clamp(2rem, 6vw, 6rem); align-items: start; }
-  .ind-head { position: sticky; top: 110px; }
-  .ind-head h2 { margin-bottom: var(--s5); }
-  .ind-head p { color: var(--ink-soft); max-width: 36ch; }
-  .ind-links { display: grid; gap: var(--s2); margin-top: var(--s5); font-weight: 500; }
-  @media (max-width: 900px) { .ind-grid { grid-template-columns: 1fr; } .ind-head { position: static; } }
+  /* ---------- 4. Proof ---------- */
+  .proof-grid { display: grid; grid-template-columns: 7fr 4fr; gap: clamp(2rem, 5vw, 5rem); align-items: end; }
+  .quote { margin: 0; }
+  .quote blockquote { margin: 0; font-size: clamp(1.4rem, 1rem + 1.4vw, 2.1rem); font-weight: 300; line-height: 1.35; letter-spacing: -0.015em; }
+  .quote figcaption { margin-top: var(--s5); color: var(--ink-soft); font-weight: 500; }
+  .reviews { font-size: var(--fs-small); color: var(--ink-soft); border-top: 1.5px solid var(--ink); padding-top: var(--s4); }
+  .reviews strong { display: block; color: var(--isl-blue); font-weight: 300; font-size: clamp(3.4rem, 2rem + 4vw, 5.2rem); letter-spacing: -0.05em; line-height: 0.95; margin-bottom: var(--s2); }
+  @media (max-width: 900px) { .proof-grid { grid-template-columns: 1fr; } }
 
-  /* ---------- Proof ---------- */
-  /* The quote block rises into the section above on purpose: it bridges "what we do" and "what clients say". */
-  .proof { padding-bottom: var(--s8); }
-  .proof-grid { display: grid; grid-template-columns: 7fr 5fr; gap: clamp(2rem, 5vw, 5rem); align-items: start; }
-  .big-quote { margin: -8rem 0 0; padding: clamp(2rem, 4vw, 3.5rem); border-radius: var(--radius); }
-  .big-quote blockquote { margin: 0; font-size: clamp(1.4rem, 1rem + 1.5vw, 2.15rem); line-height: 1.3; font-weight: 400; letter-spacing: -0.01em; }
-  .big-quote figcaption { margin-top: var(--s5); color: var(--on-dark-soft); font-weight: 500; }
-  .proof-side { padding-top: var(--s7); display: grid; gap: var(--s6); }
-  .reviews { font-size: var(--fs-lead); color: var(--ink-soft); line-height: 1.4; }
-  .reviews strong {
-    display: block; color: var(--isl-blue); font-weight: 300; font-size: clamp(3.4rem, 2rem + 4vw, 5.6rem); letter-spacing: -0.05em; line-height: 0.9;
-  }
-  .small-quote { margin: 0; padding-top: var(--s5); border-top: 1px solid var(--line); }
-  .small-quote blockquote { margin: 0; font-size: 1.05rem; }
-  .small-quote figcaption { margin-top: var(--s2); font-size: var(--fs-small); color: var(--ink-soft); font-weight: 500; }
-  @media (max-width: 900px) {
-    .proof-grid { grid-template-columns: 1fr; }
-    .big-quote { margin-top: -5rem; }
-    .proof-side { padding-top: 0; }
-  }
-
-  /* ---------- Jobs ---------- */
-  .jobs { padding-block: var(--s8) var(--s9); border-top: 1px solid var(--line); }
-  .jobs-head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: end; gap: var(--s4); margin-bottom: var(--s5); }
-  .key { display: flex; gap: var(--s5); }
+  /* ---------- 5. Jobs ---------- */
+  .jobs-intro { color: var(--ink-soft); max-width: 44ch; justify-self: end; }
   .job-list { border-top: 1.5px solid var(--ink); }
-  .jobs-foot { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s5); margin-top: var(--s6); }
-  .jobs-foot p { color: var(--ink-soft); max-width: 50ch; }
-  .ask { font: inherit; font-weight: 600; cursor: pointer; padding: 0; background: none; border: 0; color: var(--isl-blue); text-decoration: underline; text-underline-offset: 0.2em; }
+  .jobs-foot { margin-top: var(--s6); }
+  @media (max-width: 860px) { .jobs-intro { justify-self: start; } }
 </style>

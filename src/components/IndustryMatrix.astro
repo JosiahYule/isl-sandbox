@@ -3,10 +3,15 @@
 // Every industry ISL places in, with a marker for each service that covers it.
 // The filter buttons dim the industries a service doesn't cover.
 // Props: initial: "all" (default) | "contract" | "direct"
-//        compact: hide the one-line descriptions (used on the homepage)
+//        compact: hide the one-line descriptions
+//        only: "contract" | "direct" lists just that service's industries, as a plain hairline list
+//              (used on the service pages, where the other service's rows would only be noise)
 import { industries } from '../data/industries.js';
 
-const { initial = 'all', compact = false } = Astro.props;
+const { initial = 'all', compact = false, only } = Astro.props;
+const other = { contract: 'direct', direct: 'contract' }[only];
+const otherLabel = { contract: 'Contract staffing too', direct: 'Direct hire too' }[other];
+const listed = only ? industries.filter((i) => i[only]) : [];
 const count = { all: industries.length, contract: industries.filter((i) => i.contract).length, direct: industries.filter((i) => i.direct).length };
 const filters = [
   { key: 'all', label: 'All industries' },
@@ -14,6 +19,17 @@ const filters = [
   { key: 'direct', label: 'Direct hire' },
 ];
 ---
+{only ? (
+<ul class="list">
+  {listed.map((i) => (
+    <li>
+      <span class="name">{i.name}</span>
+      <span class="note">{i.note}</span>
+      {i[other] && <span class:list={['svc', `svc--${other}`, 'also']}>{otherLabel}</span>}
+    </li>
+  ))}
+</ul>
+) : (
 <div class:list={['matrix', compact && 'matrix--compact']} data-matrix data-filter={initial}>
   <div class="filters" role="group" aria-label="Show industries by service">
     {filters.map((f) => (
@@ -42,6 +58,7 @@ const filters = [
     </tbody>
   </table>
 </div>
+)}
 
 <script>
   document.querySelectorAll('[data-matrix]').forEach((m) => {
@@ -99,7 +116,14 @@ const filters = [
   [data-filter='contract'] tbody tr[data-contract='false'],
   [data-filter='direct'] tbody tr[data-direct='false'] { opacity: 0.28; }
 
+  .list { list-style: none; margin: 0; padding: 0; border-top: 1.5px solid var(--ink); }
+  .list li { display: grid; grid-template-columns: minmax(0, 1fr) auto; column-gap: var(--s5); padding-block: var(--s4); border-bottom: 1px solid var(--line); }
+  .list .note { grid-column: 1; }
+  .also { grid-column: 2; grid-row: 1; align-self: start; font-size: var(--fs-tiny); color: var(--ink-soft); font-weight: 500; white-space: nowrap; }
+
   @media (max-width: 640px) {
+    .list li { grid-template-columns: 1fr; }
+    .also { grid-column: 1; grid-row: auto; margin-top: var(--s2); }
     .c { width: 4.5rem; }
     thead th.c { font-size: 0.7rem; }
     .note { display: none; }

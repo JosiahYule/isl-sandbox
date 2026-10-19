@@ -2,6 +2,7 @@
 // CONTACT  →  /contact/
 import Base from '../layouts/Base.astro';
 import AtlanticMap from '../components/AtlanticMap.astro';
+import PageHero from '../components/PageHero.astro';
 import { brand, offices } from '../data/site.js';
 import { url } from '../lib/url.js';
 
@@ -13,30 +14,28 @@ const routes = [
 ];
 ---
 <Base title="Contact" description="Contact Integrated Staffing in Halifax, Moncton, Saint John, Charlottetown and St. John's.">
-  <section class="hero">
+  <PageHero title="Talk to the office nearest you." lead="Or start with what you need, and we'll route you to the right recruiter." />
+
+  <section class="section section--rule">
     <div class="wrap">
-      <h1>Talk to the office nearest you.</h1>
-      <p class="lead">Or start with what you need, and we'll route you to the right recruiter. General inquiries: <a href={`mailto:${brand.email}`}>{brand.email}</a></p>
+      <ul class="items">
+        {routes.map((r) => (
+          <li class:list={['item', r.kind === 'primary' && 'item--blue']}>
+            <h2 class="r-title">{r.t}</h2>
+            <p>{r.d}</p>
+            <a class="more" href={r.href}>{r.cta}</a>
+          </li>
+        ))}
+      </ul>
+      <p class="email">General inquiries: <a href={`mailto:${brand.email}`}>{brand.email}</a></p>
     </div>
   </section>
 
-  <section class="routes">
-    <div class="wrap route-grid">
-      {routes.map((r) => (
-        <a class:list={['route', r.kind === 'primary' && 'route--primary']} href={r.href}>
-          <h2>{r.t}</h2>
-          <p>{r.d}</p>
-          <span class="go">{r.cta}</span>
-        </a>
-      ))}
-    </div>
-  </section>
-
-  <section class="offices">
+  <section class="section section--tint">
     <div class="wrap off-grid">
       <AtlanticMap id="contact-map" />
       <div>
-        <h2>Our offices</h2>
+        <div class="section-head"><h2>Our offices</h2></div>
         <table>
           <caption class="visually-hidden">Office addresses and phone numbers</caption>
           <tbody>
@@ -55,37 +54,20 @@ const routes = [
 </Base>
 
 <style>
-  .hero { padding-block: clamp(3rem, 7vw, 6rem) var(--s6); }
-  .hero h1 { font-size: var(--fs-hero); font-weight: 700; letter-spacing: -0.025em; max-width: 12ch; }
-  .hero .lead { margin-top: var(--s5); }
+  .r-title { font-size: 1.4rem; letter-spacing: -0.02em; margin-bottom: var(--s2); }
+  .item--blue { border-top-color: var(--isl-blue); }
+  .email { margin-top: var(--s7); color: var(--ink-soft); }
 
-  .routes { padding-bottom: var(--s8); }
-  .route-grid { display: grid; grid-template-columns: 1.3fr 1fr 1fr; gap: var(--s3); }
-  .route {
-    display: flex; flex-direction: column; min-height: 15rem; padding: var(--s6) var(--s5);
-    background: var(--mist); color: var(--ink); text-decoration: none; border-radius: var(--radius);
-    transition: background-color 150ms var(--ease);
-  }
-  .route:hover { background: #ececec; }
-  .route--primary { background: var(--dark); color: #fff; }
-  .route--primary:hover { background: var(--dark-raised); }
-  .route h2 { font-size: clamp(1.4rem, 1.1rem + 0.9vw, 1.9rem); margin-bottom: var(--s3); }
-  .route p { opacity: 0.8; font-size: var(--fs-small); flex: 1; }
-  .go { margin-top: var(--s5); font-weight: 600; text-decoration: underline; text-underline-offset: 0.2em; }
-
-  .offices { padding-block: var(--s8) var(--s9); border-top: 1px solid var(--line); }
   .off-grid { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(2rem, 5vw, 5rem); align-items: center; }
-  .offices h2 { margin-bottom: var(--s5); }
   table { width: 100%; border-collapse: collapse; border-top: 1.5px solid var(--ink); }
   th, td { text-align: left; vertical-align: top; padding: var(--s4) var(--s3) var(--s4) 0; border-bottom: 1px solid var(--line); font-size: var(--fs-small); }
   th { font-weight: 700; font-size: 1.05rem; white-space: nowrap; }
-  th span { display: block; font-weight: 500; font-size: var(--fs-tiny); color: var(--ink-soft); }
+  th span { display: block; font-weight: 400; font-size: var(--fs-tiny); color: var(--ink-soft); }
   td:last-child { padding-right: 0; font-weight: 600; }
   td a { color: var(--ink); }
 
   @media (max-width: 900px) {
-    .route-grid, .off-grid { grid-template-columns: 1fr; }
-    .route { min-height: 0; }
+    .off-grid { grid-template-columns: 1fr; }
     tr { display: grid; grid-template-columns: 1fr auto; border-bottom: 1px solid var(--line); }
     th, td { border: 0; padding-block: var(--s2); }
     td:nth-child(2) { grid-column: 1 / -1; grid-row: 2; padding-top: 0; }

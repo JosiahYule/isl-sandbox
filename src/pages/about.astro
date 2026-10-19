@@ -2,18 +2,19 @@
 // ABOUT  →  /about/
 import Base from '../layouts/Base.astro';
 import Button from '../components/Button.astro';
+import PageHero from '../components/PageHero.astro';
 import AtlanticMap from '../components/AtlanticMap.astro';
 import CtaBand from '../components/CtaBand.astro';
-import { brand, offices, images } from '../data/site.js';
 import Photo from '../components/Photo.astro';
 import { photos } from '../data/photos.js';
+import { brand, images } from '../data/site.js';
 
 const years = new Date().getFullYear() - brand.since;
 const practices = [
-  { t: 'Screening built for the role', d: 'Typing and dexterity tests and company-specific orientations, at no extra cost.', wide: true },
-  { t: 'Contract: one hourly rate', d: 'A single, all-inclusive rate per worker.' },
-  { t: 'Direct hire: one invoice', d: 'A percentage of the hire’s annual salary, agreed upfront.' },
-  { t: 'Workers’ compensation, handled', d: 'Payroll remittances, claims, and safe, timely return to work with the Workers’ Compensation Board.', wide: true },
+  ['Screening built for the role', 'Typing and dexterity tests and company-specific orientations, at no extra cost.'],
+  ['Contract: one hourly rate', 'A single, all-inclusive rate per worker.'],
+  ['Direct hire: one invoice', 'A percentage of the hire’s annual salary, agreed upfront.'],
+  ['Workers’ compensation, handled', 'Payroll remittances, claims, and safe, timely return to work.'],
 ];
 const values = [
   ['Impact', 'A placement should make a measurable difference for the employer and the person hired.'],
@@ -21,55 +22,48 @@ const values = [
   ['Honesty', 'Clear terms and straight answers, before and after the hire.'],
   ['Communication', 'Responsive at every stage, including after someone starts.'],
 ];
+const gallery = [
+  [photos.chamberAwards, 'At the Chamber Awards'],
+  [photos.megZowie, 'Meg and Zowie'],
+  [photos.evanFirstYear, "Celebrating Evan's first year"],
+  [photos.chamberTrio, 'Erika, Meg and Shelley at the Chamber Awards'],
+  [photos.christmasTree, 'Beside the office Christmas tree'],
+  [photos.teamMembers, 'Members of the team'],
+];
 ---
 <Base title="About" description="Locally owned and operated recruiting and staffing in Atlantic Canada since 2013.">
-  <section class="hero">
-    <div class="wrap">
-      <h1>The right fit, for both sides of the hire.</h1>
-      <div class="hero-foot">
-        <p class="lead">{brand.name} is locally owned and operated. For {years} years we've matched Atlantic Canadian employers with the people they need, on contract and permanently.</p>
-        <div class="actions">
-          <Button href="/hire/">I'm hiring</Button>
-          <Button href="/find-work/" variant="outline">I'm looking for work</Button>
-        </div>
-      </div>
-    </div>
-    <div class="hero-photo">
-      <Photo src={photos.teamTogether.src} alt={photos.teamTogether.alt} ratio="21/9" sizes="(max-width: 900px) 100vw, 85vw" eager />
-    </div>
-  </section>
+  <PageHero title="The right fit, for both sides of the hire." lead={`${brand.name} is locally owned and operated. For ${years} years we've matched Atlantic Canadian employers with the people they need, on contract and permanently.`}>
+    <Button href="/hire/">I'm hiring</Button>
+    <Button href="/find-work/" variant="outline">I'm looking for work</Button>
+  </PageHero>
 
-  <section class="where on-dark">
+  <div class="wrap">
+    <Photo src={photos.teamTogether.src} alt={photos.teamTogether.alt} ratio="21/9" sizes="(max-width: 1280px) 100vw, 1200px" eager />
+  </div>
+
+  <section class="section">
     <div class="wrap where-grid">
-      <div class="where-copy">
+      <div class="section-head">
         <h2>Five offices across four provinces.</h2>
-        <p class="lead">Headquartered in Dartmouth, with teams in New Brunswick, Prince Edward Island, and Newfoundland and Labrador. Select an office on the map for its address and phone number.</p>
-        <ul class="office-list">
-          {offices.map((o) => <li><span>{o.city}</span><span>{o.province}</span></li>)}
-        </ul>
+        <p class="lead">Headquartered in Dartmouth, with teams in New Brunswick, Prince Edward Island, and Newfoundland and Labrador.</p>
       </div>
-      <AtlanticMap tone="dark" id="about-map" />
+      <AtlanticMap id="about-map" />
     </div>
   </section>
 
-  <section class="how">
+  <section class="section section--tint">
     <div class="wrap">
-      <h2>How we work</h2>
-      <div class="how-grid">
-        {practices.map((p) => (
-          <article class:list={['practice', p.wide && 'practice--wide']}>
-            <h3>{p.t}</h3>
-            <p>{p.d}</p>
-          </article>
-        ))}
-      </div>
+      <div class="section-head"><h2>How we work</h2></div>
+      <ul class="items">
+        {practices.map(([t, d]) => <li class="item"><h3>{t}</h3><p>{d}</p></li>)}
+      </ul>
     </div>
   </section>
 
-  <section class="values">
+  <section class="section">
     <div class="wrap">
-      <h2 class="visually-hidden">Our values</h2>
-      <dl>
+      <div class="section-head"><h2>What we value</h2></div>
+      <dl class="values">
         {values.map(([t, d]) => (
           <div class="value"><dt>{t}</dt><dd>{d}</dd></div>
         ))}
@@ -77,30 +71,29 @@ const values = [
     </div>
   </section>
 
-  <section class="gallery">
+  <section class="section section--rule">
     <div class="wrap">
-      <h2>The people behind the placements</h2>
-      <div class="g-grid">
-        <Photo class="g1" src={photos.chamberAwards.src} alt={photos.chamberAwards.alt} ratio="4/3" sizes="(max-width: 900px) 100vw, 50vw" caption="At the Chamber Awards" />
-        <Photo class="g2" src={photos.teamNL.src} alt={photos.teamNL.alt} ratio="4/5" sizes="(max-width: 900px) 50vw, 25vw" caption="Our Newfoundland and Labrador team, December 2025" />
-        <Photo class="g3" src={photos.megZowie.src} alt={photos.megZowie.alt} ratio="4/5" sizes="(max-width: 900px) 50vw, 25vw" caption="Meg and Zowie" />
-        <Photo class="g4" src={photos.evanFirstYear.src} alt={photos.evanFirstYear.alt} ratio="1/1" sizes="(max-width: 900px) 50vw, 25vw" caption="Celebrating Evan's first year" />
-        <Photo class="g5" src={photos.chamberTrio.src} alt={photos.chamberTrio.alt} ratio="1/1" sizes="(max-width: 900px) 50vw, 25vw" caption="Erika, Meg and Shelley at the Chamber Awards" />
-        <Photo class="g6" src={photos.christmasTree.src} alt={photos.christmasTree.alt} ratio="4/3" sizes="(max-width: 900px) 100vw, 50vw" caption="Beside the office Christmas tree" />
+      <div class="section-head"><h2>The people behind the placements</h2></div>
+      <div class="gallery">
+        {gallery.map(([p, caption]) => (
+          <Photo src={p.src} alt={p.alt} ratio="4/3" sizes="(max-width: 900px) 50vw, 33vw" caption={caption} />
+        ))}
       </div>
     </div>
   </section>
 
-  <section class="recognition">
-    <div class="wrap rec-grid">
-      <div class="rec">
-        <img src={images.badgeBestPlaces} alt="" width="72" height="72" loading="lazy" onerror="this.remove()" />
-        <div><h3>Best Places to Work</h3><p>Named one of the Best Places to Work.</p></div>
-      </div>
-      <div class="rec">
-        <img src={images.badgeCor} alt="" width="72" height="72" loading="lazy" onerror="this.remove()" />
-        <div><h3>COR certified</h3><p>Certificate of Recognition for occupational health and safety.</p></div>
-      </div>
+  <section class="section section--rule">
+    <div class="wrap">
+      <ul class="items recognition">
+        <li class="item rec">
+          <img src={images.badgeBestPlaces} alt="" width="56" height="56" loading="lazy" onerror="this.remove()" />
+          <div><h3>Best Places to Work</h3><p>Named one of the Best Places to Work.</p></div>
+        </li>
+        <li class="item rec">
+          <img src={images.badgeCor} alt="" width="56" height="56" loading="lazy" onerror="this.remove()" />
+          <div><h3>COR certified</h3><p>Certificate of Recognition for occupational health and safety.</p></div>
+        </li>
+      </ul>
     </div>
   </section>
 
@@ -108,58 +101,21 @@ const values = [
 </Base>
 
 <style>
-  .hero { padding-block: clamp(3rem, 7vw, 6rem) 0; }
-  /* The photo starts at the text column and runs off the right edge */
-  .hero-photo { margin-top: var(--s8); margin-left: max(var(--gutter), calc((100vw - var(--max)) / 2 + var(--gutter))); }
-  .hero h1 { font-size: var(--fs-hero); font-weight: 700; letter-spacing: -0.025em; max-width: 14ch; }
-  .hero-foot { display: grid; grid-template-columns: 1fr auto; gap: var(--s6); align-items: end; margin-top: var(--s6); }
-  .actions { display: flex; flex-wrap: wrap; gap: var(--s3); }
+  .where-grid { display: grid; grid-template-columns: 4fr 7fr; gap: clamp(2rem, 6vw, 6rem); align-items: center; }
 
-  .where { padding-block: var(--s8); overflow: hidden; }
-  .where-copy { position: relative; z-index: 2; }
-  .where-grid { display: grid; grid-template-columns: 1fr 1.2fr; gap: clamp(2rem, 5vw, 5rem); align-items: center; }
-  .where h2 { margin-bottom: var(--s5); max-width: 12ch; }
-  .office-list { list-style: none; padding: 0; margin: var(--s6) 0 0; border-top: 1px solid var(--line-dark); }
-  .office-list li {
-    display: flex; justify-content: space-between; padding-block: var(--s3); border-bottom: 1px solid var(--line-dark); font-weight: 700; font-size: 1.15rem;
-  }
-  .office-list li span:last-child { font-weight: 500; color: var(--on-dark-soft); font-size: var(--fs-small); }
+  .values { margin: 0; border-top: 1.5px solid var(--ink); }
+  .value { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); gap: var(--s6); align-items: baseline; padding-block: var(--s5); border-bottom: 1px solid var(--line); }
+  dt { font-weight: 300; font-size: clamp(1.9rem, 1rem + 3vw, 3.4rem); letter-spacing: -0.035em; line-height: 1; }
+  dd { margin: 0; color: var(--ink-soft); font-size: var(--fs-lead); font-weight: 300; max-width: 40ch; }
 
-  .how { padding-block: var(--s9) var(--s8); }
-  .how h2 { margin-bottom: var(--s6); }
-  .how-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--s3); }
-  .practice { background: var(--mist); padding: var(--s6) var(--s5); border-radius: var(--radius); }
-  .practice--wide { grid-column: span 2; }
-  .practice h3 { margin-bottom: var(--s2); font-size: 1.35rem; }
-  .practice p { color: var(--ink-soft); }
+  .gallery { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--s6) var(--s4); }
 
-  /* Values as large type, not cards: each word carries the line */
-  .values { padding-block: var(--s6) var(--s9); }
-  dl { margin: 0; border-top: 1.5px solid var(--ink); }
-  .value { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: var(--s6); align-items: baseline; padding-block: var(--s5); border-bottom: 1px solid var(--line); }
-  dt { font-weight: 700; font-size: clamp(1.9rem, 0.8rem + 3.4vw, 3.7rem); letter-spacing: -0.035em; line-height: 1; overflow-wrap: anywhere; }
-  dd { margin: 0; color: var(--ink-soft); font-size: var(--fs-lead); max-width: 40ch; }
-
-  .gallery { padding-block: 0 var(--s8); }
-  .gallery h2 { margin-bottom: var(--s6); max-width: 14ch; }
-  /* An uneven grid: two wide photos bracket four smaller ones */
-  .g-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--s5) var(--s4); align-items: start; }
-  .g-grid :global(.g1) { grid-column: span 2; }
-  .g-grid :global(.g6) { grid-column: 3 / span 2; }
-  .recognition { padding-block: 0 var(--s9); }
-  .rec-grid { display: grid; grid-template-columns: 1fr 1fr; gap: var(--s6); }
-  .rec { display: flex; gap: var(--s5); align-items: center; padding: var(--s5); border: 1.5px solid var(--line); border-radius: var(--radius); }
-  .rec img { width: 72px; height: 72px; object-fit: contain; flex: none; }
-  .rec h3 { margin-bottom: var(--s1); }
-  .rec p { color: var(--ink-soft); font-size: var(--fs-small); }
+  .rec { display: flex; gap: var(--s4); align-items: flex-start; }
+  .rec img { width: 56px; height: 56px; object-fit: contain; flex: none; }
 
   @media (max-width: 900px) {
-    .hero-foot, .where-grid, .rec-grid { grid-template-columns: 1fr; }
-    .how-grid { grid-template-columns: 1fr; }
-    .g-grid { grid-template-columns: 1fr 1fr; }
-    .g-grid :global(.g1), .g-grid :global(.g6) { grid-column: 1 / -1; }
-    .hero-photo { margin-left: 0; }
-    .practice--wide { grid-column: auto; }
+    .where-grid { grid-template-columns: 1fr; }
     .value { grid-template-columns: 1fr; gap: var(--s2); }
+    .gallery { grid-template-columns: 1fr 1fr; }
   }
 </style>
