@@ -107,11 +107,30 @@ astro.config.mjs  Astro settings (rarely touched)
 package.json      project name, scripts, Astro and the DM Sans font package
 ```
 
+## Photos
+
+All photos are ISL's own, already on the live site: the team photos from the About page, the warehouse banner and the headshots from each bio page. They load from Squarespace's image server, which resizes on request, so each photo ships in several sizes and the browser picks the right one (`src/lib/img.js`).
+
+- **Where they're listed:** `src/data/photos.js` (team and banner photos) and the `photo` field in `src/data/team.js` (headshots).
+- **How they're placed:** the `Photo` component puts each photo in a fixed-shape frame and crops to fit, so layouts never jump. If a crop cuts off the wrong part, change its `position` (for example `position="70% center"` keeps more of the right side).
+- **Missing headshots:** Ross, Chance, Erika, Natacha, Michaila, Crystal and Kelli have no headshot on the live site yet, so their cards show initials.
+
+## Job assistant (chatbot)
+
+The chat bubble in the corner is the ISL job assistant from `assistant/` (the same project as the zip: widget, Supabase backend, tests, README).
+
+- **Right now it runs in demo mode** (`assistant/demo-mode.js`): it reads the visitor's message with simple rules, runs the real search code (`assistant/supabase/functions/_shared/jobs.js`) over a snapshot of 53 real postings, and replies from templates. The matching is real; the conversation is simplified, and the panel says so.
+- **To make it live:** deploy the backend as described in `assistant/README.md`, add `https://josiahyule.github.io` to the allowed origins in `index.ts`, then in `src/layouts/Base.astro` replace the demo-mode script with `data-endpoint="...your function URL..."` on the widget script.
+- **Edit the originals in `assistant/`.** Before every `dev` and `build`, `scripts/sync-assistant.mjs` copies the files the site needs into `public/assistant/` (which isn't committed).
+- Any button with `data-open-assistant` opens the chat (used on the homepage and the Find work page).
+
+The same snapshot feeds the job lists on the homepage and Find work page (`src/data/jobs.js`), so View and Apply go to real postings on the live site.
+
 ## Things that are placeholders
 
-- **Job listings** on `/find-work/` and the homepage are samples (`src/data/jobs.js`). The real Avionte feed comes later.
+- **Job listings** are a snapshot of the Avionte feed from October 19, 2026 (`src/data/jobs.js`). A live site would read the feed directly.
 - **The request form** on `/hire/` shows a confirmation but doesn't send anything yet.
-- **Team roles and photos** in `team.js` are mostly blank, so cards show initials.
+- **Team roles** in `team.js` are mostly blank.
 - **The logo and badge images** load from Squarespace's image server. Before this ever goes live, download them into a `public/` folder.
 - Items marked `TODO` in the code need a decision: which Moncton address is current, and which retention and review numbers are right.
 

@@ -1,48 +1,58 @@
 ---
-// JOB ROW: one listing. The coloured edge says contract (amber) or direct hire (blue).
-import { url } from '../lib/url.js';
+// JOB ROW: one real posting. The coloured edge says contract (near-black) or permanent (ISL blue).
+// The title opens the posting on the live site; Apply goes straight to the application.
 const { job } = Astro.props;
-const typeLabel = job.type === 'contract' ? 'Contract' : 'Direct hire';
-const posted = job.posted === 1 ? 'Posted yesterday' : `Posted ${job.posted} days ago`;
+const posted = job.posted
+  ? new Date(job.posted + 'T12:00:00').toLocaleDateString('en-CA', { month: 'short', day: 'numeric' })
+  : '';
+const where = [job.city, job.province].filter(Boolean).join(', ');
+const field = [job.category, job.subcategory].filter(Boolean).join(', ');
 ---
 <article class:list={['job', `job--${job.type}`]}
   data-type={job.type} data-province={job.province}
-  data-search={`${job.title} ${job.category} ${job.city}`.toLowerCase()}>
+  data-search={`${job.title} ${field} ${job.city} ${job.snippet ?? ''}`.toLowerCase()}>
   <div class="main">
-    <h3><a href={url(`/find-work/#job-${job.id}`)} id={`job-${job.id}`}>{job.title}</a></h3>
-    <p class="where">{job.city}, {job.province}</p>
+    <h3><a href={job.viewUrl}>{job.title}</a></h3>
+    <p class="where">{where}{field && <span> in {field}</span>}</p>
   </div>
-  <p class:list={['svc', `svc--${job.type}`]}>{typeLabel}</p>
-  <p class="pay">{job.pay}<span>{job.schedule}</span></p>
-  <p class="posted">{posted}</p>
+  <p class:list={['svc', `svc--${job.type}`]}>{job.typeLabel}</p>
+  <p class="pay">{job.pay || 'Pay discussed at interview'}</p>
+  <div class="end">
+    {posted && <p class="posted">Posted {posted}</p>}
+    <a class="apply" href={job.applyUrl}>Apply<span class="visually-hidden"> for {job.title}</span></a>
+  </div>
 </article>
 
 <style>
   .job {
     position: relative;
-    display: grid; grid-template-columns: minmax(0, 2.2fr) 0.9fr 1.3fr 0.8fr; gap: var(--s4); align-items: center;
-    padding: var(--s5) var(--s4) var(--s5) var(--s5);
+    display: grid; grid-template-columns: minmax(0, 2.2fr) 0.9fr 1.2fr auto; gap: var(--s4); align-items: center;
+    padding: var(--s5) 0 var(--s5) var(--s5);
     border-bottom: 1px solid var(--line);
     transition: background-color 150ms var(--ease);
   }
-  .job::before { content: ''; position: absolute; left: 0; top: var(--s4); bottom: var(--s4); width: 4px; border-radius: 1px; }
+  .job::before { content: ''; position: absolute; left: 0; top: var(--s4); bottom: var(--s4); width: 4px; }
   .job--contract::before { background: var(--contract); }
   .job--direct::before { background: var(--direct); }
   .job:hover { background: var(--mist); }
 
   h3 { font-size: 1.15rem; }
   h3 a { color: var(--ink); text-decoration: none; }
-  h3 a::after { content: ''; position: absolute; inset: 0; } /* whole row is clickable */
   h3 a:hover { text-decoration: underline; }
   .where { color: var(--ink-soft); font-size: var(--fs-small); margin-top: var(--s1); }
   .pay { font-weight: 500; font-variant-numeric: tabular-nums; }
-  .pay span { display: block; font-weight: 400; font-size: var(--fs-small); color: var(--ink-soft); }
-  .posted { font-size: var(--fs-small); color: var(--ink-soft); text-align: right; }
+  .end { display: flex; align-items: center; gap: var(--s5); justify-content: flex-end; padding-right: var(--s4); }
+  .posted { font-size: var(--fs-small); color: var(--ink-soft); white-space: nowrap; }
+  .apply {
+    font-weight: 600; font-size: var(--fs-small); text-decoration: none; white-space: nowrap;
+    padding: 0.5rem 0.9rem; border: 1.5px solid var(--isl-blue); color: var(--isl-blue);
+  }
+  .apply:hover { background: var(--isl-blue); color: #fff; }
 
-  @media (max-width: 760px) {
-    .job { grid-template-columns: 1fr auto; row-gap: var(--s2); }
-    .pay { grid-column: 1; }
-    .posted { grid-column: 2; grid-row: 2; align-self: end; }
+  @media (max-width: 860px) {
+    .job { grid-template-columns: 1fr auto; row-gap: var(--s2); padding-left: var(--s4); }
     .svc { grid-column: 2; grid-row: 1; align-self: start; }
+    .pay { grid-column: 1; }
+    .end { grid-column: 1 / -1; justify-content: space-between; padding-right: 0; }
   }
 </style>

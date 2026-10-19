@@ -5,6 +5,8 @@ import Button from '../components/Button.astro';
 import AtlanticMap from '../components/AtlanticMap.astro';
 import CtaBand from '../components/CtaBand.astro';
 import { brand, offices, images } from '../data/site.js';
+import Photo from '../components/Photo.astro';
+import { photos } from '../data/photos.js';
 
 const years = new Date().getFullYear() - brand.since;
 const practices = [
@@ -31,6 +33,9 @@ const values = [
           <Button href="/find-work/" variant="outline">I'm looking for work</Button>
         </div>
       </div>
+    </div>
+    <div class="hero-photo">
+      <Photo src={photos.teamTogether.src} alt={photos.teamTogether.alt} ratio="21/9" sizes="(max-width: 900px) 100vw, 85vw" eager />
     </div>
   </section>
 
@@ -72,6 +77,20 @@ const values = [
     </div>
   </section>
 
+  <section class="gallery">
+    <div class="wrap">
+      <h2>The people behind the placements</h2>
+      <div class="g-grid">
+        <Photo class="g1" src={photos.chamberAwards.src} alt={photos.chamberAwards.alt} ratio="4/3" sizes="(max-width: 900px) 100vw, 50vw" caption="At the Chamber Awards" />
+        <Photo class="g2" src={photos.teamNL.src} alt={photos.teamNL.alt} ratio="4/5" sizes="(max-width: 900px) 50vw, 25vw" caption="Our Newfoundland and Labrador team, December 2025" />
+        <Photo class="g3" src={photos.megZowie.src} alt={photos.megZowie.alt} ratio="4/5" sizes="(max-width: 900px) 50vw, 25vw" caption="Meg and Zowie" />
+        <Photo class="g4" src={photos.evanFirstYear.src} alt={photos.evanFirstYear.alt} ratio="1/1" sizes="(max-width: 900px) 50vw, 25vw" caption="Celebrating Evan's first year" />
+        <Photo class="g5" src={photos.chamberTrio.src} alt={photos.chamberTrio.alt} ratio="1/1" sizes="(max-width: 900px) 50vw, 25vw" caption="Erika, Meg and Shelley at the Chamber Awards" />
+        <Photo class="g6" src={photos.christmasTree.src} alt={photos.christmasTree.alt} ratio="4/3" sizes="(max-width: 900px) 100vw, 50vw" caption="Beside the office Christmas tree" />
+      </div>
+    </div>
+  </section>
+
   <section class="recognition">
     <div class="wrap rec-grid">
       <div class="rec">
@@ -89,7 +108,9 @@ const values = [
 </Base>
 
 <style>
-  .hero { padding-block: clamp(3rem, 7vw, 6rem) var(--s8); }
+  .hero { padding-block: clamp(3rem, 7vw, 6rem) 0; }
+  /* The photo starts at the text column and runs off the right edge */
+  .hero-photo { margin-top: var(--s8); margin-left: max(var(--gutter), calc((100vw - var(--max)) / 2 + var(--gutter))); }
   .hero h1 { font-size: var(--fs-hero); font-weight: 700; letter-spacing: -0.025em; max-width: 14ch; }
   .hero-foot { display: grid; grid-template-columns: 1fr auto; gap: var(--s6); align-items: end; margin-top: var(--s6); }
   .actions { display: flex; flex-wrap: wrap; gap: var(--s3); }
@@ -119,6 +140,12 @@ const values = [
   dt { font-weight: 700; font-size: clamp(1.9rem, 0.8rem + 3.4vw, 3.7rem); letter-spacing: -0.035em; line-height: 1; overflow-wrap: anywhere; }
   dd { margin: 0; color: var(--ink-soft); font-size: var(--fs-lead); max-width: 40ch; }
 
+  .gallery { padding-block: 0 var(--s8); }
+  .gallery h2 { margin-bottom: var(--s6); max-width: 14ch; }
+  /* An uneven grid: two wide photos bracket four smaller ones */
+  .g-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--s5) var(--s4); align-items: start; }
+  .g-grid :global(.g1) { grid-column: span 2; }
+  .g-grid :global(.g6) { grid-column: 3 / span 2; }
   .recognition { padding-block: 0 var(--s9); }
   .rec-grid { display: grid; grid-template-columns: 1fr 1fr; gap: var(--s6); }
   .rec { display: flex; gap: var(--s5); align-items: center; padding: var(--s5); border: 1.5px solid var(--line); border-radius: var(--radius); }
@@ -129,6 +156,9 @@ const values = [
   @media (max-width: 900px) {
     .hero-foot, .where-grid, .rec-grid { grid-template-columns: 1fr; }
     .how-grid { grid-template-columns: 1fr; }
+    .g-grid { grid-template-columns: 1fr 1fr; }
+    .g-grid :global(.g1), .g-grid :global(.g6) { grid-column: 1 / -1; }
+    .hero-photo { margin-left: 0; }
     .practice--wide { grid-column: auto; }
     .value { grid-template-columns: 1fr; gap: var(--s2); }
   }

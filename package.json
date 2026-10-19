@@ -5,7 +5,10 @@
   "type": "module",
   "description": "Design sandbox for the Integrated Staffing website redesign",
   "scripts": {
+    "sync-assistant": "node scripts/sync-assistant.mjs",
+    "predev": "node scripts/sync-assistant.mjs",
     "dev": "astro dev",
+    "prebuild": "node scripts/sync-assistant.mjs",
     "build": "astro build",
     "preview": "astro preview"
   },

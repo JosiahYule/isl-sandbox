@@ -8,3 +8,6 @@ dist/
 # Local and OS files
 .env
 .DS_Store
+
+# Copied from assistant/ by scripts/sync-assistant.mjs
+public/assistant/

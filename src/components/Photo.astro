@@ -1,0 +1,39 @@
+---
+// PHOTO: a responsive image inside a fixed-shape frame.
+// The frame's shape (ratio) is set here, not by the photo, so layouts never jump
+// and every photo crops cleanly whatever its original proportions.
+//
+// <Photo src={photos.teamNL.src} alt={photos.teamNL.alt} ratio="4/3" sizes="50vw" caption="..." />
+//   ratio:    frame shape, e.g. "4/3", "3/4", "1/1", "16/9" (default "4/3")
+//   sizes:    how wide the photo shows on screen, so the browser picks the right file
+//   position: which part of the photo to keep when cropping (CSS object-position), default "center"
+//   eager:    load immediately (use for the first photo on a page)
+//   caption:  optional caption under the photo
+import { sized, srcset } from '../lib/img.js';
+
+const { src, alt, ratio = '4/3', sizes = '100vw', position = 'center', eager = false, caption, max = 2500, class: cls } = Astro.props;
+---
+<figure class:list={['photo', cls]}>
+  <div class="frame" style={`aspect-ratio:${ratio}`}>
+    <img
+      src={sized(src, 1000)}
+      srcset={srcset(src, max)}
+      sizes={sizes}
+      alt={alt}
+      loading={eager ? 'eager' : 'lazy'}
+      decoding="async"
+      fetchpriority={eager ? 'high' : undefined}
+      style={`object-position:${position}`}
+      onerror="this.remove()"
+    />
+  </div>
+  {caption && <figcaption>{caption}</figcaption>}
+</figure>
+
+<style>
+  .photo { margin: 0; }
+  /* The mist background shows only while loading, or if an image is ever missing */
+  .frame { position: relative; overflow: hidden; background: var(--mist); }
+  img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+  figcaption { margin-top: var(--s2); font-size: var(--fs-tiny); color: var(--ink-soft); }
+</style>

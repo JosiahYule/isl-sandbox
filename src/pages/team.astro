@@ -3,6 +3,7 @@
 // Reads src/data/team.js. Cards link to each person's bio on the live site for now.
 import Base from '../layouts/Base.astro';
 import { team } from '../data/team.js';
+import { sized } from '../lib/img.js';
 
 const initials = (n) => n.split(' ').map((x) => x[0]).join('');
 const groups = ['Leadership', 'Direct Hire'];
@@ -33,7 +34,9 @@ const filters = [
           {list.map((p) => (
             <li data-group={p.team ?? ''}>
               <a href={`https://www.integratedstaffing.ca/${p.slug}`}>
-                <span class="avatar" aria-hidden="true">{initials(p.name)}</span>
+                {p.photo
+                  ? <span class="shot"><img src={sized(p.photo, 500)} srcset={`${sized(p.photo, 500)} 500w, ${sized(p.photo, 750)} 750w`} sizes="(max-width: 760px) 50vw, 240px" alt="" loading="lazy" decoding="async" onerror="this.parentElement.classList.add('none'); this.remove();" /><span class="ini" aria-hidden="true">{initials(p.name)}</span></span>
+                  : <span class="shot none"><span class="ini" aria-hidden="true">{initials(p.name)}</span></span>}
                 <span class="name">{p.name}</span>
                 {p.role && <span class="role">{p.role}</span>}
               </a>
@@ -78,18 +81,25 @@ const filters = [
   /* Leadership gets its own row of larger cards: the people clients most often ask for by name */
   .grid--lead { grid-template-columns: repeat(3, 1fr); }
   a {
-    display: grid; align-content: end; gap: 2px; height: 100%; min-height: 12rem; padding: var(--s5);
+    display: grid; align-content: start; gap: 2px; height: 100%; padding: 0 0 var(--s5);
     background: var(--mist); color: var(--ink); text-decoration: none; border-radius: var(--radius);
     transition: background-color 150ms var(--ease);
   }
   a:hover { background: #ececec; }
-  .grid--lead a { background: var(--dark); color: #fff; min-height: 15rem; }
+  .grid--lead a { background: var(--dark); color: #fff; }
+  .grid--lead .shot { aspect-ratio: 1 / 1; }
   .grid--lead a:hover { background: var(--dark-raised); }
+  /* Headshot: a fixed 4:5 frame, cropped from the top so faces stay in view */
+  .shot { position: relative; display: block; aspect-ratio: 4 / 5; overflow: hidden; background: var(--line); margin-bottom: var(--s4); }
+  .shot img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center 20%; }
+  .shot .ini { position: absolute; inset: 0; display: none; place-items: center; font-size: 2rem; font-weight: 300; letter-spacing: -0.03em; color: var(--ink-soft); }
+  .shot.none .ini { display: grid; }
+  .name, .role { padding-inline: var(--s4); }
   .avatar {
     width: 52px; height: 52px; border-radius: 50%; display: grid; place-items: center; margin-bottom: auto;
     background: var(--paper); color: var(--ink); font-weight: 700;
   }
-  .name { margin-top: var(--s6); font-weight: 700; font-size: 1.1rem; }
+  .name { margin-top: 0; font-weight: 700; font-size: 1.1rem; }
   .grid--lead .name { font-size: 1.5rem; }
   .role { font-size: var(--fs-small); opacity: 0.75; }
 
@@ -97,6 +107,5 @@ const filters = [
     .hero-grid { grid-template-columns: 1fr; }
     .grid { grid-template-columns: 1fr 1fr; }
     .grid--lead { grid-template-columns: 1fr; }
-    a { min-height: 9rem; }
   }
 </style>

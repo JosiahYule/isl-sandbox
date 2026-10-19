@@ -3,9 +3,10 @@
 // Every industry ISL places in, with a marker for each service that covers it.
 // The filter buttons dim the industries a service doesn't cover.
 // Props: initial: "all" (default) | "contract" | "direct"
+//        compact: hide the one-line descriptions (used on the homepage)
 import { industries } from '../data/industries.js';
 
-const { initial = 'all' } = Astro.props;
+const { initial = 'all', compact = false } = Astro.props;
 const count = { all: industries.length, contract: industries.filter((i) => i.contract).length, direct: industries.filter((i) => i.direct).length };
 const filters = [
   { key: 'all', label: 'All industries' },
@@ -13,7 +14,7 @@ const filters = [
   { key: 'direct', label: 'Direct hire' },
 ];
 ---
-<div class="matrix" data-matrix data-filter={initial}>
+<div class:list={['matrix', compact && 'matrix--compact']} data-matrix data-filter={initial}>
   <div class="filters" role="group" aria-label="Show industries by service">
     {filters.map((f) => (
       <button type="button" class:list={['chip', `chip--${f.key}`]} data-key={f.key} aria-pressed={String(f.key === initial)}>
@@ -89,6 +90,11 @@ const filters = [
   .mark--contract { background: var(--contract); }
   .mark--direct { background: var(--direct); }
   .none { display: inline-block; width: 16px; height: 2px; margin-top: 11px; background: var(--line); font-size: 0; overflow: hidden; }
+
+  .matrix--compact .note { display: none; }
+  .matrix--compact tbody th, .matrix--compact tbody td { padding-block: 0.7rem; }
+  .matrix--compact .mark { margin-top: 3px; }
+  .matrix--compact .none { margin-top: 10px; }
 
   [data-filter='contract'] tbody tr[data-contract='false'],
   [data-filter='direct'] tbody tr[data-direct='false'] { opacity: 0.28; }

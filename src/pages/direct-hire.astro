@@ -8,6 +8,7 @@ import CanadaMap from '../components/CanadaMap.astro';
 import CtaBand from '../components/CtaBand.astro';
 import { team } from '../data/team.js';
 import { testimonials, stats } from '../data/site.js';
+import { sized } from '../lib/img.js';
 
 const recruiters = team.filter((p) => p.team === 'Direct Hire');
 const retention = stats.find((s) => s.label.includes('retention'))?.value ?? '92%';
@@ -79,7 +80,9 @@ const recruiterContact = { 'Zowie Tucker': { phone: '902-471-0166', email: 'zowi
       <div class="people-grid">
         {recruiters.map((r, i) => (
           <a class:list={['person', i === 0 && 'person--lead']} href={`https://www.integratedstaffing.ca/${r.slug}`}>
-            <span class="avatar" aria-hidden="true">{initials(r.name)}</span>
+            <span class="shot">{r.photo
+              ? <img src={sized(r.photo, 750)} srcset={`${sized(r.photo, 500)} 500w, ${sized(r.photo, 750)} 750w, ${sized(r.photo, 1000)} 1000w`} sizes="(max-width: 960px) 50vw, 25vw" alt="" loading="lazy" decoding="async" onerror="this.remove()" />
+              : <span class="ini" aria-hidden="true">{initials(r.name)}</span>}</span>
             <span class="pname">{r.name}</span>
             <span class="prole">{r.role}</span>
             {recruiterContact[r.name] && <span class="pcontact">{recruiterContact[r.name].phone}</span>}
@@ -139,19 +142,22 @@ const recruiterContact = { 'Zowie Tucker': { phone: '902-471-0166', email: 'zowi
 
   .people { padding-block: var(--s9) var(--s8); }
   .people h2 { margin-bottom: var(--s6); }
-  .people-grid { display: grid; grid-template-columns: 1.5fr 1fr 1fr 1fr; gap: var(--s3); }
+  .people-grid { display: grid; grid-template-columns: 1.5fr 1fr 1fr 1fr; gap: var(--s3); align-items: start; }
   .person {
-    display: grid; align-content: end; gap: 2px; min-height: 13rem; padding: var(--s5);
+    display: grid; align-content: start; gap: 2px; padding: 0 0 var(--s5);
     background: var(--mist); color: var(--ink); text-decoration: none; border-radius: var(--radius);
     transition: background-color 150ms var(--ease);
   }
   .person:hover { background: #ececec; }
   .person--lead { background: var(--dark); color: #fff; }
   .person--lead:hover { background: var(--dark-raised); }
-  .avatar {
-    width: 56px; height: 56px; border-radius: 50%; display: grid; place-items: center; margin-bottom: auto; font-weight: 700; background: var(--paper); color: var(--ink);
-  }
-  .pname { font-weight: 700; font-size: 1.15rem; margin-top: var(--s6); }
+  /* Headshots in a fixed frame, cropped from the top; the lead recruiter's frame is wider */
+  .shot { position: relative; display: block; aspect-ratio: 4 / 5; overflow: hidden; background: var(--line); margin-bottom: var(--s4); }
+  .person--lead .shot { aspect-ratio: 6 / 5; }
+  .shot img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center 20%; }
+  .ini { position: absolute; inset: 0; display: grid; place-items: center; font-size: 2rem; font-weight: 300; color: var(--ink-soft); }
+  .pname, .prole, .pcontact { padding-inline: var(--s4); }
+  .pname { font-weight: 700; font-size: 1.15rem; }
   .prole { font-size: var(--fs-small); opacity: 0.75; }
   .pcontact { font-size: var(--fs-small); font-weight: 500; margin-top: var(--s2); }
 

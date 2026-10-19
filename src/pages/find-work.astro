@@ -1,11 +1,11 @@
 ---
 // JOB BOARD  →  /find-work/
 // Search and filters run in the browser over the listings on the page.
-// Jobs are samples for now (src/data/jobs.js); later they come from the Avionte feed.
+// Jobs are a real snapshot of the Avionte feed (src/data/jobs.js); later the page reads the feed live.
 // Linking with ?q=forklift pre-fills the search (the homepage search does this).
 import Base from '../layouts/Base.astro';
 import JobRow from '../components/JobRow.astro';
-import { jobs, provinces } from '../data/jobs.js';
+import { jobs, provinces, snapshotDate } from '../data/jobs.js';
 
 const provinceOptions = [...new Set(jobs.map((j) => j.province))]
   .map((code) => ({ code, name: provinces[code] ?? code }))
@@ -16,7 +16,8 @@ const count = { contract: jobs.filter((j) => j.type === 'contract').length, dire
   <section class="top">
     <div class="wrap">
       <h1>Find your next job.</h1>
-      <p class="lead">Contract roles across Atlantic Canada and permanent roles across the country. Our recruiters meet candidates every day and match them to roles that fit.</p>
+      <p class="lead">Contract and permanent roles across Atlantic Canada. Search below, or describe what you're after and the job assistant will find matches.</p>
+      <button type="button" class="ask" data-open-assistant>Ask the job assistant</button>
 
       <form class="search" role="search" data-search>
         <label class="visually-hidden" for="q">Search jobs</label>
@@ -29,7 +30,7 @@ const count = { contract: jobs.filter((j) => j.type === 'contract').length, dire
         <div class="types" role="group" aria-label="Job type">
           <button type="button" class="t" data-type="" aria-pressed="true">All</button>
           <button type="button" class="t t--contract" data-type="contract" aria-pressed="false">Contract <span>{count.contract}</span></button>
-          <button type="button" class="t t--direct" data-type="direct" aria-pressed="false">Direct hire <span>{count.direct}</span></button>
+          <button type="button" class="t t--direct" data-type="direct" aria-pressed="false">Permanent <span>{count.direct}</span></button>
         </div>
       </form>
     </div>
@@ -46,7 +47,7 @@ const count = { contract: jobs.filter((j) => j.type === 'contract').length, dire
         <p>Try a broader term or another province. Or <a href="https://www.integratedstaffing.ca/careers/general-apply">send us your resume</a> and we'll contact you when something fits.</p>
         <button type="button" data-reset>Clear search and filters</button>
       </div>
-      <p class="note">Sandbox preview: these listings are samples for layout.</p>
+      <p class="note">Sandbox preview: real postings from ISL's job feed as of {snapshotDate}. Some may have been filled since.</p>
     </div>
   </section>
 
@@ -108,6 +109,11 @@ const count = { contract: jobs.filter((j) => j.type === 'contract').length, dire
   .top { padding-block: clamp(3rem, 7vw, 6rem) var(--s6); background: var(--mist); }
   .top h1 { font-size: var(--fs-hero); font-weight: 700; letter-spacing: -0.025em; }
   .top .lead { margin-top: var(--s4); }
+  .ask {
+    margin-top: var(--s4); font: inherit; font-weight: 600; cursor: pointer; padding: 0;
+    background: none; border: 0; color: var(--isl-blue); text-decoration: underline; text-underline-offset: 0.2em;
+  }
+  .ask:hover { color: var(--isl-blue-deep); text-decoration-thickness: 2px; }
 
   .search {
     display: grid; grid-template-columns: 1fr 14rem auto; gap: var(--s2);

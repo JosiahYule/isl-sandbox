@@ -7,16 +7,19 @@ import HireClock from '../components/HireClock.astro';
 import IndustryMatrix from '../components/IndustryMatrix.astro';
 import JobRow from '../components/JobRow.astro';
 import CtaBand from '../components/CtaBand.astro';
-import { testimonials, stats, brand } from '../data/site.js';
+import Photo from '../components/Photo.astro';
+import { photos } from '../data/photos.js';
+import { testimonials, stats, brand, offices } from '../data/site.js';
 import { jobs } from '../data/jobs.js';
 import { url } from '../lib/url.js';
 
 const [lead, ...others] = testimonials;
 const reviews = stats.find((s) => s.label.includes('reviews'))?.value ?? '200+';
 const latest = jobs.slice(0, 5);
+const tel = (n) => `tel:+1${n.replaceAll('-', '')}`;
 ---
 <Base>
-  <!-- HERO: the promise on the left, the map of where we work on the right -->
+  <!-- HERO: the promise on the left, ISL's own photo bleeding off the right edge -->
   <section class="hero">
     <div class="wrap hero-grid">
       <div class="hero-copy">
@@ -25,30 +28,14 @@ const latest = jobs.slice(0, 5);
           <span class="line line--direct">Hires that stay.</span>
         </h1>
         <p class="lead">Contract and permanent staffing from five offices across Atlantic Canada, with permanent searches anywhere in the country. Locally owned since {brand.since}.</p>
-
-        <div class="doors">
-          <div class="door door--hire">
-            <h2 class="door-title">I'm hiring</h2>
-            <a class="route route--contract" href={url('/hire/?service=contract')}>
-              <span class="route-name">Contract workers</span>
-              <span class="route-meta">On site within hours</span>
-            </a>
-            <a class="route route--direct" href={url('/hire/?service=direct')}>
-              <span class="route-name">A permanent hire</span>
-              <span class="route-meta">Backed by a 90-day guarantee</span>
-            </a>
-          </div>
-          <form class="door door--work" action={url('/find-work/')} method="get" role="search">
-            <h2 class="door-title"><label for="hero-q">I'm looking for work</label></h2>
-            <input id="hero-q" name="q" type="search" placeholder="Job title, skill or city" autocomplete="off" />
-            <button type="submit">Search jobs</button>
-            <a class="browse" href={url('/find-work/')}>Or browse all {jobs.length} open roles</a>
-          </form>
+        <div class="actions">
+          <Button href="/hire/" size="lg">Request talent</Button>
+          <Button href="/find-work/" variant="outline" size="lg">Find work</Button>
         </div>
       </div>
     </div>
-    <div class="hero-map">
-      <AtlanticMap id="hero-map" bleed />
+    <div class="hero-photo">
+      <Photo src={photos.warehouse.src} alt={photos.warehouse.alt} ratio="4/5" sizes="(max-width: 900px) 100vw, 46vw" position="70% center" eager />
     </div>
   </section>
 
@@ -63,6 +50,30 @@ const latest = jobs.slice(0, 5);
     </div>
   </section>
 
+  <!-- LOCAL: where the offices are, and the people in them -->
+  <section class="local">
+    <div class="wrap local-grid">
+      <div class="local-copy">
+        <h2>Five offices across Atlantic Canada.</h2>
+        <p class="lead">Locally owned and operated. Call the office nearest you and you'll talk to a recruiter who knows that market.</p>
+        <ul class="office-list">
+          {offices.map((o) => (
+            <li><span class="o-city">{o.city}, {o.province}</span><a href={tel(o.phone)}>{o.phone}</a></li>
+          ))}
+        </ul>
+      </div>
+      <AtlanticMap id="home-map" />
+    </div>
+    <div class="wrap people">
+      <Photo class="p-wide" src={photos.teamNL.src} alt={photos.teamNL.alt} ratio="3/2" sizes="(max-width: 900px) 100vw, 50vw" caption="Our Newfoundland and Labrador team, December 2025" />
+      <Photo class="p-tall" src={photos.chamberAwards.src} alt={photos.chamberAwards.alt} ratio="4/5" sizes="(max-width: 900px) 50vw, 25vw" caption="At the Chamber Awards" />
+      <div class="p-last">
+        <Photo src={photos.evanFirstYear.src} alt={photos.evanFirstYear.alt} ratio="1/1" sizes="(max-width: 900px) 50vw, 25vw" caption="Celebrating Evan's first year" />
+        <a class="meet" href={url('/team/')}>Meet the team</a>
+      </div>
+    </div>
+  </section>
+
   <!-- INDUSTRIES: which service covers what -->
   <section class="industries">
     <div class="wrap ind-grid">
@@ -74,7 +85,7 @@ const latest = jobs.slice(0, 5);
           <a href={url('/direct-hire/')}>How direct hire works</a>
         </div>
       </div>
-      <IndustryMatrix />
+      <IndustryMatrix compact />
     </div>
   </section>
 
@@ -104,7 +115,7 @@ const latest = jobs.slice(0, 5);
         <h2>Open roles</h2>
         <div class="key" aria-label="Colour key">
           <span class="svc svc--contract">Contract</span>
-          <span class="svc svc--direct">Direct hire</span>
+          <span class="svc svc--direct">Permanent</span>
         </div>
       </div>
       <div class="job-list">
@@ -112,7 +123,7 @@ const latest = jobs.slice(0, 5);
       </div>
       <div class="jobs-foot">
         <Button href="/find-work/" variant="outline">See all open roles</Button>
-        <p>Nothing that fits yet? <a href="https://www.integratedstaffing.ca/careers/general-apply">Send us your resume</a> and we'll match you when the right role opens.</p>
+        <p>Not sure what to search for? <button type="button" class="ask" data-open-assistant>Describe it to the job assistant</button> and it will find matches.</p>
       </div>
     </div>
   </section>
@@ -122,9 +133,9 @@ const latest = jobs.slice(0, 5);
 
 <style>
   /* ---------- Hero ---------- */
-  .hero { position: relative; overflow: hidden; border-bottom: 1px solid var(--line); }
-  .hero-grid { position: relative; z-index: 2; min-height: min(88vh, 860px); display: grid; align-items: center; padding-block: var(--s7) var(--s8); pointer-events: none; }
-  .hero-copy { max-width: 660px; pointer-events: auto; }
+  .hero { position: relative; }
+  .hero-grid { min-height: min(84vh, 820px); display: grid; align-items: center; padding-block: var(--s8) var(--s9); }
+  .hero-copy { max-width: 600px; position: relative; z-index: 2; }
   /* One sentence per line on desktop: each line is one service, underlined in that service's colour */
   .hero-title { font-size: clamp(2.6rem, 0.9rem + 4.3vw, 4.9rem); font-weight: 700; letter-spacing: -0.02em; line-height: 1; }
   @media (min-width: 901px) { .line { white-space: nowrap; } }
@@ -132,60 +143,49 @@ const latest = jobs.slice(0, 5);
   .line + .line { margin-top: 0.12em; }
   .line--contract { text-decoration-color: var(--contract); }
   .line--direct { text-decoration-color: var(--direct); }
-  .hero .lead { margin-top: var(--s6); max-width: 38ch; }
+  .hero .lead { margin-top: var(--s6); max-width: 40ch; }
+  .actions { display: flex; flex-wrap: wrap; gap: var(--s3); margin-top: var(--s7); }
 
-  /* The map bleeds off the top edge (Labrador runs out of frame) but keeps the east coast in view */
-  .hero-map {
-    position: absolute; z-index: 1; top: -4%; right: 0;
-    width: min(50vw, 900px);
+  /* The photo runs off the right edge and drops past the hero into the next section:
+     a deliberate break in the grid that ties the opening image to what follows. */
+  .hero-photo {
+    position: absolute; z-index: 1; top: 0; bottom: -6rem; right: 0; width: min(46vw, 760px);
   }
+  .hero-photo :global(.photo), .hero-photo :global(.frame) { height: 100%; }
+  .hero-photo :global(.frame) { aspect-ratio: auto !important; }
 
-  .doors { display: grid; grid-template-columns: 1.15fr 1fr; gap: var(--s3); margin-top: var(--s7); }
-  .door { border-radius: var(--radius); padding: var(--s5); }
-  .door-title { font-size: var(--fs-small); font-weight: 600; letter-spacing: 0; margin-bottom: var(--s3); }
-  .door--hire { background: var(--dark); color: #fff; display: grid; gap: var(--s2); align-content: start; }
-  .route {
-    display: grid; gap: 2px; padding: var(--s3) var(--s4); border-radius: var(--radius);
-    background: var(--dark-raised); color: #fff; text-decoration: none; border-left: 4px solid;
-    transition: background-color 150ms var(--ease);
-  }
-  .route:hover { background: #363636; }
-  .route--contract { border-left-color: var(--contract-on-dark); }
-  .route--direct { border-left-color: var(--isl-blue-on-dark); }
-  .route-name { font-weight: 700; font-size: 1.08rem; }
-  .route-meta { font-size: var(--fs-small); color: var(--on-dark-soft); }
-
-  .door--work { background: var(--paper); border: 1.5px solid var(--ink); display: grid; gap: var(--s2); align-content: start; }
-  .door--work input {
-    font: inherit; font-size: 1rem; padding: 0.75rem 0.85rem; width: 100%;
-    border: 1.5px solid var(--line); border-radius: var(--radius); background: var(--paper);
-  }
-  .door--work input:focus { border-color: var(--ink); outline: none; box-shadow: 0 0 0 3px var(--focus); }
-  .door--work button {
-    font: inherit; font-weight: 600; cursor: pointer; padding: 0.75rem; border-radius: var(--radius);
-    background: var(--isl-blue); color: #fff; border: 0;
-  }
-  .door--work button:hover { background: var(--isl-blue-deep); }
-  .browse { margin-top: var(--s2); font-size: var(--fs-small); font-weight: 500; color: var(--ink); }
-
-  @media (min-width: 901px) { .hero-map :global(.card) { right: 3.5%; } }
-  @media (min-width: 901px) and (max-width: 1180px) {
-    .hero-copy { max-width: 500px; }
-    .hero-map { width: 50vw; top: 10%; right: 0; }
-    .hero-map :global(.card) { width: 40%; padding: var(--s3) var(--s4); }
-  }
+  @media (max-width: 1100px) { .hero-copy { max-width: 470px; } .hero-photo { width: 44vw; } }
   @media (max-width: 900px) {
-    .hero-grid { min-height: 0; padding-bottom: var(--s5); }
+    .hero-grid { min-height: 0; padding-bottom: var(--s6); }
     .hero-copy { max-width: none; }
-    .hero-map { position: relative; top: 0; width: auto; margin: 0 var(--gutter) var(--s6); }
-    .doors { grid-template-columns: 1fr; }
+    .hero-photo { position: static; width: auto; }
+    .hero-photo :global(.photo), .hero-photo :global(.frame) { height: auto; }
+    .hero-photo :global(.frame) { aspect-ratio: 4 / 3 !important; }
   }
 
   /* ---------- Clock ---------- */
-  .clock-section { padding-block: var(--s9) var(--s8); }
+  .clock-section { padding-block: calc(var(--s9) + 2rem) var(--s8); }
+  @media (min-width: 901px) { .clock-section .section-head { max-width: 52%; grid-template-columns: 1fr; gap: var(--s4); } }
   .section-head { display: grid; grid-template-columns: 1fr 1fr; gap: var(--s7); align-items: end; margin-bottom: var(--s7); }
   .section-head h2 { max-width: 14ch; }
   @media (max-width: 860px) { .section-head { grid-template-columns: 1fr; gap: var(--s4); } }
+
+  /* ---------- Local: offices + people ---------- */
+  .local { padding-block: var(--s8) var(--s9); border-top: 1px solid var(--line); }
+  .local-grid { display: grid; grid-template-columns: 5fr 6fr; gap: clamp(2rem, 5vw, 5rem); align-items: center; }
+  .local h2 { max-width: 12ch; margin-bottom: var(--s5); }
+  .office-list { list-style: none; margin: var(--s6) 0 0; padding: 0; border-top: 1.5px solid var(--ink); }
+  .office-list li { display: flex; justify-content: space-between; gap: var(--s4); padding-block: var(--s3); border-bottom: 1px solid var(--line); }
+  .o-city { font-weight: 600; }
+  .office-list a { color: var(--ink); font-variant-numeric: tabular-nums; }
+  .people { display: grid; grid-template-columns: 2fr 1fr 1fr; gap: var(--s4); align-items: end; margin-top: var(--s8); }
+  .p-last { display: grid; gap: var(--s4); }
+  .meet { font-weight: 600; }
+  @media (max-width: 900px) {
+    .local-grid { grid-template-columns: 1fr; }
+    .people { grid-template-columns: 1fr 1fr; }
+    .people :global(.p-wide) { grid-column: 1 / -1; }
+  }
 
   /* ---------- Industries ---------- */
   .industries { background: var(--mist); padding-block: var(--s8) calc(var(--s9) + 4rem); }
@@ -224,4 +224,5 @@ const latest = jobs.slice(0, 5);
   .job-list { border-top: 1.5px solid var(--ink); }
   .jobs-foot { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s5); margin-top: var(--s6); }
   .jobs-foot p { color: var(--ink-soft); max-width: 50ch; }
+  .ask { font: inherit; font-weight: 600; cursor: pointer; padding: 0; background: none; border: 0; color: var(--isl-blue); text-decoration: underline; text-underline-offset: 0.2em; }
 </style>

@@ -1,0 +1,227 @@
+<title>ISL Job Assistant</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+  /* Layout: one reading column on the left, the live chat docked bottom-right like on the real site. */
+  :root {
+    --bg: #f4f7fb; --surface: #ffffff; --ink: #14243a; --muted: #5b6b80; --line: #dbe4ee;
+    --blue: #0070CA; --navy: #00549A; --tint: #e8f2fc; --ok: #17633a; --ok-bg: #e5f5ec;
+    --display: "Montserrat", system-ui, -apple-system, "Segoe UI", sans-serif;
+    --body: "Montserrat", system-ui, -apple-system, "Segoe UI", sans-serif;
+    --mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+    --bg: #0d1724; --surface: #142236; --ink: #e6eef8; --muted: #9fb1c7; --line: #26384f;
+    --blue: #4ea6ef; --navy: #8cc4f4; --tint: #1b3352; --ok: #8fe0b0; --ok-bg: #173a29; color-scheme: dark } }
+  :root[data-theme="dark"] {
+    --bg: #0d1724; --surface: #142236; --ink: #e6eef8; --muted: #9fb1c7; --line: #26384f;
+    --blue: #4ea6ef; --navy: #8cc4f4; --tint: #1b3352; --ok: #8fe0b0; --ok-bg: #173a29; color-scheme: dark }
+
+  body { background: var(--bg); color: var(--ink); font-family: var(--body); font-size: 15px; line-height: 1.6; }
+  .page { max-width: 1180px; margin: 0 auto; padding-block: 40px 120px;
+    padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+  .col { max-width: 620px; display: grid; gap: 28px; }
+  @media (min-width: 1100px) { .col { max-width: calc(100% - 460px); } }
+
+  .eyebrow { font-family: var(--mono); font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--navy); }
+  h1 { font-family: var(--display); font-weight: 800; font-size: clamp(30px, 5vw, 44px); line-height: 1.08; letter-spacing: -.02em; margin: 6px 0 12px; text-wrap: balance; }
+  .lead { margin: 0; font-size: 17px; color: var(--muted); max-width: 58ch; }
+  h2 { font-family: var(--display); font-size: 13px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; margin: 0 0 10px; color: var(--muted); }
+
+  .stats { display: flex; flex-wrap: wrap; gap: 10px 26px; margin: 0; padding: 14px 0 0; border-top: 1px solid var(--line); }
+  .stats div { display: grid; }
+  .stats dt { font-size: 12px; color: var(--muted); }
+  .stats dd { margin: 0; font-family: var(--display); font-weight: 700; font-size: 22px; font-variant-numeric: tabular-nums; }
+
+  .tries { display: flex; flex-wrap: wrap; gap: 8px; }
+  .tries button { font-family: var(--body); font-size: 13.5px; font-weight: 500; color: var(--ink); background: var(--surface);
+    border: 1px solid var(--line); border-radius: 10px; padding: 9px 12px; cursor: pointer; text-align: left; }
+  .tries button:hover { border-color: var(--blue); }
+  .tries button:focus-visible, .tbtn:focus-visible { outline: 3px solid var(--blue); outline-offset: 2px; }
+
+  .trace { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; overflow: hidden; }
+  .trace-head { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 12px 16px; border-bottom: 1px solid var(--line); }
+  .trace-head p { margin: 0; font-size: 13px; color: var(--muted); }
+  .tbtn { font-family: var(--body); font-size: 12px; font-weight: 600; color: var(--navy); background: none; border: 1px solid var(--line); border-radius: 8px; padding: 5px 10px; cursor: pointer; }
+  ol.steps { list-style: none; margin: 0; padding: 6px 0; max-height: 420px; overflow-y: auto; }
+  ol.steps li { display: grid; grid-template-columns: 92px 1fr; gap: 12px; padding: 9px 16px; font-size: 13.5px; }
+  ol.steps li + li { border-top: 1px dashed var(--line); }
+  .tag { font-family: var(--mono); font-size: 11.5px; font-weight: 500; align-self: start; padding: 2px 7px; border-radius: 6px; background: var(--tint); color: var(--navy); justify-self: start; }
+  .tag.you { background: transparent; border: 1px solid var(--line); color: var(--muted); }
+  .tag.reply { background: var(--ok-bg); color: var(--ok); }
+  .steps code { font-family: var(--mono); font-size: 12.5px; overflow-wrap: anywhere; }
+  .steps .res { display: block; color: var(--muted); font-size: 12.5px; margin-top: 2px; }
+  .empty { padding: 18px 16px; margin: 0; color: var(--muted); font-size: 13.5px; }
+
+  .how { display: grid; gap: 10px; margin: 0; padding: 0; list-style: none; counter-reset: s; }
+  .how li { display: grid; grid-template-columns: 28px 1fr; gap: 10px; }
+  .how li::before { counter-increment: s; content: counter(s); font-family: var(--mono); font-size: 12px; font-weight: 500; width: 24px; height: 24px; border-radius: 50%;
+    display: grid; place-items: center; background: var(--tint); color: var(--navy); margin-top: 1px; }
+  .how b { font-weight: 600; }
+  .note { font-size: 13px; color: var(--muted); margin: 0; padding: 12px 14px; border-left: 3px solid var(--line); }
+</style>
+
+<main class="page">
+  <div class="col">
+    <header>
+      <div class="eyebrow">Prototype · Phase 1</div>
+      <h1>ISL Job Assistant</h1>
+      <p class="lead">A chat assistant that reads ISL's open postings and matches job seekers to the right ones. The chat in the corner is live: talk to it like a candidate would.</p>
+      <dl class="stats">
+        <div><dt>Open postings</dt><dd id="s-total">0</dd></div>
+        <div><dt>Permanent</dt><dd id="s-perm">0</dd></div>
+        <div><dt>Temporary or contract</dt><dd id="s-temp">0</dd></div>
+        <div><dt>Provinces</dt><dd id="s-prov">0</dd></div>
+      </dl>
+    </header>
+
+    <section>
+      <h2>Try a candidate</h2>
+      <div class="tries" id="tries"></div>
+    </section>
+
+    <section class="trace" aria-labelledby="trace-title">
+      <div class="trace-head">
+        <div><h2 id="trace-title" style="margin:0">Behind the scenes</h2><p>Each tool the AI calls, and what it got back.</p></div>
+        <button class="tbtn" type="button" id="clear-trace">Clear</button>
+      </div>
+      <ol class="steps" id="steps"><li class="empty" style="display:block">Send a message in the chat and the AI's searches show up here.</li></ol>
+    </section>
+
+    <section>
+      <h2>How it works</h2>
+      <ol class="how">
+        <li><span><b>The visitor types</b> what they want, in their own words.</span></li>
+        <li><span><b>The AI decides what to search for.</b> It turns "I drove a forklift at Sobeys" into keywords like forklift, warehouse, material handler.</span></li>
+        <li><span><b>Ordinary code runs the search</b> over the live Avionte postings and hands back real matches. The AI can't see or invent jobs outside what comes back.</span></li>
+        <li><span><b>The AI picks the best fits</b> and explains why, and the chat shows them as cards with View and Apply buttons.</span></li>
+      </ol>
+    </section>
+
+    <p class="note" id="snapshot-note"></p>
+  </div>
+</main>
+
+<script>/*__JOBS_LOGIC__*/</script>
+<script>/*__WIDGET__*/</script>
+<script>
+(function () {
+  const JOBS = /*__JOBS_DATA__*/;
+  const SNAPSHOT_DATE = "/*__SNAPSHOT_DATE__*/";
+
+  // ---- Page stats ----
+  const perm = JOBS.filter((j) => j.employment !== "Temporary / contract").length;
+  document.getElementById("s-total").textContent = JOBS.length;
+  document.getElementById("s-perm").textContent = perm;
+  document.getElementById("s-temp").textContent = JOBS.length - perm;
+  document.getElementById("s-prov").textContent = new Set(JOBS.map((j) => j.province).filter(Boolean)).size;
+  document.getElementById("snapshot-note").textContent =
+    "This preview uses a snapshot of ISL's postings from " + SNAPSHOT_DATE + ", and the AI runs on your own Claude account. On the website, the backend reads the Avionte feed live and uses ISL's own API key. Apply links point to the live site, so a job filled since the snapshot may no longer open.";
+
+  // ---- "Behind the scenes" trace ----
+  const steps = document.getElementById("steps");
+  function step(kind, html) {
+    const empty = steps.querySelector(".empty"); if (empty) empty.remove();
+    const li = document.createElement("li");
+    const tag = document.createElement("span");
+    tag.className = "tag" + (kind === "You" ? " you" : kind === "Reply" ? " reply" : "");
+    tag.textContent = kind;
+    const body = document.createElement("div"); body.innerHTML = html;
+    li.append(tag, body); steps.append(li); steps.scrollTop = steps.scrollHeight;
+  }
+  const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+  document.getElementById("clear-trace").onclick = () => { steps.innerHTML = '<li class="empty" style="display:block">Cleared.</li>'; };
+
+  function describeCall(name, input) {
+    if (name === "search_jobs") {
+      const bits = [];
+      if (input.keywords?.length) bits.push("keywords: " + [].concat(input.keywords).join(", "));
+      if (input.city) bits.push("city: " + input.city);
+      if (input.province) bits.push("province: " + input.province);
+      if (input.employment && input.employment !== "any") bits.push("type: " + input.employment);
+      return "<code>search_jobs</code> " + esc(bits.join(" · ") || "everything");
+    }
+    if (name === "get_job_details") return "<code>get_job_details</code> " + esc(input.job_id || "");
+    if (name === "recommend_jobs") return "<code>recommend_jobs</code> " + esc((input.picks || []).length + " pick(s)");
+    return "<code>" + esc(name) + "</code>";
+  }
+  function describeResult(name, out) {
+    if (name === "search_jobs") return out.matching + " match" + (out.matching === 1 ? "" : "es") + (out.note ? " (no keyword hits, showing nearby alternatives)" : "") +
+      (out.results.length ? ": " + out.results.slice(0, 4).map((r) => r.title).join(", ") + (out.results.length > 4 ? "…" : "") : "");
+    if (name === "get_job_details") return out.title + ", " + out.location;
+    if (name === "recommend_jobs") return "Shown as cards: " + out.shown.length;
+    return "";
+  }
+
+  // ---- The demo "backend": same prompt, same tools, same search code as the real one ----
+  const ERRORS = {
+    not_granted: "To try the live demo, allow this page to use Claude when your browser asks.",
+    sampling_disabled: "Claude isn't available for this account, so the live demo can't run here.",
+    rate_limited: "That's a lot of messages in a short time. Wait a moment, then try again.",
+    session_expired: "Your Claude session expired. Sign in again, then retry.",
+    tools_unavailable: "This view can't run the job search tools. Open the page on claude.ai in a browser.",
+  };
+  let samplePromise = null;
+
+  async function demoSend(messages) {
+    samplePromise = samplePromise || (window.claude ? window.claude.use("sample") : Promise.resolve(null));
+    const sample = await samplePromise;
+    if (!sample) throw new Error("The live AI only runs when this page is opened on claude.ai while signed in.");
+    step("You", esc(messages[messages.length - 1].content));
+
+    const state = {};
+    let written = "", cut = 0;
+    const tools = TOOLS.map((t) => ({
+      name: t.name,
+      description: t.description,
+      inputSchema: t.input_schema,
+      execute(input) {
+        cut = written.length; // anything written before a tool call is "thinking out loud"
+        const line = describeCall(t.name, input || {});
+        try {
+          const out = runTool(t.name, input || {}, JOBS, state);
+          step("Tool", line + '<span class="res">' + esc(describeResult(t.name, out)) + "</span>");
+          return out;
+        } catch (e) {
+          step("Tool", line + '<span class="res">Error: ' + esc(e.message) + "</span>");
+          throw e;
+        }
+      },
+    }));
+
+    const input = [
+      { role: "user", content: systemPrompt() + "\n\nEverything after this is the live chat with a website visitor. Reply as the assistant." },
+      ...messages,
+    ];
+    try {
+      const res = await sample(input, { tools, modelTier: "quick", onText: ({ text }) => { written = text; } });
+      const reply = res.text.slice(cut).trim() || res.text.trim();
+      step("Reply", esc(reply.slice(0, 160)) + (reply.length > 160 ? "…" : ""));
+      return { reply, jobs: state.cards || [] };
+    } catch (e) {
+      if (e && e.code === "cancelled") throw new Error("Stopped.");
+      throw new Error(ERRORS[e && e.code] || "The assistant hit a snag. Please try again.");
+    }
+  }
+
+  // ---- Mount the same widget the website will use, but wired to the demo backend ----
+  try { sessionStorage.removeItem("isl-job-chat-v1"); } catch {}
+  const chat = window.ISLJobChat.mount({ send: demoSend, startOpen: true });
+
+  const TRIES = [
+    "I'm in Dartmouth with 5 years of warehouse and forklift experience. I want something permanent.",
+    "I'm a line cook in Halifax looking for full-time kitchen work.",
+    "Moving to Moncton next month. I've done payroll and accounts payable. What's out there in NB?",
+    "I'm a registered nurse in PEI.",
+    "Je cherche un emploi de chauffeur en Nouvelle-Écosse.",
+    "We're a manufacturer in Burnside and need 10 temp labourers.",
+  ];
+  const tries = document.getElementById("tries");
+  for (const q of TRIES) {
+    const b = document.createElement("button"); b.type = "button"; b.textContent = q;
+    b.onclick = () => { chat.open(); chat.ask(q); };
+    tries.append(b);
+  }
+})();
+</script>
