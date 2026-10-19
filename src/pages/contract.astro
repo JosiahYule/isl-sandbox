@@ -5,6 +5,18 @@ import Button from '../components/Button.astro';
 import PageHero from '../components/PageHero.astro';
 import IndustryMatrix from '../components/IndustryMatrix.astro';
 import CtaBand from '../components/CtaBand.astro';
+import Photo from '../components/Photo.astro';
+import { stock } from '../data/photos.js';
+import { offices } from '../data/site.js';
+import { industries } from '../data/industries.js';
+
+const contractIndustries = industries.filter((i) => i.contract).length;
+// Three facts in large type, right under the intro. Each restates a claim from the live site.
+const facts = [
+  ['Within hours', 'from your request to a worker on site'],
+  ['One rate', 'per hour, with payroll and workers\u2019 compensation inside it'],
+  [String(offices.length), 'local offices across Atlantic Canada'],
+];
 
 // What the single hourly rate covers (from the live About page).
 const covered = [
@@ -22,11 +34,19 @@ const uses = [
 ];
 ---
 <Base assistant={false} title="Contract staffing" description="Pre-screened contract workers across Atlantic Canada, on site within hours of your request, for one all-inclusive hourly rate.">
-  <PageHero svc="contract" title="Pre-screened workers, on site within hours." lead="For leaves, peaks and growth. One hourly rate covers everything, and the people work on our payroll, not yours.">
+  <PageHero photo={{ ...stock.welder, position: 'center' }} title="Pre-screened workers, on site within hours." lead="For leaves, peaks and growth. One hourly rate covers everything, and the people work on our payroll, not yours.">
     <Button href="/hire/?service=contract" size="lg">Request workers</Button>
   </PageHero>
 
-  <section class="section section--rule">
+  <section class="facts-band">
+    <div class="wrap">
+      <ul class="facts">
+        {facts.map(([f, d]) => <li><span class="figure">{f}</span><span class="fd">{d}</span></li>)}
+      </ul>
+    </div>
+  </section>
+
+  <section class="section">
     <div class="wrap">
       <div class="section-head"><h2>When employers call us</h2></div>
       <ul class="items">
@@ -37,13 +57,16 @@ const uses = [
 
   <section class="section section--tint">
     <div class="wrap rate-grid">
-      <div class="section-head">
-        <h2>One rate. Everything inside it.</h2>
-        <p class="lead">You get a single hourly rate per worker. These costs are already in it, so there's nothing else to track, file or pay.</p>
+      <Photo src={stock.construction.src} alt={stock.construction.alt} ratio="4/5" sizes="(max-width: 900px) 100vw, 40vw" />
+      <div>
+        <div class="section-head">
+          <h2>One rate. Everything inside it.</h2>
+          <p class="lead">You get a single hourly rate per worker. These costs are already in it, so there's nothing else to track, file or pay.</p>
+        </div>
+        <ul class="covered">
+          {covered.map(([t, d]) => <li><span class="c-t">{t}</span><span class="c-d">{d}</span></li>)}
+        </ul>
       </div>
-      <ul class="covered">
-        {covered.map(([t, d]) => <li><span class="c-t">{t}</span><span class="c-d">{d}</span></li>)}
-      </ul>
     </div>
   </section>
 
@@ -52,7 +75,7 @@ const uses = [
     <div class="wrap ind-grid">
       <div class="section-head">
         <h2>Where we place contract workers</h2>
-        <p class="lead">Eight industries, from warehouse floors to contact centres.</p>
+        <p class="lead">{contractIndustries} industries, from warehouse floors to contact centres.</p>
       </div>
       <IndustryMatrix only="contract" />
     </div>
@@ -62,13 +85,24 @@ const uses = [
 </Base>
 
 <style>
-  .rate-grid, .ind-grid { display: grid; grid-template-columns: 5fr 7fr; gap: clamp(2rem, 6vw, 6rem); align-items: start; }
+  .facts-band { border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+  .facts { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, 1fr); }
+  .facts li { padding: var(--s6) var(--s5) var(--s6) 0; }
+  .facts li + li { padding-left: var(--s5); border-left: 1px solid var(--line); }
+  .facts .figure { display: block; font-size: clamp(2.2rem, 1.4rem + 2.2vw, 3.4rem); margin-bottom: var(--s2); }
+  .fd { display: block; color: var(--ink-soft); max-width: 24ch; }
+
+  .rate-grid { display: grid; grid-template-columns: 5fr 7fr; gap: clamp(2rem, 6vw, 6rem); align-items: center; }
+  .ind-grid { display: grid; grid-template-columns: 5fr 7fr; gap: clamp(2rem, 6vw, 6rem); align-items: start; }
   .covered { list-style: none; margin: 0; padding: 0; border-top: 1.5px solid var(--ink); }
   .covered li { display: grid; grid-template-columns: 14rem 1fr; gap: var(--s4); padding-block: var(--s4); border-bottom: 1px solid var(--line); }
   .c-t { font-weight: 600; }
   .c-d { color: var(--ink-soft); }
   @media (max-width: 900px) {
     .rate-grid, .ind-grid { grid-template-columns: 1fr; }
+    .facts { grid-template-columns: 1fr; }
+    .facts li, .facts li + li { padding: var(--s5) 0; border-left: 0; }
+    .facts li + li { border-top: 1px solid var(--line); }
     .covered li { grid-template-columns: 1fr; gap: var(--s1); }
   }
 </style>

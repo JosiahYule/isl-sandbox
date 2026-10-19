@@ -18,3 +18,13 @@ export const photos = {
   chamberTrio: { src: cdn('ff44a3f4-fe47-49ca-be62-8fb535ac88e0/IMG_7571.jpg'), alt: 'Erika, Meg and Shelley at the Chamber Awards' },
   evanFirstYear: { src: cdn('030b303f-7cda-4655-887b-592b5accda3e/IMG_0288.jpg'), alt: "The team celebrating Evan's first year" },
 };
+
+// STOCK PHOTOS (Unsplash) already in ISL's Squarespace library from blog posts.
+// Used on the service pages until ISL has its own photos of placed workers on the job.
+// TODO: replace with ISL's own photography (a half-day shoot at two or three client sites).
+export const stock = {
+  welder: { src: cdn('1781525441968-BZM3S0N9FX12QYLAE7WO/unsplash-image-9Q_pLLP_jmA.jpg'), alt: 'A welder in a protective helmet working on metal, sparks flying', credit: 'Rob Lambert' },
+  construction: { src: cdn('1777913999462-G2VCNH8RY14H1E66HV9J/unsplash-image-X1P1_EDNnok.jpg'), alt: 'A construction worker in a hard hat on a building frame', credit: 'Josh Olalde' },
+  interview: { src: cdn('1782998628646-3QZ3AIYS6470XB12D9UQ/vitaly-gariev-2AOIg7Qvu8w-unsplash.jpg'), alt: 'A recruiter reviewing a resume with a candidate in an office', credit: 'Vitaly Gariev' },
+  halifax: { src: cdn('1773340555499-TN5WELTYLU7VA9UB347K/unsplash-image-zL7C-G2U7sw.jpg'), alt: 'Aerial view of the Halifax waterfront', credit: 'Chen Liu' },
+};

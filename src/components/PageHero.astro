@@ -1,35 +1,60 @@
 ---
 // PAGE INTRO: the same opening on every inner page, so the site reads as one system.
 //
-// <PageHero title="..." lead="..." svc="contract">
+// <PageHero title="..." lead="..." photo={photos.welder}>
 //   <Button ...>optional actions</Button>
 //   <Fragment slot="aside">optional visual on the right</Fragment>
 // </PageHero>
 //
-// svc: "contract" | "direct" adds the service colour key above the title.
-const { title, lead, svc } = Astro.props;
+// photo:  optional { src, alt, position }. Runs from the top of the page off the right
+//         edge, like the homepage hero. Use either photo or the aside slot, not both.
+// aside:  optional visual (a map, for example) placed in a right-hand column.
+import Photo from './Photo.astro';
+
+const { title, lead, photo } = Astro.props;
 const hasAside = Astro.slots.has('aside');
-const svcLabel = { contract: 'Contract staffing', direct: 'Direct hire' }[svc];
 ---
-<section class:list={['intro', hasAside && 'intro--aside']}>
+<section class:list={['intro', hasAside && 'intro--aside', photo && 'intro--photo']}>
   <div class="wrap grid">
     <div class="copy">
-      {svcLabel && <p class:list={['svc', `svc--${svc}`]}>{svcLabel}</p>}
       <h1>{title}</h1>
       {lead && <p class="lead">{lead}</p>}
       {Astro.slots.has('default') && <div class="actions"><slot /></div>}
     </div>
     {hasAside && <div class="aside"><slot name="aside" /></div>}
   </div>
+  {photo && (
+    <div class="bleed">
+      <Photo src={photo.src} alt={photo.alt} ratio="4/3" sizes="(max-width: 900px) 100vw, 46vw" position={photo.position ?? 'center'} eager />
+    </div>
+  )}
 </section>
 
 <style>
-  .intro { padding-block: clamp(3rem, 7vw, 6rem) clamp(2.5rem, 5vw, 4rem); }
+  .intro { position: relative; padding-block: clamp(3rem, 7vw, 6rem) clamp(2.5rem, 5vw, 4rem); }
   .grid { display: grid; gap: var(--s7); }
   .intro--aside .grid { grid-template-columns: 1.15fr 1fr; align-items: center; }
-  .svc { margin-bottom: var(--s4); }
   h1 { font-size: var(--fs-hero); letter-spacing: -0.025em; max-width: 14ch; }
   .lead { margin-top: var(--s5); }
   .actions { display: flex; flex-wrap: wrap; gap: var(--s3); margin-top: var(--s6); }
-  @media (max-width: 900px) { .intro--aside .grid { grid-template-columns: 1fr; } }
+
+  /* With a photo: the text takes the left half and the photo fills the right,
+     from the top of the section to the bottom, ending at the window edge. */
+  .intro--photo { padding-block: clamp(4rem, 9vw, 7.5rem); }
+  .intro--photo .grid { min-height: min(62vh, 600px); align-items: center; }
+  .intro--photo .copy { max-width: 560px; position: relative; z-index: 2; }
+  .bleed { position: absolute; z-index: 1; top: 0; bottom: 0; right: 0; width: min(46vw, 760px); }
+  .bleed :global(.photo), .bleed :global(.frame) { height: 100%; }
+  .bleed :global(.frame) { aspect-ratio: auto !important; }
+  @media (max-width: 1100px) { .intro--photo .copy { max-width: 450px; } .bleed { width: 44vw; } }
+
+  @media (max-width: 900px) {
+    .intro--aside .grid { grid-template-columns: 1fr; }
+    .intro--photo { padding-bottom: 0; }
+    .intro--photo .grid { min-height: 0; padding-bottom: var(--s6); }
+    .intro--photo .copy { max-width: none; }
+    .bleed { position: static; width: auto; }
+    .bleed :global(.photo), .bleed :global(.frame) { height: auto; }
+    .bleed :global(.frame) { aspect-ratio: 4 / 3 !important; }
+  }
 </style>

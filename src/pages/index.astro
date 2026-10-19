@@ -80,7 +80,7 @@ const tools = toolSlugs.map(([slug, who, d, cta]) => ({ ...posts.find((p) => p.s
       </div>
       <div class="items items--2">
         <div class="item">
-          <p class="svc svc--contract">Contract staffing</p>
+          <h3 class="col-title">Contract staffing</h3>
           <p class="fact"><span class="figure">Within hours</span>from your request to workers on site</p>
           <ul class="sits">
             {situations.contract.map(([q, a]) => <li><p class="q">{q}</p><p class="a">{a}</p></li>)}
@@ -88,7 +88,7 @@ const tools = toolSlugs.map(([slug, who, d, cta]) => ({ ...posts.find((p) => p.s
           <a class="more" href={url('/contract/')}>How contract staffing works</a>
         </div>
         <div class="item item--direct">
-          <p class="svc svc--direct">Direct hire</p>
+          <h3 class="col-title col-title--direct">Direct hire</h3>
           <p class="fact"><span class="figure">{retention}</span>of our direct hire placements stay</p>
           <ul class="sits">
             {situations.direct.map(([q, a]) => <li><p class="q">{q}</p><p class="a">{a}</p></li>)}
@@ -205,6 +205,8 @@ const tools = toolSlugs.map(([slug, who, d, cta]) => ({ ...posts.find((p) => p.s
   }
 
   /* ---------- 2. Services ---------- */
+  .col-title { font-size: 1.35rem; margin-bottom: var(--s5); }
+  .col-title--direct { color: var(--direct); }
   .services { padding-top: calc(clamp(4rem, 8vw, 6.5rem) + 3rem); }
   @media (min-width: 901px) { .services .section-head { max-width: 52%; } .services .items { grid-template-columns: 1fr 1fr; } }
   .item--direct { border-top-color: var(--direct); }

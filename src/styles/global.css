@@ -110,12 +110,10 @@ a[href^="tel:"] { white-space: nowrap; }
 .textlink:hover { color: var(--isl-blue-deep); text-decoration-thickness: 2px; }
 
 /* Service markers: the colour key used everywhere */
-.svc { display: inline-flex; align-items: center; gap: 0.5em; font-weight: 600; font-size: var(--fs-small); }
-.svc::before { content: ''; width: 0.7em; height: 0.7em; flex: none; }
-.svc--contract::before { background: var(--contract); }
-.svc--direct::before { background: var(--direct); }
-.on-dark .svc--contract::before { background: var(--contract-on-dark); }
-.on-dark .svc--direct::before { background: var(--isl-blue-on-dark); }
+.svc { font-weight: 600; font-size: var(--fs-small); color: var(--ink); }
+.svc--direct { color: var(--direct); }
+.on-dark .svc { color: #fff; }
+.on-dark .svc--direct { color: var(--isl-blue-on-dark); }
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }

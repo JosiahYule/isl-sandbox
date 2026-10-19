@@ -6,6 +6,8 @@ import PageHero from '../components/PageHero.astro';
 import IndustryMatrix from '../components/IndustryMatrix.astro';
 import CanadaMap from '../components/CanadaMap.astro';
 import CtaBand from '../components/CtaBand.astro';
+import Photo from '../components/Photo.astro';
+import { stock } from '../data/photos.js';
 import { team } from '../data/team.js';
 import { stats } from '../data/site.js';
 import { sized } from '../lib/img.js';
@@ -29,7 +31,7 @@ const initials = (n) => n.split(' ').map((x) => x[0]).join('');
 const phones = { 'Zowie Tucker': '902-471-0166' };
 ---
 <Base assistant={false} title="Direct hire recruitment" description="Permanent recruitment for hard-to-fill roles anywhere in Canada, with a 90-day replacement guarantee.">
-  <PageHero svc="direct" title="Permanent hires, searched coast to coast." lead="Targeted recruitment for hard-to-fill, full-time roles. Our offices are in Atlantic Canada; our searches reach every province.">
+  <PageHero title="Permanent hires, searched coast to coast." lead="Targeted recruitment for hard-to-fill, full-time roles. Our offices are in Atlantic Canada; our searches reach every province.">
     <Button href="/hire/?service=direct" size="lg">Start a search</Button>
     <Fragment slot="aside"><CanadaMap /></Fragment>
   </PageHero>
@@ -42,14 +44,18 @@ const phones = { 'Zowie Tucker': '902-471-0166' };
           <li class="item"><span class="num">{i + 1}</span><h3>{t}</h3><p>{d}</p></li>
         ))}
       </ol>
+      <div class="wide"><Photo src={stock.interview.src} alt={stock.interview.alt} ratio="21/9" sizes="(max-width: 1320px) 100vw, 1240px" position="center 40%" /></div>
     </div>
   </section>
 
   <section class="section section--tint">
     <div class="wrap">
-      <div class="section-head section-head--split">
-        <h2>{retention} of our placements stay.</h2>
-        <p class="lead">For the rest, there's the guarantee: if a hire doesn't work out in the first 90 days, we find a replacement at no extra cost. Searches average 47 days from brief to hire.</p>
+      <div class="stay">
+        <p class="big figure" aria-hidden="true">{retention}</p>
+        <div>
+          <h2>Hires that last.</h2>
+          <p class="lead">{retention} of our direct hire placements stay. For the rest, there's the guarantee: if a hire doesn't work out in the first 90 days, we find a replacement at no extra cost. Searches average 47 days from brief to hire.</p>
+        </div>
       </div>
       <ul class="items">
         {terms.map(([t, d]) => <li class="item item--blue"><h3>{t}</h3><p>{d}</p></li>)}
@@ -96,6 +102,13 @@ const phones = { 'Zowie Tucker': '902-471-0166' };
   .steps .item:last-child { border-top-style: dashed; }
   .num { display: block; font-size: 2.6rem; font-weight: 300; letter-spacing: -0.04em; line-height: 1; color: var(--direct); margin-bottom: var(--s3); }
   .item--blue { border-top-color: var(--direct); }
+  .wide { margin-top: clamp(3rem, 6vw, 5rem); }
+
+  /* The retention figure as the visual: one very large number beside the explanation */
+  .stay { display: grid; grid-template-columns: auto 1fr; gap: clamp(2rem, 6vw, 6rem); align-items: center; margin-bottom: var(--s8); }
+  .big { margin: 0; font-size: clamp(6rem, 3rem + 10vw, 13rem); color: var(--direct); }
+  .stay h2 { max-width: 18ch; }
+  .stay .lead { margin-top: var(--s4); max-width: 46ch; }
 
   .people { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--s5); }
   .people a { display: grid; gap: 2px; color: var(--ink); text-decoration: none; }
@@ -110,6 +123,8 @@ const phones = { 'Zowie Tucker': '902-471-0166' };
 
   @media (max-width: 960px) {
     .steps { grid-template-columns: 1fr; }
+    .stay { grid-template-columns: 1fr; gap: var(--s4); }
+    .wide :global(.frame) { aspect-ratio: 3 / 2 !important; }
     .people { grid-template-columns: 1fr 1fr; }
     .ind-grid { grid-template-columns: 1fr; }
   }

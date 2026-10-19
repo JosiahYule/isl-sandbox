@@ -234,10 +234,8 @@ const afterSteps = [
   .seg button:hover { border-color: var(--ink); }
   .seg button[aria-pressed='true'] { background: var(--ink); border-color: var(--ink); color: #fff; }
   .result { margin-top: var(--s5); padding-top: var(--s4); border-top: 1.5px solid var(--ink); }
-  .result-name { font-weight: 700; font-size: 1.45rem; line-height: 1.15; display: flex; gap: var(--s3); align-items: baseline; }
-  .result-name::before { content: ''; width: 14px; height: 14px; flex: none; }
-  .result[data-svc='contract'] .result-name::before { background: var(--contract); }
-  .result[data-svc='direct'] .result-name::before { background: var(--direct); }
+  .result-name { font-weight: 700; font-size: 1.45rem; line-height: 1.15; }
+  .result[data-svc='direct'] .result-name { color: var(--direct); }
   .result-why { color: var(--ink-soft); font-size: var(--fs-small); margin-top: var(--s2); }
 
   @media (max-width: 960px) {
