@@ -1,0 +1,82 @@
+---
+// HOMEPAGE  →  /
+// Each file in src/pages becomes a page. The file name is the URL.
+import Base from '../layouts/Base.astro';
+import Button from '../components/Button.astro';
+import Stats from '../components/Stats.astro';
+import Testimonials from '../components/Testimonials.astro';
+import CtaBand from '../components/CtaBand.astro';
+import { brand, images } from '../data/site.js';
+---
+<Base>
+  <section class="hero">
+    <img class="hero-img" src={images.hero} alt="Worker in an industrial warehouse reviewing a tablet" width="2500" height="1400" />
+    <div class="container hero-copy">
+      <span class="eyebrow">Integrated Staffing</span>
+      <h1>Employment solutions on demand.</h1>
+      <p class="lead">Industrial contract staffing and professional permanent placement. {brand.scope}</p>
+      <div class="actions">
+        <Button href="/hire/">Hire talent</Button>
+        <Button href="/find-work/" variant="light">Find work</Button>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container">
+      <Stats />
+    </div>
+  </section>
+
+  <section class="section section--tint">
+    <div class="container">
+      <span class="eyebrow">For employers</span>
+      <h2>Two ways to hire.</h2>
+      <div class="grid two">
+        <article class="card">
+          <h3>Contract staffing</h3>
+          <p>Pre-screened workers available within hours of your request, for vacations, leaves, seasonal peaks and growth. One all-inclusive hourly rate.</p>
+          <a href="/contract/">How contract staffing works</a>
+        </article>
+        <article class="card">
+          <h3>Direct hire</h3>
+          <p>Targeted searches for hard-to-fill permanent roles, anywhere in Canada. Retainer-based pricing and a 90-day replacement guarantee.</p>
+          <a href="/direct-hire/">How direct hire works</a>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container">
+      <span class="eyebrow">What clients say</span>
+      <h2>Trusted by employers across the region.</h2>
+      <Testimonials />
+    </div>
+  </section>
+
+  <section class="section section--tint">
+    <div class="container seeker">
+      <div>
+        <span class="eyebrow">For job seekers</span>
+        <h2>Looking for work?</h2>
+        <p class="lead">We match people to assignments that fit their skills, interests and career goals. See what's open now.</p>
+      </div>
+      <Button href="/find-work/">Browse jobs</Button>
+    </div>
+  </section>
+
+  <CtaBand />
+</Base>
+
+<style>
+  .hero { position: relative; min-height: min(78vh, 720px); display: grid; align-items: end; color: #fff; }
+  .hero-img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+  .hero::after { content: ''; position: absolute; inset: 0; background: linear-gradient(180deg, rgb(0 0 0 / 0.1), rgb(0 0 0 / 0.65)); }
+  .hero-copy { position: relative; z-index: 1; padding-block: var(--space-16); }
+  .hero .eyebrow, .hero .lead { color: #fff; }
+  .hero h1 { max-width: 14ch; }
+  .actions { display: flex; flex-wrap: wrap; gap: var(--space-3); margin-top: var(--space-6); }
+  .two { grid-template-columns: repeat(auto-fit, minmax(min(100%, 380px), 1fr)); }
+  .seeker { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--space-6); }
+</style>

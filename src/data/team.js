@@ -1,0 +1,38 @@
+// Team members, from the live site's bio pages.
+// `slug` is the bio page address on the live site (integratedstaffing.ca/<slug>).
+// TODO: add each person's role and photo. Roles below are only the ones shown on the live Direct Hire page.
+
+export const team = [
+  { name: 'Greg White', slug: 'greg-white', role: 'CEO' },
+  { name: 'Ross Argante', slug: 'ross-argante', role: '' },
+  { name: 'Chance Skauge', slug: 'chance-skauge', role: 'Director of Business Development' },
+  { name: 'Zowie Tucker', slug: 'zowie-tucker', role: 'Senior Recruitment Consultant', team: 'Direct Hire' },
+  { name: 'Shane Ico', slug: 'shane-ico', role: 'Recruitment Consultant', team: 'Direct Hire' },
+  { name: 'Lisa Laviolette', slug: 'lisa-laviolette', role: 'Recruitment Consultant', team: 'Direct Hire' },
+  { name: 'Kayla Jamieson', slug: 'kayla-jamieson', role: 'Recruitment Consultant', team: 'Direct Hire' },
+  { name: 'Amber Antle', slug: 'amber-antle', role: '' },
+  { name: 'Natacha Bailey', slug: 'natacha-bailey', role: '' },
+  { name: 'Nadine Chavarie', slug: 'nadine-chavarie', role: '' },
+  { name: 'Laura Coyle', slug: 'laura-coyle', role: '' },
+  { name: 'Michaila Doiron', slug: 'michaila-doiron', role: '' },
+  { name: 'Megan Ferguson', slug: 'megan-ferguson', role: '' },
+  { name: 'Steven Fox', slug: 'steven-fox', role: '' },
+  { name: 'Nicole Fudge', slug: 'nicole-fudge', role: '' },
+  { name: 'Carrie Fullarton', slug: 'carrie-fullarton', role: '' },
+  { name: 'Skylar Hardwick', slug: 'skylar-hardwick', role: '' },
+  { name: 'Shelley Lewis', slug: 'shelley-lewis', role: '' },
+  { name: 'James Locke', slug: 'james-locke', role: '' },
+  { name: 'Marine Migliore', slug: 'marine-migliore', role: '' },
+  { name: 'Crystal Murphy', slug: 'crystal-murphy', role: '' },
+  { name: 'Ashton Murray', slug: 'ashton-murray', role: '' },
+  { name: 'Jessica Nash', slug: 'jessica-nash', role: '' },
+  { name: 'Julia Parker', slug: 'julia-parker', role: '' },
+  { name: 'Nicole Robertson', slug: 'nicole-robertson', role: '' },
+  { name: 'Erika Smeltzer', slug: 'erika-smeltzer', role: '' },
+  { name: 'Sonja Speight', slug: 'sonja-speight', role: '' },
+  { name: 'Meg Antonick', slug: 'meg-antonick', role: '' },
+  { name: 'Evan Way', slug: 'evan-way', role: '' },
+  { name: 'Brady Wells', slug: 'brady-wells', role: '' },
+  { name: 'Kelli Wetmore', slug: 'kelli-wetmore', role: '' },
+  { name: 'Josiah Yule', slug: 'josiah-yule', role: 'Marketing Coordinator' },
+];

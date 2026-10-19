@@ -1,0 +1,10 @@
+# Installed packages (recreated by `npm install`)
+node_modules/
+
+# Build output (recreated by `npm run build`)
+dist/
+.astro/
+
+# Local and OS files
+.env
+.DS_Store

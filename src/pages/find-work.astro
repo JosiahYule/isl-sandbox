@@ -1,0 +1,54 @@
+---
+// JOB BOARD  →  /find-work/
+// Placeholder listings so you can design the layout. Later, these come from the Avionte feed.
+// Edit `sampleJobs` to test long titles, many results, empty states, etc.
+import Base from '../layouts/Base.astro';
+import PageHero from '../components/PageHero.astro';
+import Button from '../components/Button.astro';
+
+const sampleJobs = [
+  { title: 'General Labourer', type: 'Contract', category: 'Warehousing', city: 'Dartmouth, NS', pay: '$18.50/hr' },
+  { title: 'Forklift Operator', type: 'Contract', category: 'Logistics', city: 'Moncton, NB', pay: '$20/hr' },
+  { title: 'Staff Accountant', type: 'Permanent', category: 'Finance', city: 'Halifax, NS', pay: '$65,000 to $75,000' },
+  { title: 'Millwright', type: 'Contract', category: 'Skilled Trades', city: "St. John's, NL", pay: '$34/hr' },
+  { title: 'Operations Manager', type: 'Permanent', category: 'Manufacturing', city: 'Charlottetown, PE', pay: '$85,000 to $95,000' },
+  { title: 'Customer Service Representative', type: 'Contract', category: 'Contact Centres', city: 'Saint John, NB', pay: '$17.50/hr' },
+];
+---
+<Base title="Find work" description="Contract and permanent jobs across Atlantic Canada and beyond.">
+  <PageHero eyebrow="For job seekers" title="Find your next opportunity." lead="Every day we meet candidates and match them to roles that fit their skills and goals." />
+
+  <section class="section">
+    <div class="container">
+      <p class="note">Sandbox: these are sample jobs for layout only.</p>
+      <div class="jobs">
+        {sampleJobs.map((j) => (
+          <article class="card job">
+            <div>
+              <h3>{j.title}</h3>
+              <p class="meta">{j.city} · {j.category}</p>
+            </div>
+            <span class:list={['pill', j.type.toLowerCase()]}>{j.type}</span>
+            <p class="pay">{j.pay}</p>
+          </article>
+        ))}
+      </div>
+      <div class="general">
+        <p>Don't see the right job?</p>
+        <Button href="https://www.integratedstaffing.ca/careers/general-apply" variant="secondary">Apply for future positions</Button>
+      </div>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .note { font-size: var(--text-sm); color: var(--color-ink-muted); }
+  .jobs { display: grid; gap: var(--space-4); }
+  .job { display: grid; grid-template-columns: 1fr auto; gap: var(--space-2) var(--space-6); align-items: start; }
+  .job h3 { margin-bottom: var(--space-1); }
+  .meta, .pay { margin: 0; color: var(--color-ink-muted); }
+  .pill { font-size: var(--text-sm); font-weight: 600; padding: var(--space-1) var(--space-3); border-radius: var(--radius-pill); background: var(--color-surface); }
+  .permanent { background: var(--color-brand); color: var(--color-brand-ink); }
+  .general { margin-top: var(--space-12); display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-4); }
+  .general p { margin: 0; font-weight: 600; }
+</style>

@@ -1,0 +1,46 @@
+---
+// ABOUT  →  /about/
+import Base from '../layouts/Base.astro';
+import PageHero from '../components/PageHero.astro';
+import Button from '../components/Button.astro';
+import CtaBand from '../components/CtaBand.astro';
+import { brand } from '../data/site.js';
+
+const values = [
+  ['Impact', 'Every placement should make a measurable difference for the client and the candidate.'],
+  ['Passion', 'We care about the people we place and the businesses we support.'],
+  ['Honesty', 'Clear terms, straight answers, no surprises.'],
+  ['Communication', 'Responsive before, during and after every placement.'],
+];
+---
+<Base title="About" description="Locally owned and operated recruiting and staffing since 2013.">
+  <PageHero eyebrow="About us" title="The right fit, for both sides of the hire." lead={`Locally owned and operated since ${brand.since}. ${brand.scope}`}>
+    <Button href="/hire/">For employers</Button>
+    <Button href="/find-work/" variant="secondary">For job seekers</Button>
+  </PageHero>
+
+  <section class="section">
+    <div class="container">
+      <h2>How we work</h2>
+      <div class="grid">
+        <article class="card"><h3>Tailored screening</h3><p>Typing and dexterity tests and company-specific orientations, at no extra cost.</p></article>
+        <article class="card"><h3>Direct hire</h3><p>A single invoice based on a percentage of the candidate's annual salary.</p></article>
+        <article class="card"><h3>Contract hourly</h3><p>One all-inclusive hourly rate.</p></article>
+        <article class="card"><h3>Workers' compensation</h3><p>Payroll remittances, claims and safe, timely return-to-work, handled end to end.</p></article>
+      </div>
+    </div>
+  </section>
+
+  <section class="section section--tint">
+    <div class="container">
+      <h2>Our values</h2>
+      <div class="grid">
+        {values.map(([t, d], i) => (
+          <article class="card"><span class="eyebrow">0{i + 1}</span><h3>{t}</h3><p>{d}</p></article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <CtaBand />
+</Base>

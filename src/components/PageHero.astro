@@ -1,0 +1,19 @@
+---
+// PAGE HERO: the title band at the top of inner pages.
+// Usage: <PageHero eyebrow="For employers" title="..." lead="..."> optional buttons </PageHero>
+const { eyebrow, title, lead } = Astro.props;
+---
+<section class="hero section section--tint">
+  <div class="container">
+    {eyebrow && <span class="eyebrow">{eyebrow}</span>}
+    <h1>{title}</h1>
+    {lead && <p class="lead">{lead}</p>}
+    <div class="actions"><slot /></div>
+  </div>
+</section>
+
+<style>
+  .hero h1 { max-width: 18ch; }
+  .actions { display: flex; flex-wrap: wrap; gap: var(--space-3); margin-top: var(--space-6); }
+  .actions:empty { display: none; }
+</style>

@@ -1,0 +1,53 @@
+---
+// SITE FOOTER
+import { brand, nav, offices, social, images } from '../data/site.js';
+const year = new Date().getFullYear(); // never goes stale
+---
+<footer class="footer section--dark">
+  <div class="container cols">
+    <div class="about">
+      <strong>{brand.name}</strong>
+      <p>{brand.scope} Connecting employers and job seekers since {brand.since}.</p>
+      <div class="badges">
+        <img src={images.badgeBestPlaces} alt="Best Places to Work" width="80" height="80" loading="lazy" />
+        <img src={images.badgeCor} alt="COR Certified" width="80" height="80" loading="lazy" />
+      </div>
+    </div>
+
+    <nav aria-label="Footer">
+      <strong>Explore</strong>
+      <ul>{nav.map((i) => <li><a href={i.href}>{i.label}</a></li>)}</ul>
+    </nav>
+
+    <div>
+      <strong>Offices</strong>
+      <ul>
+        {offices.map((o) => (
+          <li>{o.city}, {o.province} <a href={`tel:+1${o.phone.replaceAll('-', '')}`}>{o.phone}</a></li>
+        ))}
+      </ul>
+    </div>
+
+    <div>
+      <strong>Follow</strong>
+      <ul>{social.map((s) => <li><a href={s.href}>{s.label}</a></li>)}</ul>
+    </div>
+  </div>
+  <div class="container legal">© {year} {brand.name}. All rights reserved.</div>
+</footer>
+
+<style>
+  .footer { background: var(--color-dark); color: var(--color-dark-ink); padding-block: var(--space-16) var(--space-8); }
+  .footer a { color: inherit; }
+  .cols {
+    display: grid; gap: var(--space-8);
+    grid-template-columns: 2fr repeat(3, 1fr);
+  }
+  strong { display: block; margin-bottom: var(--space-3); }
+  ul { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--space-2); }
+  .about p { opacity: 0.8; max-width: 36ch; }
+  .badges { display: flex; gap: var(--space-4); }
+  .badges img { height: 56px; width: auto; }
+  .legal { margin-top: var(--space-12); font-size: var(--text-sm); opacity: 0.6; }
+  @media (max-width: 800px) { .cols { grid-template-columns: 1fr 1fr; } .about { grid-column: 1 / -1; } }
+</style>

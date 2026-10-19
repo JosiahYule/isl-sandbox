@@ -1,0 +1,39 @@
+---
+// LEARN (BLOG INDEX)  →  /learn/
+// Lists posts from src/data/posts.js, grouped by audience. Posts still live on the real site.
+import Base from '../layouts/Base.astro';
+import PageHero from '../components/PageHero.astro';
+import { posts } from '../data/posts.js';
+
+const fmt = (d) => new Date(d + 'T12:00:00').toLocaleDateString('en-CA', { month: 'short', day: 'numeric', year: 'numeric' });
+const groups = [
+  ['For employers', posts.filter((p) => p.audience === 'employers')],
+  ['For job seekers', posts.filter((p) => p.audience === 'job seekers')],
+  ['Market insights', posts.filter((p) => p.audience === 'everyone')],
+];
+---
+<Base title="Learn" description="Hiring advice, career guides and Atlantic Canada job market insights.">
+  <PageHero eyebrow="Learn" title="Insights for employers and job seekers." lead="Hiring advice, career guides and what's happening in the Atlantic Canada job market." />
+
+  {groups.map(([label, list], i) => (
+    <section class:list={['section', i % 2 === 1 && 'section--tint']}>
+      <div class="container">
+        <h2>{label}</h2>
+        <div class="grid">
+          {list.map((p) => (
+            <a class="card post" href={p.url}>
+              <time datetime={p.date}>{fmt(p.date)}</time>
+              <strong>{p.title}</strong>
+            </a>
+          ))}
+        </div>
+      </div>
+    </section>
+  ))}
+</Base>
+
+<style>
+  .post { display: grid; gap: var(--space-2); text-decoration: none; color: var(--color-ink); }
+  .post:hover strong { color: var(--color-brand); }
+  time { font-size: var(--text-sm); color: var(--color-ink-muted); }
+</style>

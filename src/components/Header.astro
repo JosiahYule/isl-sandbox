@@ -1,0 +1,75 @@
+---
+// SITE HEADER
+// Reads the menu from src/data/site.js, so editing the nav never means touching this file.
+// The mobile menu uses <details>, a built-in HTML element that opens and closes with no JavaScript.
+import { brand, nav } from '../data/site.js';
+import Button from './Button.astro';
+
+const current = Astro.url.pathname;
+---
+<header class="header">
+  <div class="container bar">
+    <a class="logo" href="/" aria-label={`${brand.name} home`}>
+      <img src={brand.logo} alt={brand.name} width="200" height="48" />
+    </a>
+
+    <nav class="desktop" aria-label="Main">
+      {nav.map((item) => (
+        <a href={item.href} aria-current={current.startsWith(item.href) ? 'page' : undefined}>{item.label}</a>
+      ))}
+    </nav>
+
+    <div class="actions">
+      <a class="login" href={brand.loginUrl}>Login</a>
+      <Button href="/hire/" size="sm">Request talent</Button>
+    </div>
+
+    <details class="mobile">
+      <summary aria-label="Menu">Menu</summary>
+      <nav aria-label="Mobile">
+        {nav.map((item) => <a href={item.href}>{item.label}</a>)}
+        <a href={brand.loginUrl}>Login</a>
+        <Button href="/hire/">Request talent</Button>
+      </nav>
+    </details>
+  </div>
+</header>
+
+<style>
+  .header {
+    position: sticky; top: 0; z-index: 50;
+    background: var(--color-bg);
+    border-bottom: 1px solid var(--color-line);
+  }
+  .bar {
+    display: flex; align-items: center; gap: var(--space-6);
+    min-height: 72px;
+  }
+  .logo img { height: 40px; width: auto; }
+  .desktop { display: flex; gap: var(--space-6); margin-left: auto; }
+  .desktop a, .login {
+    color: var(--color-ink); text-decoration: none; font-weight: 500;
+  }
+  .desktop a:hover, .desktop a[aria-current='page'] { color: var(--color-brand); }
+  .actions { display: flex; align-items: center; gap: var(--space-4); }
+
+  .mobile { display: none; margin-left: auto; }
+  .mobile summary {
+    list-style: none; cursor: pointer; font-weight: 600;
+    padding: var(--space-2) var(--space-3);
+    border: 1px solid var(--color-line); border-radius: var(--radius);
+  }
+  .mobile summary::-webkit-details-marker { display: none; }
+  .mobile nav {
+    position: absolute; left: 0; right: 0; top: 100%;
+    display: grid; gap: var(--space-4);
+    padding: var(--space-6) var(--gutter);
+    background: var(--color-bg); border-bottom: 1px solid var(--color-line);
+  }
+  .mobile nav a { color: var(--color-ink); text-decoration: none; font-size: var(--text-lg); }
+
+  @media (max-width: 900px) {
+    .desktop, .actions { display: none; }
+    .mobile { display: block; }
+  }
+</style>

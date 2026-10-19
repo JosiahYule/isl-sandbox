@@ -1,0 +1,24 @@
+---
+// BUTTON
+// Usage: <Button href="/hire/">Request talent</Button>
+// Options: variant="primary" | "secondary" | "light", size="sm" | "md"
+const { href, variant = 'primary', size = 'md' } = Astro.props;
+---
+<a class:list={['btn', variant, size]} href={href}><slot /></a>
+
+<style>
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center;
+    gap: var(--space-2);
+    font-weight: 600; text-decoration: none; white-space: nowrap;
+    border-radius: var(--radius-pill);
+    border: 2px solid transparent;
+    transition: transform 120ms ease, background 120ms ease;
+  }
+  .btn:hover { transform: translateY(-1px); }
+  .md { padding: var(--space-3) var(--space-6); }
+  .sm { padding: var(--space-2) var(--space-4); font-size: var(--text-sm); }
+  .primary { background: var(--color-brand); color: var(--color-brand-ink); }
+  .secondary { border-color: currentColor; color: var(--color-ink); }
+  .light { background: var(--color-bg); color: var(--color-ink); }
+</style>

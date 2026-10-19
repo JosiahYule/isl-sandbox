@@ -1,0 +1,34 @@
+---
+// TEAM  →  /team/
+// Reads from src/data/team.js. Cards link to each person's bio on the live site for now.
+import Base from '../layouts/Base.astro';
+import PageHero from '../components/PageHero.astro';
+import { team } from '../data/team.js';
+---
+<Base title="Our team" description="Meet the Integrated Staffing team.">
+  <PageHero eyebrow="Our team" title="The people behind every placement." lead="Recruiters and staff across our five Atlantic Canada offices." />
+
+  <section class="section">
+    <div class="container">
+      <div class="grid people">
+        {team.map((p) => (
+          <a class="card person" href={`https://www.integratedstaffing.ca/${p.slug}`}>
+            <span class="avatar" aria-hidden="true">{p.name.split(' ').map((n) => n[0]).join('')}</span>
+            <strong>{p.name}</strong>
+            {p.role && <span class="role">{p.role}</span>}
+          </a>
+        ))}
+      </div>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .people { grid-template-columns: repeat(auto-fill, minmax(min(100%, 200px), 1fr)); }
+  .person { display: grid; gap: var(--space-1); text-decoration: none; color: var(--color-ink); }
+  .avatar {
+    width: 64px; height: 64px; border-radius: 50%; display: grid; place-items: center;
+    background: var(--color-surface); font-weight: 700; margin-bottom: var(--space-3);
+  }
+  .role { color: var(--color-ink-muted); font-size: var(--text-sm); }
+</style>

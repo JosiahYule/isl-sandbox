@@ -1,0 +1,72 @@
+---
+// DIRECT HIRE (PERMANENT PLACEMENT)  →  /direct-hire/
+import Base from '../layouts/Base.astro';
+import PageHero from '../components/PageHero.astro';
+import Button from '../components/Button.astro';
+import Stats from '../components/Stats.astro';
+import Testimonials from '../components/Testimonials.astro';
+import CtaBand from '../components/CtaBand.astro';
+import { directHireIndustries } from '../data/industries.js';
+import { team } from '../data/team.js';
+
+const recruiters = team.filter((p) => p.team === 'Direct Hire');
+const reasons = [
+  ['90-day replacement guarantee', "If a hire doesn't work out within 90 days, we complete the replacement at no extra cost."],
+  ['Transparent, retainer-based pricing', 'Clear terms agreed upfront. No surprise fees.'],
+  ['Pre-screened talent', 'Every candidate is screened for capability, culture fit and genuine interest.'],
+  ['Proactive sourcing', "We don't wait for applicants. Recruiters reach out through targeted networks."],
+  ['Industry-focused recruiters', 'Each search is led by someone who works in your industry every day.'],
+];
+---
+<Base title="Direct hire recruitment" description="Permanent recruitment for hard-to-fill roles across Canada, with a 90-day replacement guarantee.">
+  <PageHero eyebrow="Direct hire" title="Permanent hiring, made simple." lead="Targeted recruitment for hard-to-fill, full-time roles. Offices across Atlantic Canada, searches nationwide.">
+    <Button href="/hire/">Start a search</Button>
+  </PageHero>
+
+  <section class="section">
+    <div class="container">
+      <h2>Why partner with us for direct hire</h2>
+      <div class="grid">
+        {reasons.map(([t, d]) => <article class="card"><h3>{t}</h3><p>{d}</p></article>)}
+      </div>
+    </div>
+  </section>
+
+  <section class="section section--dark">
+    <div class="container"><Stats /></div>
+  </section>
+
+  <section class="section">
+    <div class="container">
+      <span class="eyebrow">Specialties</span>
+      <h2>Industries we recruit for</h2>
+      <ul class="tags">{directHireIndustries.map((i) => <li>{i}</li>)}</ul>
+    </div>
+  </section>
+
+  <section class="section section--tint">
+    <div class="container">
+      <h2>Meet your direct hire recruiters</h2>
+      <div class="grid">
+        {recruiters.map((r) => (
+          <a class="card person" href={`https://www.integratedstaffing.ca/${r.slug}`}>
+            <strong>{r.name}</strong><span>{r.role}</span>
+          </a>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container"><Testimonials /></div>
+  </section>
+
+  <CtaBand title="Let's build your team." text="Tell us about your next key hire and we'll set up a call." label="Start a search" />
+</Base>
+
+<style>
+  .tags { list-style: none; padding: 0; margin: 0; display: flex; flex-wrap: wrap; gap: var(--space-3); }
+  .tags li { padding: var(--space-2) var(--space-4); border: 1px solid var(--color-line); border-radius: var(--radius-pill); }
+  .person { display: grid; gap: var(--space-1); text-decoration: none; color: var(--color-ink); }
+  .person span { color: var(--color-ink-muted); }
+</style>

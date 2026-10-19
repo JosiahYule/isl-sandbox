@@ -1,0 +1,85 @@
+---
+// EMPLOYER LANDING PAGE  →  /hire/
+// The form is visual only in the sandbox: it doesn't send anywhere yet.
+import Base from '../layouts/Base.astro';
+import PageHero from '../components/PageHero.astro';
+import Stats from '../components/Stats.astro';
+import Testimonials from '../components/Testimonials.astro';
+import { brand } from '../data/site.js';
+
+const sectors = [
+  'Construction & Trades', 'Manufacturing & Industrial', 'Transportation & Logistics',
+  'Office & Administrative', 'Finance & Accounting', 'Engineering & Technical',
+  'Healthcare & Life Services', 'Other',
+];
+const steps = [
+  ['Tell us the role', 'Share what you need, when, and for how long.'],
+  ['We search our network', 'Recruiters screen candidates against your requirements.'],
+  ['You meet the candidates', 'A shortlist of pre-screened people, ready to interview.'],
+  ['Your position is filled', 'We handle the paperwork and follow up after placement.'],
+];
+---
+<Base title="Hire talent" description="Contract and permanent hiring for employers. Offices across Atlantic Canada, permanent search nationwide.">
+  <PageHero eyebrow="For employers" title="We find the people you're looking for." lead="Contract and permanent hiring across construction, industrial, office and more. A recruiter follows up within one business day." />
+
+  <section class="section">
+    <div class="container layout">
+      <form class="card form" onsubmit="event.preventDefault(); this.querySelector('.done').hidden = false;">
+        <h2>Tell us about your role</h2>
+        <label>Your name <input name="name" required autocomplete="name" /></label>
+        <label>Your email <input name="email" type="email" required autocomplete="email" /></label>
+        <label>Company <input name="company" autocomplete="organization" /></label>
+        <label>Sector
+          <select name="sector">{sectors.map((s) => <option>{s}</option>)}</select>
+        </label>
+        <label>What are you hiring for? <textarea name="role" rows="4"></textarea></label>
+        <button type="submit">Send my request</button>
+        <p class="done" hidden>Request received. (Sandbox: nothing was actually sent.)</p>
+        <p class="alt">Prefer to talk? Call <a href={`tel:+1${brand.mainPhone.replaceAll('-', '')}`}>{brand.mainPhone}</a> or <a href={`mailto:${brand.email}`}>email us</a>.</p>
+      </form>
+
+      <div>
+        <h2>From request to hire in days, not weeks.</h2>
+        <ol class="steps">
+          {steps.map(([t, d]) => <li><strong>{t}</strong><span>{d}</span></li>)}
+        </ol>
+        <p>Not sure which model fits? Compare <a href="/contract/">contract staffing</a> and <a href="/direct-hire/">direct hire</a>.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="section section--dark">
+    <div class="container"><Stats /></div>
+  </section>
+
+  <section class="section">
+    <div class="container"><Testimonials limit={1} /></div>
+  </section>
+</Base>
+
+<style>
+  .layout { display: grid; gap: var(--space-12); grid-template-columns: 1.1fr 1fr; align-items: start; }
+  @media (max-width: 860px) { .layout { grid-template-columns: 1fr; } }
+  .form { display: grid; gap: var(--space-4); }
+  .form h2 { font-size: var(--text-xl); }
+  label { display: grid; gap: var(--space-1); font-weight: 600; font-size: var(--text-sm); }
+  input, select, textarea {
+    font: inherit; font-weight: 400; padding: var(--space-3);
+    border: 1px solid var(--color-line); border-radius: calc(var(--radius) / 2);
+  }
+  button {
+    font: inherit; font-weight: 600; cursor: pointer;
+    padding: var(--space-3) var(--space-6); border: 0; border-radius: var(--radius-pill);
+    background: var(--color-brand); color: var(--color-brand-ink);
+  }
+  .done { color: var(--color-brand); font-weight: 600; }
+  .alt { font-size: var(--text-sm); color: var(--color-ink-muted); }
+  .steps { list-style: none; counter-reset: s; padding: 0; margin: 0 0 var(--space-6); display: grid; gap: var(--space-4); }
+  .steps li { counter-increment: s; display: grid; grid-template-columns: 2.5rem 1fr; column-gap: var(--space-3); }
+  .steps li::before {
+    content: counter(s); grid-row: span 2;
+    width: 2.5rem; height: 2.5rem; border-radius: 50%; display: grid; place-items: center;
+    background: var(--color-surface); font-weight: 700;
+  }
+  .steps span { color: var(--color-ink-muted); }
+</style>

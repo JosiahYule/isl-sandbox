@@ -1,0 +1,46 @@
+---
+// CONTRACT STAFFING  →  /contract/
+import Base from '../layouts/Base.astro';
+import PageHero from '../components/PageHero.astro';
+import Button from '../components/Button.astro';
+import Testimonials from '../components/Testimonials.astro';
+import CtaBand from '../components/CtaBand.astro';
+import { contractIndustries } from '../data/industries.js';
+
+const benefits = [
+  ['Workers within hours', 'Qualified, pre-screened workers are never more than a phone call away.'],
+  ['One all-inclusive rate', 'A single hourly rate covers wages, remittances and administration.'],
+  ['Workers’ comp handled', 'We manage payroll remittances, claims and safe return-to-work.'],
+  ['Try before you hire', 'A smart way to see someone on the job before bringing them onto your team.'],
+];
+---
+<Base title="Contract staffing" description="Pre-screened contract workers across Atlantic Canada, available within hours of your request.">
+  <PageHero eyebrow="Contract staffing" title="Flexible staffing, on your terms." lead="Vacations, maternity leaves, seasonal peaks or steady growth: our workers can be on site within hours of your request.">
+    <Button href="/hire/">Request workers</Button>
+  </PageHero>
+
+  <section class="section">
+    <div class="container">
+      <h2>Why employers use contract staffing</h2>
+      <div class="grid">
+        {benefits.map(([t, d]) => <article class="card"><h3>{t}</h3><p>{d}</p></article>)}
+      </div>
+    </div>
+  </section>
+
+  <section class="section section--tint">
+    <div class="container">
+      <span class="eyebrow">Industries</span>
+      <h2>Where we place contract workers</h2>
+      <div class="grid">
+        {contractIndustries.map((i) => <article class="card"><h3>{i.name}</h3><p>{i.text}</p></article>)}
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container"><Testimonials limit={2} /></div>
+  </section>
+
+  <CtaBand title="Need workers this week?" label="Request workers" />
+</Base>

@@ -1,0 +1,47 @@
+---
+// CONTACT  →  /contact/
+import Base from '../layouts/Base.astro';
+import PageHero from '../components/PageHero.astro';
+import Button from '../components/Button.astro';
+import Offices from '../components/Offices.astro';
+import { brand } from '../data/site.js';
+---
+<Base title="Contact" description="Contact Integrated Staffing in Halifax, Moncton, Saint John, Charlottetown and St. John's.">
+  <PageHero eyebrow="Contact" title="Talk to our team." lead="Call the office nearest you, or tell us what you need and we'll route you to the right recruiter." />
+
+  <section class="section">
+    <div class="container">
+      <div class="grid routes">
+        <article class="card">
+          <h3>I'm hiring</h3>
+          <p>Contract workers or a permanent hire. A recruiter replies within one business day.</p>
+          <Button href="/hire/">Request talent</Button>
+        </article>
+        <article class="card">
+          <h3>I'm looking for work</h3>
+          <p>Browse current openings or apply to be considered for future roles.</p>
+          <Button href="/find-work/" variant="secondary">Browse jobs</Button>
+        </article>
+        <article class="card">
+          <h3>Know a company that's hiring?</h3>
+          <p>Refer them to our team and we'll take it from there.</p>
+          <Button href="https://www.integratedstaffing.ca/referrals" variant="secondary">Make a referral</Button>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="section section--tint">
+    <div class="container">
+      <h2>Our offices</h2>
+      <Offices />
+      <p class="email">General inquiries: <a href={`mailto:${brand.email}`}>{brand.email}</a></p>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .routes .card { display: flex; flex-direction: column; align-items: flex-start; }
+  .routes p { flex: 1; }
+  .email { margin-top: var(--space-8); }
+</style>

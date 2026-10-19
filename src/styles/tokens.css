@@ -1,0 +1,53 @@
+/*
+  DESIGN TOKENS
+  -------------
+  These variables are the "knobs" of the whole design. Every component reads
+  its colours, fonts and spacing from here, so changing one value here restyles
+  the entire site. Start your redesign by editing this file.
+
+  The colours below are neutral placeholders, not ISL's brand colours.
+  Swap them for the real brand values.
+*/
+
+:root {
+  /* Colour */
+  --color-bg: #ffffff;
+  --color-surface: #f4f5f7;      /* light panels and cards */
+  --color-ink: #14171c;          /* main text */
+  --color-ink-muted: #5a6270;    /* secondary text */
+  --color-line: #dde1e7;         /* borders and dividers */
+  --color-brand: #0b4f8a;        /* primary brand colour: buttons, links */
+  --color-brand-ink: #ffffff;    /* text that sits on the brand colour */
+  --color-accent: #f2a900;       /* highlight colour, used sparingly */
+  --color-dark: #101820;         /* dark sections and footer */
+  --color-dark-ink: #e9edf2;     /* text on dark sections */
+
+  /* Type */
+  --font-body: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font-display: var(--font-body);
+  --text-sm: 0.875rem;
+  --text-base: 1.0625rem;
+  --text-lg: 1.25rem;
+  --text-xl: clamp(1.5rem, 1.2rem + 1.2vw, 2rem);
+  --text-2xl: clamp(2rem, 1.4rem + 2.4vw, 3rem);
+  --text-3xl: clamp(2.5rem, 1.6rem + 3.6vw, 4.25rem);
+  --leading-tight: 1.1;
+  --leading-body: 1.6;
+
+  /* Space (one scale for padding, margins and gaps) */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+  --space-12: 3rem;
+  --space-16: 4rem;
+  --space-24: 6rem;
+
+  /* Shape and layout */
+  --radius: 10px;
+  --radius-pill: 999px;
+  --max-width: 1180px;
+  --gutter: clamp(1rem, 4vw, 2rem);
+}
