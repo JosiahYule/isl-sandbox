@@ -60,13 +60,13 @@ const filters = [
 <style>
   .hero { padding-block: clamp(3rem, 7vw, 6rem) var(--s7); }
   .hero-grid { display: grid; grid-template-columns: 1.6fr 1fr; gap: var(--s6); align-items: end; }
-  .hero h1 { font-size: var(--fs-hero); font-weight: 830; letter-spacing: -0.035em; max-width: 16ch; }
+  .hero h1 { font-size: var(--fs-hero); font-weight: 700; letter-spacing: -0.025em; max-width: 16ch; }
 
   .people { padding-bottom: var(--s9); }
   .filters { display: flex; flex-wrap: wrap; gap: var(--s2); margin-bottom: var(--s5); }
   .filters button {
-    font: inherit; font-size: var(--fs-small); font-weight: 600; cursor: pointer;
-    padding: 0.5rem 0.95rem; border-radius: var(--radius-round); background: transparent; color: var(--ink); border: 1.5px solid var(--line);
+    font: inherit; font-size: var(--fs-small); font-weight: 500; cursor: pointer;
+    padding: 0.5rem 0.95rem; border-radius: var(--radius); background: transparent; color: var(--ink); border: 1.5px solid var(--line);
   }
   .filters button span { color: var(--ink-soft); font-weight: 500; }
   .filters button[aria-pressed='true'] { background: var(--ink); border-color: var(--ink); color: #fff; }
@@ -82,14 +82,14 @@ const filters = [
     background: var(--mist); color: var(--ink); text-decoration: none; border-radius: var(--radius);
     transition: background-color 150ms var(--ease);
   }
-  a:hover { background: #dfe8f1; }
-  .grid--lead a { background: var(--navy); color: #fff; min-height: 15rem; }
-  .grid--lead a:hover { background: var(--navy-raised); }
+  a:hover { background: #ececec; }
+  .grid--lead a { background: var(--dark); color: #fff; min-height: 15rem; }
+  .grid--lead a:hover { background: var(--dark-raised); }
   .avatar {
-    width: 52px; height: 52px; border-radius: var(--radius-round); display: grid; place-items: center; margin-bottom: auto;
-    background: var(--paper); color: var(--ink); font-family: var(--font-display); font-stretch: 115%; font-weight: 780;
+    width: 52px; height: 52px; border-radius: 50%; display: grid; place-items: center; margin-bottom: auto;
+    background: var(--paper); color: var(--ink); font-weight: 700;
   }
-  .name { margin-top: var(--s6); font-family: var(--font-display); font-stretch: 112%; font-weight: 740; font-size: 1.1rem; }
+  .name { margin-top: var(--s6); font-weight: 700; font-size: 1.1rem; }
   .grid--lead .name { font-size: 1.5rem; }
   .role { font-size: var(--fs-small); opacity: 0.75; }
 

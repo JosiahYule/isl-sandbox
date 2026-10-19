@@ -57,31 +57,30 @@ const isCurrent = (href) => current.startsWith(url(href));
   .logo { position: relative; display: block; color: var(--ink); text-decoration: none; }
   .logo img { height: 38px; width: auto; }
   .wordmark {
-    display: none; align-items: center;
-    font-family: var(--font-display); font-stretch: 115%; font-weight: 800;
+    display: none; align-items: center; font-weight: 700;
     font-size: 0.95rem; line-height: 1; letter-spacing: -0.01em; min-height: 38px;
   }
   .logo:global(.no-img) .wordmark { display: flex; }
 
   .primary { display: flex; gap: clamp(var(--s4), 2vw, var(--s6)); margin-left: auto; }
   .primary a {
-    position: relative; color: var(--ink); text-decoration: none; font-weight: 550; font-size: 0.98rem;
+    position: relative; color: var(--ink); text-decoration: none; font-weight: 500; font-size: 0.98rem;
     padding-block: var(--s2);
   }
   .primary a::after {
     content: ''; position: absolute; left: 0; right: 0; bottom: 0; height: 2px;
-    background: var(--ink); transform: scaleX(0); transform-origin: left;
+    background: var(--isl-blue); transform: scaleX(0); transform-origin: left;
     transition: transform 200ms var(--ease);
   }
   .primary a:hover::after, .primary a[aria-current='page']::after { transform: scaleX(1); }
 
   .tools { display: flex; align-items: center; gap: var(--s5); }
-  .login { color: var(--ink-soft); font-size: var(--fs-small); font-weight: 550; text-decoration: none; }
+  .login { color: var(--ink-soft); font-size: var(--fs-small); font-weight: 500; text-decoration: none; }
   .login:hover { color: var(--ink); text-decoration: underline; }
 
   .mobile { display: none; margin-left: auto; }
   .mobile summary {
-    list-style: none; cursor: pointer; font-weight: 650;
+    list-style: none; cursor: pointer; font-weight: 600;
     padding: var(--s2) var(--s4); border: 2px solid var(--ink); border-radius: var(--radius);
   }
   .mobile summary::-webkit-details-marker { display: none; }
@@ -93,8 +92,7 @@ const isCurrent = (href) => current.startsWith(url(href));
     display: flex; flex-direction: column; justify-content: space-between; gap: var(--s6);
   }
   .sheet nav { display: grid; }
-  .sheet nav a {
-    font-family: var(--font-display); font-stretch: 118%; font-weight: 780;
+  .sheet nav a { font-weight: 700;
     font-size: 2rem; letter-spacing: -0.02em; color: var(--ink); text-decoration: none;
     padding-block: var(--s3); border-bottom: 1px solid var(--line);
   }

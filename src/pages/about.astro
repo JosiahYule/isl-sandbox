@@ -90,7 +90,7 @@ const values = [
 
 <style>
   .hero { padding-block: clamp(3rem, 7vw, 6rem) var(--s8); }
-  .hero h1 { font-size: var(--fs-hero); font-weight: 830; letter-spacing: -0.035em; max-width: 14ch; }
+  .hero h1 { font-size: var(--fs-hero); font-weight: 700; letter-spacing: -0.025em; max-width: 14ch; }
   .hero-foot { display: grid; grid-template-columns: 1fr auto; gap: var(--s6); align-items: end; margin-top: var(--s6); }
   .actions { display: flex; flex-wrap: wrap; gap: var(--s3); }
 
@@ -100,10 +100,9 @@ const values = [
   .where h2 { margin-bottom: var(--s5); max-width: 12ch; }
   .office-list { list-style: none; padding: 0; margin: var(--s6) 0 0; border-top: 1px solid var(--line-dark); }
   .office-list li {
-    display: flex; justify-content: space-between; padding-block: var(--s3); border-bottom: 1px solid var(--line-dark);
-    font-family: var(--font-display); font-stretch: 112%; font-weight: 700; font-size: 1.15rem;
+    display: flex; justify-content: space-between; padding-block: var(--s3); border-bottom: 1px solid var(--line-dark); font-weight: 700; font-size: 1.15rem;
   }
-  .office-list li span:last-child { font-family: var(--font-body); font-stretch: 100%; font-weight: 500; color: var(--on-dark-soft); font-size: var(--fs-small); }
+  .office-list li span:last-child { font-weight: 500; color: var(--on-dark-soft); font-size: var(--fs-small); }
 
   .how { padding-block: var(--s9) var(--s8); }
   .how h2 { margin-bottom: var(--s6); }
@@ -117,7 +116,7 @@ const values = [
   .values { padding-block: var(--s6) var(--s9); }
   dl { margin: 0; border-top: 1.5px solid var(--ink); }
   .value { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: var(--s6); align-items: baseline; padding-block: var(--s5); border-bottom: 1px solid var(--line); }
-  dt { font-family: var(--font-display); font-stretch: 122%; font-weight: 820; font-size: clamp(1.9rem, 0.8rem + 3.4vw, 3.7rem); letter-spacing: -0.035em; line-height: 1; overflow-wrap: anywhere; }
+  dt { font-weight: 700; font-size: clamp(1.9rem, 0.8rem + 3.4vw, 3.7rem); letter-spacing: -0.035em; line-height: 1; overflow-wrap: anywhere; }
   dd { margin: 0; color: var(--ink-soft); font-size: var(--fs-lead); max-width: 40ch; }
 
   .recognition { padding-block: 0 var(--s9); }

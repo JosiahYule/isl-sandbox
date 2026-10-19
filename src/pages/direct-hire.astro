@@ -114,8 +114,8 @@ const recruiterContact = { 'Zowie Tucker': { phone: '902-471-0166', email: 'zowi
   .hero { padding-block: clamp(3rem, 7vw, 6rem); }
   .hero-grid { display: grid; grid-template-columns: 1fr 1.05fr; gap: clamp(2rem, 5vw, 5rem); align-items: center; }
   .hero .svc { color: var(--on-dark); }
-  .hero .svc::before { background: var(--direct-light); }
-  .hero h1 { font-size: clamp(2.4rem, 1rem + 4.4vw, 5rem); font-weight: 830; letter-spacing: -0.035em; margin-top: var(--s4); max-width: 11ch; }
+  .hero .svc::before { background: var(--isl-blue-on-dark); }
+  .hero h1 { font-size: clamp(2.4rem, 1rem + 4.4vw, 5rem); font-weight: 700; letter-spacing: -0.035em; margin-top: var(--s4); max-width: 11ch; }
   .hero .lead { margin-top: var(--s5); }
   .actions { margin-top: var(--s6); }
 
@@ -124,7 +124,7 @@ const recruiterContact = { 'Zowie Tucker': { phone: '902-471-0166', email: 'zowi
   .steps { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(5, 1fr); }
   .steps li { position: relative; padding: var(--s5) var(--s5) 0 0; border-top: 3px solid var(--direct); }
   .steps li.last { border-top-style: dashed; }
-  .num { font-family: var(--font-display); font-stretch: 120%; font-weight: 820; font-size: 2.6rem; line-height: 1; color: var(--direct); display: block; margin-bottom: var(--s4); }
+  .num { font-weight: 300; font-size: 3.2rem; letter-spacing: -0.04em; line-height: 1; color: var(--direct); display: block; margin-bottom: var(--s4); }
   .steps h3 { margin-bottom: var(--s2); }
   .steps p { color: var(--ink-soft); font-size: var(--fs-small); }
 
@@ -145,16 +145,15 @@ const recruiterContact = { 'Zowie Tucker': { phone: '902-471-0166', email: 'zowi
     background: var(--mist); color: var(--ink); text-decoration: none; border-radius: var(--radius);
     transition: background-color 150ms var(--ease);
   }
-  .person:hover { background: #dfe8f1; }
-  .person--lead { background: var(--navy); color: #fff; }
-  .person--lead:hover { background: var(--navy-raised); }
+  .person:hover { background: #ececec; }
+  .person--lead { background: var(--dark); color: #fff; }
+  .person--lead:hover { background: var(--dark-raised); }
   .avatar {
-    width: 56px; height: 56px; border-radius: var(--radius-round); display: grid; place-items: center; margin-bottom: auto;
-    font-family: var(--font-display); font-stretch: 115%; font-weight: 780; background: var(--paper); color: var(--ink);
+    width: 56px; height: 56px; border-radius: 50%; display: grid; place-items: center; margin-bottom: auto; font-weight: 700; background: var(--paper); color: var(--ink);
   }
-  .pname { font-family: var(--font-display); font-stretch: 112%; font-weight: 740; font-size: 1.15rem; margin-top: var(--s6); }
+  .pname { font-weight: 700; font-size: 1.15rem; margin-top: var(--s6); }
   .prole { font-size: var(--fs-small); opacity: 0.75; }
-  .pcontact { font-size: var(--fs-small); font-weight: 600; margin-top: var(--s2); }
+  .pcontact { font-size: var(--fs-small); font-weight: 500; margin-top: var(--s2); }
 
   .ind { padding-block: var(--s8); border-top: 1px solid var(--line); }
   .ind-grid { display: grid; grid-template-columns: 4fr 7fr; gap: clamp(2rem, 6vw, 6rem); align-items: start; }
@@ -165,7 +164,7 @@ const recruiterContact = { 'Zowie Tucker': { phone: '902-471-0166', email: 'zowi
   .voices figure { margin: 0; }
   .voices figure + figure { margin-top: var(--s8); }
   .voices blockquote { margin: 0; font-size: clamp(1.2rem, 1rem + 0.8vw, 1.6rem); line-height: 1.35; }
-  .voices figcaption { margin-top: var(--s3); color: var(--ink-soft); font-weight: 600; font-size: var(--fs-small); }
+  .voices figcaption { margin-top: var(--s3); color: var(--ink-soft); font-weight: 500; font-size: var(--fs-small); }
 
   @media (max-width: 960px) {
     .hero-grid, .time-head, .ind-grid, .voices-grid { grid-template-columns: 1fr; }

@@ -47,12 +47,11 @@ const tel = (n) => `tel:+1${n.replaceAll('-', '')}`;
   }
   .office { padding: var(--s5) var(--s4) var(--s5) 0; }
   .office + .office { padding-left: var(--s4); border-left: 1px solid var(--line-dark); }
-  .city {
-    font-family: var(--font-display); font-stretch: 115%; font-weight: 750;
+  .city { font-weight: 700;
     font-size: 1.15rem; letter-spacing: -0.01em; margin-bottom: var(--s2);
   }
   .city span { margin-left: 0.4em; color: var(--on-dark-soft); font-weight: 500; font-size: 0.8em; }
-  .phone { font-weight: 600; color: #fff; font-variant-numeric: tabular-nums; }
+  .phone { font-weight: 500; color: #fff; font-variant-numeric: tabular-nums; }
   .addr { color: var(--on-dark-soft); font-size: var(--fs-small); margin-top: var(--s2); line-height: 1.45; }
 
   .lower {

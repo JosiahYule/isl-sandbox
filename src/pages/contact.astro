@@ -56,7 +56,7 @@ const routes = [
 
 <style>
   .hero { padding-block: clamp(3rem, 7vw, 6rem) var(--s6); }
-  .hero h1 { font-size: var(--fs-hero); font-weight: 830; letter-spacing: -0.035em; max-width: 12ch; }
+  .hero h1 { font-size: var(--fs-hero); font-weight: 700; letter-spacing: -0.025em; max-width: 12ch; }
   .hero .lead { margin-top: var(--s5); }
 
   .routes { padding-bottom: var(--s8); }
@@ -66,21 +66,21 @@ const routes = [
     background: var(--mist); color: var(--ink); text-decoration: none; border-radius: var(--radius);
     transition: background-color 150ms var(--ease);
   }
-  .route:hover { background: #dfe8f1; }
-  .route--primary { background: var(--navy); color: #fff; }
-  .route--primary:hover { background: var(--navy-raised); }
+  .route:hover { background: #ececec; }
+  .route--primary { background: var(--dark); color: #fff; }
+  .route--primary:hover { background: var(--dark-raised); }
   .route h2 { font-size: clamp(1.4rem, 1.1rem + 0.9vw, 1.9rem); margin-bottom: var(--s3); }
   .route p { opacity: 0.8; font-size: var(--fs-small); flex: 1; }
-  .go { margin-top: var(--s5); font-weight: 650; text-decoration: underline; text-underline-offset: 0.2em; }
+  .go { margin-top: var(--s5); font-weight: 600; text-decoration: underline; text-underline-offset: 0.2em; }
 
   .offices { padding-block: var(--s8) var(--s9); border-top: 1px solid var(--line); }
   .off-grid { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(2rem, 5vw, 5rem); align-items: center; }
   .offices h2 { margin-bottom: var(--s5); }
   table { width: 100%; border-collapse: collapse; border-top: 1.5px solid var(--ink); }
   th, td { text-align: left; vertical-align: top; padding: var(--s4) var(--s3) var(--s4) 0; border-bottom: 1px solid var(--line); font-size: var(--fs-small); }
-  th { font-family: var(--font-display); font-stretch: 112%; font-weight: 740; font-size: 1.05rem; white-space: nowrap; }
-  th span { display: block; font-family: var(--font-body); font-stretch: 100%; font-weight: 500; font-size: var(--fs-tiny); color: var(--ink-soft); }
-  td:last-child { padding-right: 0; font-weight: 650; }
+  th { font-weight: 700; font-size: 1.05rem; white-space: nowrap; }
+  th span { display: block; font-weight: 500; font-size: var(--fs-tiny); color: var(--ink-soft); }
+  td:last-child { padding-right: 0; font-weight: 600; }
   td a { color: var(--ink); }
 
   @media (max-width: 900px) {

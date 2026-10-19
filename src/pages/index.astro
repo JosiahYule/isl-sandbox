@@ -126,7 +126,7 @@ const latest = jobs.slice(0, 5);
   .hero-grid { position: relative; z-index: 2; min-height: min(88vh, 860px); display: grid; align-items: center; padding-block: var(--s7) var(--s8); pointer-events: none; }
   .hero-copy { max-width: 660px; pointer-events: auto; }
   /* One sentence per line on desktop: each line is one service, underlined in that service's colour */
-  .hero-title { font-size: clamp(2.5rem, 0.9rem + 3.9vw, 4.45rem); font-stretch: 108%; font-weight: 830; letter-spacing: -0.035em; line-height: 0.98; }
+  .hero-title { font-size: clamp(2.6rem, 0.9rem + 4.3vw, 4.9rem); font-weight: 700; letter-spacing: -0.02em; line-height: 1; }
   @media (min-width: 901px) { .line { white-space: nowrap; } }
   .line { display: block; width: fit-content; text-decoration-line: underline; text-decoration-thickness: 0.09em; text-underline-offset: 0.13em; text-decoration-skip-ink: none; }
   .line + .line { margin-top: 0.12em; }
@@ -142,17 +142,17 @@ const latest = jobs.slice(0, 5);
 
   .doors { display: grid; grid-template-columns: 1.15fr 1fr; gap: var(--s3); margin-top: var(--s7); }
   .door { border-radius: var(--radius); padding: var(--s5); }
-  .door-title { font-family: var(--font-body); font-stretch: 100%; font-size: var(--fs-small); font-weight: 650; letter-spacing: 0; margin-bottom: var(--s3); }
-  .door--hire { background: var(--navy); color: #fff; display: grid; gap: var(--s2); align-content: start; }
+  .door-title { font-size: var(--fs-small); font-weight: 600; letter-spacing: 0; margin-bottom: var(--s3); }
+  .door--hire { background: var(--dark); color: #fff; display: grid; gap: var(--s2); align-content: start; }
   .route {
     display: grid; gap: 2px; padding: var(--s3) var(--s4); border-radius: var(--radius);
-    background: var(--navy-raised); color: #fff; text-decoration: none; border-left: 4px solid;
+    background: var(--dark-raised); color: #fff; text-decoration: none; border-left: 4px solid;
     transition: background-color 150ms var(--ease);
   }
-  .route:hover { background: #1b4167; }
-  .route--contract { border-left-color: var(--contract); }
-  .route--direct { border-left-color: var(--direct-light); }
-  .route-name { font-family: var(--font-display); font-stretch: 112%; font-weight: 720; font-size: 1.08rem; }
+  .route:hover { background: #363636; }
+  .route--contract { border-left-color: var(--contract-on-dark); }
+  .route--direct { border-left-color: var(--isl-blue-on-dark); }
+  .route-name { font-weight: 700; font-size: 1.08rem; }
   .route-meta { font-size: var(--fs-small); color: var(--on-dark-soft); }
 
   .door--work { background: var(--paper); border: 1.5px solid var(--ink); display: grid; gap: var(--s2); align-content: start; }
@@ -160,13 +160,13 @@ const latest = jobs.slice(0, 5);
     font: inherit; font-size: 1rem; padding: 0.75rem 0.85rem; width: 100%;
     border: 1.5px solid var(--line); border-radius: var(--radius); background: var(--paper);
   }
-  .door--work input:focus { border-color: var(--ink); outline: none; box-shadow: 0 0 0 3px var(--contract); }
+  .door--work input:focus { border-color: var(--ink); outline: none; box-shadow: 0 0 0 3px var(--focus); }
   .door--work button {
-    font: inherit; font-weight: 650; cursor: pointer; padding: 0.75rem; border-radius: var(--radius);
-    background: var(--ink); color: #fff; border: 0;
+    font: inherit; font-weight: 600; cursor: pointer; padding: 0.75rem; border-radius: var(--radius);
+    background: var(--isl-blue); color: #fff; border: 0;
   }
-  .door--work button:hover { background: var(--isl-blue); }
-  .browse { margin-top: var(--s2); font-size: var(--fs-small); font-weight: 600; color: var(--ink); }
+  .door--work button:hover { background: var(--isl-blue-deep); }
+  .browse { margin-top: var(--s2); font-size: var(--fs-small); font-weight: 500; color: var(--ink); }
 
   @media (min-width: 901px) { .hero-map :global(.card) { right: 3.5%; } }
   @media (min-width: 901px) and (max-width: 1180px) {
@@ -193,7 +193,7 @@ const latest = jobs.slice(0, 5);
   .ind-head { position: sticky; top: 110px; }
   .ind-head h2 { margin-bottom: var(--s5); }
   .ind-head p { color: var(--ink-soft); max-width: 36ch; }
-  .ind-links { display: grid; gap: var(--s2); margin-top: var(--s5); font-weight: 600; }
+  .ind-links { display: grid; gap: var(--s2); margin-top: var(--s5); font-weight: 500; }
   @media (max-width: 900px) { .ind-grid { grid-template-columns: 1fr; } .ind-head { position: static; } }
 
   /* ---------- Proof ---------- */
@@ -202,16 +202,15 @@ const latest = jobs.slice(0, 5);
   .proof-grid { display: grid; grid-template-columns: 7fr 5fr; gap: clamp(2rem, 5vw, 5rem); align-items: start; }
   .big-quote { margin: -8rem 0 0; padding: clamp(2rem, 4vw, 3.5rem); border-radius: var(--radius); }
   .big-quote blockquote { margin: 0; font-size: clamp(1.4rem, 1rem + 1.5vw, 2.15rem); line-height: 1.3; font-weight: 400; letter-spacing: -0.01em; }
-  .big-quote figcaption { margin-top: var(--s5); color: var(--on-dark-soft); font-weight: 600; }
+  .big-quote figcaption { margin-top: var(--s5); color: var(--on-dark-soft); font-weight: 500; }
   .proof-side { padding-top: var(--s7); display: grid; gap: var(--s6); }
   .reviews { font-size: var(--fs-lead); color: var(--ink-soft); line-height: 1.4; }
   .reviews strong {
-    display: block; color: var(--ink);
-    font-family: var(--font-display); font-stretch: 120%; font-weight: 820; font-size: clamp(3rem, 2rem + 3vw, 4.8rem); letter-spacing: -0.04em; line-height: 0.9;
+    display: block; color: var(--isl-blue); font-weight: 300; font-size: clamp(3.4rem, 2rem + 4vw, 5.6rem); letter-spacing: -0.05em; line-height: 0.9;
   }
   .small-quote { margin: 0; padding-top: var(--s5); border-top: 1px solid var(--line); }
   .small-quote blockquote { margin: 0; font-size: 1.05rem; }
-  .small-quote figcaption { margin-top: var(--s2); font-size: var(--fs-small); color: var(--ink-soft); font-weight: 600; }
+  .small-quote figcaption { margin-top: var(--s2); font-size: var(--fs-small); color: var(--ink-soft); font-weight: 500; }
   @media (max-width: 900px) {
     .proof-grid { grid-template-columns: 1fr; }
     .big-quote { margin-top: -5rem; }

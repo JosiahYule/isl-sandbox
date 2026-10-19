@@ -64,18 +64,20 @@ import { url } from '../lib/url.js';
 
 ## The design system
 
-**Colour has a job.** Two colours carry meaning everywhere on the site:
+Everything follows the ISL brand (the same tokens as the "editorial minimal" blog system):
 
-| Colour | Means | Token |
-| --- | --- | --- |
-| Hi-vis amber `#FFC20E` | Contract staffing | `--contract` |
-| ISL blue `#0070CA` | Direct hire (permanent placement) | `--direct` |
+| Element | Value |
+| --- | --- |
+| Font | DM Sans, self-hosted. Headings 700, body 400, intros and large numbers 300 |
+| ISL blue | `#0070CA` (hover `#005AAA`): primary buttons, links, active states |
+| Near-black | `#1A1A1A`: text and dark sections |
+| Hairlines | `#E8E8E8`: the main structural device |
+| Label grey | `#888`: larger labels only. Body-size secondary text uses `#666` so it passes contrast |
+| Corners | Square. No drop shadows |
 
-Jobs, industries, timelines and form options all use these two colours, so a visitor learns the key once. Buttons and other controls stay navy so the two colours keep their meaning. Deep harbour navy (`--navy`) carries dark sections and the map.
+**Colour also carries meaning.** Near-black always means contract staffing and ISL blue always means direct hire. Job listings, industries, timelines and form options use these two colours, always next to a text label.
 
-**Type.** Archivo, set wide and heavy, for headings (its width axis is `--display-stretch`). DM Sans, the ISL brand face, for body text. Both are self-hosted from npm packages, so pages don't wait on Google Fonts.
-
-**All the knobs** live in `src/styles/tokens.css`. Change a value there and the whole site follows.
+**All the values** live in `src/styles/tokens.css`. Change one there and the whole site follows.
 
 ## The signature pieces
 
@@ -102,7 +104,7 @@ src/
   styles/       tokens.css (design knobs) and global.css (base styles)
 scripts/        generate-maps.mjs (rebuilds the map shapes)
 astro.config.mjs  Astro settings (rarely touched)
-package.json      project name, scripts, Astro and the two font packages
+package.json      project name, scripts, Astro and the DM Sans font package
 ```
 
 ## Things that are placeholders

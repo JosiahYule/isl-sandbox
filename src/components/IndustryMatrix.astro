@@ -55,9 +55,9 @@ const filters = [
 <style>
   .filters { display: flex; flex-wrap: wrap; gap: var(--s2); margin-bottom: var(--s5); }
   .chip {
-    font: inherit; font-size: var(--fs-small); font-weight: 600; cursor: pointer;
+    font: inherit; font-size: var(--fs-small); font-weight: 500; cursor: pointer;
     display: inline-flex; align-items: center; gap: var(--s2);
-    padding: 0.5rem 0.95rem; border-radius: var(--radius-round);
+    padding: 0.5rem 0.95rem; border-radius: var(--radius);
     background: transparent; color: var(--ink); border: 1.5px solid var(--line);
     transition: background-color 150ms var(--ease), border-color 150ms var(--ease);
   }
@@ -65,13 +65,13 @@ const filters = [
   .chip .n { font-variant-numeric: tabular-nums; color: var(--ink-soft); font-weight: 500; }
   .chip[aria-pressed='true'] { background: var(--ink); border-color: var(--ink); color: #fff; }
   .chip[aria-pressed='true'] .n { color: rgb(255 255 255 / 0.7); }
-  .chip--contract[aria-pressed='true'] { background: var(--contract); border-color: var(--contract); color: var(--ink); }
-  .chip--contract[aria-pressed='true'] .n { color: var(--contract-ink); }
+  .chip--contract[aria-pressed='true'] { background: var(--ink); border-color: var(--ink); color: #fff; }
+  .chip--contract[aria-pressed='true'] .n { color: rgb(255 255 255 / 0.7); }
   .chip--direct[aria-pressed='true'] { background: var(--direct); border-color: var(--direct); }
 
   table { width: 100%; border-collapse: collapse; }
   thead th {
-    text-align: left; font-size: var(--fs-tiny); font-weight: 600; color: var(--ink-soft);
+    text-align: left; font-size: var(--fs-tiny); font-weight: 500; color: var(--ink-soft);
     padding: 0 0 var(--s2); border-bottom: 1.5px solid var(--ink);
   }
   .c { text-align: center; width: 7.5rem; }
@@ -80,7 +80,7 @@ const filters = [
   tbody tr { transition: opacity 220ms var(--ease); }
 
   .name {
-    display: block; font-family: var(--font-display); font-stretch: 110%; font-weight: 680;
+    display: block; font-weight: 700;
     font-size: 1.12rem; letter-spacing: -0.01em; line-height: 1.25;
   }
   .note { display: block; font-weight: 400; font-size: var(--fs-small); color: var(--ink-soft); margin-top: var(--s1); max-width: 56ch; }

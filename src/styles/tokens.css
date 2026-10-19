@@ -1,54 +1,56 @@
 /*
-  DESIGN TOKENS
-  -------------
-  The "knobs" of the whole design. Components read colours, type and spacing from here,
-  so changing a value here restyles the entire site.
+  DESIGN TOKENS: ISL BRAND
+  ------------------------
+  Values come from the ISL "editorial minimal" design system (the same tokens as the blog):
+  DM Sans, ISL blue #0070CA, near-black #1A1A1A, hairline #E8E8E8, label grey #888.
+  Change a value here and the whole site follows.
 
   COLOUR HAS A JOB ON THIS SITE:
-    --contract (hi-vis amber)  = contract / temporary staffing
-    --direct   (ISL blue)      = direct hire / permanent placement
-  Anywhere a job, industry or timeline appears, its colour tells you which service it is.
-  Buttons and chrome stay navy so those two colours keep their meaning.
+    --contract (near-black) = contract / temporary staffing
+    --direct   (ISL blue)   = direct hire / permanent placement
+  Jobs, industries, timelines and form options use these two, always with a text label.
 */
 
 :root {
   /* Surfaces */
   --paper: #ffffff;
-  --mist: #edf2f7;          /* cool light panels */
-  --navy: #0a2036;          /* dark sections, map land */
-  --navy-raised: #12304d;   /* raised elements on navy */
+  --mist: #f5f5f5;          /* light panels */
+  --dark: #1a1a1a;          /* dark sections (brand near-black) */
+  --dark-raised: #2b2b2b;   /* raised elements on dark */
 
   /* Ink */
-  --ink: #0c1b2a;           /* headings and body text */
-  --ink-soft: #4a5b6c;      /* secondary text (passes AA on paper and mist) */
-  --on-dark: #e8eef5;       /* text on navy */
-  --on-dark-soft: #a9bbcd;  /* secondary text on navy */
-  --line: #d3dce6;          /* hairlines on light */
-  --line-dark: #24425f;     /* hairlines on navy */
+  --ink: #1a1a1a;           /* headings and body (brand near-black) */
+  --ink-soft: #666666;      /* secondary text at body size: #888 is too light for small text (AA) */
+  --label: #888888;         /* brand label grey: larger labels and meta only */
+  --on-dark: #ffffff;
+  --on-dark-soft: #b8b8b8;
+  --line: #e8e8e8;          /* brand hairline */
+  --line-strong: #1a1a1a;   /* heavier rule that opens a list or table */
+  --line-dark: #3a3a3a;     /* hairlines on dark */
 
   /* Brand + meaning */
-  --isl-blue: #0070ca;      /* ISL brand blue */
-  --isl-blue-deep: #005aaa;
+  --isl-blue: #0070ca;
+  --isl-blue-deep: #005aaa; /* hover */
+  --isl-blue-tint: #e6f1fa; /* light blue wash */
+  --isl-blue-on-dark: #4da3e8; /* ISL blue lifted so it reads on near-black */
   --direct: var(--isl-blue);
-  --direct-light: #6cb6ff;  /* direct hire colour when it sits on navy */
-  --contract: #ffc20e;      /* hi-vis amber */
-  --contract-ink: #6b4b00;  /* readable amber-family text on light surfaces */
+  --contract: var(--ink);
+  --contract-on-dark: #ffffff;
+  --focus: rgb(0 112 202 / 0.35);
 
-  /* Type */
-  --font-display: 'Archivo Variable', 'Arial Narrow', sans-serif;
-  --font-body: 'DM Sans Variable', system-ui, sans-serif;
-  --display-stretch: 118%;  /* Archivo width axis: 100% normal, 125% widest */
+  /* Type: DM Sans throughout */
+  --font: 'DM Sans Variable', 'DM Sans', system-ui, sans-serif;
 
-  --fs-hero: clamp(2.6rem, 1rem + 6.4vw, 6.6rem);
-  --fs-h1: clamp(2.3rem, 1.2rem + 4.2vw, 4.8rem);
-  --fs-h2: clamp(1.9rem, 1.2rem + 2.6vw, 3.4rem);
-  --fs-h3: 1.3125rem;       /* 21px */
-  --fs-lead: clamp(1.125rem, 1rem + 0.4vw, 1.3125rem);
+  --fs-hero: clamp(2.6rem, 1rem + 5.2vw, 5.6rem);
+  --fs-h1: clamp(2.3rem, 1.2rem + 3.6vw, 4.4rem);
+  --fs-h2: clamp(1.9rem, 1.2rem + 2.3vw, 3.2rem);
+  --fs-h3: 1.25rem;
+  --fs-lead: clamp(1.15rem, 1rem + 0.45vw, 1.35rem);
   --fs-body: 1.0625rem;     /* 17px, the brand body size */
-  --fs-small: 0.875rem;
+  --fs-small: 0.9rem;
   --fs-tiny: 0.78rem;
 
-  /* Space: a scale, used with judgment rather than mechanically */
+  /* Space */
   --s1: 0.25rem;
   --s2: 0.5rem;
   --s3: 0.75rem;
@@ -59,11 +61,9 @@
   --s8: 4.5rem;
   --s9: 7rem;
 
-  /* Layout */
+  /* Layout: square corners, as in the brand system */
   --max: 1280px;
   --gutter: clamp(1.25rem, 4vw, 3rem);
-  --radius: 3px;            /* crisp, close to the brand's square editorial style */
-  --radius-round: 999px;    /* only for filters and pins, which are interactive */
-
+  --radius: 0;
   --ease: cubic-bezier(0.2, 0.7, 0.1, 1);
 }

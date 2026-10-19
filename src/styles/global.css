@@ -13,10 +13,10 @@ body {
   margin: 0;
   background: var(--paper);
   color: var(--ink);
-  font-family: var(--font-body);
+  font-family: var(--font);
   font-size: var(--fs-body);
-  line-height: 1.65;
-  font-optical-sizing: auto;
+  line-height: 1.7;
+  font-optical-sizing: auto;   /* DM Sans tightens itself at large sizes */
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
 }
@@ -24,36 +24,32 @@ body {
 img, svg { display: block; max-width: 100%; }
 img { height: auto; }
 
-/* Headings: Archivo, pushed wide and heavy, tight tracking */
-h1, h2, h3, .display {
-  font-family: var(--font-display);
-  font-stretch: var(--display-stretch);
-  font-weight: 780;
-  line-height: 0.98;
+/* Headings: DM Sans, bold, tight tracking at display sizes */
+h1, h2, h3 {
+  font-family: var(--font);
+  font-weight: 700;
+  line-height: 1.04;
   letter-spacing: -0.025em;
   margin: 0;
   text-wrap: balance;
 }
 h1 { font-size: var(--fs-h1); }
 h2 { font-size: var(--fs-h2); }
-h3 {
-  font-size: var(--fs-h3);
-  font-weight: 700;
-  font-stretch: 108%;
-  line-height: 1.2;
-  letter-spacing: -0.01em;
-}
+h3 { font-size: var(--fs-h3); font-weight: 600; line-height: 1.25; letter-spacing: -0.01em; }
+
+/* Large numbers use the brand's light weight (as in the blog stat strip) */
+.figure { font-weight: 300; letter-spacing: -0.04em; line-height: 0.95; font-variant-numeric: tabular-nums; }
 
 p { margin: 0 0 var(--s4); text-wrap: pretty; }
 p:last-child { margin-bottom: 0; }
 
 a { color: var(--isl-blue); text-underline-offset: 0.18em; text-decoration-thickness: 1px; }
-a:hover { text-decoration-thickness: 2px; }
+a:hover { color: var(--isl-blue-deep); text-decoration-thickness: 2px; }
 a[href^="tel:"] { white-space: nowrap; }
 
-:focus-visible { outline: 3px solid var(--contract); outline-offset: 3px; border-radius: 2px; }
+:focus-visible { outline: 2px solid var(--isl-blue); outline-offset: 3px; }
 
-::selection { background: var(--contract); color: var(--ink); }
+::selection { background: var(--isl-blue); color: #fff; }
 
 /* ---------- Helpers ---------- */
 
@@ -66,16 +62,16 @@ a[href^="tel:"] { white-space: nowrap; }
 
 .lead {
   font-size: var(--fs-lead);
-  line-height: 1.55;
-  color: var(--ink-soft);
+  font-weight: 300;
+  line-height: 1.6;
+  color: var(--ink);
   max-width: 54ch;
 }
 
-.measure { max-width: 64ch; }
-
-.on-dark { background: var(--navy); color: var(--on-dark); }
+.on-dark { background: var(--dark); color: var(--on-dark); }
 .on-dark .lead { color: var(--on-dark-soft); }
 .on-dark a { color: var(--on-dark); }
+.on-dark :focus-visible { outline-color: var(--isl-blue-on-dark); }
 
 .visually-hidden {
   position: absolute !important; width: 1px; height: 1px; overflow: hidden;
@@ -83,10 +79,12 @@ a[href^="tel:"] { white-space: nowrap; }
 }
 
 /* Service markers: the colour key used everywhere */
-.svc { display: inline-flex; align-items: center; gap: 0.45em; font-weight: 600; font-size: var(--fs-small); }
-.svc::before { content: ''; width: 0.7em; height: 0.7em; border-radius: 1px; flex: none; }
+.svc { display: inline-flex; align-items: center; gap: 0.5em; font-weight: 600; font-size: var(--fs-small); }
+.svc::before { content: ''; width: 0.7em; height: 0.7em; flex: none; }
 .svc--contract::before { background: var(--contract); }
 .svc--direct::before { background: var(--direct); }
+.on-dark .svc--contract::before { background: var(--contract-on-dark); }
+.on-dark .svc--direct::before { background: var(--isl-blue-on-dark); }
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }

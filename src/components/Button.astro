@@ -1,7 +1,7 @@
 ---
 // BUTTON
 // <Button href="/hire/">Request talent</Button>
-// variant: "solid" (navy, default) | "outline" | "light" (for navy backgrounds) | "ghost-light"
+// variant: "solid" (ISL blue, default) | "outline" | "light" (for navy backgrounds) | "ghost-light"
 // size: "md" (default) | "lg" | "sm"
 import { url } from '../lib/url.js';
 const { href, variant = 'solid', size = 'md', ...rest } = Astro.props;
@@ -10,8 +10,7 @@ const { href, variant = 'solid', size = 'md', ...rest } = Astro.props;
 
 <style>
   .btn {
-    display: inline-flex; align-items: center; justify-content: center; gap: var(--s2);
-    font-family: var(--font-body); font-weight: 650; line-height: 1.2;
+    display: inline-flex; align-items: center; justify-content: center; gap: var(--s2); font-weight: 600; line-height: 1.2;
     text-decoration: none; white-space: nowrap;
     border: 2px solid transparent; border-radius: var(--radius);
     transition: background-color 160ms var(--ease), color 160ms var(--ease), border-color 160ms var(--ease);
@@ -20,14 +19,14 @@ const { href, variant = 'solid', size = 'md', ...rest } = Astro.props;
   .btn--lg { padding: 1.05rem 1.7rem; font-size: 1.0625rem; }
   .btn--sm { padding: 0.55rem 0.95rem; font-size: var(--fs-small); }
 
-  .btn--solid { background: var(--navy); color: #fff; }
-  .btn--solid:hover { background: var(--isl-blue); }
+  .btn--solid { background: var(--isl-blue); color: #fff; }
+  .btn--solid:hover { background: var(--isl-blue-deep); }
 
   .btn--outline { border-color: var(--ink); color: var(--ink); }
   .btn--outline:hover { background: var(--ink); color: #fff; }
 
-  .btn--light { background: #fff; color: var(--navy); }
-  .btn--light:hover { background: var(--contract); }
+  .btn--light { background: #fff; color: var(--dark); }
+  .btn--light:hover { background: var(--isl-blue-tint); }
 
   .btn--ghost-light { border-color: rgb(255 255 255 / 0.45); color: #fff; }
   .btn--ghost-light:hover { border-color: #fff; background: rgb(255 255 255 / 0.08); }

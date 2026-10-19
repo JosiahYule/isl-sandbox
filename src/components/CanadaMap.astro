@@ -21,14 +21,14 @@ const { tone = 'light' } = Astro.props;
   svg { width: 100%; height: auto; }
   .rest { fill: none; stroke: var(--isl-blue); stroke-width: 1.4; stroke-linejoin: round; }
   .atl { fill: var(--isl-blue); stroke: var(--paper); stroke-width: 1; }
-  circle { fill: var(--contract); stroke: var(--navy); stroke-width: 2; }
-  .cmap--dark .rest { stroke: var(--direct-light); }
-  .cmap--dark .atl { fill: var(--direct-light); stroke: var(--navy); }
-  figcaption { display: flex; gap: var(--s5); margin-top: var(--s3); font-size: var(--fs-small); font-weight: 600; }
+  circle { fill: #fff; stroke: var(--ink); stroke-width: 2.5; }
+  .cmap--dark .rest { stroke: var(--isl-blue-on-dark); }
+  .cmap--dark .atl { fill: var(--isl-blue-on-dark); stroke: var(--dark); }
+  figcaption { display: flex; gap: var(--s5); margin-top: var(--s3); font-size: var(--fs-small); font-weight: 500; }
   .key { display: inline-flex; align-items: center; gap: var(--s2); }
   .key::before { content: ''; width: 14px; height: 14px; border-radius: 1px; }
   .key--atl::before { background: var(--isl-blue); }
   .key--rest::before { border: 1.5px solid var(--isl-blue); }
-  .cmap--dark .key--atl::before { background: var(--direct-light); }
-  .cmap--dark .key--rest::before { border-color: var(--direct-light); }
+  .cmap--dark .key--atl::before { background: var(--isl-blue-on-dark); }
+  .cmap--dark .key--rest::before { border-color: var(--isl-blue-on-dark); }
 </style>

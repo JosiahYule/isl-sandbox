@@ -61,27 +61,26 @@ const [featured, ...rest] = posts;
 
 <style>
   .hero { padding-block: clamp(3rem, 7vw, 6rem) var(--s7); }
-  .hero h1 { font-size: var(--fs-hero); font-weight: 830; letter-spacing: -0.035em; max-width: 13ch; }
+  .hero h1 { font-size: var(--fs-hero); font-weight: 700; letter-spacing: -0.025em; max-width: 13ch; }
   .hero .lead { margin-top: var(--s4); }
 
   .posts { padding-bottom: var(--s9); }
   .featured {
     display: grid; gap: var(--s3); padding: clamp(2rem, 5vw, 4rem);
-    background: var(--navy); color: #fff; text-decoration: none; border-radius: var(--radius);
+    background: var(--dark); color: #fff; text-decoration: none; border-radius: var(--radius);
     transition: background-color 150ms var(--ease);
   }
-  .featured:hover { background: var(--navy-raised); }
+  .featured:hover { background: var(--dark-raised); }
   .featured .aud { color: var(--on-dark-soft); }
-  .f-title {
-    font-family: var(--font-display); font-stretch: 118%; font-weight: 800; letter-spacing: -0.03em; line-height: 1;
+  .f-title { font-weight: 700; letter-spacing: -0.025em; line-height: 1;
     font-size: clamp(2rem, 1rem + 3.4vw, 4rem); max-width: 18ch;
   }
   .featured time { color: var(--on-dark-soft); font-size: var(--fs-small); margin-top: var(--s3); }
 
   .filters { display: flex; flex-wrap: wrap; gap: var(--s2); margin: var(--s8) 0 var(--s4); }
   .filters button {
-    font: inherit; font-size: var(--fs-small); font-weight: 600; cursor: pointer;
-    padding: 0.5rem 0.95rem; border-radius: var(--radius-round); background: transparent; color: var(--ink); border: 1.5px solid var(--line);
+    font: inherit; font-size: var(--fs-small); font-weight: 500; cursor: pointer;
+    padding: 0.5rem 0.95rem; border-radius: var(--radius); background: transparent; color: var(--ink); border: 1.5px solid var(--line);
   }
   .filters button[aria-pressed='true'] { background: var(--ink); border-color: var(--ink); color: #fff; }
 
@@ -93,8 +92,8 @@ const [featured, ...rest] = posts;
   }
   .list a:hover .title { text-decoration: underline; text-decoration-thickness: 2px; }
   time { font-size: var(--fs-small); color: var(--ink-soft); font-variant-numeric: tabular-nums; }
-  .title { font-family: var(--font-display); font-stretch: 110%; font-weight: 700; font-size: 1.3rem; letter-spacing: -0.01em; line-height: 1.2; }
-  .aud { font-size: var(--fs-small); font-weight: 600; color: var(--ink-soft); }
+  .title { font-weight: 700; font-size: 1.3rem; letter-spacing: -0.01em; line-height: 1.2; }
+  .aud { font-size: var(--fs-small); font-weight: 500; color: var(--ink-soft); }
   .list .aud { text-align: right; }
 
   @media (max-width: 760px) {

@@ -106,7 +106,7 @@ const count = { contract: jobs.filter((j) => j.type === 'contract').length, dire
 
 <style>
   .top { padding-block: clamp(3rem, 7vw, 6rem) var(--s6); background: var(--mist); }
-  .top h1 { font-size: var(--fs-hero); font-weight: 830; letter-spacing: -0.035em; }
+  .top h1 { font-size: var(--fs-hero); font-weight: 700; letter-spacing: -0.025em; }
   .top .lead { margin-top: var(--s4); }
 
   .search {
@@ -118,37 +118,37 @@ const count = { contract: jobs.filter((j) => j.type === 'contract').length, dire
     font: inherit; font-size: 1.05rem; padding: 0.85rem 1rem; border: 0; background: transparent; color: var(--ink); min-width: 0;
   }
   .search select { border-left: 1px solid var(--line); cursor: pointer; }
-  .search input:focus, .search select:focus { outline: 3px solid var(--contract); outline-offset: -3px; }
+  .search input:focus, .search select:focus { outline: 2px solid var(--isl-blue); outline-offset: -2px; }
   .types { display: flex; gap: 4px; background: var(--mist); padding: 4px; border-radius: var(--radius); }
   .t {
-    font: inherit; font-size: var(--fs-small); font-weight: 650; cursor: pointer; white-space: nowrap;
+    font: inherit; font-size: var(--fs-small); font-weight: 600; cursor: pointer; white-space: nowrap;
     display: inline-flex; align-items: center; gap: var(--s2);
     padding: 0.55rem 0.9rem; border: 0; border-radius: 2px; background: transparent; color: var(--ink);
   }
   .t span { font-weight: 500; color: var(--ink-soft); font-variant-numeric: tabular-nums; }
   .t[aria-pressed='true'] { background: var(--ink); color: #fff; }
   .t[aria-pressed='true'] span { color: rgb(255 255 255 / 0.7); }
-  .t--contract[aria-pressed='true'] { background: var(--contract); color: var(--ink); }
-  .t--contract[aria-pressed='true'] span { color: var(--contract-ink); }
+  .t--contract[aria-pressed='true'] { background: var(--ink); color: #fff; }
+  .t--contract[aria-pressed='true'] span { color: rgb(255 255 255 / 0.7); }
   .t--direct[aria-pressed='true'] { background: var(--direct); }
 
   .results { padding-block: var(--s6) var(--s8); }
   .count { font-size: var(--fs-small); color: var(--ink-soft); margin-bottom: var(--s3); }
-  .count strong { font-family: var(--font-display); font-stretch: 116%; font-weight: 800; font-size: 1.4rem; color: var(--ink); margin-right: 0.2em; }
+  .count strong { font-weight: 700; font-size: 1.4rem; color: var(--ink); margin-right: 0.2em; }
   .list { border-top: 1.5px solid var(--ink); }
   .list > [hidden] { display: none; }
   .empty { padding: var(--s7) 0; border-top: 1.5px solid var(--ink); max-width: 46rem; }
-  .empty-title { font-family: var(--font-display); font-stretch: 112%; font-weight: 760; font-size: 1.4rem; }
+  .empty-title { font-weight: 700; font-size: 1.4rem; }
   .empty button {
-    margin-top: var(--s4); font: inherit; font-weight: 650; cursor: pointer;
+    margin-top: var(--s4); font: inherit; font-weight: 600; cursor: pointer;
     padding: 0.7rem 1.1rem; border: 2px solid var(--ink); border-radius: var(--radius); background: transparent;
   }
   .note { margin-top: var(--s5); font-size: var(--fs-tiny); color: var(--ink-soft); }
 
   .general { padding-block: var(--s8); }
   .general-grid { display: grid; grid-template-columns: 1fr 1fr; gap: var(--s7); align-items: end; }
-  .apply { display: inline-block; margin-top: var(--s5); font-weight: 650; background: #fff; color: var(--navy) !important; text-decoration: none; padding: 0.9rem 1.4rem; border-radius: var(--radius); }
-  .apply:hover { background: var(--contract); }
+  .apply { display: inline-block; margin-top: var(--s5); font-weight: 600; background: #fff; color: var(--dark) !important; text-decoration: none; padding: 0.9rem 1.4rem; border-radius: var(--radius); }
+  .apply:hover { background: var(--isl-blue-tint); }
 
   @media (max-width: 860px) {
     .search { grid-template-columns: 1fr; }

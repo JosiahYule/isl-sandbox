@@ -69,24 +69,24 @@ const tel = (n) => `tel:+1${n.replaceAll('-', '')}`;
 
 <style>
   .amap {
-    --land: var(--navy);
-    --land-edge: #3b5874;
-    --context: #dfe7ef;
-    --label-bg: var(--navy);
+    --land: var(--isl-blue);
+    --land-edge: #ffffff;
+    --context: var(--line);
+    --label-bg: var(--ink);
     position: relative; margin: 0;
   }
   /* Pins are positioned as percentages of this box, so it must hold only the map */
   .canvas { position: relative; aspect-ratio: 900 / 820; }
   .amap--dark {
-    --land: var(--navy-raised);
-    --land-edge: #2f5272;
-    --context: #0f2a44;
-    --label-bg: #1d4466;
+    --land: var(--isl-blue);
+    --land-edge: var(--dark);
+    --context: #232323;
+    --label-bg: var(--ink);
   }
   svg { width: 100%; height: 100%; overflow: hidden; }
   .amap--bleed svg { overflow: visible; }
   .context path { fill: var(--context); }
-  .land path { fill: var(--land); stroke: var(--land-edge); stroke-width: 1; stroke-linejoin: round; }
+  .land path { fill: var(--land); stroke: var(--land-edge); stroke-width: 1.5; stroke-linejoin: round; }
 
   .pins { list-style: none; margin: 0; padding: 0; }
   .pins li { position: absolute; width: 0; height: 0; }
@@ -99,17 +99,16 @@ const tel = (n) => `tel:+1${n.replaceAll('-', '')}`;
   .pin--right { transform: translate(-15px, -50%); }
 
   .dot {
-    width: 18px; height: 18px; border-radius: var(--radius-round); flex: none;
-    background: #fff; border: 4px solid var(--isl-blue);
-    box-shadow: 0 0 0 4px rgb(255 255 255 / 0.25);
+    width: 18px; height: 18px; border-radius: 50%; flex: none;
+    background: #fff; border: 4px solid var(--ink);
     transition: transform 180ms var(--ease), border-color 180ms var(--ease);
   }
   .label {
     background: var(--label-bg); color: #fff; white-space: nowrap;
-    font-size: 0.8rem; font-weight: 600; line-height: 1; padding: 6px 8px; border-radius: var(--radius);
+    font-size: 0.8rem; font-weight: 500; line-height: 1; padding: 6px 8px; border-radius: var(--radius);
   }
-  .pin:hover .dot, .pin[aria-pressed='true'] .dot { transform: scale(1.25); border-color: var(--contract); }
-  .pin[aria-pressed='true'] .label { background: #fff; color: var(--navy); box-shadow: 0 0 0 1px var(--navy); }
+  .pin:hover .dot, .pin[aria-pressed='true'] .dot { transform: scale(1.25); background: var(--ink); border-color: #fff; }
+  .pin[aria-pressed='true'] .label { background: #fff; color: var(--ink); outline: 1px solid var(--ink); }
 
   .card {
     position: absolute; right: 2%; bottom: 3%; width: min(300px, 46%);
@@ -117,8 +116,8 @@ const tel = (n) => `tel:+1${n.replaceAll('-', '')}`;
     border: 1px solid var(--ink); border-radius: var(--radius);
     padding: var(--s4) var(--s5);
   }
-  .office-city { font-family: var(--font-display); font-stretch: 112%; font-weight: 750; font-size: 1.1rem; margin-bottom: var(--s1); }
-  .hq { display: block; font-family: var(--font-body); font-stretch: 100%; font-weight: 500; font-size: var(--fs-tiny); color: var(--ink-soft); }
+  .office-city { font-weight: 700; font-size: 1.1rem; margin-bottom: var(--s1); }
+  .hq { display: block; font-weight: 500; font-size: var(--fs-tiny); color: var(--ink-soft); }
   .office-addr { font-size: var(--fs-small); color: var(--ink-soft); line-height: 1.45; margin-bottom: var(--s2); }
   .office-tel { font-weight: 700; font-size: 1.05rem; color: var(--ink); font-variant-numeric: tabular-nums; }
 
