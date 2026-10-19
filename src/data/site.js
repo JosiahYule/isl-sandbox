@@ -24,7 +24,9 @@ export const images = {
 
 // Main navigation. Order here = order in the menu.
 export const nav = [
-  { label: 'Hire talent', href: '/hire/' },
+  // Each service has its own page; the "Request talent" button in the header goes to the /hire/ form.
+  { label: 'Contract staffing', href: '/contract/' },
+  { label: 'Direct hire', href: '/direct-hire/' },
   { label: 'Find work', href: '/find-work/' },
   { label: 'About', href: '/about/' },
   { label: 'Team', href: '/team/' },

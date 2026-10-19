@@ -65,7 +65,7 @@ const isCurrent = (href) => current.startsWith(url(href));
   .primary { display: flex; gap: clamp(var(--s4), 2vw, var(--s6)); margin-left: auto; }
   .primary a {
     position: relative; color: var(--ink); text-decoration: none; font-weight: 500; font-size: 0.98rem;
-    padding-block: var(--s2);
+    padding-block: var(--s2); white-space: nowrap;
   }
   .primary a::after {
     content: ''; position: absolute; left: 0; right: 0; bottom: 0; height: 2px;
@@ -99,7 +99,8 @@ const isCurrent = (href) => current.startsWith(url(href));
   .sheet nav a[aria-current='page'] { color: var(--isl-blue); }
   .sheet-tools { display: grid; gap: var(--s4); padding-bottom: var(--s6); }
 
-  @media (max-width: 960px) {
+  /* 7 menu items plus the logo and button need about 1140px; below that, use the Menu button */
+  @media (max-width: 1140px) {
     .primary, .tools { display: none; }
     .mobile { display: block; }
   }
