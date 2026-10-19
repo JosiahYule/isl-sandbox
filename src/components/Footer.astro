@@ -1,6 +1,7 @@
 ---
 // SITE FOOTER
 import { brand, nav, offices, social, images } from '../data/site.js';
+import { url } from '../lib/url.js';
 const year = new Date().getFullYear(); // never goes stale
 ---
 <footer class="footer section--dark">
@@ -16,7 +17,7 @@ const year = new Date().getFullYear(); // never goes stale
 
     <nav aria-label="Footer">
       <strong>Explore</strong>
-      <ul>{nav.map((i) => <li><a href={i.href}>{i.label}</a></li>)}</ul>
+      <ul>{nav.map((i) => <li><a href={url(i.href)}>{i.label}</a></li>)}</ul>
     </nav>
 
     <div>

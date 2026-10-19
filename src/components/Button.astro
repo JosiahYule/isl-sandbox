@@ -2,9 +2,10 @@
 // BUTTON
 // Usage: <Button href="/hire/">Request talent</Button>
 // Options: variant="primary" | "secondary" | "light", size="sm" | "md"
+import { url } from '../lib/url.js';
 const { href, variant = 'primary', size = 'md' } = Astro.props;
 ---
-<a class:list={['btn', variant, size]} href={href}><slot /></a>
+<a class:list={['btn', variant, size]} href={url(href)}><slot /></a>
 
 <style>
   .btn {

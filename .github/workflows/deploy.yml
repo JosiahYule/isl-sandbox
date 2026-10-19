@@ -1,0 +1,46 @@
+# DEPLOY TO GITHUB PAGES
+# Runs automatically every time code is pushed to `main` (you can also run it by hand
+# from the repo's Actions tab). It does what you'd do yourself:
+#   1. download the code   2. install Astro   3. build the site into dist/   4. publish dist/
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+# Permissions GitHub needs to publish a Pages site.
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# If two pushes happen close together, finish one deploy before starting the next.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .node-version
+          cache: npm
+      - run: npm ci
+      - run: npm run build
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

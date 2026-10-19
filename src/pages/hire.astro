@@ -6,6 +6,7 @@ import PageHero from '../components/PageHero.astro';
 import Stats from '../components/Stats.astro';
 import Testimonials from '../components/Testimonials.astro';
 import { brand } from '../data/site.js';
+import { url } from '../lib/url.js';
 
 const sectors = [
   'Construction & Trades', 'Manufacturing & Industrial', 'Transportation & Logistics',
@@ -43,7 +44,7 @@ const steps = [
         <ol class="steps">
           {steps.map(([t, d]) => <li><strong>{t}</strong><span>{d}</span></li>)}
         </ol>
-        <p>Not sure which model fits? Compare <a href="/contract/">contract staffing</a> and <a href="/direct-hire/">direct hire</a>.</p>
+        <p>Not sure which model fits? Compare <a href={url('/contract/')}>contract staffing</a> and <a href={url('/direct-hire/')}>direct hire</a>.</p>
       </div>
     </div>
   </section>

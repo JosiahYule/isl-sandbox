@@ -4,18 +4,19 @@
 // The mobile menu uses <details>, a built-in HTML element that opens and closes with no JavaScript.
 import { brand, nav } from '../data/site.js';
 import Button from './Button.astro';
+import { url } from '../lib/url.js';
 
 const current = Astro.url.pathname;
 ---
 <header class="header">
   <div class="container bar">
-    <a class="logo" href="/" aria-label={`${brand.name} home`}>
+    <a class="logo" href={url('/')} aria-label={`${brand.name} home`}>
       <img src={brand.logo} alt={brand.name} width="200" height="48" />
     </a>
 
     <nav class="desktop" aria-label="Main">
       {nav.map((item) => (
-        <a href={item.href} aria-current={current.startsWith(item.href) ? 'page' : undefined}>{item.label}</a>
+        <a href={url(item.href)} aria-current={current.startsWith(url(item.href)) ? 'page' : undefined}>{item.label}</a>
       ))}
     </nav>
 
@@ -27,7 +28,7 @@ const current = Astro.url.pathname;
     <details class="mobile">
       <summary aria-label="Menu">Menu</summary>
       <nav aria-label="Mobile">
-        {nav.map((item) => <a href={item.href}>{item.label}</a>)}
+        {nav.map((item) => <a href={url(item.href)}>{item.label}</a>)}
         <a href={brand.loginUrl}>Login</a>
         <Button href="/hire/">Request talent</Button>
       </nav>

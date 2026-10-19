@@ -1,10 +1,10 @@
 # ISL website sandbox
 
-A private playground for redesigning the Integrated Staffing website. Nothing here touches the live Squarespace site. Every change pushed to GitHub rebuilds a preview link on Cloudflare Pages.
+A playground for redesigning the Integrated Staffing website. Nothing here touches the live Squarespace site. Every change pushed to GitHub rebuilds the preview at **https://josiahyule.github.io/isl-sandbox/**.
 
 ## How it works, in plain terms
 
-The site is built with **Astro**. Astro takes the files in `src/` and turns them into ordinary HTML and CSS files in a folder called `dist/`. That `dist/` folder is the actual website. Cloudflare runs that conversion (the "build") every time you push, then serves the result.
+The site is built with **Astro**. Astro takes the files in `src/` and turns them into ordinary HTML and CSS files in a folder called `dist/`. That `dist/` folder is the actual website. A GitHub Actions workflow (`.github/workflows/deploy.yml`) runs that conversion (the "build") every time you push, then publishes the result to GitHub Pages. You can watch each run in the repo's **Actions** tab.
 
 You never edit `dist/` directly. You edit `src/`, and the build regenerates `dist/`.
 
@@ -49,6 +49,19 @@ Facts that appear in many places live in `src/data/`:
 
 Change a phone number in `site.js` and it updates on every page that shows it.
 
+### One rule for internal links
+
+The sandbox lives in a sub-folder (`/isl-sandbox/`), so a link written as `/hire/` would point to the wrong place. Wrap internal links in the `url()` helper from `src/lib/url.js`, which adds the prefix:
+
+```astro
+---
+import { url } from '../lib/url.js';
+---
+<a href={url('/hire/')}>Hire talent</a>
+```
+
+`<Button>`, the header and the footer already do this for you. External links (`https://...`, `tel:`, `mailto:`) don't need it.
+
 ## Where to start a redesign
 
 1. **`src/styles/tokens.css`**: the design "knobs": colours, fonts, sizes, spacing, corner rounding. The colours are neutral placeholders. Put in ISL's real brand colours first and the whole site picks them up.
@@ -79,9 +92,9 @@ package.json      project name, scripts, and the Astro dependency
 
 ## Previews
 
-Every push to the `main` branch updates the main preview link. If you push a different branch (say, `homepage-v2`), Cloudflare gives it its own preview link. That lets you try a direction without losing the current one.
+Every push to the `main` branch rebuilds the preview, usually within a minute or two. GitHub Pages hosts one version at a time, so to try a direction without losing the current one, work on a separate branch and merge it into `main` when you like it.
 
-Every page includes `<meta name="robots" content="noindex">`, so search engines won't index the sandbox.
+The preview link is public: anyone with the address can open it. Every page includes `<meta name="robots" content="noindex">`, so search engines won't index the sandbox.
 
 ## Running it on your own computer (optional)
 
