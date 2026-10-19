@@ -435,7 +435,7 @@ export function createEngine({ loadJobs, siteUrl = (path) => SITE.base + path })
     return {
       reply,
       summary,
-      contact: toContact(r, action),
+      contact: { ...toContact(r, action), officeUrl: r.office?.key && service !== 'direct' ? siteUrl(`/offices/${r.office.key}/`) : '' },
       choices: [{ label: service === 'direct' ? 'How direct hire works' : 'How contract staffing works', href: service === 'direct' ? links.direct : links.contract }, 'Start over'],
       meta: meta('hire-done'),
     };

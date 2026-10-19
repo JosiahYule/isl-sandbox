@@ -14,7 +14,7 @@ const areaKey = (city) => areas.find((a) => a.label === city)?.key;
     {showOffices && <div class="offices">
       {offices.map((o) => (
         <div class="office">
-          <p class="city">{o.city}<span>{o.province}</span></p>
+          {areaKey(o.city) ? <a class="city" href={url(`/offices/${areaKey(o.city)}/`)}>{o.city}<span>{o.province}</span></a> : <p class="city">{o.city}<span>{o.province}</span></p>}
           <a class="phone" href={tel(o.phone)}>{o.phone}</a>
           <p class="addr">{o.address.replace(/,\s*(NS|NB|PE|NL)\s.*$/, '')}</p>
           {areaKey(o.city) && <a class="near" href={url(`/find-work/?area=${areaKey(o.city)}`)}>Jobs near {o.city}</a>}
@@ -56,6 +56,7 @@ const areaKey = (city) => areas.find((a) => a.label === city)?.key;
   .city { font-weight: 700;
     font-size: 1.15rem; letter-spacing: -0.01em; margin-bottom: var(--s2);
   }
+  a.city { color: #fff; display: block; }
   .city span { margin-left: 0.4em; color: var(--on-dark-soft); font-weight: 500; font-size: 0.8em; }
   .phone { font-weight: 500; color: #fff; font-variant-numeric: tabular-nums; }
   .addr { color: var(--on-dark-soft); font-size: var(--fs-small); margin-top: var(--s2); line-height: 1.45; }

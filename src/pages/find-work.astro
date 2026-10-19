@@ -7,7 +7,6 @@
 import Base from '../layouts/Base.astro';
 import JobRow from '../components/JobRow.astro';
 import PageHero from '../components/PageHero.astro';
-import HeroFigure from '../components/HeroFigure.astro';
 import { jobs, provinces, snapshotDate } from '../data/jobs.js';
 import { areas } from '../data/areas.js';
 import { url } from '../lib/url.js';
@@ -22,15 +21,6 @@ const count = { contract: jobs.filter((j) => j.type === 'contract').length, dire
 <Base assistantMode="seeker" title="Find work" description="Contract and permanent jobs across Atlantic Canada and beyond.">
   <PageHero title="Find your next job." lead="Contract and permanent roles across Atlantic Canada.">
     <button type="button" class="textlink" data-open-assistant>Or describe what you want to the job assistant</button>
-    <Fragment slot="aside">
-      <HeroFigure figure={String(jobs.length)} label="roles open right now">
-        <div class="split" aria-hidden="true">
-          <span class="split-c" style={`width:${(count.contract / jobs.length) * 100}%`}></span>
-          <span class="split-d" style={`width:${(count.direct / jobs.length) * 100}%`}></span>
-        </div>
-        <p class="split-key"><span>{count.contract} contract</span><span class="d">{count.direct} permanent</span></p>
-      </HeroFigure>
-    </Fragment>
   </PageHero>
 
   <section class="results">
@@ -170,15 +160,6 @@ const count = { contract: jobs.filter((j) => j.type === 'contract').length, dire
   .t--contract[aria-pressed='true'] span { color: rgb(255 255 255 / 0.7); }
   .t--direct[aria-pressed='true'] { background: var(--direct); }
 
-  .split { display: flex; gap: 3px; height: 10px; margin-top: var(--s5); }
-  .split span { display: block; height: 100%; transform-origin: left; }
-  .split-c { background: var(--contract); }
-  .split-d { background: var(--direct); }
-  .split-key { display: flex; justify-content: space-between; margin-top: var(--s2); font-size: var(--fs-small); font-weight: 600; }
-  .split-key .d { color: var(--direct); }
-  :global(.motion) .split span { transform: scaleX(0); transition: transform 0.9s var(--ease) 0.3s; }
-  :global(.motion) .split .split-d { transition-delay: 0.6s; }
-  :global(.motion) :global(.hf.is-in) .split span { transform: none; }
 
   .results { padding-block: 0 clamp(4rem, 8vw, 6.5rem); }
   .near { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s2) var(--s4); margin: calc(-1 * var(--s3)) 0 var(--s6); font-size: var(--fs-small); }

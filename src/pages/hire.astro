@@ -6,7 +6,6 @@
 import Base from '../layouts/Base.astro';
 import PageHero from '../components/PageHero.astro';
 import Steps from '../components/Steps.astro';
-import HeroFigure from '../components/HeroFigure.astro';
 import { brand } from '../data/site.js';
 
 const sectors = ['Construction and trades', 'Warehousing and logistics', 'Manufacturing', 'Energy and natural resources',
@@ -23,12 +22,8 @@ const afterSteps = [
 ];
 ---
 <Base assistantMode="employer" title="Request talent" description="Request contract workers or start a permanent search. A recruiter replies within one business day.">
-  <PageHero title="Tell us who you need." lead="Contract workers or a permanent hire, anywhere we work.">
-    <Fragment slot="aside">
-      <HeroFigure figure="1" label="business day for a recruiter to reply">
-        <p class="hf-extra">Prefer to talk? <a href={tel}>{brand.mainPhone}</a></p>
-      </HeroFigure>
-    </Fragment>
+  <PageHero title="Tell us who you need." lead="Contract workers or a permanent hire, anywhere we work. A recruiter replies within one business day.">
+    <a class="textlink" href={tel}>Prefer to talk? Call {brand.mainPhone}</a>
   </PageHero>
 
   <section class="section section--rule work">

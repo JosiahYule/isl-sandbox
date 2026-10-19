@@ -1,0 +1,135 @@
+---
+// OFFICE PAGES  →  /offices/halifax/, /offices/moncton/, /offices/saint-john/, /offices/charlottetown/, /offices/st-johns/
+//
+// One template, five pages. Each page pulls together what's already stored elsewhere,
+// so nothing here is typed twice:
+//   offices        src/data/site.js       address and phone
+//   areas          src/data/areas.js      which towns count as "near"
+//   jobs           src/data/jobs.js       open roles nearby
+//   who to call    assistant/.../routing.js  the same people the chatbot hands employers to
+//   guides         src/data/posts.js      local articles from the blog
+import Base from '../../layouts/Base.astro';
+import PageHero from '../../components/PageHero.astro';
+import AtlanticMap from '../../components/AtlanticMap.astro';
+import ContactCard from '../../components/ContactCard.astro';
+import JobRow from '../../components/JobRow.astro';
+import CtaBand from '../../components/CtaBand.astro';
+import Photo from '../../components/Photo.astro';
+import { offices } from '../../data/site.js';
+import { areas } from '../../data/areas.js';
+import { jobs } from '../../data/jobs.js';
+import { posts } from '../../data/posts.js';
+import { photos } from '../../data/photos.js';
+import { route, provinceName } from '../../../assistant/supabase/functions/_shared/routing.js';
+import { url } from '../../lib/url.js';
+
+// Local articles for each office (slugs from posts.js). Add more as they're written.
+const GUIDES = {
+  halifax: ['halifax-industrial-trades-jobs'],
+  moncton: ['monctons-job-market-in-2026-why-unemployment-is-up-and-employers-still-cant-hire', 'why-new-brunswick-a-practical-guide-for-canadians-considering-a-move'],
+  'saint-john': ['why-new-brunswick-a-practical-guide-for-canadians-considering-a-move'],
+  charlottetown: [],
+  'st-johns': ['work-live-newfoundland'],
+};
+// Real photos of an office's team, where we have one
+const TEAM_PHOTO = { 'st-johns': { ...photos.teamNL, caption: 'Our St. John’s team, December 2025' } };
+
+export function getStaticPaths() {
+  return areas.map((a) => ({ params: { key: a.key } }));
+}
+
+const { key } = Astro.params;
+const area = areas.find((a) => a.key === key);
+const office = offices.find((o) => o.city === area.label);
+const here = { province: office.province, city: office.city };
+const contract = route({ audience: 'employer', service: 'contract', place: here });
+const permanent = route({ audience: 'employer', service: 'direct', place: here });
+const nearby = jobs.filter((j) => j.area === key);
+const guides = (GUIDES[key] || []).map((slug) => posts.find((p) => p.slug === slug)).filter(Boolean);
+const towns = area.towns.filter((t) => t !== area.label.toLowerCase()).slice(0, 6).map((t) => t.replace(/(^|[\s-])([a-z])/g, (m, p, c) => p + c.toUpperCase()));
+const tel = (n) => `tel:+1${n.replace(/\D/g, '')}`;
+const maps = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent('Integrated Staffing ' + office.address)}`;
+const isHead = key === 'halifax';
+const province = provinceName(office.province);
+const photo = TEAM_PHOTO[key];
+---
+<Base title={`${office.city} office`} description={`Integrated Staffing in ${office.city}: contract and permanent staffing, local jobs and who to call.`}>
+  <PageHero title={`Our ${office.city} office.`} lead={`${office.address}${isHead ? '. Our head office.' : '.'}`}>
+    <a class="call" href={tel(office.phone)}>{office.phone}</a>
+    <a class="textlink" href={maps}>Directions</a>
+    <Fragment slot="aside"><AtlanticMap id={`map-${key}`} card={false} selected={office.city} navigate /></Fragment>
+  </PageHero>
+
+  {photo && (
+    <div class="wrap" data-reveal>
+      <Photo src={photo.src} alt={photo.alt} ratio="21/9" sizes="(max-width: 1320px) 100vw, 1240px" caption={photo.caption} />
+    </div>
+  )}
+
+  <!-- Who to call: the same routing the chatbot uses -->
+  <section class="section">
+    <div class="wrap">
+      <div class="section-head"><h2>Hiring in {office.province === 'NB' ? 'New Brunswick' : province}</h2></div>
+      <div class="contacts" data-stagger>
+        <ContactCard label="Contract staffing" person={contract.person} office={contract.office}
+          href={`/hire/?service=contract&where=${encodeURIComponent(province)}`} cta="Request workers" />
+        <ContactCard label="Permanent hires, anywhere in Canada" person={permanent.person} office={permanent.office}
+          href={`/hire/?service=direct&where=${encodeURIComponent(province)}`} cta="Start a search" />
+      </div>
+    </div>
+  </section>
+
+  <!-- Jobs near this office -->
+  <section class="section section--tint">
+    <div class="wrap">
+      <div class="section-head section-head--split">
+        <h2>Jobs near {office.city}</h2>
+        <p class="lead">{towns.length ? `Including ${towns.join(', ')}.` : ''}</p>
+      </div>
+      {nearby.length ? (
+        <>
+          <div class="list" data-stagger>{nearby.slice(0, 5).map((job) => <JobRow job={job} />)}</div>
+          <a class="more" href={url(`/find-work/?area=${key}`)}>{nearby.length > 5 ? `See all ${nearby.length} jobs near ${office.city}` : 'Search all open jobs'}</a>
+        </>
+      ) : (
+        <p class="none">Nothing open nearby right now. <a href="https://www.integratedstaffing.ca/careers/general-apply">Send your resume</a> and we’ll contact you when something fits.</p>
+      )}
+    </div>
+  </section>
+
+  {guides.length > 0 && (
+    <section class="section">
+      <div class="wrap">
+        <div class="section-head"><h2>Working in {office.province === 'NB' ? 'New Brunswick' : office.province === 'NL' ? 'Newfoundland' : office.city}</h2></div>
+        <ul class="guides" data-stagger>
+          {guides.map((g) => <li><a href={g.url}><span class="g-title">{g.title}</span><span class="arrow" aria-hidden="true">→</span></a></li>)}
+        </ul>
+      </div>
+    </section>
+  )}
+
+  <CtaBand />
+</Base>
+
+<style>
+  .call { font-weight: 700; font-size: 1.35rem; color: var(--ink); text-decoration: none; font-variant-numeric: tabular-nums; margin-right: var(--s3); }
+  .call:hover { text-decoration: underline; }
+
+  .contacts { display: grid; grid-template-columns: 1fr 1fr; gap: var(--s7); }
+
+  .list { border-top: 1.5px solid var(--ink); background: var(--paper); }
+  .more { display: inline-block; margin-top: var(--s5); font-weight: 600; }
+  .none { color: var(--ink-soft); }
+
+  .guides { list-style: none; margin: 0; padding: 0; border-top: 1.5px solid var(--ink); }
+  .guides a { display: flex; justify-content: space-between; gap: var(--s4); padding-block: var(--s5); border-bottom: 1px solid var(--line); color: var(--ink); text-decoration: none; }
+  .g-title { font-weight: 600; font-size: 1.25rem; letter-spacing: -0.01em; }
+  .guides a:hover .g-title { text-decoration: underline; }
+  .arrow { color: var(--isl-blue); font-weight: 600; transition: transform 0.3s var(--ease); }
+  .guides a:hover .arrow { transform: translateX(4px); }
+
+
+  @media (max-width: 900px) {
+    .contacts { grid-template-columns: 1fr; gap: var(--s6); }
+  }
+</style>

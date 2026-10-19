@@ -3,7 +3,6 @@
 // Reads src/data/team.js. Cards link to each person's bio on the live site for now.
 import Base from '../layouts/Base.astro';
 import PageHero from '../components/PageHero.astro';
-import HeroFigure from '../components/HeroFigure.astro';
 import { offices } from '../data/site.js';
 import { team } from '../data/team.js';
 import { sized } from '../lib/img.js';
@@ -18,9 +17,7 @@ const filters = [
 ];
 ---
 <Base title="Our team" description="Meet the Integrated Staffing team across Atlantic Canada.">
-  <PageHero title="The people behind every placement." >
-    <Fragment slot="aside"><HeroFigure figure={String(team.length)} label={`recruiters and staff across ${offices.length} offices`} /></Fragment>
-  </PageHero>
+  <PageHero title="The people behind every placement." />
 
   <section class="section section--rule people" data-team>
     <div class="wrap">

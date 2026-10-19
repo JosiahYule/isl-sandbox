@@ -6,21 +6,27 @@
 //   tone: "light" (navy land on a light page, default) | "dark" (for navy sections)
 //   card: show the office details card (default true)
 //   bleed: let neighbouring land run past the map's box (used in the homepage hero)
+//   selected: the city to show first (default: the head office)
+//   navigate: selecting a pin opens that office's page (used on the office pages)
 import { atlanticMap as map } from '../data/maps.js';
 import { offices } from '../data/site.js';
+import { areas } from '../data/areas.js';
+import { url } from '../lib/url.js';
 
-const { tone = 'light', card = true, id = 'amap', bleed = false } = Astro.props;
+const { tone = 'light', card = true, id = 'amap', bleed = false, selected, navigate = false } = Astro.props;
 
 // Which side of the pin each label sits on, so nearby labels don't collide.
 const labelSide = { Halifax: 'right', Moncton: 'left', 'Saint John': 'right', Charlottetown: 'right', "St. John's": 'left' };
 
 const pins = map.offices.map((p) => {
   const o = offices.find((x) => x.city === p.city);
-  return { ...o, left: (p.x / map.width) * 100, top: (p.y / map.height) * 100, side: labelSide[p.city] ?? 'right' };
+  const key = areas.find((a) => a.label === p.city)?.key;
+  return { ...o, key, left: (p.x / map.width) * 100, top: (p.y / map.height) * 100, side: labelSide[p.city] ?? 'right' };
 });
+const sel = Math.max(0, pins.findIndex((p) => p.city === selected));
 const tel = (n) => `tel:+1${n.replaceAll('-', '')}`;
 ---
-<figure class:list={['amap', `amap--${tone}`, bleed && 'amap--bleed']} id={id} data-amap data-animate>
+<figure class:list={['amap', `amap--${tone}`, bleed && 'amap--bleed']} id={id} data-amap data-animate data-navigate={navigate ? '' : undefined}>
   <div class="canvas">
   <svg viewBox={`0 0 ${map.width} ${map.height}`} aria-hidden="true" focusable="false">
     <g class="context">{map.context.map((p) => <path d={p.d} />)}</g>
@@ -30,7 +36,7 @@ const tel = (n) => `tel:+1${n.replaceAll('-', '')}`;
   <ul class="pins" aria-label="Our offices">
     {pins.map((p, i) => (
       <li style={`left:${p.left}%;top:${p.top}%;--o:${i}`}>
-        <button type="button" class:list={['pin', `pin--${p.side}`]} aria-pressed={i === 0 ? 'true' : 'false'} data-index={i}>
+        <button type="button" class:list={['pin', `pin--${p.side}`]} aria-pressed={i === sel ? 'true' : 'false'} data-index={i} data-href={p.key ? url(`/offices/${p.key}/`) : undefined}>
           <span class="dot" aria-hidden="true"></span>
           <span class="label">{p.city}</span>
         </button>
@@ -42,10 +48,11 @@ const tel = (n) => `tel:+1${n.replaceAll('-', '')}`;
   {card && (
     <div class="card" aria-live="polite">
       {pins.map((p, i) => (
-        <div class="office" data-office={i} hidden={i !== 0}>
+        <div class="office" data-office={i} hidden={i !== sel}>
           <p class="office-city">{p.city}, {p.province}{i === 0 && <span class="hq">Head office</span>}</p>
           <p class="office-addr">{p.address}</p>
           <a class="office-tel" href={tel(p.phone)}>{p.phone}</a>
+          {p.key && <a class="office-more" href={url(`/offices/${p.key}/`)}>About this office</a>}
         </div>
       ))}
     </div>
@@ -60,6 +67,7 @@ const tel = (n) => `tel:+1${n.replaceAll('-', '')}`;
     const cards = fig.querySelectorAll('[data-office]');
     pins.forEach((pin) => {
       pin.addEventListener('click', () => {
+        if (fig.hasAttribute('data-navigate') && pin.dataset.href && pin.getAttribute('aria-pressed') !== 'true') { location.href = pin.dataset.href; return; }
         pins.forEach((p) => p.setAttribute('aria-pressed', String(p === pin)));
         cards.forEach((c) => (c.hidden = c.dataset.office !== pin.dataset.index));
       });
@@ -119,6 +127,7 @@ const tel = (n) => `tel:+1${n.replaceAll('-', '')}`;
   .office-city { font-weight: 700; font-size: 1.1rem; margin-bottom: var(--s1); }
   .hq { display: block; font-weight: 500; font-size: var(--fs-tiny); color: var(--ink-soft); }
   .office-addr { font-size: var(--fs-small); color: var(--ink-soft); line-height: 1.45; margin-bottom: var(--s2); }
+  .office-more { display: block; margin-top: var(--s2); font-size: var(--fs-small); font-weight: 600; }
   .office-tel { font-weight: 700; font-size: 1.05rem; color: var(--ink); font-variant-numeric: tabular-nums; }
 
   /* Motion: the pins drop onto the map one after another, then the office card appears */

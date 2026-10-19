@@ -115,6 +115,7 @@
     .reach svg { width: 15px; height: 15px; flex: none; color: var(--blue); }
     .go { display: block; text-align: center; text-decoration: none; font-weight: 600; font-size: 14px; padding: 11px 12px; background: var(--blue); color: var(--white); }
     .go:hover { background: var(--blue-deep); }
+    .office-link { justify-self: center; font-size: 12.5px; font-weight: 600; color: var(--blue); }
 
     /* Quick replies */
     .choices { display: flex; flex-wrap: wrap; gap: 6px; align-self: stretch; padding-top: 2px; }
@@ -215,6 +216,7 @@
       if (p.email) { const a = el("a"); a.href = "mailto:" + p.email; a.innerHTML = ICON.mail; a.append(p.email); reach.append(a); }
       c.append(who, reach);
       if (p.action?.href) { const go = el("a", "go", p.action.label); go.href = p.action.href; c.append(go); }
+      if (p.officeUrl && p.office) { const o = el("a", "office-link", `About the ${p.office} office`); o.href = p.officeUrl; c.append(o); }
       return c;
     }
     const initials = (n) => String(n || "").split(/\s+/).map((w) => w[0]).join("").slice(0, 2).toUpperCase();

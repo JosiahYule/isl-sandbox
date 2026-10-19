@@ -2,9 +2,32 @@
 // SITE HEADER
 // Menu items come from src/data/site.js. The mobile menu uses <details>, which opens
 // and closes with no JavaScript.
-import { brand, nav } from '../data/site.js';
+import { brand, nav, offices } from '../data/site.js';
 import Button from './Button.astro';
 import { url } from '../lib/url.js';
+import { jobs } from '../data/jobs.js';
+import { areas } from '../data/areas.js';
+import { posts } from '../data/posts.js';
+
+// Dropdowns: built from the same data as the pages, so the numbers are always current.
+const post = (slug) => posts.find((p) => p.slug === slug);
+const menus = {
+  '/find-work/': [
+    { label: 'All open jobs', href: url('/find-work/'), meta: String(jobs.length) },
+    ...areas.map((a) => ({ label: `Near ${a.label}`, href: url(`/find-work/?area=${a.key}`), meta: String(jobs.filter((j) => j.area === a.key).length) })),
+    { label: 'Send your resume', href: 'https://www.integratedstaffing.ca/careers/general-apply', rule: true },
+  ],
+  '/learn/': [
+    { label: 'Wage guide', href: post('wage-guide-atlantic-canada-2026')?.url, meta: 'Tool' },
+    { label: 'Resume audit', href: post('resume-audit')?.url, meta: 'Tool' },
+    { label: 'Why New Brunswick', href: post('why-new-brunswick-a-practical-guide-for-canadians-considering-a-move')?.url, meta: 'Guide' },
+    { label: 'All articles', href: url('/learn/'), meta: String(posts.length), rule: true },
+  ],
+  '/contact/': [
+    ...areas.map((a) => ({ label: a.label, href: url(`/offices/${a.key}/`), meta: offices.find((o) => o.city === a.label)?.phone })),
+    { label: 'All ways to reach us', href: url('/contact/'), rule: true },
+  ],
+};
 
 const current = Astro.url.pathname;
 const isCurrent = (href) => current.startsWith(url(href));
@@ -17,7 +40,19 @@ const isCurrent = (href) => current.startsWith(url(href));
     </a>
 
     <nav class="primary" aria-label="Main">
-      {nav.map((item) => (
+      {nav.map((item, i) => menus[item.href] ? (
+        <div class="has-drop">
+          <a href={url(item.href)} aria-current={isCurrent(item.href) ? 'page' : undefined}>{item.label}</a>
+          <button type="button" class="drop-btn" aria-expanded="false" aria-controls={`drop-${i}`} aria-label={`More in ${item.label}`}>
+            <svg viewBox="0 0 12 12" aria-hidden="true"><path d="M2.5 4.5 6 8l3.5-3.5" fill="none" stroke="currentColor" stroke-width="1.6" /></svg>
+          </button>
+          <ul class="drop" id={`drop-${i}`}>
+            {menus[item.href].map((m) => (
+              <li class:list={[m.rule && 'rule']}><a href={m.href}><span>{m.label}</span>{m.meta && <span class="m">{m.meta}</span>}</a></li>
+            ))}
+          </ul>
+        </div>
+      ) : (
         <a href={url(item.href)} aria-current={isCurrent(item.href) ? 'page' : undefined}>{item.label}</a>
       ))}
     </nav>
@@ -32,7 +67,12 @@ const isCurrent = (href) => current.startsWith(url(href));
       <div class="sheet">
         <nav aria-label="Mobile">
           {nav.map((item) => (
-            <a href={url(item.href)} aria-current={isCurrent(item.href) ? 'page' : undefined}>{item.label}</a>
+            <>
+              <a href={url(item.href)} aria-current={isCurrent(item.href) ? 'page' : undefined}>{item.label}</a>
+              {menus[item.href] && (
+                <div class="sub">{menus[item.href].filter((m) => !m.rule).map((m) => <a href={m.href}>{m.label}{m.meta && <span>{m.meta}</span>}</a>)}</div>
+              )}
+            </>
           ))}
         </nav>
         <div class="sheet-tools">
@@ -43,6 +83,23 @@ const isCurrent = (href) => current.startsWith(url(href));
     </details>
   </div>
 </header>
+
+<script>
+  // Dropdowns open on hover and keyboard focus (CSS). The arrow button also opens them
+  // for touch screens, and Escape closes whichever is open.
+  document.querySelectorAll('.has-drop').forEach((d) => {
+    const btn = d.querySelector('.drop-btn');
+    btn.addEventListener('click', () => {
+      const open = btn.getAttribute('aria-expanded') !== 'true';
+      document.querySelectorAll('.drop-btn').forEach((b) => b.setAttribute('aria-expanded', 'false'));
+      btn.setAttribute('aria-expanded', String(open));
+    });
+    d.addEventListener('keydown', (e) => { if (e.key === 'Escape') { btn.setAttribute('aria-expanded', 'false'); btn.focus(); d.classList.add('shut'); } });
+    d.addEventListener('mouseleave', () => { btn.setAttribute('aria-expanded', 'false'); d.classList.remove('shut'); });
+    d.addEventListener('focusout', (e) => { if (!d.contains(e.relatedTarget)) { btn.setAttribute('aria-expanded', 'false'); d.classList.remove('shut'); } });
+  });
+  document.addEventListener('click', (e) => { if (!e.target.closest('.has-drop')) document.querySelectorAll('.drop-btn').forEach((b) => b.setAttribute('aria-expanded', 'false')); });
+</script>
 
 <style>
   .header {
@@ -73,6 +130,33 @@ const isCurrent = (href) => current.startsWith(url(href));
     transition: transform 200ms var(--ease);
   }
   .primary a:hover::after, .primary a[aria-current='page']::after { transform: scaleX(1); }
+
+  /* Dropdowns */
+  .has-drop { position: relative; display: flex; align-items: center; gap: 2px; }
+  .drop-btn { display: grid; place-items: center; width: 18px; height: 24px; padding: 0; border: 0; background: none; color: var(--ink-soft); cursor: pointer; }
+  .drop-btn svg { width: 11px; height: 11px; transition: transform 0.2s var(--ease); }
+  .drop {
+    position: absolute; top: calc(100% + 12px); left: -18px; z-index: 70; min-width: 17rem;
+    list-style: none; margin: 0; padding: var(--s2) 0; background: var(--paper);
+    border: 1px solid var(--line); border-top: 2px solid var(--ink);
+    opacity: 0; visibility: hidden; transform: translateY(-6px);
+    transition: opacity 0.18s var(--ease), transform 0.18s var(--ease), visibility 0s linear 0.18s;
+  }
+  /* An invisible bridge so the menu stays open while the pointer moves down to it */
+  .drop::before { content: ''; position: absolute; left: 0; right: 0; top: -14px; height: 14px; }
+  .has-drop:hover .drop, .has-drop:focus-within .drop, .has-drop:has(.drop-btn[aria-expanded='true']) .drop {
+    opacity: 1; visibility: visible; transform: none; transition-delay: 0s;
+  }
+  .has-drop.shut .drop { opacity: 0; visibility: hidden; }
+  .has-drop:hover .drop-btn svg, .drop-btn[aria-expanded='true'] svg { transform: rotate(180deg); }
+  .drop li.rule { border-top: 1px solid var(--line); margin-top: var(--s2); padding-top: var(--s2); }
+  .drop a { display: flex; justify-content: space-between; gap: var(--s5); padding: 0.55rem var(--s5); color: var(--ink); text-decoration: none; font-size: 0.95rem; white-space: nowrap; }
+  .drop a::after { display: none; }
+  .drop a:hover, .drop a:focus-visible { background: var(--mist); }
+  .drop .m { color: var(--ink-soft); font-variant-numeric: tabular-nums; font-size: var(--fs-small); }
+  .sheet .sub { display: grid; padding: 0 0 var(--s3); border-bottom: 1px solid var(--line); }
+  .sheet .sub a { display: flex; justify-content: space-between; font-size: 1rem; font-weight: 500; padding: var(--s2) 0; border: 0; letter-spacing: 0; color: var(--ink); text-decoration: none; }
+  .sheet .sub a span { color: var(--ink-soft); font-variant-numeric: tabular-nums; }
 
   .tools { display: flex; align-items: center; gap: var(--s5); }
   .login { color: var(--ink-soft); font-size: var(--fs-small); font-weight: 500; text-decoration: none; }

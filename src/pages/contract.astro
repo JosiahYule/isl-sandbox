@@ -7,6 +7,13 @@ import IndustryMatrix from '../components/IndustryMatrix.astro';
 import CtaBand from '../components/CtaBand.astro';
 import Photo from '../components/Photo.astro';
 import { stock } from '../data/photos.js';
+import { route, provinceName } from '../../assistant/supabase/functions/_shared/routing.js';
+import { url } from '../lib/url.js';
+
+// Who takes contract requests in each province: the same routing the chatbot uses
+const local = [['NS', 'Halifax', 'halifax'], ['NB', 'Moncton', 'moncton'], ['PE', 'Charlottetown', 'charlottetown'], ['NL', "St. John's", 'st-johns']]
+  .map(([province, city, key]) => ({ province, key, ...route({ audience: 'employer', service: 'contract', place: { province, city } }) }));
+const tel = (n) => `tel:+1${String(n).replace(/\D/g, '')}`;
 
 const uses = [
   ['Vacation and leave cover', 'Keep the work moving while someone is away, from a week of vacation to a full maternity leave.'],
@@ -75,10 +82,30 @@ const covered = [
     </div>
   </section>
 
+  <section class="section section--rule">
+    <div class="wrap">
+      <div class="section-head"><h2>Talk to your local office</h2></div>
+      <ul class="items local">
+        {local.map((l) => (
+          <li class="item">
+            <p class="l-prov">{provinceName(l.province)}</p>
+            <h3>{l.person?.name ?? `${l.office.city} office`}</h3>
+            <p>{l.person?.handles}</p>
+            <a class="l-tel" href={tel(l.person?.phone || l.office.phone)}>{l.person?.phone || l.office.phone}</a>
+            <a class="more" href={url(`/offices/${l.key}/`)}>{l.office.city === 'Moncton' ? 'Moncton and Saint John' : l.office.city} office</a>
+          </li>
+        ))}
+      </ul>
+    </div>
+  </section>
+
   <CtaBand title="Need people this week?" text="Tell us the role and the start date. A recruiter replies within one business day." href="/hire/?service=contract" label="Request workers" />
 </Base>
 
 <style>
+  .l-prov { font-size: var(--fs-small); font-weight: 600; color: var(--ink-soft) !important; margin-bottom: var(--s2); }
+  .l-tel { display: block; margin-top: var(--s3); font-weight: 700; color: var(--ink); text-decoration: none; font-variant-numeric: tabular-nums; }
+  .local .more { display: inline-block; margin-top: var(--s2); }
   .rate-grid { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(2rem, 6vw, 6rem); align-items: start; }
   .rate-copy .section-head { margin-bottom: var(--s6); }
 

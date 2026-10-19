@@ -176,6 +176,7 @@ export function toContact({ person, office }, action) {
     email: person?.email || "",
     photo: person?.photo || "",
     office: office?.city || "",
+    officeKey: office?.key || "",
     action: action || null, // { label, href } for the main button
   };
 }

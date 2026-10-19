@@ -44,8 +44,8 @@ const ticker = jobs.slice(0, 14);
     <div class="wrap hero-inner">
       <div class="hero-copy" data-stagger>
         <h1 class="hero-title">
-          <span class="line line--contract"><span class="u">Workers in hours.</span></span>{" "}
-          <span class="line line--direct"><span class="u">Hires that stay.</span></span>
+          <span class="line">Workers in hours.</span>{" "}
+          <span class="line">Hires that stay.</span>
         </h1>
         <p class="hero-lead">Contract and permanent staffing across Atlantic Canada. Locally owned since {brand.since}.</p>
         <form class="search" action={url('/find-work/')} method="get" role="search">
@@ -192,17 +192,9 @@ const ticker = jobs.slice(0, 14);
   .hero-inner { flex: 1; display: flex; align-items: center; padding-block: var(--s8) var(--s7); }
   .hero-copy { max-width: 660px; }
 
-  .hero-title { font-size: clamp(2.9rem, 1rem + 5.4vw, 6.2rem); font-weight: 700; letter-spacing: -0.03em; line-height: 0.98; color: #fff; }
+  .hero-title { font-size: clamp(2.9rem, 1rem + 5.4vw, 6.2rem); font-weight: 600; letter-spacing: -0.03em; line-height: 1; color: #fff; }
   @media (min-width: 901px) { .line { white-space: nowrap; } }
-  /* Each line is underlined in its service colour (on dark: white for contract, light blue for direct).
-     The underline is a background line so it can draw itself across on load. */
   .line { display: block; }
-  .line + .line { margin-top: 0.24em; }
-  .u { --c: #fff; padding-bottom: 0.08em; background: linear-gradient(var(--c), var(--c)) no-repeat left bottom / 100% 0.085em; -webkit-box-decoration-break: clone; box-decoration-break: clone; }
-  .line--direct .u { --c: var(--isl-blue-on-dark); }
-  :global(.motion) .u { background-size: 0% 0.085em; transition: background-size 0.9s var(--ease) 0.6s; }
-  :global(.motion) .line--direct .u { transition-delay: 0.85s; }
-  :global(.motion) .hero-copy.is-in .u { background-size: 100% 0.085em; }
 
   .hero-lead { margin-top: var(--s6); font-size: var(--fs-lead); font-weight: 300; line-height: 1.55; color: rgb(255 255 255 / 0.86); max-width: 38ch; }
 
