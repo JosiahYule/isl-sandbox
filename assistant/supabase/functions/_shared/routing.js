@@ -42,21 +42,20 @@ export const PEOPLE = {
     phone: "902-471-0166", email: "zowie@integratedstaffing.ca",
     photo: cdn("471bd9d6-a42f-4bdd-84bc-47ae0b3f7e5d/Integrated+Staffing+Zowie+Tucker_1+%281%29.jpg"),
   },
-  // No headshot on the live site yet for these three, so cards show initials. Add `photo` when ready.
   kelli: {
     name: "Kelli Wetmore", first: "Kelli", office: "moncton", slug: "kelli-wetmore",
     handles: "New client requests, all of New Brunswick",
-    phone: "506-851-9306", email: "kelli@integratedstaffing.ca", photo: "",
+    phone: "506-851-9306", email: "kelli@integratedstaffing.ca", photo: cdn("0a6f5757-c713-4324-bedc-83e05e8973d5/Kelli-Wetmore.jpg"),
   },
   chance: {
     name: "Chance Skauge", first: "Chance", office: "charlottetown", slug: "chance-skauge",
     handles: "New client requests, all of PEI",
-    phone: "902-393-3217", email: "chance@integratedstaffing.ca", photo: "",
+    phone: "902-393-3217", email: "chance@integratedstaffing.ca", photo: cdn("ed563cb9-3419-44a3-a7e5-59589393f3c7/Headshot+-+Chance+Skauge.jpg"),
   },
   crystal: {
     name: "Crystal Murphy", first: "Crystal", office: "st-johns", slug: "crystal-murphy",
     handles: "New client requests, all of Newfoundland and Labrador",
-    phone: "709-689-0847", email: "crystal@integratedstaffing.ca", photo: "",
+    phone: "709-689-0847", email: "crystal@integratedstaffing.ca", photo: cdn("e921f8f3-efa2-46ca-908d-7c0466f5cb6e/3.png"),
   },
   skylar: {
     name: "Skylar Hardwick", first: "Skylar", office: "halifax", slug: "skylar-hardwick",
