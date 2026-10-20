@@ -8,9 +8,9 @@ import { url } from '../lib/url.js';
 import { jobs } from '../data/jobs.js';
 import { areas } from '../data/areas.js';
 import { posts } from '../data/posts.js';
+import { tools, guides } from '../data/tools.js';
 
 // Dropdowns: built from the same data as the pages, so the numbers are always current.
-const post = (slug) => posts.find((p) => p.slug === slug);
 const menus = {
   '/find-work/': [
     { label: 'All open jobs', href: url('/find-work/'), meta: String(jobs.length) },
@@ -18,10 +18,9 @@ const menus = {
     { label: 'Send your resume', href: 'https://www.integratedstaffing.ca/careers/general-apply', rule: true },
   ],
   '/learn/': [
-    { label: 'Wage guide', href: post('wage-guide-atlantic-canada-2026')?.url, meta: 'Tool' },
-    { label: 'Resume audit', href: post('resume-audit')?.url, meta: 'Tool' },
-    { label: 'Why New Brunswick', href: post('why-new-brunswick-a-practical-guide-for-canadians-considering-a-move')?.url, meta: 'Guide' },
-    { label: 'All articles', href: url('/learn/'), meta: String(posts.length), rule: true },
+    ...tools.map((t) => ({ label: t.title, href: t.url, meta: 'Tool' })),
+    ...guides.map((g) => ({ label: g.title, href: g.url, meta: 'Guide' })),
+    { label: 'All tools and articles', href: url('/learn/'), meta: String(posts.length + tools.length), rule: true },
   ],
   '/contact/': [
     ...areas.map((a) => ({ label: a.label, href: url(`/offices/${a.key}/`), meta: offices.find((o) => o.city === a.label)?.phone })),

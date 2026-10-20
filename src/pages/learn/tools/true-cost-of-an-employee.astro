@@ -1,0 +1,210 @@
+---
+// TOOL: TRUE COST OF AN EMPLOYEE  →  /learn/tools/true-cost-of-an-employee/
+// Enter a wage, hours and province; see what each hour worked really costs.
+// The maths and every rate (with sources) are in src/lib/payroll.js. The page is drawn once
+// on the server with a $20 example, then the script redraws it as the inputs change.
+import Base from '../../../layouts/Base.astro';
+import PageHero from '../../../components/PageHero.astro';
+import { trueCost, money, RATES, SOURCES } from '../../../lib/payroll.js';
+import { url } from '../../../lib/url.js';
+
+const start = { wage: 20, hours: 40, province: 'NS' };
+const r = trueCost(start);
+const provinces = Object.entries(RATES.provinces);
+const pct = (v) => `${(v * 100).toFixed(1)}%`;
+// Rates in the explanation keep their real precision: 5.95%, not 5.9%
+const rate = (v) => `${Number((v * 100).toFixed(3))}%`;
+---
+<Base title="True cost of an employee" description="What each hour worked really costs an Atlantic Canadian employer once CPP, EI, workers' comp, vacation pay and paid holidays are added." assistantMode="employer">
+  <PageHero compact title="True cost of an employee." lead="What each hour worked costs you, once the costs every employer pays are added." />
+
+  <section class="tool" data-cost>
+    <div class="wrap grid">
+      <form class="inputs" aria-label="Your numbers" onsubmit="return false">
+        <label class="field">
+          <span class="lbl">Hourly wage</span>
+          <span class="money"><span aria-hidden="true">$</span><input name="wage" type="number" inputmode="decimal" min="10" max="200" step="0.25" value={start.wage} /></span>
+        </label>
+        <label class="field">
+          <span class="lbl">Hours a week</span>
+          <input name="hours" type="number" inputmode="decimal" min="5" max="60" step="0.5" value={start.hours} />
+        </label>
+        <fieldset class="field">
+          <legend class="lbl">Province</legend>
+          <div class="seg">
+            {provinces.map(([code, p]) => (
+              <label><input type="radio" name="province" value={code} checked={code === start.province} /><span>{code === 'PE' ? 'PEI' : code}</span></label>
+            ))}
+          </div>
+        </fieldset>
+        <label class="field">
+          <span class="lbl">Workers’ comp rate <span class="unit">per $100 of payroll</span></span>
+          <input name="wcb" type="number" inputmode="decimal" min="0" max="15" step="0.01" value={RATES.provinces[start.province].wcb} />
+          <span class="hint" data-wcb-hint>The {RATES.provinces[start.province].name} average. Yours depends on your industry.</span>
+        </label>
+      </form>
+
+      <div class="result" aria-live="polite">
+        <p class="big"><span data-out="perHour">{money(r.perHour)}</span></p>
+        <p class="per">per hour worked</p>
+        <p class="sub"><span data-out="uplift">{pct(r.uplift)}</span> more than the <span data-out="wage">{money(r.wage)}</span> wage.</p>
+
+        <!-- One bar: the wage, then everything added on top -->
+        <div class="bar" aria-hidden="true">
+          <span class="seg-wage" data-bar="wage" style={`flex-grow:${r.wage}`}></span>
+          <span class="seg-add" data-bar="add" style={`flex-grow:${r.perHour - r.wage}`}></span>
+        </div>
+        <p class="key" aria-hidden="true"><span class="k k--wage">Wage</span><span class="k k--add">Added costs</span></p>
+
+        <table class="lines">
+          <thead><tr><th scope="col">Cost</th><th scope="col">Per hour worked</th><th scope="col">Per year</th></tr></thead>
+          <tbody>
+            {r.lines.map((l) => (
+              <tr data-line={l.key}><th scope="row">{l.label}</th><td>{money(l.hour)}</td><td>{money(l.year, false)}</td></tr>
+            ))}
+          </tbody>
+          <tfoot><tr><th scope="row">Total</th><td data-out="perHour2">{money(r.perHour)}</td><td data-out="total">{money(r.total, false)}</td></tr></tfoot>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section class="section section--tint">
+    <div class="wrap cta">
+      <div>
+        <h2>One rate covers all of it.</h2>
+        <p class="lead">With contract staffing, the worker is on our payroll. Wages, CPP, EI, workers’ comp, vacation pay and recruiting are in one hourly rate.</p>
+      </div>
+      <a class="go" href={url('/hire/?service=contract')} data-hire>Get a rate for this role</a>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="wrap"><div class="how">
+      <h2>How it’s worked out</h2>
+      <ul>
+        <li>A full year is scheduled: 52 weeks at your hours. Two weeks of vacation and the province’s paid holidays are paid but not worked, so the total is divided by the hours actually worked.</li>
+        <li>Vacation pay is 4%, the starting rate in every Atlantic province. Paid holidays: Nova Scotia 6, New Brunswick 8, PEI 8, Newfoundland and Labrador 6.</li>
+        <li>CPP is {rate(RATES.cpp.rate)} above the {money(RATES.cpp.exemption, false)} exemption up to {money(RATES.cpp.ympe, false)}, then {rate(RATES.cpp.cpp2Rate)} up to {money(RATES.cpp.yampe, false)}. EI is {rate(RATES.ei.employeeRate * RATES.ei.employerFactor)} up to {money(RATES.ei.max, false)}. Workers’ comp stops at each province’s earnings ceiling.</li>
+        <li>It counts only what the law requires. Benefits, overtime, training and the cost of finding and replacing people would add more.</li>
+      </ul>
+      <p class="src">{RATES.year} rates. Sources: {SOURCES.map(([label, href], i) => <>{i > 0 && ', '}<a href={href}>{label}</a></>)}. An estimate, not payroll or tax advice.</p>
+    </div></div>
+  </section>
+</Base>
+
+<script>
+  import { trueCost, money, RATES } from '../../../lib/payroll.js';
+
+  const root = document.querySelector<HTMLElement>('[data-cost]')!;
+  const form = root.querySelector('form')!;
+  const out = (k: string) => root.querySelectorAll<HTMLElement>(`[data-out="${k}"]`);
+  const set = (k: string, v: string) => out(k).forEach((el) => (el.textContent = v));
+  const hire = document.querySelector<HTMLAnchorElement>('[data-hire]')!;
+  const hireBase = hire.getAttribute('href')!;
+  const wcbInput = form.elements.namedItem('wcb') as HTMLInputElement;
+  const wcbHint = root.querySelector<HTMLElement>('[data-wcb-hint]')!;
+  let lastProvince = 'NS';
+
+  function update() {
+    const data = new FormData(form);
+    const province = String(data.get('province'));
+    // Switching province resets workers' comp to that province's average
+    if (province !== lastProvince) {
+      wcbInput.value = String(RATES.provinces[province].wcb);
+      wcbHint.textContent = `The ${RATES.provinces[province].name} average. Yours depends on your industry.`;
+      lastProvince = province;
+    }
+    const wage = Number(data.get('wage'));
+    const hours = Number(data.get('hours'));
+    const wcb = Number(wcbInput.value); // read after any province reset above, not from the earlier snapshot
+    if (!(wage > 0) || !(hours > 0)) return; // wait for a usable number
+    const r = trueCost({ wage, hours, province, wcb: Number.isFinite(wcb) ? wcb : undefined });
+
+    set('perHour', money(r.perHour));
+    set('perHour2', money(r.perHour));
+    set('uplift', `${(r.uplift * 100).toFixed(1)}%`);
+    set('wage', money(r.wage));
+    set('total', money(r.total, false));
+    for (const l of r.lines) {
+      const row = root.querySelector(`[data-line="${l.key}"]`)!;
+      row.querySelector('th')!.textContent = l.label;
+      const [h, y] = row.querySelectorAll('td');
+      h.textContent = money(l.hour);
+      y.textContent = money(l.year, false);
+    }
+    root.querySelector<HTMLElement>('[data-bar="wage"]')!.style.flexGrow = String(r.wage);
+    root.querySelector<HTMLElement>('[data-bar="add"]')!.style.flexGrow = String(r.perHour - r.wage);
+
+    // The request form opens pre-filled with this role's details
+    const details = `Contract worker at about ${money(wage)}/hour, ${hours} hours a week.`;
+    hire.href = `${hireBase}&where=${encodeURIComponent(r.province.name)}&details=${encodeURIComponent(details)}`;
+  }
+
+  form.addEventListener('input', update);
+  update();
+</script>
+
+<style>
+  .tool { padding-block: var(--s5) clamp(3rem, 6vw, 5rem); }
+  .grid { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: var(--s7) clamp(2.5rem, 6vw, 6rem); align-items: start; }
+
+  /* Inputs */
+  .inputs { display: grid; gap: var(--s5); border-top: 1.5px solid var(--ink); padding-top: var(--s5); }
+  .field { display: grid; gap: var(--s2); margin: 0; padding: 0; border: 0; min-width: 0; }
+  .lbl { font-weight: 600; padding: 0; }
+  .unit { font-weight: 400; color: var(--ink-soft); font-size: var(--fs-small); margin-left: 0.3em; }
+  .hint { font-size: var(--fs-small); color: var(--ink-soft); }
+  input[type='number'] { font: inherit; font-size: 1.25rem; font-variant-numeric: tabular-nums; padding: 0.7rem 0.9rem; border: 1.5px solid var(--line); background: var(--paper); color: var(--ink); width: 100%; }
+  input[type='number']:focus { outline: none; border-color: var(--isl-blue); }
+  .money { position: relative; display: block; }
+  .money > span { position: absolute; left: 0.9rem; top: 50%; transform: translateY(-50%); font-size: 1.25rem; color: var(--ink-soft); }
+  .money input { padding-left: 1.9rem; }
+  .seg { display: grid; grid-template-columns: repeat(4, 1fr); border: 1.5px solid var(--line); }
+  .seg label { position: relative; }
+  .seg input { position: absolute; opacity: 0; inset: 0; cursor: pointer; }
+  .seg span { display: block; text-align: center; padding: 0.7rem 0; font-weight: 600; }
+  .seg label + label span { border-left: 1.5px solid var(--line); }
+  .seg input:checked + span { background: var(--ink); color: #fff; }
+  .seg input:focus-visible + span { outline: 2px solid var(--isl-blue); outline-offset: -2px; }
+
+  /* Result */
+  .result { border-top: 1.5px solid var(--ink); padding-top: var(--s5); }
+  .big { margin: 0; font-weight: 300; font-size: clamp(3.4rem, 2rem + 5vw, 6rem); letter-spacing: -0.04em; line-height: 1; font-variant-numeric: tabular-nums; }
+  .per { margin: var(--s2) 0 0; font-weight: 600; }
+  .sub { margin: var(--s2) 0 0; color: var(--ink-soft); }
+  .bar { display: flex; gap: 2px; height: 14px; margin-top: var(--s6); }
+  .bar span { display: block; min-width: 2px; transition: flex-grow 0.35s var(--ease); }
+  .seg-wage { background: var(--ink); }
+  .seg-add { background: var(--isl-blue); }
+  .key { display: flex; gap: var(--s5); margin: var(--s3) 0 0; font-size: var(--fs-small); color: var(--ink-soft); }
+  .k { display: inline-flex; align-items: center; gap: var(--s2); }
+  .k::before { content: ''; width: 12px; height: 12px; }
+  .k--wage::before { background: var(--ink); }
+  .k--add::before { background: var(--isl-blue); }
+
+  .lines { width: 100%; border-collapse: collapse; margin-top: var(--s6); font-variant-numeric: tabular-nums; }
+  .lines th, .lines td { padding: 0.65rem 0; border-bottom: 1px solid var(--line); text-align: right; font-weight: 400; }
+  .lines th[scope='row'], .lines thead th:first-child { text-align: left; }
+  .lines td { padding-left: var(--s4); white-space: nowrap; }
+  .lines thead th { font-size: var(--fs-small); color: var(--ink-soft); font-weight: 500; }
+  .lines tbody tr:first-child th, .lines tbody tr:first-child td { font-weight: 600; }
+  .lines tfoot th, .lines tfoot td { font-weight: 700; border-bottom: 0; border-top: 1.5px solid var(--ink); }
+
+  /* Call to action */
+  .cta { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: var(--s5) var(--s7); align-items: end; }
+  .cta .lead { margin-top: var(--s4); max-width: 52ch; }
+  .go { font-weight: 600; background: var(--isl-blue); color: #fff; text-decoration: none; padding: 1rem 1.5rem; white-space: nowrap; }
+  .go:hover { background: var(--isl-blue-deep); color: #fff; }
+
+  .how { max-width: 72ch; }
+  .how h2 { font-size: var(--fs-h3); margin-bottom: var(--s4); }
+  .how ul { margin: 0; padding-left: 1.2em; display: grid; gap: var(--s3); color: var(--ink-soft); }
+  .how li::marker { color: var(--isl-blue); }
+  .src { margin-top: var(--s5); font-size: var(--fs-small); color: var(--ink-soft); }
+
+  @media (max-width: 900px) {
+    .grid, .cta { grid-template-columns: 1fr; }
+    .go { justify-self: start; }
+  }
+</style>

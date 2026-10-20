@@ -1,0 +1,196 @@
+---
+// TOOL: RESUME CHECK  →  /learn/tools/resume-check/
+// Paste a resume, get a score and the fixes that matter most (rules in src/lib/resume.js).
+// Optional: pick one of our open jobs to see which of its key terms the resume mentions.
+// Everything runs in the browser; the resume is never sent or saved.
+import Base from '../../../layouts/Base.astro';
+import PageHero from '../../../components/PageHero.astro';
+import { jobs } from '../../../data/jobs.js';
+import { keywordsFor, CHECKS } from '../../../lib/resume.js';
+import { url } from '../../../lib/url.js';
+
+// Only the terms per job go to the page, not the full postings
+const jobTerms = jobs.map((j) => ({ id: j.id, label: `${j.title}, ${[j.city, j.province].filter(Boolean).join(' ')}`, url: j.url, apply: j.applyUrl, terms: keywordsFor(j) }));
+const groups = [...new Set(CHECKS.map((c) => c.group))];
+---
+<Base title="Resume check" description="Paste your resume for a score and the fixes that matter most to recruiters. It never leaves your browser." assistantMode="seeker">
+  <PageHero compact title="Resume check." lead="Paste your resume for a score and the fixes that matter most. It never leaves your browser." />
+
+  <section class="tool" data-resume>
+    <div class="wrap grid">
+      <form class="inputs" onsubmit="return false" aria-label="Your resume">
+        <label class="field">
+          <span class="lbl">Your resume</span>
+          <textarea name="text" rows="16" placeholder="Copy everything from your resume and paste it here." spellcheck="false"></textarea>
+        </label>
+        <label class="field">
+          <span class="lbl">Compare with one of our jobs <span class="opt">optional</span></span>
+          <select name="job">
+            <option value="">No, just check my resume</option>
+            {jobTerms.map((j) => <option value={j.id}>{j.label}</option>)}
+          </select>
+        </label>
+        <button type="button" class="go" data-run>Check my resume</button>
+        <p class="private">Nothing is sent or saved. The check runs on this page only.</p>
+      </form>
+
+      <div class="out" aria-live="polite">
+        <div class="placeholder" data-placeholder>
+          <p class="ph-title">{CHECKS.length} checks in {groups.length} areas</p>
+          <ul>{groups.map((g) => <li>{g}</li>)}</ul>
+        </div>
+
+        <div class="results" data-results hidden>
+          <p class="score"><span data-score>0</span><span class="of">/100</span></p>
+          <p class="verdict" data-verdict></p>
+          <div class="meter" aria-hidden="true"><span data-meter></span></div>
+
+          <div class="match" data-match hidden>
+            <h2>Against this job</h2>
+            <p data-match-sum></p>
+            <ul class="terms" data-terms></ul>
+            <p class="hint">Add a missing term only if it’s true for you. <a data-job-link href="#">View the job</a></p>
+          </div>
+
+          <div data-fixes-wrap>
+            <h2>Fix these first</h2>
+            <ol class="fixes" data-fixes></ol>
+          </div>
+          <details class="passed">
+            <summary>Already good <span data-passed-n></span></summary>
+            <ul data-passed></ul>
+          </details>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section section--tint">
+    <div class="wrap next">
+      <div>
+        <h2>Ready to apply?</h2>
+        <p class="lead">See every job we’re hiring for, or send your resume and we’ll contact you when something fits.</p>
+      </div>
+      <div class="next-go">
+        <a class="go" href={url('/find-work/')}>See open jobs</a>
+        <a class="textlink" href="https://www.integratedstaffing.ca/careers/general-apply">Send your resume</a>
+      </div>
+    </div>
+  </section>
+
+  <script type="application/json" id="job-terms" set:html={JSON.stringify(jobTerms)} />
+</Base>
+
+<script>
+  import { checkResume, matchTerms } from '../../../lib/resume.js';
+
+  const root = document.querySelector<HTMLElement>('[data-resume]')!;
+  const form = root.querySelector('form')!;
+  const text = form.elements.namedItem('text') as HTMLTextAreaElement;
+  const job = form.elements.namedItem('job') as HTMLSelectElement;
+  const jobsData: { id: string; label: string; url: string; terms: string[] }[] = JSON.parse(document.getElementById('job-terms')!.textContent!);
+  const $ = (s: string) => root.querySelector<HTMLElement>(s)!;
+  const li = (t: string, cls = '') => { const el = document.createElement('li'); el.textContent = t; if (cls) el.className = cls; return el; };
+
+  // ?job=<id> (from a job page) pre-selects that job
+  const pre = new URLSearchParams(location.search).get('job');
+  if (pre && jobsData.some((j) => j.id === pre)) job.value = pre;
+
+  function run() {
+    const t = text.value.trim();
+    if (t.length < 40) { text.focus(); return; }
+    const r = checkResume(t);
+    $('[data-placeholder]').hidden = true;
+    $('[data-results]').hidden = false;
+    $('[data-score]').textContent = String(r.score);
+    $('[data-meter]').style.width = `${r.score}%`;
+    $('[data-verdict]').textContent = r.score >= 85 ? 'Strong. A few small fixes and it’s ready.'
+      : r.score >= 60 ? 'Good start. The fixes below will make the biggest difference.'
+      : 'Worth an hour of work. Start at the top of the list.';
+
+    const fixes = $('[data-fixes]');
+    fixes.replaceChildren(...r.fixes.map((f) => {
+      const el = document.createElement('li');
+      const b = document.createElement('strong'); b.textContent = f.label;
+      const p = document.createElement('span'); p.textContent = f.fix;
+      el.append(b, p);
+      return el;
+    }));
+    $('[data-fixes-wrap]').hidden = !r.fixes.length;
+    $('[data-passed]').replaceChildren(...r.passed.map((p) => li(p.label)));
+    $('[data-passed-n]').textContent = `(${r.passed.length})`;
+
+    const chosen = jobsData.find((j) => j.id === job.value);
+    $('[data-match]').hidden = !chosen;
+    if (chosen) {
+      const m = matchTerms(t, chosen.terms);
+      const found = m.filter((x) => x.found).length;
+      $('[data-match-sum]').textContent = `Your resume mentions ${found} of ${m.length} things this posting asks for.`;
+      $('[data-terms]').replaceChildren(...m.map((x) => li(x.term, x.found ? 'yes' : 'no')));
+      root.querySelector<HTMLAnchorElement>('[data-job-link]')!.href = chosen.url;
+    }
+    $('[data-results]').scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'nearest' });
+  }
+
+  root.querySelector('[data-run]')!.addEventListener('click', run);
+  job.addEventListener('change', () => { if (!$('[data-results]').hidden) run(); });
+</script>
+
+<style>
+  .tool { padding-block: var(--s5) clamp(3rem, 6vw, 5rem); }
+  .grid { display: grid; grid-template-columns: minmax(0, 6fr) minmax(0, 5fr); gap: var(--s7) clamp(2.5rem, 6vw, 6rem); align-items: start; }
+
+  .inputs { display: grid; gap: var(--s5); border-top: 1.5px solid var(--ink); padding-top: var(--s5); }
+  .field { display: grid; gap: var(--s2); }
+  .lbl { font-weight: 600; }
+  .opt { font-weight: 400; color: var(--ink-soft); font-size: var(--fs-small); margin-left: 0.3em; }
+  textarea, select { font: inherit; padding: 0.8rem 0.9rem; border: 1.5px solid var(--line); background: var(--paper); color: var(--ink); width: 100%; }
+  textarea { resize: vertical; min-height: 18rem; font-size: 0.95rem; line-height: 1.55; }
+  textarea:focus, select:focus { outline: none; border-color: var(--isl-blue); }
+  .go { justify-self: start; display: inline-block; font: inherit; font-weight: 600; background: var(--isl-blue); color: #fff; border: 0; cursor: pointer; text-decoration: none; padding: 0.9rem 1.4rem; }
+  .go:hover { background: var(--isl-blue-deep); color: #fff; }
+  .private { margin: 0; font-size: var(--fs-small); color: var(--ink-soft); }
+
+  .out { border-top: 1.5px solid var(--ink); padding-top: var(--s5); position: sticky; top: calc(72px + var(--s5)); }
+  .placeholder { color: var(--ink-soft); }
+  .ph-title { font-weight: 600; color: var(--ink); margin: 0 0 var(--s3); }
+  .placeholder ul { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: 1fr 1fr; gap: var(--s2) var(--s4); }
+  .placeholder li { padding-bottom: var(--s2); border-bottom: 1px solid var(--line); }
+
+  .score { margin: 0; font-weight: 300; font-size: clamp(3.4rem, 2rem + 5vw, 6rem); letter-spacing: -0.04em; line-height: 1; font-variant-numeric: tabular-nums; }
+  .of { font-size: 0.35em; color: var(--ink-soft); letter-spacing: 0; margin-left: 0.15em; }
+  .verdict { margin: var(--s3) 0 0; font-weight: 600; }
+  .meter { height: 8px; background: rgb(0 0 0 / 0.07); margin-top: var(--s4); }
+  .meter span { display: block; height: 100%; width: 0; background: var(--isl-blue); transition: width 0.6s var(--ease); }
+  .out h2 { font-size: 1.15rem; margin: var(--s6) 0 var(--s3); }
+
+  /* The lists below are filled in by the script, so their items are styled with :global()
+     (Astro's scoped styles only reach elements written in this file's markup) */
+  .fixes { margin: 0; padding: 0; list-style: none; counter-reset: fix; border-top: 1px solid var(--line); }
+  .fixes :global(li) { counter-increment: fix; display: grid; grid-template-columns: 1.6rem 1fr; gap: 2px var(--s2); padding: var(--s3) 0; border-bottom: 1px solid var(--line); }
+  .fixes :global(li)::before { content: counter(fix); grid-row: span 2; font-weight: 600; color: var(--isl-blue); font-variant-numeric: tabular-nums; }
+  .fixes :global(strong) { grid-column: 2; }
+  .fixes :global(span) { grid-column: 2; color: var(--ink-soft); font-size: var(--fs-small); line-height: 1.5; }
+
+  .terms { list-style: none; margin: var(--s3) 0; padding: 0; display: flex; flex-wrap: wrap; gap: var(--s2); }
+  .terms :global(li) { font-size: var(--fs-small); font-weight: 500; padding: 0.3rem 0.6rem; border: 1.5px solid var(--line); }
+  .terms :global(li.yes) { border-color: var(--isl-blue); color: var(--isl-blue); }
+  .terms :global(li.yes)::before { content: '✓ '; }
+  .terms :global(li.no) { color: var(--ink-soft); border-style: dashed; }
+  .hint { font-size: var(--fs-small); color: var(--ink-soft); margin: 0; }
+  .hint a { font-weight: 600; }
+
+  .passed { margin-top: var(--s5); }
+  .passed summary { cursor: pointer; font-weight: 600; }
+  .passed ul { margin: var(--s3) 0 0; padding-left: 1.2em; color: var(--ink-soft); font-size: var(--fs-small); display: grid; gap: var(--s1); }
+
+  .next { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: var(--s5) var(--s7); align-items: end; }
+  .next .lead { margin-top: var(--s4); max-width: 52ch; }
+  .next-go { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s4); }
+  .textlink { font-weight: 600; }
+
+  @media (max-width: 900px) {
+    .grid, .next { grid-template-columns: 1fr; }
+    .out { position: static; }
+  }
+</style>

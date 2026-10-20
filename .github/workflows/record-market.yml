@@ -1,0 +1,38 @@
+# RECORD THE JOB MARKET
+# Once a day, saves a one-line summary of ISL's open jobs (counts by province, type and role
+# family, and middle pay) to src/data/market/history.jsonl, and commits it.
+# This is the history a future hiring-market tool will chart. See scripts/record-market.mjs.
+# Needs the AVIONTE_FEED_URL secret; without it the run does nothing.
+#
+# A commit made by this workflow doesn't start a deploy by itself (GitHub's rule for its own
+# token), so there's no loop; the next scheduled deploy picks the new line up.
+name: Record job market
+
+on:
+  schedule:
+    - cron: '30 23 * * *' # 8:30 pm Atlantic (UTC), every day
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  record:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .node-version
+      - run: node scripts/record-market.mjs
+        env:
+          AVIONTE_FEED_URL: ${{ secrets.AVIONTE_FEED_URL }}
+      - name: Commit the day's line
+        run: |
+          if [ -n "$(git status --porcelain src/data/market)" ]; then
+            git config user.name "github-actions[bot]"
+            git config user.email "41898699+github-actions[bot]@users.noreply.github.com"
+            git add src/data/market
+            git commit -m "Record job market $(date -u +%F)"
+            git push
+          fi

@@ -1,0 +1,49 @@
+---
+// TOOLS  →  /learn/tools/
+// ISL's recruitment intelligence tools, then the long-form guides. Both lists come from src/data/tools.js.
+import Base from '../../../layouts/Base.astro';
+import PageHero from '../../../components/PageHero.astro';
+import ToolCards from '../../../components/ToolCards.astro';
+import { guides } from '../../../data/tools.js';
+import { url } from '../../../lib/url.js';
+---
+<Base title="Tools" description="Free recruitment tools from Integrated Staffing: the true cost of an employee, pay on open jobs, and a resume check.">
+  <PageHero compact title="Tools." lead="Built from what our recruiters see across Atlantic Canada. Free, and nothing to sign up for." />
+
+  <section class="tools-sec">
+    <div class="wrap"><h2 class="visually-hidden">Tools</h2><ToolCards /></div>
+  </section>
+
+  <section class="section section--tint">
+    <div class="wrap">
+      <div class="section-head section-head--split g-head">
+        <h2>Guides</h2>
+        <p class="lead"><a href={url('/learn/')}>All articles</a></p>
+      </div>
+      <ul class="guides">
+        {guides.map((g) => (
+          <li><a href={g.url}><span class="who">{g.who}</span><span class="t">{g.title}</span><span class="d">{g.d}</span></a></li>
+        ))}
+      </ul>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .tools-sec { padding-block: var(--s5) clamp(3.5rem, 7vw, 6rem); }
+  .g-head .lead { justify-self: end; font-weight: 600; font-size: var(--fs-body); }
+  .guides { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: 1fr 1fr; border-top: 1.5px solid var(--ink); }
+  .guides li + li { border-left: 1px solid var(--line); }
+  .guides a { display: grid; gap: var(--s2); padding: var(--s5) var(--s5) var(--s5) 0; color: var(--ink); text-decoration: none; }
+  .guides li + li a { padding-left: var(--s5); }
+  .guides a:hover .t { text-decoration: underline; }
+  .who { font-size: var(--fs-tiny); font-weight: 500; color: var(--ink-soft); }
+  .t { font-weight: 700; font-size: 1.25rem; }
+  .d { color: var(--ink-soft); }
+  @media (max-width: 760px) {
+    .guides { grid-template-columns: 1fr; }
+    .guides li + li { border-left: 0; border-top: 1px solid var(--line); }
+    .guides li + li a { padding-left: 0; }
+    .g-head .lead { justify-self: start; }
+  }
+</style>

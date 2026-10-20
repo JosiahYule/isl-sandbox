@@ -1,81 +1,76 @@
 ---
-// TOOL CARDS: ISL's three free tools, each with a small preview drawn from the tool's own content,
-// so a visitor sees what they'll get before clicking. Used on the homepage and the Learn page.
+// TOOL CARDS: ISL's recruitment intelligence tools (src/data/tools.js), each with a small
+// preview drawn from the tool's own output, so a visitor sees what they'll get before clicking.
+// Used on the homepage, the Learn page and /learn/tools/.
 //
-// All numbers come from the live posts (checked October 19, 2026):
-//   wage guide:   sector ranges quoted in the article text
-//   resume audit: the eight checklist sections and how many checks each has (42 in all)
-//   NB guide:     average home prices from its city comparison
-// If a post is updated, update the numbers here too.
-import { posts } from '../data/posts.js';
+// Every number is computed, never typed in:
+//   cost:   trueCost() for a $20/hour, 40-hour job in Nova Scotia (src/lib/payroll.js)
+//   pay:    the four busiest role families on our open jobs (src/lib/jobpay.js)
+//   resume: the checks and areas the resume check runs (src/lib/resume.js)
+import { tools } from '../data/tools.js';
+import { jobs } from '../data/jobs.js';
+import { trueCost, money } from '../lib/payroll.js';
+import { payByFamily } from '../lib/jobpay.js';
+import { CHECKS } from '../lib/resume.js';
 
-const post = (slug) => posts.find((p) => p.slug === slug) ?? { title: '', url: '#' };
-
-// Wage guide: hourly range by sector. The scale runs $15 to $55.
-const wages = [
-  ['Warehousing and logistics', 17, 33, ''],
-  ['Administrative', 17, 35, ''],
-  ['Construction', 18, 46, '+'],
-  ['Skilled trades', 25, 52, '+'],
+// Cost: wage, then the added costs in three plain groups
+const c = trueCost({ wage: 20, hours: 40, province: 'NS' });
+const h = (keys) => c.lines.filter((l) => keys.includes(l.key)).reduce((n, l) => n + l.hour, 0);
+const costRows = [
+  ['Wage', 20, false],
+  ['Holidays and vacation', h(['holidays', 'vacation']), true],
+  ['CPP and EI', h(['cpp', 'ei']), true],
+  ['Workers’ comp', h(['wcb']), true],
 ];
-const W0 = 15, W1 = 55;
-const pos = (v) => ((v - W0) / (W1 - W0)) * 100;
 
-// Resume audit: section name and number of checks
-const audit = [['Contact', 5], ['Summary', 5], ['Experience', 6], ['Achievements', 5], ['Skills', 5], ['Education', 5], ['Keywords', 5], ['Formatting', 6]];
+// Pay: dots on a shared $15 to $45 scale (anything higher sits at the right edge)
+const fam = payByFamily(jobs).filter((r) => r.family !== 'Other').slice(0, 4);
+const P0 = 15, P1 = 45;
+const px = (v) => ((Math.min(Math.max(v, P0), P1) - P0) / (P1 - P0)) * 100;
+
+// Resume: one tick per check, grouped by area
+const areas = [...new Set(CHECKS.map((k) => k.group))].map((g) => ({ g, n: CHECKS.filter((k) => k.group === g).length }));
 let tick = 0;
-const auditRows = audit.map(([name, n]) => ({ name, ticks: Array.from({ length: n }, () => tick++) }));
-
-// NB guide: average home price, in thousands
-const homes = [['Toronto', 1100, '$1.1M+'], ['Moncton', 340, '$340K'], ['Fredericton', 310, '$310K'], ['Saint John', 255, '$255K']];
-
-const tools = [
-  { key: 'wage', who: 'For employers and job seekers', ...post('wage-guide-atlantic-canada-2026'), d: 'Entry-level to top-of-market hourly rates, by industry and role.', cta: 'Open the wage guide' },
-  { key: 'audit', who: 'For job seekers', ...post('resume-audit'), d: 'Score your resume and see where to focus first.', cta: 'Audit your resume' },
-  { key: 'nb', who: 'For job seekers', ...post('why-new-brunswick-a-practical-guide-for-canadians-considering-a-move'), d: 'Jobs, cities and a calculator for what your salary is worth there.', cta: 'Read the guide' },
-];
+const areaRows = areas.map((a) => ({ ...a, ticks: Array.from({ length: a.n }, () => tick++) }));
 ---
 <ul class="tools">
   {tools.map((t, i) => (
     <li style={`--i:${i}`}>
       <a class="card" href={t.url}>
-        <div class:list={['vis', `vis--${t.key}`]} data-animate aria-hidden="true">
-          {t.key === 'wage' && (
+        <div class:list={['vis', `vis--${t.preview}`]} data-animate aria-hidden="true">
+          {t.preview === 'cost' && (
             <>
-              <p class="vis-cap">Hourly range by sector</p>
-              <ul class="wages">
-                {wages.map(([name, lo, hi, plus], j) => (
+              <p class="vis-cap">A $20/hour job in Nova Scotia</p>
+              <ul class="cost">
+                {costRows.map(([name, v, add], j) => (
+                  <li style={`--j:${j}`}><span>{name}</span><span class="c-val">{add ? '+' : ''}{money(v)}</span></li>
+                ))}
+                <li class="c-total"><span>Each hour worked</span><span class="c-val">{money(c.perHour)}</span></li>
+              </ul>
+            </>
+          )}
+          {t.preview === 'pay' && (
+            <>
+              <p class="vis-cap">Pay per hour, by role</p>
+              <ul class="pay">
+                {fam.map((r, j) => (
                   <li style={`--j:${j}`}>
-                    <span class="w-name">{name}</span>
-                    <span class="w-track"><span class="w-bar" style={`left:${pos(lo)}%;width:${pos(hi) - pos(lo)}%`}></span></span>
-                    <span class="w-val">${lo} to ${hi}{plus}</span>
+                    <span class="p-name">{r.family}</span>
+                    <span class="p-strip">{r.jobs.map((jb) => <span class:list={['p-dot', `p-dot--${jb.type}`]} style={`left:${px(jb.payInfo.hourly)}%`}></span>)}</span>
                   </li>
                 ))}
               </ul>
+              <p class="p-axis"><span>$15</span><span>$30</span><span>$45+</span></p>
             </>
           )}
-          {t.key === 'audit' && (
+          {t.preview === 'resume' && (
             <>
-              <p class="vis-cap">42 checks in 8 sections</p>
+              <p class="vis-cap">{CHECKS.length} checks in {areas.length} areas</p>
               <ul class="audit">
-                {auditRows.map((r) => (
+                {areaRows.map((r) => (
                   <li>
-                    <span class="a-name">{r.name}</span>
+                    <span class="a-name">{r.g}</span>
                     <span class="a-ticks">{r.ticks.map((k) => <span class="tick" style={`--k:${k}`}></span>)}</span>
-                  </li>
-                ))}
-              </ul>
-            </>
-          )}
-          {t.key === 'nb' && (
-            <>
-              <p class="vis-cap">Average home price</p>
-              <ul class="homes">
-                {homes.map(([city, v, label], j) => (
-                  <li style={`--j:${j}`} class:list={[j === 0 && 'away']}>
-                    <span class="h-name">{city}</span>
-                    <span class="h-track"><span class="h-bar" style={`width:${(v / 1100) * 100}%`}></span></span>
-                    <span class="h-val">{label}</span>
                   </li>
                 ))}
               </ul>
@@ -104,39 +99,39 @@ const tools = [
   .vis-cap { font-size: var(--fs-tiny); font-weight: 600; color: var(--ink-soft); margin-bottom: var(--s4); }
   .vis ul { list-style: none; margin: 0; padding: 0; display: grid; flex: 1; align-content: space-between; }
 
-  /* Wage ranges */
-  .wages li { display: grid; grid-template-columns: 1fr auto; gap: 4px var(--s3); }
-  .w-name { font-size: var(--fs-tiny); font-weight: 500; }
-  .w-val { grid-row: 1; grid-column: 2; font-size: var(--fs-tiny); color: var(--ink-soft); font-variant-numeric: tabular-nums; }
-  .w-track { grid-row: 2; grid-column: 1 / -1; position: relative; height: 8px; background: rgb(0 0 0 / 0.06); }
-  .w-bar { position: absolute; top: 0; bottom: 0; background: var(--isl-blue); transform-origin: left; }
+  /* Cost: a short receipt */
+  .cost li { display: flex; justify-content: space-between; font-size: var(--fs-small); padding-bottom: 6px; border-bottom: 1px solid rgb(0 0 0 / 0.08); }
+  .c-val { font-variant-numeric: tabular-nums; color: var(--ink-soft); }
+  .c-total { border-bottom: 0 !important; border-top: 1.5px solid var(--ink); padding-top: 6px; font-weight: 600; }
+  .c-total .c-val { color: var(--isl-blue); font-weight: 700; }
 
-  /* Resume audit: one short bar per check */
+  /* Pay: a dot per job on one scale */
+  .pay li { display: grid; gap: 6px; }
+  .p-name { font-size: var(--fs-tiny); font-weight: 500; }
+  .p-strip { position: relative; height: 10px; border-bottom: 1px solid rgb(0 0 0 / 0.12); }
+  .p-dot { position: absolute; top: 0; width: 8px; height: 8px; margin-left: -4px; background: var(--contract); box-shadow: 0 0 0 1.5px var(--mist); }
+  .p-dot--direct { background: var(--direct); border-radius: 50%; }
+  :global(.section--tint) .p-dot { box-shadow: 0 0 0 1.5px var(--paper); }
+  .p-axis { display: flex; justify-content: space-between; margin: 6px 0 0; font-size: var(--fs-tiny); color: var(--ink-soft); font-variant-numeric: tabular-nums; }
+
+  /* Resume: one short bar per check */
   .audit li { display: grid; grid-template-columns: 6.2rem 1fr; align-items: center; gap: var(--s3); }
   .a-name { font-size: var(--fs-tiny); font-weight: 500; line-height: 1.2; }
   .a-ticks { display: flex; gap: 4px; }
   .tick { width: 5px; height: 11px; background: var(--ink); }
-
-  /* Home prices */
-  .homes li { display: grid; grid-template-columns: 5.6rem 1fr 3.4rem; align-items: center; gap: var(--s3); }
-  .h-name { font-size: var(--fs-tiny); font-weight: 500; }
-  .h-val { font-size: var(--fs-tiny); color: var(--ink-soft); text-align: right; font-variant-numeric: tabular-nums; }
-  .h-track { height: 8px; }
-  .h-bar { display: block; height: 100%; background: var(--isl-blue); transform-origin: left; }
-  .away .h-bar { background: var(--ink); }
 
   .who { font-size: var(--fs-tiny); font-weight: 500; color: var(--ink-soft); margin-bottom: var(--s2); }
   h3 { font-size: 1.25rem; margin-bottom: var(--s2); }
   .d { color: var(--ink-soft); }
   .more { margin-top: auto; padding-top: var(--s3); font-weight: 600; color: var(--isl-blue); }
 
-  /* Motion: the bars grow from the left, the checks fill one by one */
+  /* Motion: rows and dots settle in, the checks fill one by one */
   :global(.motion) .tools > li { opacity: 0; transform: translateY(18px); transition: opacity 0.7s var(--ease), transform 0.7s var(--ease); transition-delay: calc(var(--i) * 110ms); }
   :global(.motion) .tools > li:has(.is-in) { opacity: 1; transform: none; }
-  :global(.motion) .w-bar, :global(.motion) .h-bar { transform: scaleX(0); transition: transform 0.9s var(--ease); transition-delay: calc(0.25s + var(--j) * 120ms); }
-  :global(.motion) .is-in .w-bar, :global(.motion) .is-in .h-bar { transform: none; }
-  :global(.motion) .tick { background: rgb(0 0 0 / 0.1); transition: background 0.15s; transition-delay: calc(0.3s + var(--k) * 28ms); }
+  :global(.motion) .cost li, :global(.motion) .pay li { opacity: 0; transition: opacity 0.5s var(--ease); transition-delay: calc(0.25s + var(--j, 4) * 110ms); }
+  :global(.motion) .is-in .cost li, :global(.motion) .is-in .pay li { opacity: 1; }
+  :global(.motion) .tick { background: rgb(0 0 0 / 0.1); transition: background 0.15s; transition-delay: calc(0.3s + var(--k) * 40ms); }
   :global(.motion) .is-in .tick { background: var(--ink); }
 
-  @media (max-width: 960px) { .tools { grid-template-columns: 1fr; } .vis { height: auto; min-height: 200px; } .vis ul { gap: var(--s3); } }
+  @media (max-width: 900px) { .tools { grid-template-columns: 1fr; } }
 </style>

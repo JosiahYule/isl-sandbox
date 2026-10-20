@@ -1,10 +1,11 @@
 ---
 // LEARN (BLOG INDEX)  →  /learn/
 // Lists posts from src/data/posts.js. Posts still live on the real site.
-import Base from '../layouts/Base.astro';
-import PageHero from '../components/PageHero.astro';
-import ToolCards from '../components/ToolCards.astro';
-import { posts } from '../data/posts.js';
+import Base from '../../layouts/Base.astro';
+import PageHero from '../../components/PageHero.astro';
+import ToolCards from '../../components/ToolCards.astro';
+import { posts } from '../../data/posts.js';
+import { url } from '../../lib/url.js';
 
 const fmt = (d) => new Date(d + 'T12:00:00').toLocaleDateString('en-CA', { month: 'long', day: 'numeric', year: 'numeric' });
 const audienceLabel = { employers: 'For employers', 'job seekers': 'For job seekers', everyone: 'Market insights' };
@@ -14,14 +15,15 @@ const filters = [
   { key: 'job seekers', label: 'For job seekers' },
   { key: 'everyone', label: 'Market insights' },
 ];
-const [featured, ...rest] = posts;
+// The old resume audit post is replaced by the Resume check tool, so it's left out of the list
+const [featured, ...rest] = posts.filter((p) => p.slug !== 'resume-audit');
 ---
 <Base title="Learn" description="Hiring advice, career guides and Atlantic Canada job market insights.">
-  <PageHero title="Hiring advice and career guides." lead="Written by our team for Atlantic Canadian employers and job seekers." />
+  <PageHero title="Tools, guides and hiring advice." lead="Built by our team from what we see across Atlantic Canada." />
 
   <section class="section section--rule">
     <div class="wrap">
-      <div class="section-head"><h2>Start with a tool</h2></div>
+      <div class="section-head section-head--split t-head"><h2>Tools</h2><p class="lead"><a href={url('/learn/tools/')}>All tools and guides</a></p></div>
       <ToolCards />
     </div>
   </section>
@@ -65,6 +67,8 @@ const [featured, ...rest] = posts;
 </script>
 
 <style>
+  .t-head .lead { justify-self: end; font-weight: 600; font-size: var(--fs-body); }
+  @media (max-width: 860px) { .t-head .lead { justify-self: start; } }
   /* The newest post leads, set large; the rest follow as a dated list */
   .featured { display: grid; gap: var(--s4); justify-items: start; padding-bottom: var(--s7); color: var(--ink); text-decoration: none; }
   .featured:hover .f-title { text-decoration: underline; text-decoration-thickness: 2px; }

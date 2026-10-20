@@ -1,0 +1,259 @@
+---
+// TOOL: PAY ON OUR OPEN JOBS  →  /learn/tools/pay-on-open-jobs/
+// Every open posting with a stated pay, grouped into role families (src/lib/jobpay.js) and
+// drawn as dots on one shared hourly scale. Built from the same job data as the board,
+// so it updates whenever the jobs do.
+//
+// Reading it: each dot is one job (square = contract, circle = permanent); the short
+// vertical line in each row is the middle (median) pay for that family. The table below
+// carries the same numbers for anyone who'd rather read than look.
+// Filters (province, type) redraw the rows and the table from the dots that remain.
+import Base from '../../../layouts/Base.astro';
+import PageHero from '../../../components/PageHero.astro';
+import { jobs, snapshotDate } from '../../../data/jobs.js';
+import { payByFamily, perHour } from '../../../lib/jobpay.js';
+import { url } from '../../../lib/url.js';
+
+const rows = payByFamily(jobs);
+const counted = rows.reduce((n, r) => n + r.jobs.length, 0);
+const left = jobs.length - counted;
+const top = Math.ceil(Math.max(...rows.map((r) => r.high)) / 10) * 10;
+const AXIS = [15, top];
+const x = (v) => ((Math.min(Math.max(v, AXIS[0]), AXIS[1]) - AXIS[0]) / (AXIS[1] - AXIS[0])) * 100;
+// Gridlines and labels every $10 from $20 (the scale itself starts at $15)
+const ticks = Array.from({ length: (top - 20) / 10 + 1 }, (_, i) => 20 + i * 10);
+const provinces = [['', 'All'], ['NS', 'NS'], ['NB', 'NB'], ['PE', 'PEI'], ['NL', 'NL']];
+const types = [['', 'All'], ['contract', 'Contract'], ['direct', 'Permanent']];
+// Dots closer than 2.2% of the scale would cover each other (two jobs at $17.50 sit in exactly
+// the same spot), so they're stacked into lanes: middle first, then above, then below.
+// Every job keeps its own spot to hover and select.
+const LANES = [0, -1, 1, -2, 2];
+for (const r of rows) {
+  const placed = [];
+  for (const j of r.jobs) {
+    const pos = x(j.payInfo.hourly);
+    j.lane = LANES.find((l) => !placed.some((d) => d.lane === l && Math.abs(d.pos - pos) < 2.2)) ?? 0;
+    placed.push({ pos, lane: j.lane });
+  }
+}
+const dollars = (v) => perHour(v).replace('/hour', '');
+const payText = (j) => j.payInfo.unit === 'year' ? `${j.pay} (about ${perHour(j.payInfo.hourly)})` : j.pay;
+---
+<Base title="Pay on our open jobs" description="What Atlantic Canadian employers are offering right now, by role and province, from every job Integrated Staffing is hiring for.">
+  <PageHero compact title="Pay on our open jobs." lead="What employers are offering right now, from every job we’re hiring for." />
+
+  <section class="tool" data-pay>
+    <div class="wrap">
+      <div class="filters">
+        <div class="chips" role="group" aria-label="Province">
+          {provinces.map(([k, l], i) => <button type="button" data-prov={k} aria-pressed={String(i === 0)}>{l}</button>)}
+        </div>
+        <div class="chips" role="group" aria-label="Job type">
+          {types.map(([k, l], i) => <button type="button" data-type={k} aria-pressed={String(i === 0)}>{l}</button>)}
+        </div>
+        <p class="legend" aria-hidden="true"><span class="lg lg--contract">Contract</span><span class="lg lg--direct">Permanent</span><span class="lg lg--mid">Middle pay</span></p>
+      </div>
+
+      <!-- A figure, not role="img": its dots are links, and an image can't contain links -->
+      <figure class="chart">
+        <figcaption class="visually-hidden">Pay by role family. Each job is a link; the same figures are in the table below.</figcaption>
+        <div class="axis" aria-hidden="true">
+          {ticks.map((t) => <span style={`left:${x(t)}%`}>${t}</span>)}
+        </div>
+        {rows.map((r) => (
+          <div class="row" data-row>
+            <p class="fam"><span class="fam-name">{r.family}</span> <span class="fam-n" data-n>{r.jobs.length} {r.jobs.length === 1 ? 'job' : 'jobs'}</span></p>
+            <div class="strip">
+              {ticks.map((t) => <span class="grid" style={`left:${x(t)}%`} aria-hidden="true"></span>)}
+              <span class="mid" data-mid style={`left:${x(r.median)}%`} aria-hidden="true"></span>
+              {r.jobs.map((j) => (
+                <a class:list={['dot', `dot--${j.type}`]} href={j.url} style={`left:${x(j.payInfo.hourly)}%;--lane:${j.lane}`}
+                   data-v={j.payInfo.hourly} data-prov={j.province} data-type={j.type}
+                   data-tip={`${payText(j)}|${j.title}|${[j.city, j.province].filter(Boolean).join(', ')} · ${j.typeLabel}`}
+                   aria-label={`${j.title}, ${[j.city, j.province].filter(Boolean).join(', ')}, ${j.typeLabel}, ${payText(j)}`}>
+                  <span></span>
+                </a>
+              ))}
+            </div>
+            <p class="range" data-range>{perHour(r.median)} <span>middle</span></p>
+          </div>
+        ))}
+        <div class="tip" role="tooltip" hidden><strong></strong><span class="t-title"></span><span class="t-where"></span></div>
+      </figure>
+      <p class="empty" hidden data-empty>No jobs with a stated pay match these filters right now.</p>
+
+      <table class="table" data-table>
+        <caption>Pay by role family, per hour</caption>
+        <thead><tr><th scope="col">Role family</th><th scope="col">Jobs</th><th scope="col">Lowest</th><th scope="col">Middle</th><th scope="col">Highest</th></tr></thead>
+        <tbody>
+          {rows.map((r) => (
+            <tr data-trow={r.family}><th scope="row">{r.family}</th><td>{r.jobs.length}</td><td>{dollars(r.low)}</td><td>{dollars(r.median)}</td><td>{dollars(r.high)}</td></tr>
+          ))}
+        </tbody>
+      </table>
+
+      <p class="note">{counted} of our {jobs.length} open jobs, as of {snapshotDate}. {left > 0 && `${left} without a stated pay, or with only a part-time yearly figure, aren’t shown. `}Salaries are shown per hour over a 2,080-hour year. Select a dot to open that job.</p>
+    </div>
+  </section>
+
+  <section class="section section--tint">
+    <div class="wrap two">
+      <div>
+        <h2>Hiring for one of these?</h2>
+        <p class="lead">Tell us the role and where. A recruiter replies within one business day.</p>
+        <a class="go" href={url('/hire/')}>Request talent</a>
+      </div>
+      <div>
+        <h2>Looking for work?</h2>
+        <p class="lead">Every job above is open now, with more added each week.</p>
+        <a class="go go--ink" href={url('/find-work/')}>See open jobs</a>
+      </div>
+    </div>
+  </section>
+</Base>
+
+<script>
+  // Filters and the hover/focus readout. Labels go in with textContent, never as HTML.
+  const root = document.querySelector<HTMLElement>('[data-pay]')!;
+  const chart = root.querySelector<HTMLElement>('.chart')!;
+  const tip = chart.querySelector<HTMLElement>('.tip')!;
+  const AXIS = (() => {
+    const labels = [...chart.querySelectorAll<HTMLElement>('.axis span')];
+    return [15, Number(labels.at(-1)!.textContent!.replace('$', ''))];
+  })();
+  const x = (v: number) => ((Math.min(Math.max(v, AXIS[0]), AXIS[1]) - AXIS[0]) / (AXIS[1] - AXIS[0])) * 100;
+  const perHour = (v: number) => '$' + (Math.round(v * 100) / 100).toFixed(v % 1 ? 2 : 0) + '/hour';
+  const median = (xs: number[]) => { const s = [...xs].sort((a, b) => a - b); const k = Math.floor(s.length / 2); return s.length % 2 ? s[k] : (s[k - 1] + s[k]) / 2; };
+  let prov = '', type = '';
+
+  function apply() {
+    let any = false;
+    chart.querySelectorAll<HTMLElement>('[data-row]').forEach((row) => {
+      const dots = [...row.querySelectorAll<HTMLElement>('.dot')];
+      const shown = dots.filter((d) => (!prov || d.dataset.prov === prov) && (!type || d.dataset.type === type));
+      dots.forEach((d) => (d.hidden = !shown.includes(d)));
+      const name = row.querySelector('.fam-name')!.textContent!;
+      const trow = root.querySelector<HTMLElement>(`[data-trow="${CSS.escape(name)}"]`)!;
+      row.hidden = trow.hidden = !shown.length;
+      if (!shown.length) return;
+      any = true;
+      const vals = shown.map((d) => Number(d.dataset.v));
+      const mid = median(vals);
+      row.querySelector<HTMLElement>('[data-mid]')!.style.left = `${x(mid)}%`;
+      row.querySelector('[data-n]')!.textContent = `${shown.length} ${shown.length === 1 ? 'job' : 'jobs'}`;
+      row.querySelector('[data-range]')!.firstChild!.textContent = `${perHour(mid)} `;
+      const cells = trow.querySelectorAll('td');
+      cells[0].textContent = String(shown.length);
+      const dollars = (v: number) => perHour(v).replace('/hour', '');
+      cells[1].textContent = dollars(Math.min(...vals));
+      cells[2].textContent = dollars(mid);
+      cells[3].textContent = dollars(Math.max(...vals));
+    });
+    root.querySelector<HTMLElement>('[data-empty]')!.hidden = any;
+    root.querySelector<HTMLElement>('[data-table]')!.hidden = !any;
+  }
+
+  const bind = (attr: string, setv: (v: string) => void) => {
+    const btns = root.querySelectorAll<HTMLButtonElement>(`.chips [data-${attr}]`);
+    btns.forEach((b) => b.addEventListener('click', () => {
+      btns.forEach((o) => o.setAttribute('aria-pressed', String(o === b)));
+      setv(b.dataset[attr] || '');
+      apply();
+    }));
+  };
+  bind('prov', (v) => (prov = v));
+  bind('type', (v) => (type = v));
+
+  // Readout: pay first (it's what the reader wants), then the job and where
+  function show(d: HTMLElement) {
+    const [pay, title, where] = (d.dataset.tip || '').split('|');
+    tip.querySelector('strong')!.textContent = pay;
+    tip.querySelector('.t-title')!.textContent = title;
+    tip.querySelector('.t-where')!.textContent = where;
+    tip.hidden = false;
+    const c = chart.getBoundingClientRect(), r = d.getBoundingClientRect();
+    const left = Math.min(Math.max(r.left - c.left + r.width / 2, 110), c.width - 110);
+    tip.style.left = `${left}px`;
+    tip.style.top = `${r.top - c.top}px`;
+  }
+  chart.querySelectorAll<HTMLElement>('.dot').forEach((d) => {
+    d.addEventListener('pointerenter', () => show(d));
+    d.addEventListener('focus', () => show(d));
+    d.addEventListener('pointerleave', () => (tip.hidden = true));
+    d.addEventListener('blur', () => (tip.hidden = true));
+  });
+</script>
+
+<style>
+  .tool { padding-block: var(--s5) clamp(3rem, 6vw, 5rem); }
+  .filters { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s3) var(--s5); margin-bottom: var(--s6); }
+  .chips { display: flex; flex-wrap: wrap; gap: var(--s2); }
+  .chips button { font: inherit; font-size: var(--fs-small); font-weight: 500; cursor: pointer; padding: 0.45rem 0.85rem; background: transparent; color: var(--ink); border: 1.5px solid var(--line); }
+  .chips button[aria-pressed='true'] { background: var(--ink); border-color: var(--ink); color: #fff; }
+  .legend { display: flex; gap: var(--s4); margin: 0 0 0 auto; font-size: var(--fs-small); color: var(--ink-soft); }
+  .lg { display: inline-flex; align-items: center; gap: var(--s2); }
+  .lg::before { content: ''; width: 10px; height: 10px; }
+  .lg--contract::before { background: var(--contract); }
+  .lg--direct::before { background: var(--direct); border-radius: 50%; }
+  .lg--mid::before { width: 2px; height: 16px; background: var(--ink); }
+
+  /* The chart: a label column, the strip, and the middle figure */
+  .chart { position: relative; margin: 0; border-top: 1.5px solid var(--ink); }
+  .axis { position: relative; height: 2.2rem; margin-left: var(--label); margin-right: var(--range); }
+  .axis span { position: absolute; bottom: 0.45rem; transform: translateX(-50%); font-size: var(--fs-tiny); color: var(--ink-soft); font-variant-numeric: tabular-nums; }
+  .chart { --label: 15rem; --range: 8.5rem; }
+  .row { display: grid; grid-template-columns: var(--label) minmax(0, 1fr) var(--range); align-items: center; border-bottom: 1px solid var(--line); min-height: 4.25rem; }
+  .row[hidden] { display: none; }
+  .fam { margin: 0; padding-right: var(--s4); display: grid; }
+  .fam-name { font-weight: 600; }
+  .fam-n { font-size: var(--fs-small); color: var(--ink-soft); }
+  .strip { position: relative; height: 4.25rem; }
+  .dot:hover, .dot:focus-visible { z-index: 2; }
+  .grid { position: absolute; top: 0; bottom: 0; width: 1px; background: var(--line); }
+  .mid { position: absolute; top: 25%; bottom: 25%; width: 2px; margin-left: -1px; background: var(--ink); }
+  .range { margin: 0; text-align: right; font-weight: 600; font-variant-numeric: tabular-nums; }
+  .range span { display: block; font-weight: 400; font-size: var(--fs-small); color: var(--ink-soft); }
+
+  /* Dots: a 24px hit area around a 10px mark, with a 2px white ring so overlapping dots stay distinct */
+  .dot { position: absolute; top: calc(50% + var(--lane, 0) * 13px); width: 24px; height: 24px; margin: -12px 0 0 -12px; display: grid; place-items: center; }
+  .dot[hidden] { display: none; }
+  .dot span { width: 11px; height: 11px; background: var(--contract); box-shadow: 0 0 0 2px var(--paper); transition: transform 0.15s; }
+  .dot--direct span { background: var(--direct); border-radius: 50%; width: 12px; height: 12px; }
+  .dot:hover span, .dot:focus-visible span { transform: scale(1.35); }
+  .dot:focus-visible { outline: 2px solid var(--isl-blue); outline-offset: 0; }
+
+  .tip { position: absolute; z-index: 5; transform: translate(-50%, calc(-100% - 10px)); background: var(--ink); color: #fff; padding: 0.55rem 0.75rem; display: grid; gap: 1px; pointer-events: none; min-width: 12rem; max-width: 18rem; }
+  .tip[hidden] { display: none; }
+  .tip strong { font-size: 1rem; font-variant-numeric: tabular-nums; }
+  .tip .t-title { font-size: var(--fs-small); font-weight: 500; }
+  .tip .t-where { font-size: var(--fs-tiny); color: rgb(255 255 255 / 0.75); }
+
+  .empty { padding: var(--s6) 0; color: var(--ink-soft); }
+  .table { width: 100%; border-collapse: collapse; margin-top: clamp(2.5rem, 5vw, 4rem); font-variant-numeric: tabular-nums; }
+  .table[hidden], .table tr[hidden] { display: none; }
+  .table caption { text-align: left; font-weight: 700; font-size: var(--fs-h3); margin-bottom: var(--s4); }
+  .table th, .table td { text-align: right; padding: 0.65rem var(--s3); border-bottom: 1px solid var(--line); font-weight: 400; }
+  .table th[scope='row'], .table thead th:first-child { text-align: left; padding-left: 0; }
+  .table th[scope='row'] { font-weight: 600; }
+  .table thead th { font-size: var(--fs-small); color: var(--ink-soft); font-weight: 500; border-bottom: 1.5px solid var(--ink); }
+  .note { margin-top: var(--s5); font-size: var(--fs-small); color: var(--ink-soft); max-width: 75ch; }
+
+  .two { display: grid; grid-template-columns: 1fr 1fr; gap: var(--s7); }
+  .two .lead { margin: var(--s3) 0 var(--s5); }
+  .go { display: inline-block; font-weight: 600; background: var(--isl-blue); color: #fff; text-decoration: none; padding: 0.85rem 1.3rem; }
+  .go:hover { background: var(--isl-blue-deep); color: #fff; }
+  .go--ink { background: var(--ink); }
+  .go--ink:hover { background: #000; }
+
+  @media (max-width: 760px) {
+    .chart { --label: 0px; --range: 0px; }
+    .row { grid-template-columns: 1fr auto; grid-template-areas: 'fam range' 'strip strip'; padding-top: var(--s4); }
+    .fam { grid-area: fam; }
+    .range { grid-area: range; }
+    .strip { grid-area: strip; height: 3.25rem; }
+    .axis { margin: 0; }
+    .legend { margin-left: 0; width: 100%; }
+    .two { grid-template-columns: 1fr; }
+    .table th, .table td { padding-inline: var(--s2); font-size: var(--fs-small); }
+  }
+</style>

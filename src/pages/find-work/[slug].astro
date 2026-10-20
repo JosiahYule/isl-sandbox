@@ -91,6 +91,7 @@ const schema = {
           {job.posted && <div><dt>Posted</dt><dd><time datetime={job.posted}>{longDate(job.posted)}</time></dd></div>}
         </dl>
         <Button href={job.applyUrl} size="lg">Apply now</Button>
+        <a class="rc" href={url(`/learn/tools/resume-check/?job=${job.id}`)}>Check your resume against this job</a>
         <p class="ask">Questions? <a href={ask.href}>{ask.name}</a> <a class="tel" href={tel(ask.phone)}>{ask.phone}</a></p>
       </aside>
 
@@ -138,6 +139,7 @@ const schema = {
   .facts div { display: flex; justify-content: space-between; gap: var(--s4); padding-bottom: var(--s3); border-bottom: 1px solid var(--line); }
   .facts dt { color: var(--ink-soft); font-size: var(--fs-small); }
   .facts dd { margin: 0; font-weight: 600; text-align: right; font-variant-numeric: tabular-nums; }
+  .rc { font-size: var(--fs-small); font-weight: 600; }
   .ask { margin: 0; font-size: var(--fs-small); color: var(--ink-soft); line-height: 1.6; }
   .ask a { font-weight: 600; }
   .ask .tel { display: block; color: var(--ink); text-decoration: none; font-size: 1rem; }
