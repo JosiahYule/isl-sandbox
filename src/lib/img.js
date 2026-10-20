@@ -5,7 +5,10 @@
 const WIDTHS = [500, 750, 1000, 1500, 2500];
 
 // The image URL at a given width, e.g. sized(url, 750) -> url?format=750w
+// Photos kept in this repo (public/images/) can't be resized on request, so they're saved
+// ahead of time at each width as name-500w.jpg, name-750w.jpg ... and we point at the right file.
 export function sized(url, width) {
+  if (url.startsWith('/')) return url.replace(/\.jpg$/, `-${width}w.jpg`);
   return `${url.split('?')[0]}?format=${width}w`;
 }
 

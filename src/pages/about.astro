@@ -42,8 +42,8 @@ const gallery = [
     <Button href="/find-work/" variant="outline">I'm looking for work</Button>
   </PageHero>
 
-  <div class="wrap" data-reveal>
-    <Photo src={photos.teamTogether.src} alt={photos.teamTogether.alt} ratio="21/9" sizes="(max-width: 1280px) 100vw, 1200px" eager />
+  <div class="wrap team-photo" data-reveal>
+    <Photo src={photos.teamTogether.src} alt={photos.teamTogether.alt} ratio="21/9" sizes="(max-width: 1280px) 100vw, 1200px" position="center 85%" eager />
   </div>
 
   <div class="facts-gap"><Facts facts={facts} /></div>
@@ -89,6 +89,8 @@ const gallery = [
 </Base>
 
 <style>
+  /* On phones a 21:9 strip makes 40 people tiny, so the frame gets taller */
+  @media (max-width: 700px) { .team-photo :global(.frame) { aspect-ratio: 3 / 2 !important; } }
   .gal-head .lead { justify-self: end; font-weight: 600; font-size: var(--fs-body); }
   @media (max-width: 860px) { .gal-head .lead { justify-self: start; } }
   .facts-gap { margin-top: clamp(3rem, 6vw, 5rem); }
