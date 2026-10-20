@@ -4,14 +4,15 @@
 //
 // <Facts facts={[['13', 'years in Atlantic Canada'], ['Within hours', 'from request to worker on site']]} />
 // A figure counts up when it starts with a number ("13", "200+", "92%").
+// Optional third item: 'contract' or 'direct', which colours the figure by service (the site's colour key).
 const { facts = [] } = Astro.props;
 const counts = (f) => /^\d/.test(f);
 ---
 <section class="facts-band">
   <div class="wrap">
     <ul class="facts" data-stagger style={`--n:${facts.length}`}>
-      {facts.map(([f, d]) => (
-        <li><span class="figure" data-countup={counts(f) ? '' : undefined}>{f}</span><span class="fd">{d}</span></li>
+      {facts.map(([f, d, svc]) => (
+        <li><span class:list={['figure', svc && `figure--${svc}`]} data-countup={counts(f) ? '' : undefined}>{f}</span><span class="fd">{d}</span></li>
       ))}
     </ul>
   </div>
@@ -23,6 +24,8 @@ const counts = (f) => /^\d/.test(f);
   .facts li { padding: var(--s6) var(--s5) var(--s6) 0; }
   .facts li + li { padding-left: var(--s5); border-left: 1px solid var(--line); }
   .figure { display: block; font-size: clamp(2.2rem, 1.4rem + 2.2vw, 3.4rem); margin-bottom: var(--s2); }
+  .figure--contract { color: var(--contract); }
+  .figure--direct { color: var(--direct); }
   .fd { display: block; color: var(--ink-soft); max-width: 26ch; }
   @media (max-width: 900px) {
     .facts { grid-template-columns: 1fr 1fr; }

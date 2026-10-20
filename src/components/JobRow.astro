@@ -1,6 +1,6 @@
 ---
 // JOB ROW: one real posting. The coloured edge says contract (near-black) or permanent (ISL blue).
-// The title opens the posting on the live site; Apply goes straight to the application.
+// The title opens the job's page here (/find-work/<slug>/); Apply goes straight to the application.
 const { job } = Astro.props;
 const posted = job.posted
   ? new Date(job.posted + 'T12:00:00').toLocaleDateString('en-CA', { month: 'short', day: 'numeric' })
@@ -12,7 +12,7 @@ const field = [job.category, job.subcategory].filter(Boolean).join(', ');
   data-type={job.type} data-province={job.province} data-area={job.area}
   data-search={`${job.title} ${field} ${job.city} ${job.snippet ?? ''}`.toLowerCase()}>
   <div class="main">
-    <h3><a href={job.viewUrl}>{job.title}</a></h3>
+    <h3><a href={job.url}>{job.title}</a></h3>
     <p class="where">{where}</p>
   </div>
   <p class:list={['svc', `svc--${job.type}`]}>{job.typeLabel}</p>

@@ -1,0 +1,171 @@
+---
+// JOB PAGE  →  /find-work/<slug>/
+// One page per open posting, from the same job data as the board (src/data/jobs.js).
+//
+//   header       service, title, where
+//   side card    pay, type, posted, Apply, and who to ask (routing.js: the Halifax job
+//                seeker contact, otherwise the office that covers the job's town)
+//   description  the posting, turned into headings, lists and paragraphs (src/lib/jobtext.js)
+//   more jobs    others near the same office, or in the same province
+//
+// Apply goes to the live application form, as on the board.
+// JobPosting structured data lets Google show the job in its job search once the site is indexed.
+import Base from '../../layouts/Base.astro';
+import Button from '../../components/Button.astro';
+import JobRow from '../../components/JobRow.astro';
+import { jobs, provinces } from '../../data/jobs.js';
+import { areas } from '../../data/areas.js';
+import { brand } from '../../data/site.js';
+import { jobBlocks, payFromBlocks, PAY_LABEL } from '../../lib/jobtext.js';
+import { url } from '../../lib/url.js';
+import { route, placeFrom } from '../../../assistant/supabase/functions/_shared/routing.js';
+
+export function getStaticPaths() {
+  return jobs.map((job) => ({ params: { slug: job.slug }, props: { job } }));
+}
+
+const { job } = Astro.props;
+// Pay: the feed's figure, so the card matches the job board. When the feed has none, use the
+// posting's own "Pay:" line instead, and take that line out of the description so it isn't said twice.
+// (When both exist, the posting's line stays in the description: it often adds "+ benefits" and the like.)
+const parsed = jobBlocks(job.description, job.title);
+const fromText = job.pay ? '' : payFromBlocks(parsed);
+const pay = job.pay || fromText;
+const blocks = !fromText ? parsed : parsed
+  .map((b) => (b.type === 'details' ? { ...b, items: b.items.filter((i) => !PAY_LABEL.test(i.label)) } : b))
+  .filter((b) => b.type !== 'details' || b.items.length);
+const where = [job.city, job.province].filter(Boolean).join(', ');
+const longDate = (d) => new Date(d + 'T12:00:00').toLocaleDateString('en-CA', { month: 'long', day: 'numeric', year: 'numeric' });
+const area = areas.find((a) => a.key === job.area);
+
+// Who a job seeker can ask about this posting
+const { person, office } = route({ audience: 'seeker', service: job.type, place: placeFrom(`${job.city} ${provinces[job.province] || job.province}`) });
+const ask = person
+  ? { name: person.name, phone: person.phone, href: url(`/team/${person.slug}/`) }
+  : { name: `Our ${office.city} office`, phone: office.phone, href: url(`/offices/${office.key}/`) };
+const tel = (n) => `tel:+1${n.replace(/\D/g, '')}`;
+
+// More jobs: same office area first, then the same province, newest first
+const others = jobs.filter((j) => j.id !== job.id);
+const near = (area ? others.filter((j) => j.area === job.area) : []).concat(others.filter((j) => j.province === job.province && (!area || j.area !== job.area)));
+const more = near.slice(0, 4);
+const moreLabel = area ? `More jobs near ${area.label}` : `More jobs in ${provinces[job.province] || job.province}`;
+const moreHref = area ? url(`/find-work/?area=${area.key}`) : url(`/find-work/?province=${job.province}`);
+
+// Structured data (schema.org JobPosting). Pay is only included when it's a clear hourly or yearly figure.
+function salary(pay) {
+  const m = String(pay).match(/^\$([\d,.]+)(?: to \$([\d,.]+))?\/(hour|year)$/);
+  if (!m) return undefined;
+  const n = (s) => Number(s.replace(/,/g, ''));
+  const [min, max] = [n(m[1]), m[2] ? n(m[2]) : undefined];
+  if (m[3] === 'year' && min < 1000) return undefined; // a range like "$55 to $65,000" is a typo in the feed
+  return { '@type': 'MonetaryAmount', currency: 'CAD', value: { '@type': 'QuantitativeValue', unitText: m[3].toUpperCase(), ...(max ? { minValue: min, maxValue: max } : { value: min }) } };
+}
+const schema = {
+  '@context': 'https://schema.org', '@type': 'JobPosting',
+  title: job.title,
+  description: job.description.split('\n').map((l) => l.trim()).filter(Boolean).map((l) => `<p>${l.replace(/[<>&]/g, (c) => ({ '<': '&lt;', '>': '&gt;', '&': '&amp;' }[c]))}</p>`).join(''),
+  identifier: { '@type': 'PropertyValue', name: brand.name, value: job.id },
+  datePosted: job.posted,
+  employmentType: job.type === 'direct' ? 'FULL_TIME' : 'TEMPORARY',
+  hiringOrganization: { '@type': 'Organization', name: brand.name, sameAs: 'https://www.integratedstaffing.ca' },
+  jobLocation: { '@type': 'Place', address: { '@type': 'PostalAddress', addressLocality: job.city, addressRegion: job.province, addressCountry: 'CA' } },
+  baseSalary: salary(job.pay),
+  directApply: false,
+};
+---
+<Base title={`${job.title}, ${where}`} description={job.snippet} assistantMode="seeker" schema={schema}>
+  <article class="jp">
+    <header class="wrap jp-head">
+      <a class="back" href={url('/find-work/')}>← All jobs</a>
+      <p class:list={['svc', `svc--${job.type}`]}>{job.typeLabel}</p>
+      <h1>{job.title}</h1>
+      <p class="where">{where}</p>
+    </header>
+
+    <div class="wrap jp-grid">
+      <aside class:list={['card', `card--${job.type}`]} aria-label="Job summary">
+        <dl class="facts">
+          <div><dt>Pay</dt><dd>{pay || 'Discussed at interview'}</dd></div>
+          <div><dt>Type</dt><dd>{job.typeLabel}</dd></div>
+          {job.posted && <div><dt>Posted</dt><dd><time datetime={job.posted}>{longDate(job.posted)}</time></dd></div>}
+        </dl>
+        <Button href={job.applyUrl} size="lg">Apply now</Button>
+        <p class="ask">Questions? <a href={ask.href}>{ask.name}</a> <a class="tel" href={tel(ask.phone)}>{ask.phone}</a></p>
+      </aside>
+
+      <div class="body">
+        {blocks.map((b) => (
+          b.type === 'heading' ? <h2>{b.text}</h2>
+          : b.type === 'list' ? <ul>{b.items.map((i) => <li>{i}</li>)}</ul>
+          : b.type === 'details' ? <dl class="details">{b.items.map((i) => <div><dt>{i.label}</dt><dd>{i.value}</dd></div>)}</dl>
+          : <p>{b.text}</p>
+        ))}
+        <div class="end">
+          <Button href={job.applyUrl}>Apply for this job</Button>
+          <p class="fine">You’ll finish applying on our job board. It’s always free.</p>
+        </div>
+      </div>
+    </div>
+  </article>
+
+  {more.length > 0 && (
+    <section class="section section--tint">
+      <div class="wrap">
+        <div class="section-head section-head--split more-head">
+          <h2>{moreLabel}</h2>
+          <p class="lead"><a href={moreHref}>See all</a></p>
+        </div>
+        <div class="list">{more.map((j) => <JobRow job={j} />)}</div>
+      </div>
+    </section>
+  )}
+</Base>
+
+<style>
+  .jp { padding-block: clamp(2.5rem, 5vw, 4rem) clamp(3.5rem, 7vw, 6rem); }
+  .back { display: inline-block; margin-bottom: var(--s6); font-size: var(--fs-small); font-weight: 600; text-decoration: none; }
+  .back:hover { text-decoration: underline; }
+  .jp-head h1 { font-size: var(--fs-h1); letter-spacing: -0.025em; max-width: 22ch; margin-top: var(--s2); }
+  .where { margin-top: var(--s3); font-size: var(--fs-lead); font-weight: 300; }
+
+  /* The summary card sits on the right and stays in view while the posting scrolls */
+  .jp-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(280px, 340px); gap: var(--s6) clamp(2.5rem, 6vw, 6rem); margin-top: clamp(2rem, 4vw, 3rem); align-items: start; }
+  .card { grid-column: 2; grid-row: 1; position: sticky; top: calc(72px + var(--s5)); border-top: 4px solid var(--contract); background: var(--mist); padding: var(--s5); display: grid; gap: var(--s5); }
+  .card--direct { border-top-color: var(--direct); }
+  .card :global(.btn) { width: 100%; }
+  .facts { margin: 0; display: grid; gap: var(--s3); }
+  .facts div { display: flex; justify-content: space-between; gap: var(--s4); padding-bottom: var(--s3); border-bottom: 1px solid var(--line); }
+  .facts dt { color: var(--ink-soft); font-size: var(--fs-small); }
+  .facts dd { margin: 0; font-weight: 600; text-align: right; font-variant-numeric: tabular-nums; }
+  .ask { margin: 0; font-size: var(--fs-small); color: var(--ink-soft); line-height: 1.6; }
+  .ask a { font-weight: 600; }
+  .ask .tel { display: block; color: var(--ink); text-decoration: none; font-size: 1rem; }
+
+  /* The posting: a comfortable reading column */
+  .body { grid-column: 1; grid-row: 1; max-width: 68ch; }
+  .body > :first-child { margin-top: 0; }
+  .body h2 { font-size: 1.3rem; letter-spacing: -0.01em; margin: var(--s7) 0 var(--s3); }
+  .body p, .body li, .body dd { font-size: 1.06rem; line-height: 1.7; }
+  .body p { margin: 0 0 var(--s4); }
+  .body ul { margin: 0 0 var(--s4); padding-left: 1.2em; }
+  .body li { margin-bottom: var(--s2); padding-left: 0.25em; }
+  .body li::marker { color: var(--isl-blue); }
+  .details { margin: 0 0 var(--s4); display: grid; gap: var(--s1); }
+  .details div { display: flex; gap: var(--s3); }
+  .details dt { font-weight: 600; min-width: 7.5rem; line-height: 1.7; }
+  .details dd { margin: 0; }
+  .end { margin-top: var(--s7); padding-top: var(--s5); border-top: 1.5px solid var(--ink); display: flex; flex-wrap: wrap; align-items: center; gap: var(--s3) var(--s5); }
+  .fine { margin: 0; color: var(--ink-soft); font-size: var(--fs-small); max-width: 36ch; }
+
+  .more-head .lead { justify-self: end; font-weight: 600; font-size: var(--fs-body); }
+  .list { border-top: 1.5px solid var(--ink); background: var(--paper); }
+
+  @media (max-width: 900px) {
+    .jp-grid { grid-template-columns: 1fr; }
+    .card, .body { grid-column: 1; grid-row: auto; }
+    .card { position: static; }
+    .more-head .lead { justify-self: start; }
+    .details div { flex-direction: column; gap: 0; }
+  }
+</style>

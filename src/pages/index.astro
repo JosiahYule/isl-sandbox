@@ -57,7 +57,7 @@ const ticker = jobs.slice(0, 14);
         {[0, 1].map((copy) => (
           <ul class="ticker-list" aria-hidden={copy === 1 ? 'true' : undefined}>
             {ticker.map((j) => (
-              <li><a href={url(`/find-work/?q=${encodeURIComponent(j.title)}`)} tabindex={copy === 1 ? -1 : undefined}><strong>{j.title.replace(/\s*\/\s*/g, ' / ')}</strong><span>{j.city}, {j.province}</span><span>{j.pay}</span></a></li>
+              <li><a href={j.url} tabindex={copy === 1 ? -1 : undefined}><strong>{j.title.replace(/\s*\/\s*/g, ' / ')}</strong><span>{j.city}, {j.province}</span><span>{j.pay}</span></a></li>
             ))}
           </ul>
         ))}

@@ -2,11 +2,20 @@
 // WE RECRUIT. IT'S THAT SIMPLE.
 // The live site's signature line, kept simple: the heading, and three short lines beside it
 // (where we are, what we recruit for, how we match). One thing moves: the industry word.
+// Under it, the four figures that back up "simple", coloured by service.
 //
 // Accessibility: the rolling word is decoration (aria-hidden). Screen readers get the
 // full sentence with every industry instead. With reduced motion the word stays put.
 const industries = ['construction', 'logistics', 'manufacturing', 'oil and gas', 'skilled trades', 'hospitality', 'administration'];
 const list = industries.slice(0, -1).join(', ') + ' and ' + industries.at(-1);
+// What "simple" means in numbers: two for contract (near-black), two for permanent (ISL blue)
+const facts = [
+  ['One rate', 'per contract worker, payroll included', 'contract'],
+  ['Temp to perm', 'try someone on contract, then hire them', 'contract'],
+  ['47 days', 'average permanent search', 'direct'],
+  ['90 days', 'replacement guarantee on permanent hires', 'direct'],
+];
+import Facts from './Facts.astro';
 ---
 <section class="section we" data-we>
   <div class="wrap we-grid">
@@ -21,6 +30,7 @@ const list = industries.slice(0, -1).join(', ') + ' and ' + industries.at(-1);
       <li>People matched to work that fits their skills and goals.</li>
     </ul>
   </div>
+  <div class="we-facts"><Facts facts={facts} /></div>
 </section>
 
 <script>
@@ -63,6 +73,11 @@ const list = industries.slice(0, -1).join(', ') + ' and ' + industries.at(-1);
   .word.on { opacity: 1; transform: none; }
   :global(.motion) .word { transition: transform 0.55s var(--ease), opacity 0.4s; }
   :global(.motion) .word.out { opacity: 0; transform: translateY(-100%); }
+
+  .we-facts { margin-top: clamp(3rem, 6vw, 5rem); }
+  .we-facts :global(.facts-band) { border-top: 1px solid var(--line); }
+  /* A touch smaller than the About page's figures, so "Temp to perm" stays on one line in a quarter column */
+  .we-facts :global(.figure) { font-size: clamp(2rem, 1.3rem + 1.4vw, 2.6rem); white-space: nowrap; }
 
   @media (max-width: 900px) {
     .we-grid { grid-template-columns: 1fr; }

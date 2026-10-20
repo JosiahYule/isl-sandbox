@@ -1,13 +1,19 @@
 # DEPLOY TO GITHUB PAGES
-# Runs automatically every time code is pushed to `main` (you can also run it by hand
-# from the repo's Actions tab). It does what you'd do yourself:
+# Runs automatically every time code is pushed to `main`, and on a schedule so the job board
+# and job pages stay current (you can also run it by hand from the repo's Actions tab):
 #   1. download the code   2. install Astro   3. build the site into dist/   4. publish dist/
+# Before building, scripts/fetch-jobs.mjs reads the live Avionte feed, using the
+# AVIONTE_FEED_URL secret (repo Settings > Secrets and variables > Actions).
 name: Deploy to GitHub Pages
 
 on:
   push:
     branches: [main]
   workflow_dispatch:
+  # Times are UTC. Hourly from 8 am to 8 pm Atlantic on weekdays, and once a day on weekends.
+  schedule:
+    - cron: '0 11-23 * * 1-5'
+    - cron: '0 15 * * 0,6'
 
 # Permissions GitHub needs to publish a Pages site.
 permissions:
@@ -31,6 +37,8 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run build
+        env:
+          AVIONTE_FEED_URL: ${{ secrets.AVIONTE_FEED_URL }}
       - uses: actions/upload-pages-artifact@v3
         with:
           path: dist
