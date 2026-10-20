@@ -48,12 +48,21 @@ const nearby = jobs.filter((j) => j.area === key);
 const guides = (GUIDES[key] || []).map((slug) => posts.find((p) => p.slug === slug)).filter(Boolean);
 const towns = area.towns.filter((t) => t !== area.label.toLowerCase()).slice(0, 6).map((t) => t.replace(/(^|[\s-])([a-z])/g, (m, p, c) => p + c.toUpperCase()));
 const tel = (n) => `tel:+1${n.replace(/\D/g, '')}`;
+// "99 Wyse Road, Suite 1320, Dartmouth, NS B3A 4S5" -> street, town, province, postal code
+const parts = office.address.split(', ');
+const [region, ...postal] = parts.at(-1).split(' ');
+const officeSchema = {
+  '@context': 'https://schema.org', '@type': 'EmploymentAgency', name: `Integrated Staffing ${office.city}`,
+  telephone: '+1-' + office.phone, url: new URL(Astro.url.pathname, Astro.site).href,
+  address: { '@type': 'PostalAddress', streetAddress: parts.slice(0, -2).join(', '), addressLocality: parts.at(-2), addressRegion: region, postalCode: postal.join(' '), addressCountry: 'CA' },
+  parentOrganization: { '@type': 'Organization', name: 'Integrated Staffing', url: 'https://www.integratedstaffing.ca' },
+};
 const maps = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent('Integrated Staffing ' + office.address)}`;
 const isHead = key === 'halifax';
 const province = provinceName(office.province);
 const photo = TEAM_PHOTO[key];
 ---
-<Base title={`${office.city} office`} description={`Integrated Staffing in ${office.city}: contract and permanent staffing, local jobs and who to call.`}>
+<Base schema={officeSchema} title={`${office.city} office`} description={`Integrated Staffing in ${office.city}: contract and permanent staffing, local jobs and who to call.`}>
   <PageHero title={`Our ${office.city} office.`} lead={`${office.address}${isHead ? '. Our head office.' : '.'}`}>
     <a class="call" href={tel(office.phone)}>{office.phone}</a>
     <a class="textlink" href={maps}>Directions</a>

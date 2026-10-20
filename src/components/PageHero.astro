@@ -9,12 +9,13 @@
 // photo:  optional { src, alt, position }. Runs from the top of the page off the right
 //         edge, like the homepage hero. Use either photo or the aside slot, not both.
 // aside:  optional visual (a map, for example) placed in a right-hand column.
+// compact: a shorter intro for task pages (the request form), so the task starts on the first screen.
 import Photo from './Photo.astro';
 
-const { title, lead, photo } = Astro.props;
+const { title, lead, photo, compact = false } = Astro.props;
 const hasAside = Astro.slots.has('aside');
 ---
-<section class:list={['intro', hasAside && 'intro--aside', photo && 'intro--photo']}>
+<section class:list={['intro', hasAside && 'intro--aside', photo && 'intro--photo', compact && 'intro--compact']}>
   <div class="wrap grid">
     <div class="copy">
       <h1>{title}</h1>
@@ -35,6 +36,9 @@ const hasAside = Astro.slots.has('aside');
   .grid { display: grid; gap: var(--s7); }
   .intro--aside .grid { grid-template-columns: 1.15fr 1fr; align-items: center; }
   h1 { font-size: var(--fs-hero); letter-spacing: -0.025em; max-width: 14ch; }
+  .intro--compact { padding-block: clamp(2.5rem, 5vw, 4rem) clamp(1.5rem, 3vw, 2.5rem); }
+  .intro--compact h1 { font-size: var(--fs-h1); max-width: none; }
+  .intro--compact .actions { margin-top: var(--s4); }
   .lead { margin-top: var(--s5); }
   .actions { display: flex; flex-wrap: wrap; gap: var(--s3); margin-top: var(--s6); }
 

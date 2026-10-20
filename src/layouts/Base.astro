@@ -5,13 +5,16 @@ import '@fontsource-variable/dm-sans/opsz.css';   // DM Sans, the ISL brand face
 import '../styles/global.css';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
-import { brand } from '../data/site.js';
+import { brand, images } from '../data/site.js';
 import { url } from '../lib/url.js';
 
 // assistant: false hides the assistant entirely
 // assistantMode: "employer" (hiring pages) or "seeker" (job pages) opens it ready for that visitor; leave out to let it ask
 // footerOffices: false hides the footer's office row (the contact page already lists the offices)
-const { title, description = brand.scope, assistant = true, assistantMode, footerOffices = true } = Astro.props;
+// schema: optional structured data (an object or a list) that search engines read, e.g. an office's address
+const { title, description = brand.scope, assistant = true, assistantMode, footerOffices = true, schema } = Astro.props;
+const canonical = new URL(Astro.url.pathname, Astro.site).href;
+const shareImage = images.hero.replace(/format=\d+w/, 'format=1500w');
 const fullTitle = title ? `${title} | ${brand.name}` : `${brand.name} | Contract and permanent staffing in Atlantic Canada`;
 ---
 <!doctype html>
@@ -22,6 +25,17 @@ const fullTitle = title ? `${title} | ${brand.name}` : `${brand.name} | Contract
     <title>{fullTitle}</title>
     <meta name="description" content={description} />
     <meta name="theme-color" content="#1a1a1a" />
+    <link rel="icon" href={url('/favicon.svg')} type="image/svg+xml" />
+    <link rel="canonical" href={canonical} />
+    <!-- Link previews (LinkedIn, Facebook, Teams, iMessage) -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content={brand.name} />
+    <meta property="og:title" content={title || fullTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={shareImage} />
+    <meta name="twitter:card" content="summary_large_image" />
+    {schema && <script type="application/ld+json" set:html={JSON.stringify(schema)} />}
     <meta name="robots" content="noindex" /><!-- sandbox: keep search engines out -->
     <!-- Turn on the entrance animations only when the visitor's device allows motion.
          This runs before the page paints, so nothing flashes. (See src/scripts/motion.js) -->

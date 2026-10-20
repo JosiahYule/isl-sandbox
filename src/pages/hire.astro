@@ -1,16 +1,16 @@
 ---
 // EMPLOYER REQUEST  →  /hire/
-// Left: the request form. Right: three questions that recommend a service and preselect it in the form.
+// The request form, with a card beside it showing who will reply. The card updates as the
+// visitor picks a service and a province, using the same routing as the chatbot
+// (assistant/supabase/functions/_shared/routing.js), so both always name the same person.
+//
 // The form is visual only in the sandbox: nothing is sent.
-// Linking with ?service=contract or ?service=direct preselects that service.
+// Links can pre-fill it: ?service=contract|direct, ?details=... (the textarea), ?where=Nova Scotia
 import Base from '../layouts/Base.astro';
 import PageHero from '../components/PageHero.astro';
 import Steps from '../components/Steps.astro';
 import { brand } from '../data/site.js';
 
-const sectors = ['Construction and trades', 'Warehousing and logistics', 'Manufacturing', 'Energy and natural resources',
-  'Hospitality and customer service', 'Office and administrative', 'Finance and accounting', 'Engineering and technical',
-  'Technology and IT', 'Healthcare', 'Other'];
 const locations = ['Nova Scotia', 'New Brunswick', 'Prince Edward Island', 'Newfoundland and Labrador', 'Elsewhere in Canada'];
 const tel = `tel:+1${brand.mainPhone.replaceAll('-', '')}`;
 // From the live /hire page: the four steps from request to filled position.
@@ -22,20 +22,21 @@ const afterSteps = [
 ];
 ---
 <Base assistantMode="employer" title="Request talent" description="Request contract workers or start a permanent search. A recruiter replies within one business day.">
-  <PageHero title="Tell us who you need." lead="Contract workers or a permanent hire, anywhere we work. A recruiter replies within one business day.">
+  <PageHero compact title="Tell us who you need." lead="A recruiter replies within one business day.">
     <a class="textlink" href={tel}>Prefer to talk? Call {brand.mainPhone}</a>
   </PageHero>
 
   <section class="section section--rule work">
     <div class="wrap layout">
       <form class="form" id="request" novalidate>
+        <!-- 1. The request first: what and where -->
         <fieldset class="service">
           <legend>What do you need?</legend>
           <div class="options">
             <label class="opt opt--contract">
               <input type="radio" name="service" value="contract" />
               <span class="opt-name">Contract workers</span>
-              <span class="opt-meta">Short or long term, on site within hours</span>
+              <span class="opt-meta">For a set time, on site within hours</span>
             </label>
             <label class="opt opt--direct">
               <input type="radio" name="service" value="direct" />
@@ -43,71 +44,89 @@ const afterSteps = [
               <span class="opt-meta">A targeted search with a 90-day guarantee</span>
             </label>
             <label class="opt opt--unsure">
-              <input type="radio" name="service" value="unsure" checked />
+              <input type="radio" name="service" value="unsure" />
               <span class="opt-name">Not sure yet</span>
-              <span class="opt-meta">We'll recommend the right fit</span>
+              <span class="opt-meta">Three quick questions will help</span>
             </label>
+          </div>
+
+          <!-- Shown only for "Not sure yet" -->
+          <div class="helper" hidden>
+            <div class="q" data-q="length">
+              <p class="q-label" id="q1">How long do you need them?</p>
+              <div class="seg" role="group" aria-labelledby="q1">
+                <button type="button" data-v="temp" aria-pressed="false">Days to months</button>
+                <button type="button" data-v="perm" aria-pressed="false">Permanently</button>
+              </div>
+            </div>
+            <div class="q" data-q="start">
+              <p class="q-label" id="q2">When do they need to start?</p>
+              <div class="seg" role="group" aria-labelledby="q2">
+                <button type="button" data-v="now" aria-pressed="false">This week</button>
+                <button type="button" data-v="later" aria-pressed="false">In a few weeks or more</button>
+              </div>
+            </div>
+            <div class="q" data-q="trial">
+              <p class="q-label" id="q3">Would you like to see them on the job first?</p>
+              <div class="seg" role="group" aria-labelledby="q3">
+                <button type="button" data-v="yes" aria-pressed="false">Yes</button>
+                <button type="button" data-v="no" aria-pressed="false">No</button>
+              </div>
+            </div>
+            <p class="result" aria-live="polite" hidden></p>
           </div>
         </fieldset>
 
         <div class="fields">
-          <label class="field">Your name <input name="name" autocomplete="name" required /></label>
-          <label class="field">Work email <input name="email" type="email" autocomplete="email" required /></label>
-          <label class="field">Company <input name="company" autocomplete="organization" /></label>
-          <label class="field"><span>Phone <span class="opt-tag">(optional)</span></span> <input name="phone" type="tel" autocomplete="tel" /></label>
-          <label class="field">Industry
-            <select name="sector">{sectors.map((s) => <option>{s}</option>)}</select>
-          </label>
-          <label class="field">Where's the work?
-            <select name="location">{locations.map((l) => <option>{l}</option>)}</select>
-          </label>
           <label class="field field--wide">What are you hiring for?
-            <textarea name="role" rows="4" placeholder="The role, how many people, and when you need them to start"></textarea>
+            <textarea name="role" rows="3" required placeholder="The role, how many people, and when you need them to start"></textarea>
+            <span class="err" hidden>Tell us the role, even roughly.</span>
           </label>
+          <label class="field field--wide">Where's the work?
+            <select name="location" required>
+              <option value="" selected disabled>Choose a province</option>
+              {locations.map((l) => <option>{l}</option>)}
+            </select>
+            <span class="err" hidden>Choose where the work is.</span>
+          </label>
+
+          <!-- 2. Then the person -->
+          <label class="field">Your name <input name="name" autocomplete="name" required />
+            <span class="err" hidden>Add your name.</span>
+          </label>
+          <label class="field">Work email <input name="email" type="email" autocomplete="email" required />
+            <span class="err" hidden>Add an email address we can reply to.</span>
+          </label>
+          <label class="field"><span>Company <span class="opt-tag">(optional)</span></span> <input name="company" autocomplete="organization" /></label>
+          <label class="field"><span>Phone <span class="opt-tag">(optional)</span></span> <input name="phone" type="tel" autocomplete="tel" /></label>
         </div>
 
+        <p class="to-line" aria-live="polite"></p>
         <div class="submit">
           <button type="submit">Send request</button>
           <p>We use your details only to respond to this request.</p>
         </div>
         <div class="sent" hidden tabindex="-1">
           <p class="sent-title">Request sent.</p>
-          <p>A recruiter will reply within one business day. (Sandbox preview: nothing was actually sent.)</p>
+          <p class="sent-who"></p>
+          <p class="sent-note">Sandbox preview: nothing was actually sent.</p>
         </div>
       </form>
 
-      <aside class="picker" aria-labelledby="picker-title">
-        <h2 id="picker-title">Not sure which service fits?</h2>
-        <p class="picker-intro">Answer three questions and we'll choose for you.</p>
-        <div class="progress" aria-hidden="true"><span></span><span></span><span></span></div>
-
-        <div class="q" data-q="length">
-          <p class="q-label">How long do you need them?</p>
-          <div class="seg" role="group" aria-label="How long do you need them?">
-            <button type="button" data-v="temp" aria-pressed="false">Days to months</button>
-            <button type="button" data-v="perm" aria-pressed="false">Permanently</button>
+      <!-- Who will reply: updates with the service and province chosen -->
+      <div class="reply" aria-live="polite">
+        <p class="r-label">Who'll reply</p>
+        <div class="r-card">
+          <span class="r-face"><img alt="" hidden /><span class="r-ini"></span></span>
+          <div>
+            <p class="r-name">The office nearest the work</p>
+            <p class="r-role">Choose where the work is to see who it goes to.</p>
           </div>
         </div>
-        <div class="q" data-q="start">
-          <p class="q-label">When do they need to start?</p>
-          <div class="seg" role="group" aria-label="When do they need to start?">
-            <button type="button" data-v="now" aria-pressed="false">This week</button>
-            <button type="button" data-v="later" aria-pressed="false">In a few weeks or more</button>
-          </div>
-        </div>
-        <div class="q" data-q="trial">
-          <p class="q-label">Would you like to see them on the job first?</p>
-          <div class="seg" role="group" aria-label="Would you like to see them on the job first?">
-            <button type="button" data-v="yes" aria-pressed="false">Yes</button>
-            <button type="button" data-v="no" aria-pressed="false">No</button>
-          </div>
-        </div>
-
-        <div class="result" aria-live="polite" hidden>
-          <p class="result-name"></p>
-          <p class="result-why"></p>
-        </div>
-      </aside>
+        <p class="r-reach"><a class="r-tel" href={tel}>{brand.mainPhone}</a><a class="r-mail" hidden></a></p>
+        <p class="r-note" hidden></p>
+        <p class="r-promise">Replies within one business day.</p>
+      </div>
     </div>
   </section>
 
@@ -120,91 +139,135 @@ const afterSteps = [
 </Base>
 
 <script>
-  const form = document.getElementById('request');
-  const radios = form.querySelectorAll('input[name="service"]');
-  const select = (v) => radios.forEach((r) => (r.checked = r.value === v));
+  import { route, provinceName } from '../../assistant/supabase/functions/_shared/routing.js';
 
-  // ?service=contract|direct from links elsewhere on the site
-  const fromUrl = new URLSearchParams(location.search).get('service');
-  if (fromUrl === 'contract' || fromUrl === 'direct') select(fromUrl);
-  // ?details= and ?where= come from the assistant, so the visitor doesn't retype what they told it
+  const form = document.getElementById('request') as HTMLFormElement;
+  const radios = [...form.querySelectorAll<HTMLInputElement>('input[name="service"]')];
+  const loc = form.querySelector<HTMLSelectElement>('[name="location"]')!;
+  const helper = form.querySelector<HTMLElement>('.helper')!;
+  const select = (v: string) => radios.forEach((r) => (r.checked = r.value === v));
+  const service = () => radios.find((r) => r.checked)?.value || 'unsure';
+
+  // ---- Pre-fill from links (the chatbot, the service pages, office pages) ----
   const params = new URLSearchParams(location.search);
-  if (params.get('details')) form.querySelector('[name="role"]').value = params.get('details');
+  const fromUrl = params.get('service');
+  if (fromUrl === 'contract' || fromUrl === 'direct') select(fromUrl);
+  if (params.get('details')) form.querySelector<HTMLTextAreaElement>('[name="role"]')!.value = params.get('details')!;
   const where = params.get('where');
-  const loc = form.querySelector('[name="location"]');
-  if (where && [...loc.options].some((o) => o.value === where || o.text === where)) loc.value = where;
+  if (where && [...loc.options].some((o) => o.text === where)) loc.value = where;
 
-  // Recommendation logic for the three questions
-  const answers = {};
-  const result = document.querySelector('.result');
-  const nameEl = result.querySelector('.result-name');
-  const whyEl = result.querySelector('.result-why');
+  // ---- Who'll reply ----
+  const CODES: Record<string, string> = { 'Nova Scotia': 'NS', 'New Brunswick': 'NB', 'Prince Edward Island': 'PE', 'Newfoundland and Labrador': 'NL' };
+  const card = document.querySelector('.reply')!;
+  const $ = (s: string) => card.querySelector(s) as HTMLElement;
+  const toLine = form.querySelector<HTMLElement>('.to-line')!;
+  let replier = 'A recruiter';
 
+  function updateReply() {
+    const choice = loc.value;
+    const svc = service();
+    const outside = choice === 'Elsewhere in Canada';
+    const place = outside ? { outside: true, province: '', city: '' } : CODES[choice] ? { province: CODES[choice], city: '', outside: false } : null;
+    if (!place && svc !== 'direct') {
+      $('.r-name').textContent = 'The office nearest the work';
+      $('.r-role').textContent = 'Choose where the work is to see who it goes to.';
+      $('.r-ini').textContent = 'ISL'; (card.querySelector('.r-face img') as HTMLImageElement).hidden = true;
+      $('.r-mail').hidden = true; $('.r-note').hidden = true;
+      toLine.textContent = ''; replier = 'A recruiter';
+      return;
+    }
+    // Contract can't be staffed outside Atlantic Canada: that request goes to a permanent search
+    const asked = outside && svc !== 'direct' ? 'direct' : svc;
+    const r = route({ audience: 'employer', service: asked === 'direct' ? 'direct' : asked === 'unsure' ? 'unsure' : 'contract', place });
+    const p = r.person;
+    const name = p?.name || `Our ${r.office.city} office`;
+    $('.r-name').textContent = name;
+    $('.r-role').textContent = p?.handles || r.office.address;
+    $('.r-ini').textContent = name.split(/\s+/).map((w) => w[0]).join('').slice(0, 2);
+    const img = card.querySelector('.r-face img') as HTMLImageElement;
+    img.hidden = true; // shown only once the photo has loaded, so a missing one leaves the initials
+    if (p?.photo) { img.onload = () => (img.hidden = false); img.onerror = () => (img.hidden = true); img.src = p.photo; }
+    const phone = p?.phone || r.office.phone;
+    const telA = $('.r-tel') as HTMLAnchorElement; telA.textContent = phone; telA.href = 'tel:+1' + phone.replace(/\D/g, '');
+    const mail = $('.r-mail') as HTMLAnchorElement;
+    if (p?.email) { mail.textContent = p.email; mail.href = 'mailto:' + p.email; mail.hidden = false; } else mail.hidden = true;
+    const note = $('.r-note');
+    note.hidden = !(outside && svc !== 'direct');
+    note.textContent = 'Contract staffing is in Atlantic Canada only, so this goes to our permanent search team.';
+    replier = p?.first || `Our ${r.office.city} office`;
+    toLine.textContent = `This goes to ${p ? p.name : `our ${r.office.city} office`}, who'll reply within one business day.`;
+  }
+
+  // ---- "Not sure yet": three questions that choose for them ----
+  const answers: Record<string, string> = {};
+  const result = helper.querySelector<HTMLElement>('.result')!;
   function recommend() {
     const { length, start, trial } = answers;
     if (!length || !start || !trial) return;
-    let svc, name, why;
-    if (length === 'temp') {
-      svc = 'contract'; name = 'Contract workers';
-      why = 'A fixed stretch of work is what contract staffing is built for: one hourly rate, and we handle payroll and workers’ compensation.';
-    } else if (trial === 'yes') {
-      svc = 'contract'; name = 'Contract, with the option to hire';
-      why = 'Start them on contract, see them on the job, then bring them onto your team when you’re sure.';
-    } else {
-      svc = 'direct'; name = 'A permanent hire';
-      why = start === 'now'
-        ? 'A permanent search averages 47 days. If the seat can’t wait, we can cover it with a contract worker while we search.'
-        : 'A targeted search for the right long-term fit, backed by a 90-day replacement guarantee.';
-    }
-    select(svc);
-    // Briefly highlight the option we just chose in the form, so the link between the two is visible
-    const chosen = form.querySelector(`input[value="${svc}"]`)?.closest('.opt');
-    if (chosen) { chosen.classList.remove('flash'); void chosen.offsetWidth; chosen.classList.add('flash'); }
-    result.dataset.svc = svc;
-    nameEl.textContent = name;
-    whyEl.textContent = why + ' We’ve selected it in the form.';
+    let svc: string, text: string;
+    if (length === 'temp') { svc = 'contract'; text = 'Contract workers fit a set stretch of work.'; }
+    else if (trial === 'yes') { svc = 'contract'; text = 'Start on contract, then hire them when you’re sure.'; }
+    else { svc = 'direct'; text = start === 'now' ? 'A permanent search. If the seat can’t wait, a contract worker can cover it meanwhile.' : 'A permanent search, with a 90-day guarantee.'; }
+    result.textContent = `${text} We’ve selected it above.`;
     result.hidden = false;
+    helperChose = true;
+    select(svc);
+    const chosen = form.querySelector(`input[value="${svc}"]`)?.closest('.opt');
+    if (chosen) { chosen.classList.remove('flash'); void (chosen as HTMLElement).offsetWidth; chosen.classList.add('flash'); }
+    updateReply();
   }
-
-  document.querySelectorAll('.q').forEach((q) => {
+  helper.querySelectorAll('.q').forEach((q) => {
     const buttons = q.querySelectorAll('button');
     buttons.forEach((b) => b.addEventListener('click', () => {
       buttons.forEach((x) => x.setAttribute('aria-pressed', String(x === b)));
-      answers[q.dataset.q] = b.dataset.v;
-      // Fill one segment of the progress bar per answered question
-      const done = Object.keys(answers).length;
-      document.querySelectorAll('.progress span').forEach((s, i) => s.classList.toggle('on', i < done));
+      answers[(q as HTMLElement).dataset.q!] = b.dataset.v!;
       recommend();
     }));
   });
+  // The questions show for "Not sure yet", and stay open once they've picked a service for the visitor
+  let helperChose = false;
+  radios.forEach((r) => r.addEventListener('change', () => {
+    if (service() === 'unsure') helper.hidden = false;
+    else if (!helperChose) helper.hidden = true;
+    updateReply();
+  }));
+  loc.addEventListener('change', updateReply);
+  updateReply();
 
+  // ---- Validation: say what's missing, right under the field ----
+  const required = [...form.querySelectorAll<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>('[required]')];
+  const errFor = (f: Element) => f.closest('.field')?.querySelector<HTMLElement>('.err');
+  required.forEach((f) => f.addEventListener('input', () => { if (f.checkValidity()) { f.removeAttribute('aria-invalid'); const e = errFor(f); if (e) e.hidden = true; } }));
   form.addEventListener('submit', (e) => {
     e.preventDefault();
-    if (!form.checkValidity()) { form.reportValidity(); return; }
-    form.querySelector('.submit').hidden = true;
-    const sent = form.querySelector('.sent');
+    const bad = required.filter((f) => !f.checkValidity());
+    required.forEach((f) => { const ok = !bad.includes(f); f.toggleAttribute('aria-invalid', !ok); const e = errFor(f); if (e) e.hidden = ok; });
+    if (bad.length) { bad[0].focus(); return; }
+    form.querySelector<HTMLElement>('.submit')!.hidden = true;
+    toLine.hidden = true;
+    const sent = form.querySelector<HTMLElement>('.sent')!;
+    form.querySelector('.sent-who')!.textContent = `${replier} will reply within one business day.`;
     sent.hidden = false;
     sent.focus();
   });
 </script>
 
 <style>
-
-  .layout { display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 4.5fr); gap: clamp(2rem, 5vw, 4.5rem); align-items: start; }
+  .work { padding-top: clamp(2.5rem, 5vw, 4rem); }
+  .layout { display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 4fr); gap: clamp(2rem, 5vw, 4.5rem); align-items: start; }
 
   /* Form */
-  .form { }
-  fieldset { border: 0; margin: 0; padding: 0; }
+  fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
   legend, .field { font-weight: 500; font-size: var(--fs-small); }
   legend { margin-bottom: var(--s3); }
   .options { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--s2); }
   .opt {
-    position: relative; display: grid; gap: 2px; cursor: pointer;
+    position: relative; display: grid; gap: 2px; align-content: start; cursor: pointer;
     padding: var(--s4); padding-top: calc(var(--s4) + 6px);
     border: 1.5px solid var(--line); border-radius: var(--radius);
     transition: border-color 150ms var(--ease), background-color 150ms var(--ease);
   }
-  .opt::before { content: ''; position: absolute; left: -1.5px; right: -1.5px; top: -1.5px; height: 6px; border-radius: var(--radius) var(--radius) 0 0; }
+  .opt::before { content: ''; position: absolute; left: -1.5px; right: -1.5px; top: -1.5px; height: 6px; }
   .opt--contract::before { background: var(--contract); }
   .opt--direct::before { background: var(--direct); }
   .opt--unsure::before { background: var(--line); }
@@ -213,63 +276,63 @@ const afterSteps = [
   .opt-meta { font-weight: 400; color: var(--ink-soft); font-size: var(--fs-small); line-height: 1.4; }
   .opt:hover { border-color: var(--ink-soft); }
   .opt:has(input:checked) { border-color: var(--ink); background: var(--mist); }
+  .opt--direct:has(input:checked) { border-color: var(--direct); background: var(--isl-blue-tint); }
   .opt:has(input:focus-visible) { outline: 2px solid var(--isl-blue); outline-offset: 2px; }
+  .opt.flash { animation: flash 1.2s var(--ease); }
+  @keyframes flash { 0% { box-shadow: 0 0 0 0 rgb(0 112 202 / 0.45); } 100% { box-shadow: 0 0 0 14px rgb(0 112 202 / 0); } }
+
+  .helper { margin-top: var(--s3); padding: var(--s4) var(--s5) var(--s5); background: var(--mist); display: grid; gap: var(--s4); }
+  .helper[hidden] { display: none; }
+  .helper:not([hidden]) { animation: rise 0.35s var(--ease); }
+  @keyframes rise { from { opacity: 0; transform: translateY(-6px); } }
+  .q-label { font-weight: 500; font-size: var(--fs-small); margin-bottom: var(--s2); }
+  .seg { display: grid; grid-template-columns: 1fr 1fr; gap: var(--s2); }
+  .seg button { font: inherit; font-size: var(--fs-small); font-weight: 500; cursor: pointer; padding: 0.6rem 0.5rem; border: 1.5px solid var(--line); background: var(--paper); color: var(--ink); }
+  .seg button:hover { border-color: var(--ink); }
+  .seg button[aria-pressed='true'] { background: var(--ink); border-color: var(--ink); color: #fff; }
+  .result { font-weight: 600; margin: 0; }
 
   .fields { display: grid; grid-template-columns: 1fr 1fr; gap: var(--s4) var(--s5); margin-top: var(--s6); }
-  .field { display: grid; gap: var(--s1); }
+  .field { display: grid; gap: var(--s1); align-content: start; }
   .field--wide { grid-column: 1 / -1; }
   .opt-tag { font-weight: 400; color: var(--ink-soft); }
   input:not([type='radio']), select, textarea {
     font: inherit; font-size: 1rem; font-weight: 400; color: var(--ink);
-    padding: 0.75rem 0.85rem; border: 1.5px solid var(--line); border-radius: var(--radius); background: var(--paper); width: 100%;
+    padding: 0.75rem 0.85rem; border: 1.5px solid var(--line); background: var(--paper); width: 100%;
   }
+  select:invalid { color: var(--ink-soft); }
   input:focus, select:focus, textarea:focus { outline: none; border-color: var(--ink); box-shadow: 0 0 0 3px var(--focus); }
-  .submit { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s5); margin-top: var(--s6); }
-  .submit button {
-    font: inherit; font-weight: 600; font-size: 1.0625rem; cursor: pointer;
-    padding: 1rem 1.8rem; border: 0; border-radius: var(--radius); background: var(--isl-blue); color: #fff;
-  }
+  [aria-invalid] { border-color: #b3261e !important; }
+  .err { color: #b3261e; font-weight: 500; font-size: var(--fs-small); }
+
+  .to-line { display: none; margin: var(--s5) 0 0; font-size: var(--fs-small); font-weight: 500; }
+  .submit { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s3) var(--s5); margin-top: var(--s6); }
+  .submit button { font: inherit; font-weight: 600; font-size: 1.0625rem; cursor: pointer; padding: 1rem 1.8rem; border: 0; background: var(--isl-blue); color: #fff; }
   .submit button:hover { background: var(--isl-blue-deep); }
-  .submit p { font-size: var(--fs-small); color: var(--ink-soft); }
+  .submit p { font-size: var(--fs-small); color: var(--ink-soft); margin: 0; }
   .sent { margin-top: var(--s6); padding-top: var(--s4); border-top: 3px solid var(--isl-blue); }
-  .sent-title { font-weight: 700; font-size: 1.3rem; }
+  .sent-title { font-weight: 700; font-size: 1.3rem; margin-bottom: var(--s2); }
+  .sent-note { color: var(--ink-soft); font-size: var(--fs-small); }
 
-  /* Picker: same hairline structure as the rest of the site, opened by a heavy rule */
-  .picker { border-top: 3px solid var(--ink); padding-top: var(--s5); position: sticky; top: 100px; }
-  .picker h2 { font-size: 1.6rem; }
-  .picker-intro { color: var(--ink-soft); font-size: var(--fs-small); margin-top: var(--s3); }
-  .q { margin-top: var(--s5); padding-top: var(--s4); border-top: 1px solid var(--line); }
-  .q-label { font-weight: 500; font-size: var(--fs-small); margin-bottom: var(--s2); }
-  .seg { display: grid; grid-template-columns: 1fr 1fr; gap: var(--s2); }
-  .seg button {
-    font: inherit; font-size: var(--fs-small); font-weight: 500; cursor: pointer;
-    padding: 0.65rem 0.5rem; border: 1.5px solid var(--line); border-radius: var(--radius); background: var(--paper); color: var(--ink);
-  }
-  .seg button:hover { border-color: var(--ink); }
-  .seg button[aria-pressed='true'] { background: var(--ink); border-color: var(--ink); color: #fff; }
-  .progress { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; margin-top: var(--s4); }
-  .progress span { height: 4px; background: var(--line); position: relative; overflow: hidden; }
-  .progress span::after { content: ''; position: absolute; inset: 0; background: var(--ink); transform: scaleX(0); transform-origin: left; transition: transform 0.4s var(--ease); }
-  .progress span.on::after { transform: none; }
-  .result:not([hidden]) { animation: rise 0.5s var(--ease); }
-  @keyframes rise { from { opacity: 0; transform: translateY(10px); } }
-  .opt.flash { animation: flash 1.2s var(--ease); }
-  @keyframes flash { 0% { box-shadow: 0 0 0 0 rgb(0 112 202 / 0.45); } 100% { box-shadow: 0 0 0 14px rgb(0 112 202 / 0); } }
-
-
-  .result { margin-top: var(--s5); padding-top: var(--s4); border-top: 1.5px solid var(--ink); }
-  .result-name { font-weight: 700; font-size: 1.45rem; line-height: 1.15; }
-  .result[data-svc='direct'] .result-name { color: var(--direct); }
-  .result-why { color: var(--ink-soft); font-size: var(--fs-small); margin-top: var(--s2); }
+  /* Who'll reply */
+  .reply { position: sticky; top: 100px; padding-top: var(--s4); border-top: 3px solid var(--ink); display: grid; gap: var(--s4); }
+  .r-label { margin: 0; font-size: var(--fs-small); font-weight: 600; color: var(--ink-soft); }
+  .r-card { display: flex; gap: var(--s4); align-items: center; }
+  .r-face { position: relative; width: 72px; height: 72px; flex: none; display: grid; place-items: center; overflow: hidden; background: var(--mist); color: var(--ink-soft); font-weight: 300; font-size: 1.3rem; }
+  .r-face img[hidden] { display: none; }
+  .r-face img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center 20%; }
+  .r-name { margin: 0; font-weight: 700; font-size: 1.2rem; letter-spacing: -0.01em; }
+  .r-role { margin: 2px 0 0; color: var(--ink-soft); font-size: var(--fs-small); }
+  .r-reach { display: grid; gap: 2px; margin: 0; font-weight: 600; }
+  .r-reach a { color: var(--ink); text-decoration: none; width: fit-content; }
+  .r-reach a:hover { text-decoration: underline; }
+  .r-note { margin: 0; font-size: var(--fs-small); color: var(--ink-soft); }
+  .r-promise { margin: 0; padding-top: var(--s3); border-top: 1px solid var(--line); font-size: var(--fs-small); color: var(--ink-soft); }
 
   @media (max-width: 960px) {
     .layout { grid-template-columns: 1fr; }
-    .picker { position: static; order: -1; }
+    .reply { display: none; }        /* on phones, one line above the button says who it goes to */
+    .to-line { display: block; }
   }
-  @media (max-width: 620px) {
-    .options, .fields { grid-template-columns: 1fr; }
-  }
-
-  /* After-send steps */
-
+  @media (max-width: 620px) { .options, .fields { grid-template-columns: 1fr; } }
 </style>

@@ -8,14 +8,13 @@ import AtlanticMap from '../components/AtlanticMap.astro';
 import CtaBand from '../components/CtaBand.astro';
 import Photo from '../components/Photo.astro';
 import ToolCards from '../components/ToolCards.astro';
+import Proof from '../components/Proof.astro';
 import { photos } from '../data/photos.js';
-import { testimonials, stats, brand } from '../data/site.js';
+import { stats, brand, offices, social } from '../data/site.js';
 import { jobs } from '../data/jobs.js';
 import { url } from '../lib/url.js';
 
-const quote = testimonials[0];
 const retention = stats.find((s) => s.label.includes('retention'))?.value ?? '92%';
-const reviews = stats.find((s) => s.label.includes('reviews'))?.value ?? '200+';
 
 // Situations employers call about, each answered by the service that fits, with one figure
 // that backs the answer. Every claim restates the live site (hours, one rate, temp to perm,
@@ -30,11 +29,18 @@ const situations = [
 ];
 const svcName = { contract: 'Contract staffing', direct: 'Direct hire' };
 const svcLink = { contract: '/contract/', direct: '/direct-hire/' };
+// Structured data: who ISL is and where its offices are (read by search engines)
+const orgSchema = {
+  '@context': 'https://schema.org', '@type': 'EmploymentAgency', name: brand.name, url: 'https://www.integratedstaffing.ca',
+  telephone: '+1-' + brand.mainPhone, email: brand.email, foundingDate: String(brand.since), areaServed: 'Atlantic Canada',
+  sameAs: social.map((s) => s.href),
+  department: offices.map((o) => ({ '@type': 'EmploymentAgency', name: `${brand.name} ${o.city}`, telephone: '+1-' + o.phone, address: o.address })),
+};
 // The "Now hiring" strip in the hero: the newest real postings
 const ticker = jobs.slice(0, 14);
 
 ---
-<Base>
+<Base description="Contract and permanent staffing from five offices across Atlantic Canada. Search open jobs, or tell us who you need." schema={orgSchema}>
   <!-- 1. HERO: ISL's own photo across the full width, the promise over it,
        one way in for each audience, and a live strip of real open jobs -->
   <section class="hero">
@@ -124,20 +130,7 @@ const ticker = jobs.slice(0, 14);
   </section>
 
   <!-- 4. PROOF: one client quote, with the review count beside it -->
-  <section class="section proof">
-    <div class="wrap proof-grid">
-      <figure class="quote">
-        <blockquote>{quote.quote}</blockquote>
-        <figcaption>{quote.who}</figcaption>
-      </figure>
-      <div class="reviews" data-animate>
-        <p class="stars" aria-hidden="true">{[0, 1, 2, 3, 4].map((i) => (
-          <svg viewBox="0 0 24 24" style={`--s:${i}`}><path d="M12 2.5l2.9 6.1 6.6.8-4.9 4.6 1.3 6.6L12 17.3l-5.9 3.3 1.3-6.6-4.9-4.6 6.6-.8z" /></svg>
-        ))}</p>
-        <p><strong data-countup>{reviews}</strong> five-star reviews on Google from clients and candidates.</p>
-      </div>
-    </div>
-  </section>
+  <Proof />
 
   <!-- 6. FREE TOOLS: ISL's own guides and tools -->
   <section class="section section--rule tools">
@@ -279,18 +272,7 @@ const ticker = jobs.slice(0, 14);
   .more { font-weight: 600; }
   @media (max-width: 900px) { .local-grid { grid-template-columns: 1fr; } }
 
-  /* ---------- 4. Proof ---------- */
-  .proof-grid { display: grid; grid-template-columns: 7fr 4fr; gap: clamp(2rem, 5vw, 5rem); align-items: end; }
-  .quote { margin: 0; }
-  .quote blockquote { margin: 0; font-size: clamp(1.4rem, 1rem + 1.4vw, 2.1rem); font-weight: 300; line-height: 1.35; letter-spacing: -0.015em; }
-  .quote figcaption { margin-top: var(--s5); color: var(--ink-soft); font-weight: 500; }
-  .reviews { font-size: var(--fs-small); color: var(--ink-soft); border-top: 1.5px solid var(--ink); padding-top: var(--s4); }
-  .stars { display: flex; gap: 4px; margin-bottom: var(--s4); }
-  .stars svg { width: 22px; height: 22px; fill: var(--isl-blue); }
-  :global(.motion) .stars svg { transform: scale(0.4); opacity: 0; transition: transform 0.45s var(--ease), opacity 0.3s; transition-delay: calc(var(--s) * 90ms); }
-  :global(.motion) .reviews.is-in .stars svg { transform: none; opacity: 1; }
-  .reviews strong { display: block; color: var(--isl-blue); font-weight: 300; font-size: clamp(3.4rem, 2rem + 4vw, 5.2rem); letter-spacing: -0.05em; line-height: 0.95; margin-bottom: var(--s2); }
-  @media (max-width: 900px) { .proof-grid { grid-template-columns: 1fr; } }
+  /* ---------- 4. Proof: see Proof.astro ---------- */
 
   /* ---------- 6. Tools: see ToolCards.astro ---------- */
   @media (max-width: 860px) { .jobs-intro { justify-self: start; } }

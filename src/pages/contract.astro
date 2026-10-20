@@ -6,6 +6,7 @@ import PageHero from '../components/PageHero.astro';
 import IndustryMatrix from '../components/IndustryMatrix.astro';
 import CtaBand from '../components/CtaBand.astro';
 import Photo from '../components/Photo.astro';
+import Proof from '../components/Proof.astro';
 import { stock } from '../data/photos.js';
 import { route, provinceName } from '../../assistant/supabase/functions/_shared/routing.js';
 import { url } from '../lib/url.js';
@@ -82,7 +83,9 @@ const covered = [
     </div>
   </section>
 
-  <section class="section section--rule">
+  <Proof index={0} tint />
+
+  <section class="section">
     <div class="wrap">
       <div class="section-head"><h2>Talk to your local office</h2></div>
       <ul class="items local">

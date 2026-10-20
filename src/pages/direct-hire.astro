@@ -9,6 +9,7 @@ import CtaBand from '../components/CtaBand.astro';
 import Steps from '../components/Steps.astro';
 import UnitChart from '../components/UnitChart.astro';
 import Photo from '../components/Photo.astro';
+import Proof from '../components/Proof.astro';
 import { stock } from '../data/photos.js';
 import { team } from '../data/team.js';
 import { stats } from '../data/site.js';
@@ -88,7 +89,9 @@ const phones = { 'Zowie Tucker': '902-471-0166' };
     </div>
   </section>
 
-  <section class="section section--rule">
+  <Proof index={1} tint />
+
+  <section class="section">
     <div class="wrap">
       <div class="section-head section-head--split">
         <h2>Specialties</h2>

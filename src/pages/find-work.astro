@@ -47,6 +47,7 @@ const count = { contract: jobs.filter((j) => j.type === 'contract').length, dire
           ))}
         </ul>
       </nav>
+      <h2 class="visually-hidden">Open roles</h2>
       <p class="count" aria-live="polite"><strong data-count>{jobs.length}</strong> <span data-count-label>open roles</span></p>
       <div class="list" data-list>
         {jobs.map((job) => <JobRow job={job} />)}

@@ -62,6 +62,11 @@ const isCurrent = (href) => current.startsWith(url(href));
       <Button href="/hire/" size="sm">Request talent</Button>
     </div>
 
+    <!-- Phones: one tap to call the head office, beside the menu -->
+    <a class="call-m" href={`tel:+1${brand.mainPhone.replaceAll('-', '')}`} aria-label={`Call ${brand.mainPhone}`}>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.4 1.8.7 2.7a2 2 0 0 1-.5 2.1L8 9.8a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.7.7a2 2 0 0 1 1.7 2z"/></svg>
+      <span>Call</span>
+    </a>
     <details class="mobile">
       <summary><span>Menu</span></summary>
       <div class="sheet">
@@ -162,7 +167,9 @@ const isCurrent = (href) => current.startsWith(url(href));
   .login { color: var(--ink-soft); font-size: var(--fs-small); font-weight: 500; text-decoration: none; }
   .login:hover { color: var(--ink); text-decoration: underline; }
 
-  .mobile { display: none; margin-left: auto; }
+  .mobile { display: none; }
+  .call-m { display: none; align-items: center; gap: var(--s2); margin-left: auto; padding: var(--s2) var(--s3); font-weight: 600; color: var(--ink); text-decoration: none; }
+  .call-m svg { width: 18px; height: 18px; color: var(--isl-blue); }
   .mobile summary {
     list-style: none; cursor: pointer; font-weight: 600;
     padding: var(--s2) var(--s4); border: 2px solid var(--ink); border-radius: var(--radius);
@@ -187,5 +194,7 @@ const isCurrent = (href) => current.startsWith(url(href));
   @media (max-width: 1140px) {
     .primary, .tools { display: none; }
     .mobile { display: block; }
+    .call-m { display: inline-flex; }
+    .bar { gap: var(--s3); }
   }
 </style>

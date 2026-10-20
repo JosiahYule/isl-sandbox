@@ -1,0 +1,36 @@
+---
+// PROOF: one client quote beside the Google review count.
+// <Proof index={1} />  picks a testimonial from src/data/site.js; tint adds the grey band.
+import { testimonials, stats } from '../data/site.js';
+const { index = 0, tint = false } = Astro.props;
+const quote = testimonials[index] ?? testimonials[0];
+const reviews = stats.find((s) => s.label.includes('reviews'))?.value ?? '200+';
+---
+<section class:list={['section', 'proof', tint && 'section--tint']}>
+  <div class="wrap proof-grid">
+    <figure class="quote" data-reveal>
+      <blockquote>“{quote.quote}”</blockquote>
+      <figcaption>{quote.who}</figcaption>
+    </figure>
+    <div class="reviews" data-animate>
+      <p class="stars" aria-hidden="true">{[0, 1, 2, 3, 4].map((i) => (
+        <svg viewBox="0 0 24 24" style={`--s:${i}`}><path d="M12 2.5l2.9 6.1 6.6.8-4.9 4.6 1.3 6.6L12 17.3l-5.9 3.3 1.3-6.6-4.9-4.6 6.6-.8z" /></svg>
+      ))}</p>
+      <p><strong data-countup>{reviews}</strong> five-star reviews on Google from clients and candidates.</p>
+    </div>
+  </div>
+</section>
+
+<style>
+  .proof-grid { display: grid; grid-template-columns: 7fr 4fr; gap: clamp(2rem, 5vw, 5rem); align-items: end; }
+  .quote { margin: 0; }
+  .quote blockquote { margin: 0; font-size: clamp(1.4rem, 1rem + 1.4vw, 2.1rem); font-weight: 300; line-height: 1.35; letter-spacing: -0.015em; text-indent: -0.4em; }
+  .quote figcaption { margin-top: var(--s5); color: var(--ink-soft); font-weight: 500; }
+  .reviews { font-size: var(--fs-small); color: var(--ink-soft); border-top: 1.5px solid var(--ink); padding-top: var(--s4); }
+  .stars { display: flex; gap: 4px; margin-bottom: var(--s4); }
+  .stars svg { width: 22px; height: 22px; fill: var(--isl-blue); }
+  :global(.motion) .stars svg { transform: scale(0.4); opacity: 0; transition: transform 0.45s var(--ease), opacity 0.3s; transition-delay: calc(var(--s) * 90ms); }
+  :global(.motion) .reviews.is-in .stars svg { transform: none; opacity: 1; }
+  .reviews strong { display: block; color: var(--isl-blue); font-weight: 300; font-size: clamp(3.4rem, 2rem + 4vw, 5.2rem); letter-spacing: -0.05em; line-height: 0.95; margin-bottom: var(--s2); }
+  @media (max-width: 900px) { .proof-grid { grid-template-columns: 1fr; } }
+</style>

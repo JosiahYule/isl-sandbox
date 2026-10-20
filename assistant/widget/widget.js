@@ -50,6 +50,8 @@
       background: var(--dark); color: var(--white); font-weight: 600; font-size: 14.5px; line-height: 1; border-bottom: 3px solid var(--blue); }
     .launcher:hover { background: #000; }
     .launcher svg { width: 20px; height: 20px; flex: none; }
+    /* Phones: icon only, so the button doesn't cover the page */
+    @media (max-width: 600px) { .launcher { padding: 14px; } .launcher span { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); } }
     .launcher .dot { width: 8px; height: 8px; border-radius: 50%; background: #4da3e8; margin-left: 2px; }
     .launcher:focus-visible, button:focus-visible, a:focus-visible, textarea:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
 
@@ -207,7 +209,7 @@
       const c = el("div", "contact");
       const who = el("div", "who");
       const face = el("div", "face");
-      if (p.photo) { const img = el("img"); img.src = p.photo; img.alt = ""; img.onerror = () => { img.remove(); face.textContent = initials(p.name); }; face.append(img); }
+      if (p.photo) { const img = el("img"); img.alt = ""; img.onerror = () => { img.remove(); face.textContent = initials(p.name); }; img.src = p.photo; face.append(img); }
       else face.textContent = initials(p.name);
       const t = el("div"); t.append(el("strong", null, p.name), el("span", null, p.handles));
       who.append(face, t);
