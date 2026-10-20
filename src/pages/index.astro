@@ -9,6 +9,7 @@ import CtaBand from '../components/CtaBand.astro';
 import Photo from '../components/Photo.astro';
 import ToolCards from '../components/ToolCards.astro';
 import Proof from '../components/Proof.astro';
+import WeRecruit from '../components/WeRecruit.astro';
 import { photos } from '../data/photos.js';
 import { stats, brand, offices, social } from '../data/site.js';
 import { jobs } from '../data/jobs.js';
@@ -79,7 +80,10 @@ const ticker = jobs.slice(0, 14);
     </div>
   </section>
 
-  <!-- 2. SITUATIONS: the employer picks what's happening; one answer panel responds,
+  <!-- 2. WE RECRUIT. The live site's signature line, with three live points: where, what, who -->
+  <WeRecruit />
+
+  <!-- 3. SITUATIONS: the employer picks what's happening; one answer panel responds,
        in the colour of the service that fits (near-black contract, ISL blue direct hire) -->
   <section class="section sit-section">
     <div class="wrap">
