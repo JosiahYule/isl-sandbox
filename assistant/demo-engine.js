@@ -29,7 +29,7 @@ const numberWord = (n) => (n >= 0 && n < NUM_WORDS.length ? NUM_WORDS[n] : Strin
 
 // ---------- Who is talking: employer or job seeker? ----------
 const COUNT = String.raw`(?:\d{1,3}|one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|fifteen|twenty|a few|few|several|a couple(?: of)?|a dozen|some|extra|more)`;
-const PEOPLE_WORDS = String.raw`(?:staff|workers|people|employees|temps|hands|help|labou?rers|drivers|operators|cooks|cleaners|welders|carpenters|electricians|servers|pickers|packers|receptionists|assistants|accountants|bookkeepers|technicians|mechanics|guards|agents|reps|associates|landscapers|harvesters|movers|helpers)`;
+const PEOPLE_WORDS = String.raw`(?:staff|people|help|(?:worker|employee|temp|hand|labou?rer|driver|operator|cook|cleaner|welder|carpenter|electrician|server|picker|packer|receptionist|assistant|accountant|bookkeeper|technician|mechanic|guard|agent|rep|associate|landscaper|harvester|mover|helper|controller|manager|supervisor|millwright|engineer)s?)(?!\s+(?:job|jobs|work|position|positions|role|roles|opening|openings)\b)`;
 const EMPLOYER_RE = new RegExp([
   String.raw`\b(i'?m|we'?re|i am|we are|currently|company is|business is|still) hiring\b`,
   String.raw`\b(looking|want|need|trying|planning) to (hire|fill|staff|recruit)\b`,
@@ -49,7 +49,7 @@ const STOP = new Set(("i im i'm am a an the and or but for to of in on at by wit
   "could would like please hi hello hey there is are be what whats what's open opening openings available currently new get got also just really " +
   'very good great kind type sort full part time permanent perm temporary temp contract casual short long term about how else other only show ' +
   'instead area city town rural place places where everywhere nearby close closer us you your yes no okay ok thanks thank sure maybe right now ' +
-  'seasonal days weeks months week month somewhere else more next actually instead now then still').split(/\s+/));
+  'seasonal days weeks months week month somewhere else more next actually instead now then still drive driving-licence').split(/\s+/));
 const RELATED = {
   warehouse: ['warehouse', 'forklift', 'shipper', 'receiver', 'labourer', 'material handler'],
   forklift: ['forklift', 'warehouse'],
@@ -145,7 +145,9 @@ const FAQ = [
   ['about', /\bwhat (is|does) (isl|integrated staffing)|\bwho are you\b|\bwhat do you do\b|\bhow does (this|it|isl) work\b/],
   ['resume', /\bsend (my|a) resume\b|\bgeneral appli|\bresume\b/],
   ['thanks', /^(thanks|thank you|thx|cheers|great,? thanks|perfect|awesome|that'?s (great|perfect|all)|ok thanks|bye|goodbye)\b/],
-  ['hello', /^(hi|hello|hey|good (morning|afternoon|evening)|bonjour)[!. ]*$/],
+  ['hello', /^(hi|hello|hey|hiya|good (morning|afternoon|evening)|bonjour)( there)?[!. ]*$/],
+  ['howareyou', /\bhow are you\b|\bhow'?s it going\b|\bhow are things\b/],
+  ['bot', /\bare you (a |an )?(bot|robot|real|human|ai|person)\b|\bwho am i (talking|speaking) (to|with)\b/],
   ['more', /^(show )?(me )?(more|next|other ones|any others|more (jobs|results|options))\b|\bshow (me )?more\b/],
   ['restart', /^(start over|restart|reset|new search|start again)\b/],
   ['elsewhere', /^somewhere else\b|\bdifferent (city|area|place|location)\b/],
@@ -236,18 +238,24 @@ export function createEngine({ loadJobs, siteUrl = (path) => SITE.base + path })
     const faq = st.lastFaq;
 
     if (faq === 'restart') {
-      return { reply: 'Starting fresh. Are you looking for work, or hiring?', choices: ["I'm looking for work", "I'm hiring"], meta: { ask: 'mode' } };
+      return { reply: 'Sure, let’s start fresh! Are you looking for work, or hiring?', choices: ["I'm looking for work", "I'm hiring"], meta: { ask: 'mode' } };
     }
     if (faq === 'hello' && !st.mode) {
-      return { reply: pick(['Hi there. Are you looking for work, or hiring?', 'Hello. Are you here to find work, or to hire?'], seed), choices: ["I'm looking for work", "I'm hiring"], meta: { ask: 'mode' } };
+      return { reply: pick(['Hi there! Are you looking for work, or hiring?', 'Hello! Are you here to find work, or to find people?'], seed), choices: ["I'm looking for work", "I'm hiring"], meta: { ask: 'mode' } };
     }
     if (faq === 'thanks') {
-      return { reply: st.mode === 'employer' ? 'You’re welcome. Good luck with the hire.' : 'You’re welcome. Good luck with the search.', choices: ['Start over'], meta: { mode: st.mode } };
+      return { reply: st.mode === 'employer' ? 'You’re very welcome! Good luck with the hire.' : 'You’re very welcome! Good luck with the search, and come back anytime.', choices: ['Start over'], meta: { mode: st.mode } };
+    }
+    if (faq === 'howareyou') {
+      return { reply: st.mode ? 'I’m doing great, thanks for asking! Where were we?' : 'I’m doing great, thanks for asking! Are you looking for work, or hiring?', choices: st.mode ? [] : ["I'm looking for work", "I'm hiring"], meta: { mode: st.mode, ask: st.mode ? asked : 'mode' } };
+    }
+    if (faq === 'bot') {
+      return { reply: 'I’m ISL’s virtual assistant. I can find open jobs for you, or connect you with the right recruiter if you’re hiring. What brings you here today?', choices: ["I'm looking for work", "I'm hiring"], meta: { mode: st.mode, ask: 'mode' } };
     }
     if (st.mode === 'employer') return employerTurn(st, asked, seed);
     if (faq && faq !== 'more' && faq !== 'elsewhere') return seekerFaq(faq, st);
     if (!st.mode && !st.seek.keywords.length && !st.seek.place) {
-      return { reply: 'Happy to help. Are you looking for work, or hiring?', choices: ["I'm looking for work", "I'm hiring"], meta: { ask: 'mode' } };
+      return { reply: 'Happy to help! Are you looking for work, or hiring?', choices: ["I'm looking for work", "I'm hiring"], meta: { ask: 'mode' } };
     }
     return seekerTurn(st, seed);
   };
@@ -258,21 +266,21 @@ export function createEngine({ loadJobs, siteUrl = (path) => SITE.base + path })
     const office = route({ audience: 'seeker', place: st.seek.place });
     switch (faq) {
       case 'apply':
-        return { reply: 'Each job card has an Apply button that opens the application for that role. If nothing fits yet, you can send your resume and a recruiter will reach out when something does.', choices: [{ label: 'Send my resume', href: links.generalApply }, 'Show me jobs'], meta };
+        return { reply: 'It’s easy: each job card has an Apply button that opens the application for that role. If nothing fits yet, send your resume and a recruiter will reach out when something does.', choices: [{ label: 'Send my resume', href: links.generalApply }, 'Show me jobs'], meta };
       case 'fees':
-        return { reply: 'It’s free. ISL never charges job seekers, and we never ask for banking details to apply.', choices: ['Show me jobs'], meta };
+        return { reply: 'Not a cent! It’s completely free for job seekers. We never charge a fee, and we’ll never ask for banking details to apply.', choices: ['Show me jobs'], meta };
       case 'pay': case 'price':
-        return { reply: 'Pay is on each job card when the employer has shared it. For typical rates by role, our wage guide has entry-level to top-of-market ranges.', choices: [{ label: 'Open the wage guide', href: links.wageGuide }, 'Show me jobs'], meta };
+        return { reply: 'Pay is listed on each job card when the employer has shared it. For typical rates by role, our wage guide has entry-level to top-of-market ranges.', choices: [{ label: 'Open the wage guide', href: links.wageGuide }, 'Show me jobs'], meta };
       case 'permit':
-        return { reply: 'A recruiter can answer that properly, since it depends on your situation and the role.', contact: toContact(office), meta };
+        return { reply: 'A recruiter is the best person to answer that, since it depends on your situation and the role. Here’s who to ask:', contact: toContact(office), meta };
       case 'status':
-        return { reply: 'I can’t see applications from here, but the office can.', contact: toContact(office), meta };
+        return { reply: 'I can’t see applications from here, but the office can help. Here’s who to contact:', contact: toContact(office), meta };
       case 'about':
-        return { reply: 'Integrated Staffing places people in contract and permanent jobs across Atlantic Canada, from five local offices. Tell me the work you want and I’ll show you what’s open.', choices: ['Warehouse work', 'Office and admin', 'Driving', 'Trades'], meta: { ...meta, ask: 'seek-work' } };
+        return { reply: 'We’re Integrated Staffing! We place people in contract and permanent jobs across Atlantic Canada, from five local offices. What kind of work are you looking for?', choices: ['Warehouse work', 'Office and admin', 'Driving', 'Trades'], meta: { ...meta, ask: 'seek-work' } };
       case 'resume':
-        return { reply: 'Send your resume once and a recruiter will contact you when a role fits.', choices: [{ label: 'Send my resume', href: links.generalApply }, 'Show me jobs'], meta };
+        return { reply: 'Good idea. Send your resume once, and a recruiter will reach out when a role fits.', choices: [{ label: 'Send my resume', href: links.generalApply }, 'Show me jobs'], meta };
       default:
-        return { reply: 'Tell me the kind of work you want and where, and I’ll show you what’s open.', meta: { ...meta, ask: 'seek-work' } };
+        return { reply: 'Tell me the kind of work you’re after and where, and I’ll show you what’s open!', meta: { ...meta, ask: 'seek-work' } };
     }
   }
 
@@ -280,10 +288,10 @@ export function createEngine({ loadJobs, siteUrl = (path) => SITE.base + path })
     const s = st.seek;
     const meta = { mode: 'seeker' };
     if (st.lastFaq === 'elsewhere' || (/^show me jobs$/i.test(st.lastText.trim()) && !s.keywords.length && !s.place)) {
-      return { reply: 'Where would you like to work?', choices: ['Halifax area', 'Moncton', 'Charlottetown', "St. John's"], meta: { ...meta, ask: 'seek-place' } };
+      return { reply: 'Sure! Where would you like to work?', choices: ['Halifax area', 'Moncton', 'Charlottetown', "St. John's"], meta: { ...meta, ask: 'seek-place' } };
     }
     if (!s.keywords.length && !s.place) {
-      return { reply: pick(['What kind of work are you after, and where?', 'Sure. What kind of work, and which area?'], seed), choices: ['Warehouse work', 'Office and admin', 'Driving', 'Trades'], meta: { ...meta, ask: 'seek-work' } };
+      return { reply: pick(['Love to help with that! What kind of work are you looking for, and where?', 'Let’s find you something! What kind of work, and which area?'], seed), choices: ['Warehouse work', 'Office and admin', 'Driving', 'Trades'], meta: { ...meta, ask: 'seek-work' } };
     }
 
     const jobs = await loadJobs();
@@ -307,9 +315,9 @@ export function createEngine({ loadJobs, siteUrl = (path) => SITE.base + path })
     choices.push('Somewhere else');
 
     if (!shown.length) {
-      if (s.page > 0) return { reply: 'That’s everything that matches right now.', choices: ['Somewhere else', { label: 'Send my resume', href: links.generalApply }], meta };
+      if (s.page > 0) return { reply: 'That’s everything that matches right now. Want to try another area?', choices: ['Somewhere else', { label: 'Send my resume', href: links.generalApply }], meta };
       return {
-        reply: `Nothing open for ${what.trim() ? typeWord + what.trim() + ' work' : 'that'}${where} right now. Send your resume and a recruiter will reach out when something fits.`,
+        reply: `I couldn’t find any ${what.trim() ? typeWord + what.trim() + ' work' : 'openings like that'}${where} right now, sorry! If you send your resume, a recruiter will reach out when something fits.`,
         choices: [{ label: 'Send my resume', href: links.generalApply }, 'Somewhere else', 'Any type of work'],
         meta,
       };
@@ -318,15 +326,18 @@ export function createEngine({ loadJobs, siteUrl = (path) => SITE.base + path })
     const cards = shown.map((r) => toCard(jobs.find((j) => j.id === r.job_id), ''));
     let reply;
     if (s.page > 0) {
-      reply = pick(['Here are a few more.', 'A few more that fit.'], seed);
+      reply = pick(['Sure, here are a few more.', 'Here you go, a few more that fit.'], seed);
     } else if (found.note || strictTotal === 0) {
       const wider = city && s.place?.province ? ` in ${provinceName(s.place.province)}` : '';
       const thing = what.trim() ? `${typeWord}${what.trim()} work` : `${typeWord}work like that`;
-      reply = `Nothing open for ${thing}${where} right now. ${cards.length === 1 ? 'This is the closest role' : 'These are the closest roles'}${wider}.`;
+      reply = `I couldn’t find any ${thing}${where} right now, sorry about that. ${cards.length === 1 ? 'Here’s the closest role' : 'Here are the closest roles'}${wider}.`;
     } else if (strictTotal > PAGE) {
-      reply = `${cap(numberWord(strictTotal))} ${typeWord}${what}roles open${where}. Here are the ${numberWord(PAGE)} closest matches.`;
+      reply = pick([
+        `Good news! ${cap(numberWord(strictTotal))} ${typeWord}${what}roles are open${where}. Here are the ${numberWord(PAGE)} closest matches.`,
+        `I found ${numberWord(strictTotal)} ${typeWord}${what}roles open${where}. Here are the best ${numberWord(PAGE)} to start with.`,
+      ], seed);
     } else {
-      reply = `${cap(numberWord(strictTotal))} ${typeWord}${what}${strictTotal === 1 ? 'role' : 'roles'} open${where} right now.`;
+      reply = `Good news! ${cap(numberWord(strictTotal))} ${typeWord}${what}${strictTotal === 1 ? 'role is' : 'roles are'} open${where} right now.`;
     }
     return { reply: reply.replace(/\s+/g, ' '), jobs: cards, choices: choices.slice(0, 4), meta: { ...meta, ask: 'seek-results' } };
   }
@@ -345,14 +356,19 @@ export function createEngine({ loadJobs, siteUrl = (path) => SITE.base + path })
     const where = h.place ? (h.place.outside ? h.place.label : h.place.city ? `in ${h.place.city}` : `in ${h.place.label}`) : '';
     const known = [who, where].filter(Boolean).join(' ');
     const prevKnown = st.prevKnown || '';
-    const ack = known && known !== prevKnown && asked !== 'hire-done' ? `${cap(known)}. ` : '';
+    // Say back what's new ("Three labourers in rural Nova Scotia, got it!"), or a short thanks
+    // when they've just answered a question. The thanks rotates so it doesn't repeat.
+    const shortThanks = pick(['Perfect. ', 'Sounds good. ', 'Thanks! ', 'Great. '], seed);
+    const ack = asked === 'hire-service' && h.service === 'unsure' ? 'No problem, we can help you figure that out. '
+      : known && known !== prevKnown && !(prevKnown && known.startsWith(prevKnown)) && asked !== 'hire-done' ? `${cap(known)}, got it! `
+      : asked && asked.startsWith('hire-') && asked !== 'hire-role' && asked !== 'hire-done' ? shortThanks : '';
 
     if (['price', 'fees', 'pay'].includes(st.lastFaq)) {
       const r = route({ audience: 'employer', service: h.service === 'direct' ? 'direct' : 'contract', place: h.place });
       return {
         reply: h.service === 'direct'
-          ? 'A permanent search is one invoice, a percentage of the hire’s annual salary, agreed before the search starts. The person below can quote it for your role.'
-          : 'Contract staffing is one hourly rate per worker, with wages, payroll and workers’ compensation included. The rate depends on the role, so the person below can quote it.',
+          ? 'Happy to explain. A permanent search is one invoice, a percentage of the hire’s annual salary, agreed before the search starts. The person below can quote it for your role.'
+          : 'Happy to explain. Contract staffing is one hourly rate per worker, with wages, payroll and workers’ compensation included. The rate depends on the role, so the person below can quote it for you.',
         contact: toContact(r), meta: meta(asked),
       };
     }
@@ -361,7 +377,7 @@ export function createEngine({ loadJobs, siteUrl = (path) => SITE.base + path })
     // 1. The role
     if (!h.role || (h.role.generic && !h.role.count)) {
       return {
-        reply: asked === 'hire-role' ? 'What’s the job title or type of work?' : pick(['Who do you need? A role and how many people is plenty.', 'Happy to help. Who do you need, and how many?'], seed),
+        reply: asked === 'hire-role' ? 'No problem. What’s the job title, or the type of work?' : pick(['Happy to help you find someone! Who do you need, and how many?', 'Great, let’s find you the right people! Who do you need, and how many?'], seed),
         choices: ['General labourers', 'Warehouse staff', 'Office and admin', 'A permanent hire'],
         meta: meta('hire-role'),
       };
@@ -369,7 +385,7 @@ export function createEngine({ loadJobs, siteUrl = (path) => SITE.base + path })
     // 2. Where
     if (!h.place) {
       return {
-        reply: `${ack}Where’s the work?`,
+        reply: `${ack}Where’s the work located?`,
         choices: ['Nova Scotia', 'New Brunswick', 'PEI', 'Newfoundland and Labrador', 'Elsewhere in Canada'],
         meta: meta('hire-place'),
       };
@@ -377,7 +393,7 @@ export function createEngine({ loadJobs, siteUrl = (path) => SITE.base + path })
     // 3. Contract or permanent
     if (!h.service) {
       return {
-        reply: `${ack}Is this for a set stretch of time, or a permanent hire?`,
+        reply: `${ack}Is this for a set stretch of time, or are you looking for a permanent hire?`,
         choices: ['For a set time', 'Permanent', 'Try them first, then hire', 'Not sure yet'],
         meta: meta('hire-service'),
       };
@@ -386,7 +402,7 @@ export function createEngine({ loadJobs, siteUrl = (path) => SITE.base + path })
     const service = h.service === 'temp-to-perm' ? 'contract' : h.service;
     if (service !== 'direct' && h.place.outside) {
       return {
-        reply: 'Our contract workers come from our five Atlantic offices, so contract staffing stays in Atlantic Canada. Permanent searches reach anywhere in the country.',
+        reply: 'Just so you know, our contract workers come from our five Atlantic offices, so contract staffing stays in Atlantic Canada. Permanent searches can reach anywhere in the country, though. Would that work?',
         choices: ['Make it a permanent search', 'The work is in Atlantic Canada'],
         meta: meta('hire-service'),
       };
@@ -394,7 +410,7 @@ export function createEngine({ loadJobs, siteUrl = (path) => SITE.base + path })
     // 4. Start date (contract only: it decides how urgent the search is)
     if (service !== 'direct' && !h.start && asked !== 'hire-start') {
       return {
-        reply: `${ack}When do you need them to start?`,
+        reply: `${ack}And when would you like them to start?`,
         choices: ['As soon as possible', 'In the next few weeks', 'Planning ahead'],
         meta: meta('hire-start'),
       };
@@ -419,12 +435,12 @@ export function createEngine({ loadJobs, siteUrl = (path) => SITE.base + path })
 
     let reply;
     if (service === 'direct') {
-      reply = `${first} leads our direct hire team, so a permanent search starts there.`;
+      reply = `${first} leads our direct hire team and will take it from here.`;
     } else if (r.person) {
       const covers = h.place.province === 'NS' ? `Our Halifax office covers all of Nova Scotia, and ${first} handles new client requests there.`
         : h.place.province === 'NB' ? `${first} handles new client requests for our Moncton and Saint John offices.`
         : `${first} handles new client requests at our ${r.office.city} office.`;
-      reply = h.service === 'unsure' ? `${covers} ${first} can also help you choose between contract and permanent.` : covers;
+      reply = h.service === 'unsure' ? covers.replace(/\.$/, ', and can help you choose between contract and permanent too.') : covers;
     } else {
       reply = h.place.city
         ? `Our ${r.office.city} office covers ${h.place.city}.`
@@ -432,6 +448,14 @@ export function createEngine({ loadJobs, siteUrl = (path) => SITE.base + path })
           ? 'Our Moncton office is a good place to start, and they’ll pass it to Saint John if that’s closer.'
           : `Our ${r.office.city} office covers ${provinceName(h.place.province)}.`;
     }
+    // A town without an office (Cape Breton, Fredericton, Gander...): say plainly that we cover it
+    // The office cities and the towns right around them (these don't need a "we cover it")
+    const OFFICE_CITIES = ['halifax', 'dartmouth', 'bedford', 'sackville', 'lower sackville', 'burnside', 'cole harbour', 'timberlea',
+      'moncton', 'dieppe', 'riverview', 'saint john', 'quispamsis', 'rothesay', 'charlottetown', 'stratford', 'cornwall',
+      "st. john's", 'mount pearl', 'paradise', 'conception bay south', 'torbay'];
+    const beyondOffice = h.place.city && !OFFICE_CITIES.includes(h.place.city.toLowerCase());
+    const opener = beyondOffice ? `Good news, we cover ${h.place.city}!` : pick(['Thanks, that’s everything I need!', 'Perfect, that’s all I need!'], seed);
+    reply = `${opener} ${reply}`;
     return {
       reply,
       summary,

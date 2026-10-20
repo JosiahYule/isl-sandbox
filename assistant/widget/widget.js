@@ -29,9 +29,9 @@
 
   // What the window says first, for each kind of visitor.
   const GREETINGS = {
-    ask: { text: "Hi. Are you looking for work, or hiring?", choices: ["I'm looking for work", "I'm hiring"], placeholder: "Type a message" },
-    seeker: { text: "Hi. What kind of work are you after, and where? I'll show you what's open.", choices: ["Warehouse work", "Office and admin", "Driving", "Trades"], placeholder: "e.g. Forklift work in Moncton" },
-    employer: { text: "Hi. Tell me who you need and where, and I'll put you in touch with the right person at ISL.", choices: ["3 labourers in rural Nova Scotia", "A permanent controller in Moncton", "Warehouse staff in Halifax next week"], placeholder: "e.g. 3 labourers in rural Nova Scotia" },
+    ask: { text: "Hi there! I can help you find a job, or find the right people to hire. Which brings you here today?", choices: ["I'm looking for work", "I'm hiring"], placeholder: "Type a message" },
+    seeker: { text: "Hi there! Tell me what kind of work you're looking for and where, and I'll show you what's open.", choices: ["Warehouse work", "Office and admin", "Driving", "Trades"], placeholder: "e.g. Forklift work in Moncton" },
+    employer: { text: "Hi there! Tell me who you need and where, and I'll connect you with the right person on our team.", choices: ["3 labourers in rural Nova Scotia", "A permanent controller in Moncton", "Warehouse staff in Halifax next week"], placeholder: "e.g. 3 labourers in rural Nova Scotia" },
   };
   const LAUNCHER = { ask: "Ask ISL", seeker: "Find a job", employer: "Hiring? Ask us" };
 
@@ -305,7 +305,8 @@
         .concat(state.turns.filter((x) => x.role === "user" || x.role === "assistant").map((x) => (x.role === "assistant" ? { role: x.role, content: x.content, meta: x.meta } : { role: x.role, content: x.content })));
       try {
         const r = await send(messages);
-        await new Promise((ok) => setTimeout(ok, 350)); // a beat, so replies don't feel instant and robotic
+        // A short "typing" pause that grows with the reply, so it reads like someone answering, not a machine
+        await new Promise((ok) => setTimeout(ok, Math.min(400 + (r.reply || "").length * 6, 1200)));
         if (r.meta?.mode && GREETINGS[r.meta.mode]) state.mode = r.meta.mode; // header follows the conversation
         state.turns.push({ role: "assistant", content: r.reply || "Here's what I found.", jobs: r.jobs || [], contact: r.contact || null, summary: r.summary || null, choices: r.choices || [], meta: r.meta || null });
       } catch (e) {

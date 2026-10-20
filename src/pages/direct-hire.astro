@@ -10,10 +10,10 @@ import Steps from '../components/Steps.astro';
 import UnitChart from '../components/UnitChart.astro';
 import Photo from '../components/Photo.astro';
 import Proof from '../components/Proof.astro';
+import PersonCard from '../components/PersonCard.astro';
 import { stock } from '../data/photos.js';
 import { team } from '../data/team.js';
 import { stats } from '../data/site.js';
-import { sized } from '../lib/img.js';
 
 const recruiters = team.filter((p) => p.team === 'Direct Hire');
 const retention = stats.find((s) => s.label.includes('retention'))?.value ?? '92%';
@@ -31,8 +31,6 @@ const terms = [
   ['Industry recruiters', 'Each search is led by a recruiter in your field.'],
   ['One invoice', 'A percentage of the hire’s annual salary.'],
 ];
-const initials = (n) => n.split(' ').map((x) => x[0]).join('');
-const phones = { 'Zowie Tucker': '902-471-0166' };
 ---
 <Base assistantMode="employer" title="Direct hire recruitment" description="Permanent recruitment for hard-to-fill roles anywhere in Canada, with a 90-day replacement guarantee.">
   <PageHero title="Permanent hires, searched coast to coast." lead="Targeted recruitment for hard-to-fill, full-time roles.">
@@ -74,16 +72,7 @@ const phones = { 'Zowie Tucker': '902-471-0166' };
       <div class="section-head"><h2>Your direct hire recruiters</h2></div>
       <ul class="people" data-stagger>
         {recruiters.map((r) => (
-          <li>
-            <a href={`https://www.integratedstaffing.ca/${r.slug}`}>
-              <span class="shot">{r.photo
-                ? <img src={sized(r.photo, 750)} srcset={`${sized(r.photo, 500)} 500w, ${sized(r.photo, 750)} 750w`} sizes="(max-width: 900px) 50vw, 25vw" alt="" loading="lazy" decoding="async" onerror="this.remove()" />
-                : <span class="ini" aria-hidden="true">{initials(r.name)}</span>}</span>
-              <span class="pname">{r.name}</span>
-              <span class="prole">{r.role}</span>
-              {phones[r.name] && <span class="pphone">{phones[r.name]}</span>}
-            </a>
-          </li>
+          <li><PersonCard person={r} /></li>
         ))}
       </ul>
     </div>
@@ -117,14 +106,6 @@ const phones = { 'Zowie Tucker': '902-471-0166' };
   :global(.motion) .figs.is-in > li { background-size: 100% 1.5px; }
 
   .people { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--s5); }
-  .people a { display: grid; gap: 2px; color: var(--ink); text-decoration: none; }
-  .people a:hover .pname { text-decoration: underline; }
-  .shot { position: relative; display: block; aspect-ratio: 4 / 5; overflow: hidden; background: var(--mist); margin-bottom: var(--s3); }
-  .shot img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center 20%; transition: transform 0.6s var(--ease); }
-  .people a:hover .shot img { transform: scale(1.03); }
-  .ini { position: absolute; inset: 0; display: grid; place-items: center; font-size: 2rem; font-weight: 300; color: var(--ink-soft); }
-  .pname { font-weight: 700; font-size: 1.1rem; }
-  .prole, .pphone { font-size: var(--fs-small); color: var(--ink-soft); }
 
   @media (max-width: 960px) {
     .stay { grid-template-columns: 1fr; }

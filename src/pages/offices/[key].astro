@@ -15,6 +15,8 @@ import ContactCard from '../../components/ContactCard.astro';
 import JobRow from '../../components/JobRow.astro';
 import CtaBand from '../../components/CtaBand.astro';
 import Photo from '../../components/Photo.astro';
+import PersonCard from '../../components/PersonCard.astro';
+import { team } from '../../data/team.js';
 import { offices } from '../../data/site.js';
 import { areas } from '../../data/areas.js';
 import { jobs } from '../../data/jobs.js';
@@ -30,6 +32,13 @@ const GUIDES = {
   'saint-john': ['why-new-brunswick-a-practical-guide-for-canadians-considering-a-move'],
   charlottetown: [],
   'st-johns': ['work-live-newfoundland'],
+};
+// What each office covers: the whole province, not just the city it's in
+const COVERS = {
+  NS: 'Our Halifax office covers all of Nova Scotia, from Yarmouth to Cape Breton.',
+  NB: 'Between them, our Moncton and Saint John offices cover all of New Brunswick, Fredericton and the north included.',
+  PE: 'Our Charlottetown office covers the whole Island, Summerside to Souris.',
+  NL: 'Our St. John’s office covers all of Newfoundland and Labrador, not just the Avalon.',
 };
 // Real photos of an office's team, where we have one
 const TEAM_PHOTO = { 'st-johns': { ...photos.teamNL, caption: 'Our St. John’s team, December 2025' } };
@@ -61,6 +70,7 @@ const maps = `https://www.google.com/maps/search/?api=1&query=${encodeURICompone
 const isHead = key === 'halifax';
 const province = provinceName(office.province);
 const photo = TEAM_PHOTO[key];
+const people = team.filter((p) => p.province === office.province);
 ---
 <Base schema={officeSchema} title={`${office.city} office`} description={`Integrated Staffing in ${office.city}: contract and permanent staffing, local jobs and who to call.`}>
   <PageHero title={`Our ${office.city} office.`} lead={`${office.address}${isHead ? '. Our head office.' : '.'}`}>
@@ -78,7 +88,10 @@ const photo = TEAM_PHOTO[key];
   <!-- Who to call: the same routing the chatbot uses -->
   <section class="section">
     <div class="wrap">
-      <div class="section-head"><h2>Hiring in {office.province === 'NB' ? 'New Brunswick' : province}</h2></div>
+      <div class="section-head">
+        <h2>Hiring in {office.province === 'NB' ? 'New Brunswick' : province}</h2>
+        <p class="lead">{COVERS[office.province]}</p>
+      </div>
       <div class="contacts" data-stagger>
         <ContactCard label="Contract staffing" person={contract.person} office={contract.office}
           href={`/hire/?service=contract&where=${encodeURIComponent(province)}`} cta="Request workers" />
@@ -106,6 +119,15 @@ const photo = TEAM_PHOTO[key];
     </div>
   </section>
 
+  {people.length > 0 && (
+    <section class="section">
+      <div class="wrap">
+        <div class="section-head"><h2>Our team in {office.province === 'NB' ? 'New Brunswick' : office.province === 'PE' ? 'PEI' : office.province === 'NL' ? 'Newfoundland and Labrador' : 'Nova Scotia'}</h2></div>
+        <ul class="team" data-stagger>{people.map((p) => <li><PersonCard person={p} size="sm" /></li>)}</ul>
+      </div>
+    </section>
+  )}
+
   {guides.length > 0 && (
     <section class="section">
       <div class="wrap">
@@ -126,6 +148,7 @@ const photo = TEAM_PHOTO[key];
 
   .contacts { display: grid; grid-template-columns: 1fr 1fr; gap: var(--s7); }
 
+  .team { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: var(--s5) var(--s4); }
   .list { border-top: 1.5px solid var(--ink); background: var(--paper); }
   .more { display: inline-block; margin-top: var(--s5); font-weight: 600; }
   .none { color: var(--ink-soft); }

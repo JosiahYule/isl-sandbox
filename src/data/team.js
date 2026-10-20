@@ -2,11 +2,13 @@
 // `slug` is the bio page address on the live site (integratedstaffing.ca/<slug>).
 // `photo` is the headshot from their live bio page (Squarespace image store), without a size.
 // Missing photos (no headshot on the live site yet): Ross, Chance, Erika, Natacha, Michaila, Crystal, Kelli.
-// TODO: add roles for everyone; only leadership, direct hire and marketing roles are filled in.
+// Titles, provinces, contact details and bios come from src/data/bios.js (merged in below).
+
+import { bios } from './bios.js';
 
 const cdn = (path) => `https://images.squarespace-cdn.com/content/v1/691490c94119776708e69bbe/${path}`;
 
-export const team = [
+const people = [
   { name: 'Greg White', slug: 'greg-white', role: 'CEO', team: 'Leadership', photo: cdn('347a41ba-e729-495e-ad94-39b2a85f1118/Headshot+-+G.+White.png') },
   { name: 'Ross Argante', slug: 'ross-argante', role: 'Partner', team: 'Leadership' },
   { name: 'Chance Skauge', slug: 'chance-skauge', role: 'Director of Business Development', team: 'Leadership' },
@@ -16,11 +18,9 @@ export const team = [
   { name: 'Kayla Jamieson', slug: 'kayla-jamieson', role: 'Recruitment Consultant', team: 'Direct Hire', photo: cdn('75e91452-b766-4e60-ac55-0c75bb6c2616/Kayla+Jamieson.png') },
   { name: 'Amber Antle', slug: 'amber-antle', role: '', photo: cdn('768d3e2a-b0eb-44af-a48c-2fa25c843713/IMG_0975.png') },
   { name: 'Natacha Bailey', slug: 'natacha-bailey', role: '' },
-  { name: 'Nadine Chavarie', slug: 'nadine-chavarie', role: '', photo: cdn('a93ec765-14d1-4b29-84da-eb170342e580/Nadine+C.+Headshot') },
   { name: 'Laura Coyle', slug: 'laura-coyle', role: '', photo: cdn('70f9ceb8-76bf-4415-b32f-cdbba19bd9e9/Laura+C+Headshot.png') },
   { name: 'Michaila Doiron', slug: 'michaila-doiron', role: '' },
   { name: 'Megan Ferguson', slug: 'megan-ferguson', role: '', photo: cdn('e09b703e-98d4-4fcd-81ee-784e873d0f3e/Headshot+-+Megan+Ferguson.jpg') },
-  { name: 'Steven Fox', slug: 'steven-fox', role: '', photo: cdn('03576e16-fd5d-450d-afd7-006409c78519/Screenshot+2025-08-05+111122.png') },
   { name: 'Nicole Fudge', slug: 'nicole-fudge', role: '', photo: cdn('ef4581bc-24d6-4baf-9720-e7633a7936d1/websized-mdwed_2022_0128_1.jpg') },
   { name: 'Carrie Fullarton', slug: 'carrie-fullarton', role: '', photo: cdn('d54271f1-1eb7-4dfa-8743-5e586e637316/Carrie+F.+Headshot') },
   { name: 'Skylar Hardwick', slug: 'skylar-hardwick', role: '', photo: cdn('0bd6add1-06f1-4a63-ace6-538e53b49a0c/Integrated+Staffing+Skylar+Hardwick.jpg') },
@@ -40,3 +40,6 @@ export const team = [
   { name: 'Kelli Wetmore', slug: 'kelli-wetmore', role: '' },
   { name: 'Josiah Yule', slug: 'josiah-yule', role: 'Marketing Coordinator', photo: cdn('0f317710-5e34-4396-8ea2-b3f16f46e21f/Untitled+%28Instagram+Post+%2845%29%29+%284%29+%281%29.png') },
 ];
+
+// Each person, with their title, province, contact details and bio from bios.js
+export const team = people.map((p) => ({ ...p, ...(bios[p.slug] || {}), role: bios[p.slug]?.title || p.role }));

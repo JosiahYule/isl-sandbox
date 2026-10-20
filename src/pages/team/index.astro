@@ -1,0 +1,75 @@
+---
+// TEAM  →  /team/
+// Everyone from src/data/team.js. Each card opens that person's page (/team/<slug>/).
+// Filters: leadership, direct hire, and each province (from where each bio says they're based).
+import Base from '../../layouts/Base.astro';
+import PageHero from '../../components/PageHero.astro';
+import PersonCard from '../../components/PersonCard.astro';
+import CtaBand from '../../components/CtaBand.astro';
+import { team } from '../../data/team.js';
+
+const PROVINCES = [['NS', 'Nova Scotia'], ['NB', 'New Brunswick'], ['PE', 'PEI'], ['NL', 'Newfoundland and Labrador']];
+// Leadership first, then everyone else in the order of the data file.
+const people = [...team.filter((p) => p.team === 'Leadership'), ...team.filter((p) => p.team !== 'Leadership')];
+const filters = [
+  { key: '', label: 'Everyone', n: team.length },
+  { key: 'Leadership', label: 'Leadership', n: team.filter((p) => p.team === 'Leadership').length },
+  { key: 'Direct Hire', label: 'Direct hire', n: team.filter((p) => p.team === 'Direct Hire').length },
+  ...PROVINCES.map(([code, label]) => ({ key: code, label, n: team.filter((p) => p.province === code).length })),
+];
+---
+<Base title="Our team" description="Meet the Integrated Staffing team across Nova Scotia, New Brunswick, PEI, and Newfoundland and Labrador.">
+  <PageHero title="The people behind every placement." />
+
+  <section class="section section--rule people" data-team>
+    <div class="wrap">
+      <div class="filters" role="group" aria-label="Filter team">
+        {filters.map((f, i) => (
+          <button type="button" data-key={f.key} aria-pressed={String(i === 0)}>{f.label} <span>{f.n}</span></button>
+        ))}
+      </div>
+      <ul class="grid">
+        {people.map((p, i) => (
+          <li data-tags={[p.team, p.province].filter(Boolean).join('|')} data-reveal style={`--i:${i % 5}`}>
+            <PersonCard person={p} />
+          </li>
+        ))}
+      </ul>
+    </div>
+  </section>
+
+  <CtaBand />
+</Base>
+
+<script>
+  const root = document.querySelector('[data-team]')!;
+  const buttons = root.querySelectorAll<HTMLButtonElement>('.filters button');
+  const cards = root.querySelectorAll<HTMLElement>('.grid li');
+  const apply = (b: HTMLButtonElement) => {
+    buttons.forEach((x) => x.setAttribute('aria-pressed', String(x === b)));
+    const key = b.dataset.key || '';
+    cards.forEach((c) => (c.hidden = !!key && !(c.dataset.tags || '').split('|').includes(key)));
+  };
+  // ?filter=NS (from a person's page) opens the grid already filtered
+  const start = [...buttons].find((b) => b.dataset.key === new URLSearchParams(location.search).get('filter'));
+  if (start) apply(start);
+  buttons.forEach((b) => b.addEventListener('click', () => {
+    buttons.forEach((x) => x.setAttribute('aria-pressed', String(x === b)));
+    const key = b.dataset.key || '';
+    cards.forEach((c) => (c.hidden = !!key && !(c.dataset.tags || '').split('|').includes(key)));
+  }));
+</script>
+
+<style>
+  .filters { display: flex; flex-wrap: wrap; gap: var(--s2); margin-bottom: var(--s6); }
+  .filters button {
+    font: inherit; font-size: var(--fs-small); font-weight: 500; cursor: pointer;
+    padding: 0.5rem 0.95rem; background: transparent; color: var(--ink); border: 1.5px solid var(--line);
+  }
+  .filters button span { color: var(--ink-soft); }
+  .filters button[aria-pressed='true'] { background: var(--ink); border-color: var(--ink); color: #fff; }
+  .filters button[aria-pressed='true'] span { color: rgb(255 255 255 / 0.7); }
+  .grid { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 200px), 1fr)); gap: var(--s6) var(--s4); }
+  .grid li[hidden] { display: none; }
+  @media (max-width: 760px) { .grid { grid-template-columns: 1fr 1fr; } }
+</style>

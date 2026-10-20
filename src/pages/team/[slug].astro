@@ -1,0 +1,131 @@
+---
+// TEAM MEMBER PAGES  →  /team/<slug>/
+// One template for everyone in src/data/team.js. Each page pulls together:
+//   the person      team.js + bios.js   photo, title, contact details, bio, specialties
+//   their office    site.js / areas.js  the office page for the province they're based in
+//   hiring help     routing.js          if they're who the chatbot hands employers to, say so
+//   colleagues      team.js             others based in the same province
+import Base from '../../layouts/Base.astro';
+import PersonCard from '../../components/PersonCard.astro';
+import CtaBand from '../../components/CtaBand.astro';
+import { team } from '../../data/team.js';
+import { sized } from '../../lib/img.js';
+import { url } from '../../lib/url.js';
+import { PEOPLE, provinceName } from '../../../assistant/supabase/functions/_shared/routing.js';
+
+export function getStaticPaths() {
+  return team.map((p) => ({ params: { slug: p.slug } }));
+}
+
+const { slug } = Astro.params;
+const p = team.find((x) => x.slug === slug);
+const first = p.name.split(' ')[0];
+const initials = p.name.split(' ').map((x) => x[0]).join('');
+// The office page for their province (New Brunswick has two offices; Moncton is listed first)
+const OFFICE = { NS: ['halifax', 'Halifax office'], NB: ['moncton', 'Moncton and Saint John offices'], PE: ['charlottetown', 'Charlottetown office'], NL: ['st-johns', 'St. John’s office'] };
+const [officeKey, officeLabel] = OFFICE[p.province] || [];
+const contact = Object.values(PEOPLE).find((x) => x.slug === slug); // are employers routed to them?
+const isDirect = p.team === 'Direct Hire';
+const sameProvince = team.filter((x) => x.province === p.province && x.slug !== slug);
+const colleagues = sameProvince.slice(0, 7);
+const tel = (n) => `tel:+1${String(n).replace(/\D/g, '')}`;
+const hireHref = isDirect || slug === 'zowie-tucker'
+  ? '/hire/?service=direct'
+  : `/hire/?service=contract&where=${encodeURIComponent(provinceName(p.province))}`;
+---
+<Base title={p.name} description={`${p.name}, ${p.role} at Integrated Staffing${p.province ? `, ${provinceName(p.province)}` : ''}.`}>
+  <section class="person">
+    <div class="wrap grid">
+      <div class:list={['shot', !p.photo && 'none']} data-reveal>
+        {p.photo && <img src={sized(p.photo, 1000)} srcset={`${sized(p.photo, 750)} 750w, ${sized(p.photo, 1000)} 1000w, ${sized(p.photo, 1500)} 1500w`} sizes="(max-width: 900px) 100vw, 40vw" alt={`${p.name}, ${p.role}`} fetchpriority="high" onerror="this.parentElement.classList.add('none'); this.remove();" />}
+        <span class="ini" aria-hidden="true">{initials}</span>
+      </div>
+
+      <div class="info">
+        <a class="back" href={url('/team/')}>← Our team</a>
+        <h1>{p.name}</h1>
+        <p class="role">{p.role}</p>
+        {officeKey && <p class="where">Based in {provinceName(p.province)} · <a href={url(`/offices/${officeKey}/`)}>{officeLabel}</a></p>}
+
+        <ul class="reach">
+          {p.phone && <li><a href={tel(p.phone)}>{p.phone}</a></li>}
+          {p.email && <li><a href={`mailto:${p.email}`}>{p.email}</a></li>}
+          {p.linkedin && <li><a href={p.linkedin}>LinkedIn</a></li>}
+        </ul>
+
+        {p.bio && <p class="bio">{p.bio}</p>}
+
+        {p.specialties?.length > 0 && (
+          <div class="spec">
+            <p class="spec-label">Specialties</p>
+            <ul>{p.specialties.map((s) => <li>{s}</li>)}</ul>
+          </div>
+        )}
+
+        {(contact || isDirect) && (
+          <div class="hiring">
+            <p class="h-text">{contact ? `${contact.handles}.` : 'Permanent placement, direct hire team.'} {first} can help you find the right people.</p>
+            <a class="h-go" href={url(hireHref)}>{isDirect || slug === 'zowie-tucker' ? 'Start a search' : 'Request workers'}</a>
+          </div>
+        )}
+      </div>
+    </div>
+  </section>
+
+  {colleagues.length > 0 && (
+    <section class="section section--rule">
+      <div class="wrap">
+        <div class="section-head section-head--split">
+          <h2>Also in {provinceName(p.province)}</h2>
+          {officeKey && <p class="lead"><a href={url(`/offices/${officeKey}/`)}>Visit the {officeLabel}</a></p>}
+        </div>
+        <ul class="row" data-stagger>{colleagues.map((c) => <li><PersonCard person={c} size="sm" /></li>)}</ul>
+        {sameProvince.length > colleagues.length && <a class="all" href={url(`/team/?filter=${p.province}`)}>See all {sameProvince.length + 1} in {provinceName(p.province)}</a>}
+      </div>
+    </section>
+  )}
+
+  <CtaBand />
+</Base>
+
+<style>
+  .person { padding-block: clamp(2.5rem, 6vw, 5rem); }
+  .grid { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: clamp(2rem, 6vw, 6rem); align-items: start; }
+
+  .shot { position: relative; aspect-ratio: 4 / 5; overflow: hidden; background: var(--mist); }
+  .shot img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center 20%; }
+  .ini { position: absolute; inset: 0; display: none; place-items: center; font-size: clamp(3rem, 2rem + 4vw, 6rem); font-weight: 300; letter-spacing: -0.04em; color: var(--ink-soft); }
+  .shot.none .ini { display: grid; }
+
+  .back { display: inline-block; margin-bottom: var(--s6); font-size: var(--fs-small); font-weight: 600; text-decoration: none; }
+  .back:hover { text-decoration: underline; }
+  h1 { font-size: var(--fs-h1); letter-spacing: -0.025em; }
+  .role { margin-top: var(--s3); font-size: var(--fs-lead); font-weight: 300; }
+  .where { margin-top: var(--s2); color: var(--ink-soft); font-size: var(--fs-small); }
+
+  .reach { list-style: none; margin: var(--s6) 0 0; padding: var(--s4) 0 0; border-top: 1.5px solid var(--ink); display: flex; flex-wrap: wrap; gap: var(--s2) var(--s6); font-weight: 600; }
+  .reach a { color: var(--ink); text-decoration: none; }
+  .reach a:hover { text-decoration: underline; }
+
+  .bio { margin-top: var(--s6); font-size: 1.12rem; line-height: 1.7; max-width: 60ch; }
+
+  .spec { margin-top: var(--s6); }
+  .spec-label { font-size: var(--fs-small); font-weight: 600; color: var(--ink-soft); margin-bottom: var(--s2); }
+  .spec ul { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: var(--s2); }
+  .spec li { border: 1.5px solid var(--line); padding: 0.4rem 0.75rem; font-size: var(--fs-small); font-weight: 500; }
+
+  .hiring { margin-top: var(--s7); padding: var(--s5); background: var(--mist); display: flex; flex-wrap: wrap; gap: var(--s4); align-items: center; justify-content: space-between; }
+  .h-text { margin: 0; font-weight: 500; max-width: 44ch; }
+  .h-go { font-weight: 600; background: var(--isl-blue); color: #fff; text-decoration: none; padding: 0.8rem 1.3rem; }
+  .h-go:hover { background: var(--isl-blue-deep); color: #fff; }
+
+  .all { display: inline-block; margin-top: var(--s5); font-weight: 600; }
+  .row { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: var(--s5) var(--s4); }
+  @media (max-width: 1100px) { .row { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+  @media (max-width: 560px) { .row { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+
+  @media (max-width: 900px) {
+    .grid { grid-template-columns: 1fr; }
+    .shot { max-width: 360px; }
+  }
+</style>

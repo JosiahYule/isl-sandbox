@@ -29,39 +29,39 @@ export const OFFICES = {
 };
 
 export const PEOPLE = {
+  // Details from each person's bio on the live site (October 20, 2026). `slug` is their team page.
   meg: {
-    name: "Meg Antonick", first: "Meg", office: "halifax",
-    handles: "New client requests, Halifax office",
-    phone: "902-423-1919", email: "meg@integratedstaffing.ca",
+    name: "Meg Antonick", first: "Meg", office: "halifax", slug: "meg-antonick",
+    handles: "New client requests, all of Nova Scotia",
+    phone: "902-266-3775", email: "meg@integratedstaffing.ca",
     photo: cdn("08195d05-31a1-41ef-aa76-946ecfb272d5/Headshot+-+M.+Antonick.jpg"),
   },
   zowie: {
-    name: "Zowie Tucker", first: "Zowie", office: "halifax",
-    handles: "Leads our direct hire team",
+    name: "Zowie Tucker", first: "Zowie", office: "halifax", slug: "zowie-tucker",
+    handles: "Leads our direct hire team, all of Canada",
     phone: "902-471-0166", email: "zowie@integratedstaffing.ca",
     photo: cdn("471bd9d6-a42f-4bdd-84bc-47ae0b3f7e5d/Integrated+Staffing+Zowie+Tucker_1+%281%29.jpg"),
   },
-  // No phone on these three: the card shows the line for the office the request is routed to.
-  // No headshot on the live site yet, so the card shows initials. Add `email` and `photo` when ready.
+  // No headshot on the live site yet for these three, so cards show initials. Add `photo` when ready.
   kelli: {
-    name: "Kelli Wetmore", first: "Kelli", office: "moncton",
-    handles: "New client requests, Moncton and Saint John offices",
-    phone: "", email: "", photo: "",
+    name: "Kelli Wetmore", first: "Kelli", office: "moncton", slug: "kelli-wetmore",
+    handles: "New client requests, all of New Brunswick",
+    phone: "506-851-9306", email: "kelli@integratedstaffing.ca", photo: "",
   },
   chance: {
-    name: "Chance Skauge", first: "Chance", office: "charlottetown",
-    handles: "New client requests, Charlottetown office",
-    phone: "", email: "", photo: "",
+    name: "Chance Skauge", first: "Chance", office: "charlottetown", slug: "chance-skauge",
+    handles: "New client requests, all of PEI",
+    phone: "902-393-3217", email: "chance@integratedstaffing.ca", photo: "",
   },
   crystal: {
-    name: "Crystal Murphy", first: "Crystal", office: "st-johns",
-    handles: "New client requests, St. John's office",
-    phone: "", email: "", photo: "",
+    name: "Crystal Murphy", first: "Crystal", office: "st-johns", slug: "crystal-murphy",
+    handles: "New client requests, all of Newfoundland and Labrador",
+    phone: "709-689-0847", email: "crystal@integratedstaffing.ca", photo: "",
   },
   skylar: {
-    name: "Skylar Hardwick", first: "Skylar", office: "halifax",
+    name: "Skylar Hardwick", first: "Skylar", office: "halifax", slug: "skylar-hardwick",
     handles: "Job seeker questions, Halifax office",
-    phone: "902-423-1919", email: "skylar@integratedstaffing.ca",
+    phone: "902-393-2530", email: "skylar@integratedstaffing.ca",
     photo: cdn("0bd6add1-06f1-4a63-ace6-538e53b49a0c/Integrated+Staffing+Skylar+Hardwick.jpg"),
   },
 };
@@ -88,12 +88,17 @@ export const provinceName = (code) => PROVINCE_NAMES[code] || code;
 const TOWNS = {
   NS: ["halifax", "dartmouth", "bedford", "sackville", "lower sackville", "burnside", "cole harbour", "timberlea", "fall river", "enfield",
     "hammonds plains", "truro", "bridgewater", "kentville", "windsor", "wolfville", "antigonish", "new glasgow", "stellarton", "pictou",
-    "yarmouth", "amherst", "sydney", "glace bay", "digby", "lunenburg", "port hawkesbury", "elmsdale", "goffs", "prospect bay"],
+    "yarmouth", "amherst", "sydney", "glace bay", "digby", "lunenburg", "port hawkesbury", "elmsdale", "goffs", "prospect bay",
+    "cape breton", "north sydney", "sydney mines", "new waterford", "baddeck", "inverness", "chester", "liverpool", "shelburne",
+    "middleton", "greenwood", "berwick", "annapolis royal", "oxford", "springhill", "tatamagouche", "mahone bay", "hantsport"],
   NB: ["moncton", "dieppe", "riverview", "shediac", "scoudouc", "sackville nb", "miramichi", "bathurst", "edmundston", "campbellton",
-    "saint john", "quispamsis", "rothesay", "grand bay-westfield", "sussex", "st. stephen", "fredericton", "oromocto"],
-  PE: ["charlottetown", "stratford", "cornwall", "summerside", "montague", "souris", "kensington", "alberton", "alexandra"],
+    "saint john", "quispamsis", "rothesay", "grand bay-westfield", "sussex", "st. stephen", "fredericton", "oromocto",
+    "woodstock", "grand falls", "caraquet", "shippagan", "tracadie", "st. andrews", "hampton", "florenceville", "lower queensbury"],
+  PE: ["charlottetown", "stratford", "cornwall", "summerside", "montague", "souris", "kensington", "alberton", "alexandra",
+    "slemon park", "o'leary", "tignish", "georgetown", "north rustico", "cavendish", "borden-carleton", "crapaud"],
   NL: ["st. john's", "st johns", "mount pearl", "paradise", "conception bay south", "cbs", "torbay", "portugal cove", "gander",
-    "grand falls", "corner brook", "clarenville", "carbonear", "bay roberts", "goose bay"],
+    "grand falls-windsor", "grand falls - windsor", "corner brook", "clarenville", "carbonear", "bay roberts", "goose bay",
+    "happy valley-goose bay", "labrador city", "stephenville", "deer lake", "marystown", "placentia", "bonavista", "twillingate"],
 };
 const SAINT_JOHN_AREA = ["saint john", "quispamsis", "rothesay", "grand bay-westfield", "sussex", "st. stephen", "fredericton", "oromocto"];
 const OUTSIDE = /\b(ontario|toronto|ottawa|quebec|québec|montreal|montréal|manitoba|winnipeg|saskatchewan|regina|saskatoon|alberta|calgary|edmonton|british columbia|vancouver|victoria|yukon|nunavut|northwest territories|across canada|anywhere in canada|elsewhere in canada|outside (of )?atlantic|out west|remote)\b/i;

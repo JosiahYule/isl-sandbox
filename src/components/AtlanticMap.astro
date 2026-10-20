@@ -8,12 +8,30 @@
 //   bleed: let neighbouring land run past the map's box (used in the homepage hero)
 //   selected: the city to show first (default: the head office)
 //   navigate: selecting a pin opens that office's page (used on the office pages)
+//   towns: optional [{ name, lon, lat }] drawn as small dots (places we staff beyond the office cities)
 import { atlanticMap as map } from '../data/maps.js';
 import { offices } from '../data/site.js';
 import { areas } from '../data/areas.js';
 import { url } from '../lib/url.js';
 
-const { tone = 'light', card = true, id = 'amap', bleed = false, selected, navigate = false } = Astro.props;
+const { tone = 'light', card = true, id = 'amap', bleed = false, selected, navigate = false, towns = [] } = Astro.props;
+
+// Placing towns on the map: we know each office's real coordinates and its position on the map,
+// so we fit the straight-line rule (x = a·lon + b·lat + c, same for y) that best links the two.
+// Over an area this size the map's curvature is small, so towns land within a few pixels.
+const OFFICE_LL = { Halifax: [-63.57, 44.67], Moncton: [-64.78, 46.09], 'Saint John': [-66.06, 45.27], Charlottetown: [-63.13, 46.24], "St. John's": [-52.71, 47.56] };
+function fit(pick) {
+  // Least squares for [a, b, c] from rows [lon, lat, 1] -> value (normal equations, 3x3)
+  const rows = map.offices.map((o) => [...OFFICE_LL[o.city], 1, pick(o)]);
+  const M = [0, 1, 2].map((i) => [0, 1, 2].map((j) => rows.reduce((t, r) => t + r[i] * r[j], 0)));
+  const v = [0, 1, 2].map((i) => rows.reduce((t, r) => t + r[i] * r[3], 0));
+  for (let i = 0; i < 3; i++) for (let k = i + 1; k < 3; k++) { const f = M[k][i] / M[i][i]; for (let j = i; j < 3; j++) M[k][j] -= f * M[i][j]; v[k] -= f * v[i]; }
+  const x = [0, 0, 0];
+  for (let i = 2; i >= 0; i--) x[i] = (v[i] - M[i].slice(i + 1).reduce((t, m, j) => t + m * x[i + 1 + j], 0)) / M[i][i];
+  return x;
+}
+const [ax, bx, cx] = fit((o) => o.x), [ay, by, cy] = fit((o) => o.y);
+const townDots = towns.map((t) => ({ ...t, x: ax * t.lon + bx * t.lat + cx, y: ay * t.lon + by * t.lat + cy }));
 
 // Which side of the pin each label sits on, so nearby labels don't collide.
 const labelSide = { Halifax: 'right', Moncton: 'left', 'Saint John': 'right', Charlottetown: 'right', "St. John's": 'left' };
@@ -31,6 +49,7 @@ const tel = (n) => `tel:+1${n.replaceAll('-', '')}`;
   <svg viewBox={`0 0 ${map.width} ${map.height}`} aria-hidden="true" focusable="false">
     <g class="context">{map.context.map((p) => <path d={p.d} />)}</g>
     <g class="land">{map.provinces.map((p) => <path d={p.d} data-prov={p.id} />)}</g>
+    {townDots.length > 0 && <g class="towns">{townDots.map((t, i) => <circle cx={t.x} cy={t.y} r="8" style={`--o:${i}`}><title>{t.name}</title></circle>)}</g>}
   </svg>
 
   <ul class="pins" aria-label="Our offices">
@@ -96,6 +115,9 @@ const tel = (n) => `tel:+1${n.replaceAll('-', '')}`;
   .context path { fill: var(--context); }
   .land path { fill: var(--land); stroke: var(--land-edge); stroke-width: 1.5; stroke-linejoin: round; }
 
+  .towns circle { fill: var(--ink); stroke: #fff; stroke-width: 2.5; transform-box: fill-box; transform-origin: center; }
+  :global(.motion) .amap .towns circle { transform: scale(0); transition: transform 0.4s var(--ease); transition-delay: calc(0.9s + var(--o) * 110ms); }
+  :global(.motion) .amap.is-in .towns circle { transform: none; }
   .pins { list-style: none; margin: 0; padding: 0; }
   .pins li { position: absolute; width: 0; height: 0; }
   .pin {

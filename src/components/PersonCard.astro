@@ -1,0 +1,32 @@
+---
+// PERSON CARD: headshot (or initials), name and title, linking to the person's page.
+// Used on the team grid, office pages, direct hire recruiters and "also in" rows.
+// <PersonCard person={p} size="lg" />   size: "lg" (team grid) | "sm" (rows of colleagues)
+import { sized } from '../lib/img.js';
+import { url } from '../lib/url.js';
+const { person: p, size = 'lg' } = Astro.props;
+const initials = p.name.split(' ').map((x) => x[0]).join('');
+---
+<a class:list={['pc', `pc--${size}`]} href={url(`/team/${p.slug}/`)}>
+  <span class:list={['shot', !p.photo && 'none']}>
+    {p.photo && <img src={sized(p.photo, 500)} srcset={`${sized(p.photo, 500)} 500w, ${sized(p.photo, 750)} 750w`} sizes={size === 'sm' ? '160px' : '(max-width: 760px) 50vw, 240px'} alt="" loading="lazy" decoding="async" onerror="this.parentElement.classList.add('none'); this.remove();" />}
+    <span class="ini" aria-hidden="true">{initials}</span>
+  </span>
+  <span class="name">{p.name}</span>
+  {p.role && <span class="role">{p.role}</span>}
+</a>
+
+<style>
+  .pc { display: grid; gap: 2px; color: var(--ink); text-decoration: none; align-content: start; }
+  .pc:hover .name { text-decoration: underline; }
+  /* Headshot: a fixed 4:5 frame, cropped from the top so faces stay in view */
+  .shot { position: relative; display: block; aspect-ratio: 4 / 5; overflow: hidden; background: var(--mist); margin-bottom: var(--s3); }
+  .shot img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center 20%; transition: transform 0.6s var(--ease); }
+  .pc:hover .shot img { transform: scale(1.04); }
+  .ini { position: absolute; inset: 0; display: none; place-items: center; font-size: 2rem; font-weight: 300; letter-spacing: -0.03em; color: var(--ink-soft); }
+  .shot.none .ini { display: grid; }
+  .name { font-weight: 700; font-size: 1.05rem; }
+  .role { font-size: var(--fs-small); color: var(--ink-soft); line-height: 1.4; }
+  .pc--sm .name { font-size: 0.98rem; }
+  .pc--sm .ini { font-size: 1.5rem; }
+</style>

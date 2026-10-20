@@ -33,15 +33,15 @@ await talk('Employer: all in one line', ['We need 5 warehouse workers in Truro f
 await talk('Employer: permanent', ["I'm hiring", 'A permanent controller in Moncton'],
   (r) => expect(r.contact?.name === 'Zowie Tucker' && r.contact.email === 'zowie@integratedstaffing.ca', 'permanent goes to Zowie, with email'));
 await talk('Employer: step by step', ["I'm hiring", 'Forklift operators', 'New Brunswick', 'Not sure yet', 'In the next few weeks'],
-  (r) => expect(r.contact?.name === 'Kelli Wetmore' && r.contact.phone === '506-801-1446', 'NB contract goes to Kelli, Moncton line'));
+  (r) => expect(r.contact?.name === 'Kelli Wetmore' && r.contact.phone === '506-851-9306', 'NB contract goes to Kelli'));
 await talk('Employer: Saint John area', ['need two drivers in Quispamsis on contract asap'],
-  (r) => expect(r.contact?.name === 'Kelli Wetmore' && r.contact.phone === '506-717-0607', 'Quispamsis goes to Kelli, Saint John line'));
+  (r) => expect(r.contact?.name === 'Kelli Wetmore' && r.contact.phone === '506-851-9306', 'Quispamsis goes to Kelli'));
 await talk('Employer: outside Atlantic', ["I'm hiring", '10 cleaners', 'Elsewhere in Canada', 'For a set time', 'Make it a permanent search'],
   (r) => expect(r.contact?.name === 'Zowie Tucker', 'outside Atlantic: permanent only'));
 await talk('Employer: asks price', ['Looking to hire a receptionist in Charlottetown', 'how much does it cost?'],
   (r) => expect(r.contact?.name === 'Chance Skauge', 'Charlottetown goes to Chance'));
 await talk("Employer: St. John's", ["We need 4 cleaners in Mount Pearl", 'For a set time', 'Planning ahead'],
-  (r) => expect(r.contact?.name === 'Crystal Murphy' && r.contact.phone === '709-800-2454', "St. John's goes to Crystal"));
+  (r) => expect(r.contact?.name === 'Crystal Murphy' && r.contact.phone === '709-689-0847', "St. John's goes to Crystal"));
 await talk('Employer mode page greeting', ['A permanent controller in Moncton'],
   (r) => expect(r.contact?.name === 'Zowie Tucker', 'employer page mode'), 'employer');
 

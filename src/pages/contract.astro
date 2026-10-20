@@ -7,6 +7,17 @@ import IndustryMatrix from '../components/IndustryMatrix.astro';
 import CtaBand from '../components/CtaBand.astro';
 import Photo from '../components/Photo.astro';
 import Proof from '../components/Proof.astro';
+import AtlanticMap from '../components/AtlanticMap.astro';
+import { jobs } from '../data/jobs.js';
+import { areas } from '../data/areas.js';
+import { places } from '../data/places.js';
+
+// Proof that we staff beyond the office cities: towns with open contract roles right now
+// that aren't in any office's own area (from the live job snapshot, so it updates with the feed).
+const officeTowns = new Set(areas.flatMap((a) => a.towns));
+const beyond = [...new Set(jobs.filter((j) => j.type === 'contract' && j.city && !officeTowns.has(j.city.toLowerCase())).map((j) => j.city.replace(' - ', '-')))];
+const townDots = beyond.map((name) => ({ name, ll: places[name.toLowerCase()] || places[name.toLowerCase().replace('-', ' - ')] }))
+  .filter((t) => t.ll).map((t) => ({ name: t.name, lon: t.ll[0], lat: t.ll[1] }));
 import { stock } from '../data/photos.js';
 import { route, provinceName } from '../../assistant/supabase/functions/_shared/routing.js';
 import { url } from '../lib/url.js';
@@ -33,7 +44,7 @@ const covered = [
 ];
 ---
 <Base assistantMode="employer" title="Contract staffing" description="Pre-screened contract workers across Atlantic Canada, on site within hours of your request, for one all-inclusive hourly rate.">
-  <PageHero photo={{ ...stock.welder, position: 'center' }} title="Pre-screened workers, on site within hours." lead="They work for you and stay on our payroll, recruited by the office nearest you.">
+  <PageHero photo={{ ...stock.welder, position: 'center' }} title="Pre-screened workers, on site within hours." lead="Anywhere in Atlantic Canada, not just our office cities. They work for you and stay on our payroll.">
     <Button href="/hire/?service=contract" size="lg">Request workers</Button>
   </PageHero>
 
@@ -46,8 +57,29 @@ const covered = [
     </div>
   </section>
 
+  <!-- Coverage: each office covers its whole province -->
+  <section class="section section--tint coverage">
+    <div class="wrap cov-grid">
+      <div class="cov-copy">
+        <div class="section-head">
+          <h2>All of Atlantic Canada, not just our office cities.</h2>
+          <p class="lead">Each office covers its whole province. Cape Breton, Fredericton, Gander: if the work is in Atlantic Canada, we can staff it.</p>
+        </div>
+        {beyond.length > 0 && (
+          <div class="now">
+            <p class="now-label">Contract roles open right now in</p>
+            <ul class="now-list" data-stagger>{beyond.map((t) => <li>{t}</li>)}</ul>
+          </div>
+        )}
+        <p class="key"><span class="k-office">Our offices</span><span class="k-town">Open roles beyond them</span></p>
+        <a class="more" href="#local">Find your provincial contact</a>
+      </div>
+      <AtlanticMap id="coverage-map" card={false} navigate towns={townDots} />
+    </div>
+  </section>
+
   <!-- One rate: five separate costs gather into a single rate card as it scrolls into view -->
-  <section class="section section--tint">
+  <section class="section section--rule">
     <div class="wrap rate-grid">
       <div class="rate-copy">
         <div class="section-head">
@@ -85,9 +117,9 @@ const covered = [
 
   <Proof index={0} tint />
 
-  <section class="section">
+  <section class="section" id="local">
     <div class="wrap">
-      <div class="section-head"><h2>Talk to your local office</h2></div>
+      <div class="section-head"><h2>Your contact for each province</h2></div>
       <ul class="items local">
         {local.map((l) => (
           <li class="item">
@@ -109,6 +141,18 @@ const covered = [
   .l-prov { font-size: var(--fs-small); font-weight: 600; color: var(--ink-soft) !important; margin-bottom: var(--s2); }
   .l-tel { display: block; margin-top: var(--s3); font-weight: 700; color: var(--ink); text-decoration: none; font-variant-numeric: tabular-nums; }
   .local .more { display: inline-block; margin-top: var(--s2); }
+  .cov-grid { display: grid; grid-template-columns: 5fr 6fr; gap: clamp(2rem, 6vw, 6rem); align-items: center; }
+  .now { border-top: 1.5px solid var(--ink); padding-top: var(--s4); }
+  .now-label { font-size: var(--fs-small); font-weight: 600; color: var(--ink-soft); margin-bottom: var(--s3); }
+  .now-list { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: var(--s2); }
+  .now-list li { background: var(--paper); border: 1.5px solid var(--line); padding: 0.4rem 0.8rem; font-weight: 600; font-size: var(--fs-small); }
+  .key { display: flex; flex-wrap: wrap; gap: var(--s2) var(--s5); margin-top: var(--s5); font-size: var(--fs-small); color: var(--ink-soft); }
+  .key span { display: inline-flex; align-items: center; gap: var(--s2); }
+  .key span::before { content: ''; width: 12px; height: 12px; border-radius: 50%; }
+  .k-office::before { background: #fff; border: 3px solid var(--ink); }
+  .k-town::before { background: var(--ink); border: 2px solid #fff; outline: 1px solid var(--ink); }
+  .coverage .more { display: inline-block; margin-top: var(--s5); font-weight: 600; }
+  @media (max-width: 900px) { .cov-grid { grid-template-columns: 1fr; } }
   .rate-grid { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(2rem, 6vw, 6rem); align-items: start; }
   .rate-copy .section-head { margin-bottom: var(--s6); }
 
