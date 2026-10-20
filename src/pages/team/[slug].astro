@@ -75,12 +75,12 @@ const hireHref = isDirect || slug === 'zowie-tucker'
   {colleagues.length > 0 && (
     <section class="section section--rule">
       <div class="wrap">
-        <div class="section-head section-head--split">
+        <div class="section-head section-head--split person-row-head">
           <h2>Also in {provinceName(p.province)}</h2>
           {officeKey && <p class="lead"><a href={url(`/offices/${officeKey}/`)}>Visit the {officeLabel}</a></p>}
         </div>
         <ul class="row" data-stagger>{colleagues.map((c) => <li><PersonCard person={c} size="sm" /></li>)}</ul>
-        {sameProvince.length > colleagues.length && <a class="all" href={url(`/team/?filter=${p.province}`)}>See all {sameProvince.length + 1} in {provinceName(p.province)}</a>}
+        {sameProvince.length > 4 && <a class="all" href={url(`/team/?filter=${p.province}`)}>See all {sameProvince.length + 1} in {provinceName(p.province)}</a>}
       </div>
     </section>
   )}
@@ -119,10 +119,13 @@ const hireHref = isDirect || slug === 'zowie-tucker'
   .h-go { font-weight: 600; background: var(--isl-blue); color: #fff; text-decoration: none; padding: 0.8rem 1.3rem; }
   .h-go:hover { background: var(--isl-blue-deep); color: #fff; }
 
+  .person-row-head .lead { justify-self: end; font-weight: 600; font-size: var(--fs-body); }
+  @media (max-width: 860px) { .person-row-head .lead { justify-self: start; } }
   .all { display: inline-block; margin-top: var(--s5); font-weight: 600; }
   .row { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: var(--s5) var(--s4); }
   @media (max-width: 1100px) { .row { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
-  @media (max-width: 560px) { .row { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  /* On phones, two columns of four: seven big cards made a long scroll, and "See all" covers the rest */
+  @media (max-width: 560px) { .row { grid-template-columns: repeat(2, minmax(0, 1fr)); } .row li:nth-child(n+5) { display: none; } }
 
   @media (max-width: 900px) {
     .grid { grid-template-columns: 1fr; }

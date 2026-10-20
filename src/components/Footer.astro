@@ -24,6 +24,10 @@ const areaKey = (city) => areas.find((a) => a.label === city)?.key;
 
     <div class:list={['lower', !showOffices && 'lower--top']}>
       <div class="about">
+        <a class="flogo" href={url('/')} aria-label={`${brand.name} home`}>
+          <img src={brand.logo} alt="" width="190" height="46" loading="lazy" onerror="this.parentElement.classList.add('no-img'); this.remove();" />
+          <span class="fword" aria-hidden="true">Integrated<br />Staffing</span>
+        </a>
         <p>{brand.name} has connected employers and job seekers since {brand.since}. Locally owned and operated.</p>
         <div class="badges">
           <img src={images.badgeBestPlaces} alt="Best Places to Work" width="64" height="64" loading="lazy" onerror="this.remove()" />
@@ -66,6 +70,11 @@ const areaKey = (city) => areas.find((a) => a.label === city)?.key;
     margin-top: var(--s7); padding-top: var(--s6); border-top: 1px solid var(--line-dark);
   }
   .lower--top { margin-top: 0; }
+  /* The logo file is dark; brightness(0) + invert(1) turns every colour in it to white for the dark footer */
+  .flogo { display: inline-block; margin-bottom: var(--s4); color: #fff; }
+  .flogo img { height: 40px; width: auto; filter: brightness(0) invert(1); }
+  .fword { display: none; font-weight: 700; font-size: 1.15rem; line-height: 1; letter-spacing: -0.01em; }
+  .flogo:global(.no-img) .fword { display: block; }
   .about p { color: var(--on-dark-soft); max-width: 42ch; }
   .badges { display: flex; gap: var(--s4); margin-top: var(--s5); }
   .badges img { height: 56px; width: auto; }

@@ -3,12 +3,14 @@
 // the rest of Canada outlined (where permanent searches reach).
 import { canadaMap as map } from '../data/maps.js';
 const { tone = 'light' } = Astro.props;
+// The drawing only spans x 156 to 854 of the 1000-wide data, so the viewBox is cropped to it (plus a little air)
+// and the map fills the space it's given instead of floating in a white margin.
 // Animation order: the outlines draw from east to west, "coast to coast"
 const westward = ['QC', 'NU', 'ON', 'MB', 'SK', 'NT', 'AB', 'BC', 'YT'];
 const order = (id) => Math.max(0, westward.indexOf(id));
 ---
 <figure class:list={['cmap', `cmap--${tone}`]} data-animate>
-  <svg viewBox={`0 0 ${map.width} ${map.height}`} role="img" aria-labelledby="cmap-title">
+  <svg viewBox="146 3 718 612" role="img" aria-labelledby="cmap-title">
     <title id="cmap-title">Map of Canada. Offices in the four Atlantic provinces; permanent searches in every province and territory.</title>
     {map.provinces.map((p) => p.atlantic
       ? <path d={p.d} class="atl" />

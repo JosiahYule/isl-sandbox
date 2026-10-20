@@ -89,7 +89,11 @@ a[href^="tel:"] { white-space: nowrap; }
 .section { padding-block: clamp(4rem, 8vw, 6.5rem); }
 .section--tint { background: var(--mist); }
 .section--rule { border-top: 1px solid var(--line); }
+/* Two white sections back to back read as one big gap; a hairline marks the change of topic */
+.section:not(.section--tint):not(.on-dark) + .section:not(.section--tint):not(.on-dark) { border-top: 1px solid var(--line); }
 
+/* <span class="line"> inside a heading: forces a break at a sentence, so headings never orphan a word */
+h1 .line, h2 .line { display: block; }
 .section-head { max-width: 46rem; margin-bottom: clamp(2rem, 4vw, 3.25rem); }
 .section-head .lead { margin-top: var(--s4); }
 .section-head--split { max-width: none; display: grid; grid-template-columns: 1fr 1fr; gap: var(--s4) var(--s7); align-items: end; }

@@ -16,7 +16,7 @@ const field = [job.category, job.subcategory].filter(Boolean).join(', ');
     <p class="where">{where}</p>
   </div>
   <p class:list={['svc', `svc--${job.type}`]}>{job.typeLabel}</p>
-  <p class="pay">{job.pay || 'Pay discussed at interview'}</p>
+  <p class:list={['pay', !job.pay && 'pay--none']}>{job.pay || 'Pay discussed at interview'}</p>
   <div class="end">
     {posted && <p class="posted">Posted {posted}</p>}
     <a class="apply" href={job.applyUrl}>Apply<span class="visually-hidden"> for {job.title}</span></a>
@@ -41,6 +41,7 @@ const field = [job.category, job.subcategory].filter(Boolean).join(', ');
   h3 a:hover { text-decoration: underline; }
   .where { color: var(--ink-soft); font-size: var(--fs-small); margin-top: var(--s1); }
   .pay { font-weight: 500; font-variant-numeric: tabular-nums; }
+  .pay--none { color: var(--ink-soft); font-weight: 400; }
   .end { display: flex; align-items: center; gap: var(--s5); justify-content: flex-end; padding-right: var(--s4); }
   .posted { font-size: var(--fs-small); color: var(--ink-soft); white-space: nowrap; }
   .apply {

@@ -6,6 +6,7 @@ import PageHero from '../components/PageHero.astro';
 import Facts from '../components/Facts.astro';
 import CtaBand from '../components/CtaBand.astro';
 import Photo from '../components/Photo.astro';
+import { url } from '../lib/url.js';
 import { photos } from '../data/photos.js';
 import { brand, images, offices, stats } from '../data/site.js';
 import { team } from '../data/team.js';
@@ -60,7 +61,7 @@ const gallery = [
 
   <section class="section section--rule">
     <div class="wrap">
-      <div class="section-head"><h2>The people behind the placements</h2></div>
+      <div class="section-head section-head--split gal-head"><h2>The people behind the placements</h2><p class="lead"><a href={url('/team/')}>Meet the whole team</a></p></div>
       <div class="gallery" data-stagger>
         {gallery.map(([p, caption]) => (
           <Photo src={p.src} alt={p.alt} ratio="4/3" sizes="(max-width: 900px) 50vw, 33vw" caption={caption} />
@@ -88,6 +89,8 @@ const gallery = [
 </Base>
 
 <style>
+  .gal-head .lead { justify-self: end; font-weight: 600; font-size: var(--fs-body); }
+  @media (max-width: 860px) { .gal-head .lead { justify-self: start; } }
   .facts-gap { margin-top: clamp(3rem, 6vw, 5rem); }
   .facts-gap :global(.facts-band) { border-top: 1px solid var(--line); }
 

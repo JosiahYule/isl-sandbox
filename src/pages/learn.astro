@@ -29,10 +29,9 @@ const [featured, ...rest] = posts;
   <section class="section section--tint posts" data-posts>
     <div class="wrap">
       <a class="featured" href={featured.url} data-reveal>
-        <span class="new">Latest</span>
-        <span class="aud">{audienceLabel[featured.audience]}</span>
+        <span class="eyebrow"><span class="new">Latest</span><span class="aud">{audienceLabel[featured.audience]}</span><time datetime={featured.date}>{fmt(featured.date)}</time></span>
         <span class="f-title">{featured.title}</span>
-        <time datetime={featured.date}>{fmt(featured.date)}</time>
+        <span class="read">Read the post <span aria-hidden="true">→</span></span>
       </a>
 
       <div class="filters" role="group" aria-label="Filter posts">
@@ -67,12 +66,16 @@ const [featured, ...rest] = posts;
 
 <style>
   /* The newest post leads, set large; the rest follow as a dated list */
-  .featured { display: grid; gap: var(--s3); padding-bottom: var(--s7); color: var(--ink); text-decoration: none; }
+  .featured { display: grid; gap: var(--s4); justify-items: start; padding-bottom: var(--s7); color: var(--ink); text-decoration: none; }
   .featured:hover .f-title { text-decoration: underline; text-decoration-thickness: 2px; }
-  .featured .aud { color: var(--isl-blue); }
-  .new { font-size: var(--fs-tiny); font-weight: 600; color: var(--ink-soft); }
+  /* One meta line: Latest (a small solid tag) · audience · date */
+  .eyebrow { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s2) var(--s4); font-size: var(--fs-small); }
+  .new { background: var(--ink); color: #fff; font-weight: 600; font-size: var(--fs-tiny); padding: 0.2rem 0.5rem; }
+  .featured .aud { color: var(--isl-blue); font-weight: 600; }
   .f-title { font-weight: 700; letter-spacing: -0.025em; line-height: 1.05; font-size: clamp(2rem, 1rem + 3vw, 3.6rem); max-width: 20ch; }
-  .featured time { color: var(--ink-soft); font-size: var(--fs-small); }
+  .read { font-weight: 600; color: var(--isl-blue); }
+  .read span { display: inline-block; transition: transform 0.3s var(--ease); }
+  .featured:hover .read span { transform: translateX(4px); }
 
   .filters { display: flex; flex-wrap: wrap; gap: var(--s2); margin-bottom: var(--s4); }
   .filters button {
