@@ -1,7 +1,7 @@
 ---
 // HOMEPAGE  →  /
 // Built from the shared section system in global.css:
-// hero (job search + now hiring strip), situation picker, offices, proof, free tools, call to action.
+// hero (job search + now hiring strip), we recruit, offices, proof, free tools, call to action.
 import Base from '../layouts/Base.astro';
 import Button from '../components/Button.astro';
 import AtlanticMap from '../components/AtlanticMap.astro';
@@ -11,25 +11,10 @@ import ToolCards from '../components/ToolCards.astro';
 import Proof from '../components/Proof.astro';
 import WeRecruit from '../components/WeRecruit.astro';
 import { photos } from '../data/photos.js';
-import { stats, brand, offices, social } from '../data/site.js';
+import { brand, offices, social } from '../data/site.js';
 import { jobs } from '../data/jobs.js';
 import { url } from '../lib/url.js';
 
-const retention = stats.find((s) => s.label.includes('retention'))?.value ?? '92%';
-
-// Situations employers call about, each answered by the service that fits, with one figure
-// that backs the answer. Every claim restates the live site (hours, one rate, temp to perm,
-// retention, average search time, national search).
-const situations = [
-  { svc: 'contract', q: "Someone's on leave next week.", fig: 'Within hours', figLabel: 'from your call to a worker on site', a: 'A pre-screened worker covers the role for as long as the leave lasts.' },
-  { svc: 'contract', q: 'Orders just doubled for the season.', fig: 'One rate', figLabel: 'per worker, with payroll and workers\u2019 compensation included', a: 'Add people for the peak and scale back when it settles.' },
-  { svc: 'contract', q: "We'd like to see someone work before we hire.", fig: 'Temp to perm', figLabel: 'start on contract, hire when you\u2019re sure', a: 'See them on the job before you make an offer.' },
-  { svc: 'direct', q: 'Our controller just gave notice.', fig: retention, figLabel: 'of our permanent placements stay', a: 'A targeted search led by a recruiter in your field, with a 90-day guarantee.' },
-  { svc: 'direct', q: 'This role has been posted for months.', fig: '47 days', figLabel: 'on average, from brief to hire', a: 'We go after the people who aren\u2019t answering job ads.' },
-  { svc: 'direct', q: "We're hiring outside Atlantic Canada.", fig: 'Every province', figLabel: 'reached by our permanent searches', a: 'Our offices are in Atlantic Canada. Our searches aren\u2019t limited to it.' },
-];
-const svcName = { contract: 'Contract staffing', direct: 'Direct hire' };
-const svcLink = { contract: '/contract/', direct: '/direct-hire/' };
 // Structured data: who ISL is and where its offices are (read by search engines)
 const orgSchema = {
   '@context': 'https://schema.org', '@type': 'EmploymentAgency', name: brand.name, url: 'https://www.integratedstaffing.ca',
@@ -80,41 +65,8 @@ const ticker = jobs.slice(0, 14);
     </div>
   </section>
 
-  <!-- 2. WE RECRUIT. The live site's signature line, with three live points: where, what, who -->
+  <!-- 2. WE RECRUIT. The live site's signature line, with three short lines beside it -->
   <WeRecruit />
-
-  <!-- 3. SITUATIONS: the employer picks what's happening; one answer panel responds,
-       in the colour of the service that fits (near-black contract, ISL blue direct hire) -->
-  <section class="section sit-section">
-    <div class="wrap">
-      <div class="section-head">
-        <h2>What's happening at your company?</h2>
-      </div>
-      <div class="picker" data-sit>
-        <div class="sit-list" role="tablist" aria-label="Hiring situations" data-stagger>
-          {situations.map((x, i) => (
-            <button type="button" role="tab" id={`sit-${i}`} aria-controls="sit-panel" aria-selected={i === 0 ? 'true' : 'false'} tabindex={i === 0 ? 0 : -1} class:list={['sit', `sit--${x.svc}`]} data-i={i}>
-              <span class="sit-q">{x.q}</span>
-            </button>
-          ))}
-        </div>
-        <div class="panel" id="sit-panel" role="tabpanel" aria-labelledby="sit-0" data-svc={situations[0].svc}>
-          {situations.map((x, i) => (
-            <div class="answer" data-answer={i} hidden={i !== 0}>
-              <p class="p-svc">{svcName[x.svc]}</p>
-              <p class="p-fig figure">{x.fig}</p>
-              <p class="p-fig-label">{x.figLabel}</p>
-              <p class="p-a">{x.a}</p>
-              <div class="p-actions">
-                <Button href={`/hire/?service=${x.svc}`} variant="light">Request talent</Button>
-                <a class="p-more" href={url(svcLink[x.svc])}>How {x.svc === 'contract' ? 'contract staffing' : 'direct hire'} works</a>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-    </div>
-  </section>
 
   <!-- 3. WHERE WE ARE: the map and the people in those offices -->
   <section class="section section--tint local">
@@ -136,7 +88,7 @@ const ticker = jobs.slice(0, 14);
   <!-- 4. PROOF: one client quote, with the review count beside it -->
   <Proof />
 
-  <!-- 6. FREE TOOLS: ISL's own guides and tools -->
+  <!-- 5. FREE TOOLS: ISL's own guides and tools -->
   <section class="section section--rule tools">
     <div class="wrap">
       <div class="section-head">
@@ -149,31 +101,6 @@ const ticker = jobs.slice(0, 14);
 
   <CtaBand />
 </Base>
-
-<script>
-  // Situation picker: selecting a situation shows its answer and recolours the panel
-  // for the service that fits. Arrow keys move between situations (standard tab behaviour).
-  const root = document.querySelector('[data-sit]');
-  if (root) {
-    const tabs = [...root.querySelectorAll('.sit')];
-    const panel = root.querySelector('.panel');
-    const answers = [...root.querySelectorAll('.answer')];
-    const show = (i, focus = false) => {
-      tabs.forEach((t, k) => { t.setAttribute('aria-selected', String(k === i)); t.tabIndex = k === i ? 0 : -1; });
-      answers.forEach((a, k) => (a.hidden = k !== i));
-      panel.dataset.svc = tabs[i].classList.contains('sit--direct') ? 'direct' : 'contract';
-      panel.setAttribute('aria-labelledby', tabs[i].id);
-      if (focus) tabs[i].focus();
-    };
-    tabs.forEach((t, i) => {
-      t.addEventListener('click', () => show(i));
-      t.addEventListener('keydown', (e) => {
-        const step = { ArrowDown: 1, ArrowRight: 1, ArrowUp: -1, ArrowLeft: -1 }[e.key];
-        if (step) { e.preventDefault(); show((i + step + tabs.length) % tabs.length, true); }
-      });
-    });
-  }
-</script>
 
 <style>
   /* ---------- 1. Hero ---------- */
@@ -234,42 +161,6 @@ const ticker = jobs.slice(0, 14);
     .ticker-label { padding-left: var(--s4); padding-right: var(--s4); }
   }
 
-  /* ---------- 2. Situations ---------- */
-  .picker { display: grid; grid-template-columns: 5fr 6fr; gap: clamp(1.5rem, 4vw, 4rem); align-items: stretch; }
-  .sit-list { display: grid; align-content: start; border-top: 1.5px solid var(--ink); }
-  .sit {
-    position: relative; display: flex; justify-content: space-between; align-items: baseline; gap: var(--s4);
-    width: 100%; padding: var(--s5) var(--s4) var(--s5) var(--s5); text-align: left;
-    font: inherit; color: var(--ink-soft); background: none; border: 0; border-bottom: 1px solid var(--line); cursor: pointer;
-    transition: color 0.2s, background 0.2s;
-  }
-  .sit::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 4px; background: var(--contract); transform: scaleY(0); transition: transform 0.35s var(--ease); }
-  .sit--direct::before { background: var(--direct); }
-  .sit-q { font-size: clamp(1.1rem, 0.9rem + 0.6vw, 1.4rem); font-weight: 500; letter-spacing: -0.015em; line-height: 1.3; }
-  .sit:hover { color: var(--ink); background: var(--mist); }
-  .sit[aria-selected='true'] { color: var(--ink); }
-  .sit[aria-selected='true']::before { transform: none; }
-
-  /* The answer panel: near-black for contract, ISL blue for direct hire */
-  .panel { position: relative; color: #fff; background: var(--dark); padding: clamp(2rem, 4vw, 3.5rem); display: flex; transition: background 0.5s var(--ease); min-height: 26rem; }
-  .panel[data-svc='direct'] { background: var(--isl-blue); }
-  .answer { display: flex; flex-direction: column; width: 100%; }
-  .answer[hidden] { display: none; }
-  .answer:not([hidden]) { animation: answer 0.55s var(--ease); }
-  @keyframes answer { from { opacity: 0; transform: translateY(14px); } }
-  .p-svc { font-size: var(--fs-small); font-weight: 600; color: rgb(255 255 255 / 0.75); margin-bottom: var(--s5); }
-  .p-fig { font-size: clamp(3rem, 1.6rem + 4vw, 5.4rem); margin: 0 0 var(--s2); }
-  .p-fig-label { color: rgb(255 255 255 / 0.8); max-width: 30ch; }
-  .p-a { margin-top: auto; padding-top: var(--s6); font-size: var(--fs-lead); font-weight: 300; line-height: 1.5; max-width: 40ch; }
-  .p-actions { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s3) var(--s5); margin-top: var(--s6); }
-  .p-more { color: #fff; font-weight: 600; }
-  .p-more:hover { color: #fff; }
-
-  @media (max-width: 900px) {
-    .picker { grid-template-columns: 1fr; }
-    .panel { min-height: 0; }
-  }
-
   /* ---------- 3. Local ---------- */
   .local-grid { display: grid; grid-template-columns: 7fr 4fr; gap: clamp(2rem, 5vw, 5rem); align-items: start; }
   .local-photo { display: grid; gap: var(--s4); }
@@ -278,6 +169,6 @@ const ticker = jobs.slice(0, 14);
 
   /* ---------- 4. Proof: see Proof.astro ---------- */
 
-  /* ---------- 6. Tools: see ToolCards.astro ---------- */
+  /* ---------- 5. Tools: see ToolCards.astro ---------- */
   @media (max-width: 860px) { .jobs-intro { justify-self: start; } }
 </style>

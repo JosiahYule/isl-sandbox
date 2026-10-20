@@ -1,162 +1,70 @@
 ---
 // WE RECRUIT. IT'S THAT SIMPLE.
-// The live site's signature section (below the homepage hero), rebuilt in the sandbox's style.
-// Same three points as the live version, each with a small live visual instead of an icon:
-//   01 Where  offices light up down a line, then a dashed line out to "partners across Canada"
-//   02 What   "Specializing in" + an industry word that rolls over every couple of seconds
-//   03 Who    the four things we match on tick off one by one, ending in "Placed"
+// The live site's signature line, kept simple: the heading, and three short lines beside it
+// (where we are, what we recruit for, how we match). One thing moves: the industry word.
 //
-// Accessibility: the rolling word is decoration (aria-hidden); the full industry list is real
-// text underneath it, and the current word is highlighted there too. With reduced motion,
-// nothing moves: every office, tick and industry is simply shown.
-import { offices } from '../data/site.js';
-
-const industries = ['Construction', 'Logistics', 'Manufacturing', 'Oil and gas', 'Technical trades', 'Hospitality', 'Administration'];
-const matchOn = ['Qualifications', 'Skill sets', 'Interests', 'Career goals'];
+// Accessibility: the rolling word is decoration (aria-hidden). Screen readers get the
+// full sentence with every industry instead. With reduced motion the word stays put.
+const industries = ['construction', 'logistics', 'manufacturing', 'oil and gas', 'skilled trades', 'hospitality', 'administration'];
+const list = industries.slice(0, -1).join(', ') + ' and ' + industries.at(-1);
 ---
 <section class="section we" data-we>
-  <div class="wrap">
-    <div class="we-head" data-reveal>
-      <h2 class="we-title"><span class="line we-blue">We recruit.</span> <span class="line">It’s that simple.</span></h2>
-      <p class="lead">Industrial contract staffing and professional permanent placement.</p>
-    </div>
+  <div class="wrap we-grid">
+    <h2 class="we-title" data-reveal><span class="line we-blue">We recruit.</span> <span class="line">It’s that simple.</span></h2>
 
-    <ol class="we-points" data-stagger>
-      <!-- 01 WHERE -->
-      <li class="pt" data-animate>
-        <p class="pt-num">01 <span>Where</span></p>
-        <div class="vis vis--where" aria-hidden="true">
-          <ul class="route">
-            {offices.map((o, i) => (
-              <li style={`--k:${i}`}><span class="dot"></span>{o.city}{i === 0 && <span class="hq">HQ</span>}</li>
-            ))}
-            <li class="beyond" style={`--k:${offices.length}`}><span class="dot"></span>Partners across Canada</li>
-          </ul>
-        </div>
-        <p class="pt-text">Headquartered in Halifax, with offices in New Brunswick, PEI, and Newfoundland and Labrador.</p>
+    <ul class="we-lines" data-stagger>
+      <li>Based in Halifax, with offices across Atlantic Canada.</li>
+      <li>
+        <span class="visually-hidden">Specializing in {list}.</span>
+        <span aria-hidden="true">Specializing in <span class="roll">{industries.map((w, i) => <span class:list={['word', i === 0 && 'on']}>{w}.</span>)}</span></span>
       </li>
-
-      <!-- 02 WHAT -->
-      <li class="pt" data-animate>
-        <p class="pt-num">02 <span>What</span></p>
-        <div class="vis vis--what">
-          <p class="spec-in" aria-hidden="true">Specializing in</p>
-          <div class="roll" aria-hidden="true">
-            {industries.map((w, i) => <span class:list={['word', i === 0 && 'on']}>{w}</span>)}
-          </div>
-          <ul class="ind" aria-label="Industries we specialize in">
-            {industries.map((w, i) => <li class:list={[i === 0 && 'on']}>{w}</li>)}
-          </ul>
-        </div>
-        <p class="pt-text">The industries we know best, on contract and permanently.</p>
-      </li>
-
-      <!-- 03 WHO -->
-      <li class="pt" data-animate>
-        <p class="pt-num">03 <span>Who</span></p>
-        <div class="vis vis--who" aria-hidden="true">
-          <ul class="checks">
-            {matchOn.map((m, i) => <li style={`--k:${i}`}><span class="tick"></span>{m}</li>)}
-          </ul>
-          <span class="placed" style={`--k:${matchOn.length}`}>Placed</span>
-        </div>
-        <p class="pt-text">People are matched to work that fits their qualifications, skills, interests and career goals.</p>
-      </li>
-    </ol>
+      <li>People matched to work that fits their skills and goals.</li>
+    </ul>
   </div>
 </section>
 
 <script>
-  // The rolling industry word. Only runs when motion is allowed, and only while the section
-  // is on screen (no point animating something nobody can see).
-  const root = document.querySelector<HTMLElement>('[data-we]');
-  if (root && document.documentElement.classList.contains('motion')) {
-    const words = root.querySelectorAll<HTMLElement>('.roll .word');
-    const items = root.querySelectorAll<HTMLElement>('.ind li');
+  // Swap the industry word every couple of seconds, only while it's on screen
+  // and only when the visitor's device allows motion.
+  const roll = document.querySelector<HTMLElement>('[data-we] .roll');
+  if (roll && document.documentElement.classList.contains('motion')) {
+    const words = [...roll.querySelectorAll<HTMLElement>('.word')];
     let i = 0;
     let timer: number | undefined;
     const step = () => {
-      words[i].classList.remove('on'); items[i].classList.remove('on');
-      words[i].classList.add('out');
       const prev = words[i];
+      prev.classList.replace('on', 'out');
       setTimeout(() => prev.classList.remove('out'), 600);
       i = (i + 1) % words.length;
-      words[i].classList.add('on'); items[i].classList.add('on');
+      words[i].classList.add('on');
     };
     new IntersectionObserver(([e]) => {
       if (e.isIntersecting && !timer) timer = window.setInterval(step, 2200);
       if (!e.isIntersecting && timer) { clearInterval(timer); timer = undefined; }
-    }).observe(root.querySelector('.roll')!);
+    }).observe(roll);
   }
 </script>
 
 <style>
-  /* Heading: light weight, like the live version, with "We recruit." in ISL blue */
-  .we-head { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); gap: var(--s4) var(--s7); align-items: end; margin-bottom: clamp(2.5rem, 5vw, 4rem); }
+  .we-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: var(--s6) var(--s8); align-items: center; }
   .we-title { font-weight: 300; font-size: clamp(2.6rem, 1rem + 4.4vw, 5rem); letter-spacing: -0.035em; line-height: 1.02; margin: 0; }
   .we-blue { color: var(--isl-blue); }
-  .we-head .lead { margin: 0; max-width: 34ch; }
 
-  /* Three points on one hairline, like the rest of the site's item rows */
-  .we-points { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); border-top: 1.5px solid var(--ink); }
-  /* subgrid: the three columns share one set of rows (label, visual, sentence), so the rules
-     above the sentences line up even though each visual is a different height */
-  .we-points { grid-template-rows: auto 1fr auto; }
-  .pt { display: grid; grid-row: span 3; grid-template-rows: subgrid; row-gap: 0; padding: var(--s5) var(--s6) 0 0; }
-  .pt + .pt { padding-left: var(--s6); border-left: 1px solid var(--line); }
-  .pt-num { margin: 0; font-size: var(--fs-small); font-weight: 600; color: var(--isl-blue); font-variant-numeric: tabular-nums; }
-  .pt-num span { color: var(--ink); margin-left: 0.5em; }
-  .vis { padding-block: var(--s5); }
-  .pt-text { margin: 0; padding-top: var(--s4); border-top: 1px solid var(--line); color: var(--ink-soft); max-width: 36ch; }
+  /* Three lines between hairlines, the same rhythm as the site's other lists */
+  .we-lines { list-style: none; margin: 0; padding: 0; border-top: 1.5px solid var(--ink); }
+  .we-lines li { padding-block: var(--s5); border-bottom: 1px solid var(--line); font-size: var(--fs-lead); line-height: 1.4; }
 
-  /* 01: offices down a line; the last stretch is dashed, reaching past the offices */
-  .route { list-style: none; margin: 0; padding: 0; position: relative; }
-  .route li { position: relative; display: flex; align-items: center; gap: var(--s3); padding-block: 0.42rem; font-weight: 600; }
-  .route li::before { content: ''; position: absolute; left: 5px; top: 50%; height: 100%; border-left: 2px solid var(--isl-blue); }
-  .route li:nth-last-child(2)::before { border-left-style: dashed; }
-  .route li:last-child::before { display: none; }
-  .dot { position: relative; z-index: 1; flex: none; width: 12px; height: 12px; border-radius: 50%; background: var(--isl-blue); }
-  .route .beyond { color: var(--ink-soft); font-weight: 500; }
-  .beyond .dot { background: var(--paper); border: 2px solid var(--isl-blue); }
-  .hq { font-size: var(--fs-tiny); font-weight: 600; color: #fff; background: var(--ink); padding: 0.1rem 0.4rem; }
-
-  /* 02: the rolling word. Words stack in one spot; the current one sits in place,
-     the next waits below, the previous slides out above. */
-  .spec-in { margin: 0; font-size: var(--fs-small); font-weight: 600; color: var(--ink-soft); }
-  .roll { position: relative; height: 1.25em; overflow: hidden; font-size: clamp(1.9rem, 1rem + 1.6vw, 2.6rem); font-weight: 300; letter-spacing: -0.03em; color: var(--isl-blue); margin-top: var(--s2); }
-  .word { position: absolute; left: 0; top: 0; white-space: nowrap; opacity: 0; transform: translateY(100%); }
+  /* The rolling word: every word sits in the same grid cell, so the box is as wide as the
+     longest one and nothing around it shifts. Each word carries its own full stop, so a short
+     word never leaves a gap before the period. The current word is in place; the next waits
+     below, the last slides out above. */
+  .roll { display: inline-grid; vertical-align: bottom; overflow: hidden; color: var(--isl-blue); font-weight: 600; }
+  .word { grid-area: 1 / 1; white-space: nowrap; opacity: 0; transform: translateY(100%); }
   .word.on { opacity: 1; transform: none; }
   :global(.motion) .word { transition: transform 0.55s var(--ease), opacity 0.4s; }
   :global(.motion) .word.out { opacity: 0; transform: translateY(-100%); }
-  .ind { list-style: none; margin: var(--s4) 0 0; padding: 0; display: flex; flex-wrap: wrap; gap: var(--s2); }
-  .ind li { font-size: var(--fs-small); font-weight: 500; padding: 0.3rem 0.6rem; border: 1.5px solid var(--line); color: var(--ink-soft); transition: border-color 0.3s, color 0.3s, background 0.3s; }
-  .ind li.on { border-color: var(--isl-blue); color: var(--isl-blue); }
 
-  /* 03: four ticks, then the solid "Placed" tag */
-  .checks { list-style: none; margin: 0; padding: 0; display: grid; gap: 0; }
-  .checks li { display: flex; align-items: center; gap: var(--s3); padding-block: 0.6rem; border-bottom: 1px solid var(--line); font-weight: 600; }
-  .tick { position: relative; flex: none; width: 20px; height: 20px; border: 1.5px solid var(--isl-blue); }
-  .tick::after { content: ''; position: absolute; left: 6px; top: 2px; width: 5px; height: 10px; border: solid #fff; border-width: 0 2px 2px 0; transform: rotate(45deg); }
-  .tick { background: var(--isl-blue); }
-  .placed { display: inline-block; margin-top: var(--s4); padding: 0.45rem 0.9rem; background: var(--isl-blue); color: #fff; font-weight: 600; font-size: var(--fs-small); }
-
-  /* Motion: each point plays its little sequence when it scrolls into view (--k orders the steps) */
-  :global(.motion) .route li { opacity: 0; transform: translateX(-8px); transition: opacity 0.4s, transform 0.5s var(--ease); transition-delay: calc(0.25s + var(--k) * 0.14s); }
-  :global(.motion) .route li::before { transform-origin: top; transform: scaleY(0); transition: transform 0.35s var(--ease); transition-delay: calc(0.35s + var(--k) * 0.14s); }
-  :global(.motion) .pt.is-in .route li { opacity: 1; transform: none; }
-  :global(.motion) .pt.is-in .route li::before { transform: none; }
-
-  :global(.motion) .tick { background: transparent; transition: background 0.25s; transition-delay: calc(0.5s + var(--k) * 0.35s); }
-  :global(.motion) .tick::after { opacity: 0; transition: opacity 0.2s; transition-delay: calc(0.55s + var(--k) * 0.35s); }
-  :global(.motion) .pt.is-in .tick { background: var(--isl-blue); }
-  :global(.motion) .pt.is-in .tick::after { opacity: 1; }
-  :global(.motion) .placed { opacity: 0; transform: translateY(6px); transition: opacity 0.4s, transform 0.5s var(--ease); transition-delay: calc(0.6s + var(--k) * 0.35s); }
-  :global(.motion) .pt.is-in .placed { opacity: 1; transform: none; }
-
-  @media (max-width: 960px) {
-    .we-head { grid-template-columns: 1fr; }
-    .we-points { grid-template-columns: 1fr; }
-    .pt, .pt + .pt { padding: var(--s5) 0 var(--s6); border-left: 0; }
-    .pt + .pt { border-top: 1px solid var(--line); }
+  @media (max-width: 900px) {
+    .we-grid { grid-template-columns: 1fr; }
   }
 </style>
