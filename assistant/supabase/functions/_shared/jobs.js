@@ -80,7 +80,10 @@ function num(v) {
 export function formatPay(raw) {
   const fmt = (n) => (n >= 1000 ? "$" + Math.round(n).toLocaleString("en-CA") : "$" + n.toFixed(2).replace(/\.00$/, ""));
   const unit = (n) => (n >= 1000 ? "/year" : "/hour");
-  const actual = num(raw.PayActual), min = num(raw.PayMin), max = num(raw.PayMax);
+  const actual = num(raw.PayActual), max = num(raw.PayMax);
+  let min = num(raw.PayMin);
+  // A yearly range with the low end typed in thousands (55 to 65000) means 55,000 to 65,000
+  if (min > 0 && min < 1000 && max >= 1000 && min * 1000 <= max) min *= 1000;
   // A real range beats a single number (some postings fill both).
   if (min > 0 && max > 0 && max !== min) return fmt(min) + " to " + fmt(max) + unit(max);
   if (actual > 0) return fmt(actual) + unit(actual);

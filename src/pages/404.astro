@@ -1,0 +1,42 @@
+---
+// 404  →  shown for any address that doesn't exist (GitHub Pages and most hosts serve 404.html).
+// Offers the three things people are usually after: a job, a hire, or a phone number.
+import Base from '../layouts/Base.astro';
+import PageHero from '../components/PageHero.astro';
+import Button from '../components/Button.astro';
+import { brand } from '../data/site.js';
+import { jobs } from '../data/jobs.js';
+import { url } from '../lib/url.js';
+---
+<Base title="Page not found" description="This page has moved or doesn't exist.">
+  <PageHero compact title="This page has moved." lead="Or it never existed. Here’s where most people are headed." />
+  <section class="nf">
+    <div class="wrap">
+      <form class="search" action={url('/find-work/')} method="get" role="search">
+        <label for="nf-q">Search {jobs.length} open jobs</label>
+        <div class="bar">
+          <input id="nf-q" name="q" type="search" placeholder="Job title, skill or city" autocomplete="off" />
+          <button type="submit">Search</button>
+        </div>
+      </form>
+      <div class="more">
+        <Button href="/hire/">Request talent</Button>
+        <Button href="/" variant="outline">Go to the homepage</Button>
+        <a class="tel" href={`tel:+1${brand.mainPhone.replaceAll('-', '')}`}>Or call {brand.mainPhone}</a>
+      </div>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .nf { padding-block: var(--s5) clamp(4rem, 8vw, 6.5rem); }
+  .search { max-width: 40rem; border-top: 1.5px solid var(--ink); padding-top: var(--s5); }
+  .search label { display: block; font-weight: 600; margin-bottom: var(--s2); }
+  .bar { display: flex; }
+  .bar input { flex: 1; min-width: 0; font: inherit; padding: 0.85rem 1rem; border: 1.5px solid var(--line); border-right: 0; }
+  .bar input:focus { outline: none; border-color: var(--isl-blue); }
+  .bar button { font: inherit; font-weight: 600; background: var(--isl-blue); color: #fff; border: 0; padding: 0 1.4rem; cursor: pointer; }
+  .bar button:hover { background: var(--isl-blue-deep); }
+  .more { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s3) var(--s4); margin-top: var(--s6); }
+  .tel { font-weight: 600; }
+</style>

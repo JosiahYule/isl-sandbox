@@ -10,6 +10,9 @@ import PageHero from '../../components/PageHero.astro';
 import { jobs, provinces, snapshotDate } from '../../data/jobs.js';
 import { areas } from '../../data/areas.js';
 import { url } from '../../lib/url.js';
+import { industryPages } from '../../data/industries.js';
+// Industries that have open jobs right now, for the industry filter
+const industryOptions = industryPages.map((i) => ({ slug: i.slug, name: i.name, n: jobs.filter((j) => j.industry === i.slug).length })).filter((i) => i.n);
 
 const provinceOptions = [...new Set(jobs.map((j) => j.province))]
   .map((code) => ({ code, name: provinces[code] ?? code }))
@@ -32,6 +35,11 @@ const count = { contract: jobs.filter((j) => j.type === 'contract').length, dire
         <select id="prov" name="province">
           <option value="">All provinces</option>
           {provinceOptions.map((p) => <option value={p.code}>{p.name}</option>)}
+        </select>
+        <label class="visually-hidden" for="ind">Industry</label>
+        <select id="ind" name="industry">
+          <option value="">All industries</option>
+          {industryOptions.map((i) => <option value={i.slug}>{i.name}</option>)}
         </select>
         <div class="types" role="group" aria-label="Job type">
           <button type="button" class="t" data-type="" aria-pressed="true">All</button>
@@ -77,6 +85,7 @@ const count = { contract: jobs.filter((j) => j.type === 'contract').length, dire
   const form = document.querySelector('[data-search]');
   const q = form.querySelector('#q');
   const prov = form.querySelector('#prov');
+  const ind = form.querySelector('#ind');
   const typeButtons = form.querySelectorAll('.t');
   const rows = [...document.querySelectorAll('[data-list] > *')];
   const countEl = document.querySelector('[data-count]');
@@ -91,11 +100,12 @@ const count = { contract: jobs.filter((j) => j.type === 'contract').length, dire
 
   function apply() {
     const term = q.value.trim().toLowerCase();
-    const filtering = !!(term || prov.value || type || area);
+    const filtering = !!(term || prov.value || ind.value || type || area);
     let shown = 0;
     rows.forEach((r) => {
       const ok = (!term || r.dataset.search.includes(term))
         && (!prov.value || r.dataset.province === prov.value)
+        && (!ind.value || r.dataset.industry === ind.value)
         && (!type || r.dataset.type === type)
         && (!area || r.dataset.area === area);
       if (ok) shown++;
@@ -113,9 +123,13 @@ const count = { contract: jobs.filter((j) => j.type === 'contract').length, dire
   // ?province=NL (from a job page's "See all") opens the board filtered to that province
   const startProv = new URLSearchParams(location.search).get('province');
   if (startProv && [...prov.options].some((o) => o.value === startProv)) prov.value = startProv;
+  // ?industry=warehousing-and-logistics (from an industry page) opens the board filtered to it
+  const startInd = new URLSearchParams(location.search).get('industry');
+  if (startInd && [...ind.options].some((o) => o.value === startInd)) ind.value = startInd;
   form.addEventListener('submit', (e) => { e.preventDefault(); apply(); });
   q.addEventListener('input', apply);
   prov.addEventListener('change', apply);
+  ind.addEventListener('change', apply);
   typeButtons.forEach((b) => b.addEventListener('click', () => {
     type = b.dataset.type;
     typeButtons.forEach((x) => x.setAttribute('aria-pressed', String(x === b)));
@@ -132,7 +146,7 @@ const count = { contract: jobs.filter((j) => j.type === 'contract').length, dire
   }));
   more.addEventListener('click', () => { expanded = true; apply(); rows[PAGE]?.querySelector('a')?.focus(); });
   document.querySelector('[data-reset]').addEventListener('click', () => {
-    q.value = ''; prov.value = ''; type = ''; area = '';
+    q.value = ''; prov.value = ''; ind.value = ''; type = ''; area = '';
     const u = new URL(location.href); u.searchParams.delete('area'); history.replaceState(null, '', u);
     typeButtons.forEach((x, i) => x.setAttribute('aria-pressed', String(i === 0)));
     apply(); q.focus();
@@ -142,7 +156,7 @@ const count = { contract: jobs.filter((j) => j.type === 'contract').length, dire
 
 <style>
   .search {
-    display: grid; grid-template-columns: 1fr 14rem auto; gap: var(--s2);
+    display: grid; grid-template-columns: 1fr 12rem 15rem auto; gap: var(--s2);
     margin-bottom: var(--s6); padding: var(--s2); background: var(--paper);
     border: 1.5px solid var(--ink); border-radius: var(--radius);
   }
@@ -197,6 +211,11 @@ const count = { contract: jobs.filter((j) => j.type === 'contract').length, dire
   .apply { display: inline-block; margin-top: var(--s5); font-weight: 600; background: var(--isl-blue); color: #fff; text-decoration: none; padding: 0.9rem 1.4rem; }
   .apply:hover { background: var(--isl-blue-deep); color: #fff; }
 
+  /* Mid-size screens: search on its own row, the two filters side by side, job type below */
+  @media (max-width: 1100px) {
+    .search { grid-template-columns: 1fr 1fr; }
+    .search input, .search .types { grid-column: 1 / -1; }
+  }
   @media (max-width: 860px) {
     .search { grid-template-columns: 1fr; }
     .search select { border-left: 0; border-top: 1px solid var(--line); }

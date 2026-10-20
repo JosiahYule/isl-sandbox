@@ -16,9 +16,27 @@ import meta from '../../assistant/data/jobs-meta.json';
 import { areaFor } from './areas.js';
 import { url } from '../lib/url.js';
 import { jobSummary } from '../lib/jobtext.js';
+import { industryOf } from './industries.js';
 
 // When the jobs were last read from the feed, e.g. "October 19, 2026"
 export const snapshotDate = new Date(meta.fetched).toLocaleDateString('en-CA', { month: 'long', day: 'numeric', year: 'numeric', timeZone: 'America/Halifax' });
+
+// Feed titles sometimes carry things that belong elsewhere: a year ("General Labourer 2025")
+// or the town again ("Garbage Collector - Saint John"). Both come off for display.
+function tidyTitle(title, city) {
+  let t = title.replace(/\s*\/\s*/g, ' / ').trim();          // "Driver/ Labourer" -> "Driver / Labourer"
+  t = t.replace(/\s+(19|20)\d{2}$/, '');                       // trailing year
+  if (city) t = t.replace(new RegExp(`\\s*[-–]\\s*${city.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`, 'i'), '');
+  return t.trim();
+}
+
+// "$55 to $65,000/year": the low end was typed in thousands. Read it as $55,000.
+function tidyPay(pay) {
+  const m = String(pay || '').match(/^\$([\d,]+) to \$([\d,]+)\/year$/);
+  if (!m) return pay;
+  const lo = Number(m[1].replace(/,/g, '')), hi = Number(m[2].replace(/,/g, ''));
+  return lo < 1000 && lo * 1000 <= hi ? `$${(lo * 1000).toLocaleString('en-CA')} to $${m[2]}/year` : pay;
+}
 
 const slugify = (s) => String(s).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '')
   .replace(/['’]/g, '').replace(/&/g, ' and ').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
@@ -30,10 +48,12 @@ export const jobs = snapshot
     const slug = [slugify(j.title), city, slugify(j.id)].filter(Boolean).join('-');
     return {
       ...j,
-      title: j.title.replace(/\s*\/\s*/g, ' / ').trim(), // "Driver/ Labourer" -> "Driver / Labourer"
+      title: tidyTitle(j.title, j.city),
+      pay: tidyPay(j.pay),
       slug,
       url: url(`/find-work/${slug}/`),
       area: areaFor(j.city),
+      industry: industryOf(j.title), // '' when it's none of the six industry pages
       type: j.employment === 'Permanent' ? 'direct' : 'contract',
       typeLabel: j.employment === 'Permanent' ? 'Permanent' : j.employment === 'Temp to perm' ? 'Temp to perm' : 'Contract',
       snippet: jobSummary(j.description, j.title),

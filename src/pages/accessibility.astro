@@ -1,0 +1,22 @@
+---
+// ACCESSIBILITY  →  /accessibility/
+// The checks listed here are the ones actually run on this site (axe and Lighthouse, October 2026).
+import LegalPage from '../components/LegalPage.astro';
+import { brand } from '../data/site.js';
+---
+<LegalPage title="Accessibility" lead="Everyone should be able to find work and find people on this site." updated="2026-10-20">
+  <h2>Our goal</h2>
+  <p>We aim to meet the Web Content Accessibility Guidelines (WCAG) 2.1 at level AA, in line with Nova Scotia’s Accessibility Act.</p>
+
+  <h2>What we’ve done</h2>
+  <ul>
+    <li>Every page works with a keyboard alone, and starts with a link to skip straight to the content.</li>
+    <li>Text and buttons are checked against contrast guidelines.</li>
+    <li>Images have descriptions, and charts come with a table of the same figures.</li>
+    <li>Animations switch off when your device is set to reduce motion.</li>
+    <li>Every type of page has been checked with automated accessibility tests (axe and Lighthouse).</li>
+  </ul>
+
+  <h2>Tell us about a barrier</h2>
+  <p>If something on this site is hard to use, or you need a page or posting in another format, email <a href={`mailto:${brand.email}`}>{brand.email}</a> or call {brand.mainPhone}. We’ll reply within one business day and help you apply or reach a recruiter another way in the meantime.</p>
+</LegalPage>

@@ -9,7 +9,7 @@ const where = [job.city, job.province].filter(Boolean).join(', ');
 const field = [job.category, job.subcategory].filter(Boolean).join(', ');
 ---
 <article class:list={['job', `job--${job.type}`]}
-  data-type={job.type} data-province={job.province} data-area={job.area}
+  data-type={job.type} data-province={job.province} data-area={job.area} data-industry={job.industry}
   data-search={`${job.title} ${field} ${job.city} ${job.snippet ?? ''}`.toLowerCase()}>
   <div class="main">
     <h3><a href={job.url}>{job.title}</a></h3>

@@ -92,3 +92,19 @@ You've done every one of these steps before on the onboarding portal.
 node test/search.test.mjs data/feed.json     # search quality on real postings
 node test/edge.sim.mjs <bundled edge.js> data/feed.json   # full backend loop with a fake Claude
 ```
+
+## The request form (isl-request)
+
+`supabase/functions/isl-request/index.ts` sends the website's "Tell us who you need" form to the
+recruiter the page names (the same routing.js the chatbot uses), by email through Resend.
+
+1. In Resend, verify the sending domain (integratedstaffing.ca) if it isn't already.
+2. Add the secrets in Supabase:
+   ```
+   supabase secrets set RESEND_API_KEY=re_...
+   supabase secrets set REQUEST_FROM="Integrated Staffing website <website@integratedstaffing.ca>"
+   supabase secrets set REQUEST_CC=info@integratedstaffing.ca     # optional
+   ```
+3. Deploy: `supabase functions deploy isl-request --no-verify-jwt`
+4. Paste the function's URL into `src/data/site.js` (`forms.requestEndpoint`) and push.
+   Until then the form shows its confirmation and says nothing was sent.

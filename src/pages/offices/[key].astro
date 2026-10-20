@@ -116,6 +116,10 @@ const people = team.filter((p) => p.province === office.province);
       ) : (
         <p class="none">Nothing open nearby right now. <a href="https://www.integratedstaffing.ca/careers/general-apply">Send your resume</a> and we’ll contact you when something fits.</p>
       )}
+      <!-- Local guides sit with the jobs: they're for the same reader, someone looking at work here -->
+      {guides.length > 0 && (
+        <p class="local-guides"><span>Guides:</span> {guides.map((g, i) => <>{i > 0 && ' · '}<a href={g.url}>{g.title}</a></>)}</p>
+      )}
     </div>
   </section>
 
@@ -128,21 +132,13 @@ const people = team.filter((p) => p.province === office.province);
     </section>
   )}
 
-  {guides.length > 0 && (
-    <section class="section">
-      <div class="wrap">
-        <div class="section-head"><h2>Working in {office.province === 'NB' ? 'New Brunswick' : office.province === 'NL' ? 'Newfoundland' : office.city}</h2></div>
-        <ul class="guides" data-stagger>
-          {guides.map((g) => <li><a href={g.url}><span class="g-title">{g.title}</span><span class="arrow" aria-hidden="true">→</span></a></li>)}
-        </ul>
-      </div>
-    </section>
-  )}
 
   <CtaBand />
 </Base>
 
 <style>
+  .local-guides { margin-top: var(--s5); padding-top: var(--s4); border-top: 1px solid var(--line); font-size: var(--fs-small); }
+  .local-guides span { font-weight: 600; margin-right: var(--s2); }
   .call { font-weight: 700; font-size: 1.35rem; color: var(--ink); text-decoration: none; font-variant-numeric: tabular-nums; margin-right: var(--s3); }
   .call:hover { text-decoration: underline; }
 

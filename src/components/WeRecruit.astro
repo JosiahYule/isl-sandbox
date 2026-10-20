@@ -2,20 +2,21 @@
 // WE RECRUIT. IT'S THAT SIMPLE.
 // The live site's signature line, kept simple: the heading, and three short lines beside it
 // (where we are, what we recruit for, how we match). One thing moves: the industry word.
-// Under it, the four figures that back up "simple", coloured by service.
+// Under it, the two services, each with the two figures that back up "simple" and a link.
 //
 // Accessibility: the rolling word is decoration (aria-hidden). Screen readers get the
 // full sentence with every industry instead. With reduced motion the word stays put.
 const industries = ['construction', 'logistics', 'manufacturing', 'oil and gas', 'skilled trades', 'hospitality', 'administration'];
 const list = industries.slice(0, -1).join(', ') + ' and ' + industries.at(-1);
-// What "simple" means in numbers: two for contract (near-black), two for permanent (ISL blue)
-const facts = [
-  ['One rate', 'per contract worker, payroll included', 'contract'],
-  ['Temp to perm', 'try someone on contract, then hire them', 'contract'],
-  ['47 days', 'average permanent search', 'direct'],
-  ['90 days', 'replacement guarantee on permanent hires', 'direct'],
+// What "simple" means, by service: each block is the way into that service's page.
+// Contract in near-black, direct hire in ISL blue (the site's colour key).
+const services = [
+  { key: 'contract', name: 'Contract staffing', href: '/contract/', go: 'How contract staffing works',
+    figs: [['One rate', 'per worker, payroll included'], ['Temp to perm', 'try someone, then hire them']] },
+  { key: 'direct', name: 'Direct hire', href: '/direct-hire/', go: 'How direct hire works',
+    figs: [['47 days', 'average search, brief to hire'], ['90 days', 'replacement guarantee']] },
 ];
-import Facts from './Facts.astro';
+import { url } from '../lib/url.js';
 ---
 <section class="section we" data-we>
   <div class="wrap we-grid">
@@ -30,7 +31,19 @@ import Facts from './Facts.astro';
       <li>People matched to work that fits their skills and goals.</li>
     </ul>
   </div>
-  <div class="we-facts"><Facts facts={facts} /></div>
+  <div class="wrap">
+    <ul class="svcs" data-stagger>
+      {services.map((s) => (
+        <li>
+          <a class:list={['sb', `sb--${s.key}`]} href={url(s.href)}>
+            <span class="sb-name">{s.name}</span>
+            <span class="sb-figs">{s.figs.map(([f, d]) => <span class="sb-fig"><span class="figure">{f}</span><span class="fd">{d}</span></span>)}</span>
+            <span class="sb-go">{s.go} <span aria-hidden="true">→</span></span>
+          </a>
+        </li>
+      ))}
+    </ul>
+  </div>
 </section>
 
 <script>
@@ -74,12 +87,22 @@ import Facts from './Facts.astro';
   :global(.motion) .word { transition: transform 0.55s var(--ease), opacity 0.4s; }
   :global(.motion) .word.out { opacity: 0; transform: translateY(-100%); }
 
-  .we-facts { margin-top: clamp(3rem, 6vw, 5rem); }
-  .we-facts :global(.facts-band) { border-top: 1px solid var(--line); }
-  /* A touch smaller than the About page's figures, so "Temp to perm" stays on one line in a quarter column */
-  .we-facts :global(.figure) { font-size: clamp(2rem, 1.3rem + 1.4vw, 2.6rem); white-space: nowrap; }
+  /* The two services: a coloured top edge (near-black contract, blue direct hire), two figures, a link */
+  .svcs { list-style: none; margin: clamp(3rem, 6vw, 5rem) 0 0; padding: 0; display: grid; grid-template-columns: 1fr 1fr; gap: var(--s5); }
+  .sb { display: grid; gap: var(--s4); height: 100%; padding: var(--s5) var(--s5) var(--s5); border-top: 4px solid var(--contract); background: var(--mist); color: var(--ink); text-decoration: none; transition: background 0.2s; }
+  .sb--direct { border-top-color: var(--direct); }
+  .sb:hover { background: #eeeeee; }
+  .sb-name { font-weight: 700; font-size: 1.15rem; }
+  .sb-figs { display: grid; grid-template-columns: 1fr 1fr; gap: var(--s4); }
+  .sb-fig { display: grid; gap: var(--s1); }
+  .sb .figure { font-size: clamp(1.9rem, 1.2rem + 1.6vw, 2.6rem); white-space: nowrap; }
+  .sb--direct .figure { color: var(--direct); }
+  .fd { color: var(--ink-soft); font-size: var(--fs-small); }
+  .sb-go { font-weight: 600; color: var(--isl-blue); }
+  .sb-go span { display: inline-block; transition: transform 0.3s var(--ease); }
+  .sb:hover .sb-go span { transform: translateX(4px); }
 
   @media (max-width: 900px) {
-    .we-grid { grid-template-columns: 1fr; }
+    .we-grid, .svcs { grid-template-columns: 1fr; }
   }
 </style>

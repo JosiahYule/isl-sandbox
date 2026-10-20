@@ -8,10 +8,11 @@
     "sync-assistant": "node scripts/sync-assistant.mjs",
     "predev": "node scripts/sync-assistant.mjs",
     "dev": "astro dev",
-    "prebuild": "node scripts/fetch-jobs.mjs && node scripts/sync-assistant.mjs",
+    "prebuild": "node scripts/fetch-jobs.mjs && node scripts/check-jobs.mjs && node scripts/sync-assistant.mjs",
     "build": "astro build",
     "preview": "astro preview",
-    "fetch-jobs": "node scripts/fetch-jobs.mjs"
+    "fetch-jobs": "node scripts/fetch-jobs.mjs",
+    "check-jobs": "node scripts/check-jobs.mjs"
   },
   "dependencies": {
     "@fontsource-variable/dm-sans": "^5.3.0",

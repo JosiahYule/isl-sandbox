@@ -1,0 +1,32 @@
+---
+// LEGAL PAGE: the frame for Privacy, Terms and Accessibility. A short intro, a draft notice
+// while ISL reviews the wording, then the page's sections as plain prose.
+// <LegalPage title="Privacy" lead="..." updated="2026-10-20">...sections...</LegalPage>
+import Base from '../layouts/Base.astro';
+import PageHero from './PageHero.astro';
+const { title, lead, description, updated } = Astro.props;
+const date = new Date(updated + 'T12:00:00').toLocaleDateString('en-CA', { month: 'long', day: 'numeric', year: 'numeric' });
+---
+<Base title={title} description={description || lead}>
+  <PageHero compact title={`${title}.`} lead={lead} />
+  <section class="legal">
+    <div class="wrap">
+      <div class="prose">
+        <!-- TODO: remove this notice once ISL (and its lawyer, if needed) has approved the wording -->
+        <p class="draft">Draft for ISL’s review. Last updated {date}.</p>
+        <slot />
+      </div>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .legal { padding-block: var(--s5) clamp(4rem, 8vw, 6.5rem); }
+  .prose { max-width: 68ch; border-top: 1.5px solid var(--ink); padding-top: var(--s5); }
+  .draft { display: inline-block; margin: 0 0 var(--s5); padding: 0.3rem 0.65rem; background: var(--mist); font-size: var(--fs-small); color: var(--ink-soft); }
+  .prose :global(h2) { font-size: 1.3rem; margin: var(--s7) 0 var(--s3); }
+  .prose :global(p), .prose :global(li) { line-height: 1.7; }
+  .prose :global(p) { margin: 0 0 var(--s4); }
+  .prose :global(ul) { margin: 0 0 var(--s4); padding-left: 1.2em; display: grid; gap: var(--s2); }
+  .prose :global(li::marker) { color: var(--isl-blue); }
+</style>

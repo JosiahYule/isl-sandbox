@@ -1,0 +1,27 @@
+---
+// TERMS  →  /terms/
+import LegalPage from '../components/LegalPage.astro';
+import { brand } from '../data/site.js';
+---
+<LegalPage title="Terms of use" lead="The ground rules for using this website." updated="2026-10-20">
+  <h2>Using the site</h2>
+  <p>You’re welcome to use this site to look for work, learn about our services and use our tools. Please don’t misuse it: no attempts to break it, scrape it in bulk, or pass yourself off as someone else.</p>
+
+  <h2>Job postings</h2>
+  <p>Postings, pay and locations come from our clients and can change or close without notice. A posting is an invitation to apply, not an offer of work.</p>
+
+  <h2>Tools and guides</h2>
+  <p>Our calculators, pay figures and guides are general information, not legal, tax or payroll advice. Figures are estimates based on the sources each tool names.</p>
+
+  <h2>Our content</h2>
+  <p>The text, photos and design of this site belong to {brand.name}. You may share links to it; please ask before copying it.</p>
+
+  <h2>Links to other sites</h2>
+  <p>We link to other sites we think are useful. We’re not responsible for what they say or do.</p>
+
+  <h2>Liability</h2>
+  <p>We work to keep this site accurate and available, but we can’t promise it always will be. We’re not liable for losses that come from using it, to the extent the law allows.</p>
+
+  <h2>Governing law</h2>
+  <p>These terms are governed by the laws of Nova Scotia and the federal laws of Canada that apply there.</p>
+</LegalPage>

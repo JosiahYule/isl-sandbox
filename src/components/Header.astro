@@ -9,9 +9,14 @@ import { jobs } from '../data/jobs.js';
 import { areas } from '../data/areas.js';
 import { posts } from '../data/posts.js';
 import { tools, guides } from '../data/tools.js';
+import { industryPages } from '../data/industries.js';
 
 // Dropdowns: built from the same data as the pages, so the numbers are always current.
 const menus = {
+  '/contract/': [
+    ...industryPages.map((i) => ({ label: i.name, href: url(`/industries/${i.slug}/`) })),
+    { label: 'How contract staffing works', href: url('/contract/'), rule: true },
+  ],
   '/find-work/': [
     { label: 'All open jobs', href: url('/find-work/'), meta: String(jobs.length) },
     ...areas.map((a) => ({ label: `Near ${a.label}`, href: url(`/find-work/?area=${a.key}`), meta: String(jobs.filter((j) => j.area === a.key).length) })),

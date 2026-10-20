@@ -4,12 +4,15 @@
 // visitor picks a service and a province, using the same routing as the chatbot
 // (assistant/supabase/functions/_shared/routing.js), so both always name the same person.
 //
-// The form is visual only in the sandbox: nothing is sent.
+// Sending: when forms.requestEndpoint is set in src/data/site.js, the form posts to the
+// isl-request function (assistant/supabase/functions/isl-request), which emails the recruiter
+// the card names. With no endpoint (the sandbox), it shows the confirmation and says nothing was sent.
 // Links can pre-fill it: ?service=contract|direct, ?details=... (the textarea), ?where=Nova Scotia
 import Base from '../layouts/Base.astro';
 import PageHero from '../components/PageHero.astro';
 import Steps from '../components/Steps.astro';
-import { brand } from '../data/site.js';
+import { brand, forms } from '../data/site.js';
+import { url } from '../lib/url.js';
 
 const locations = ['Nova Scotia', 'New Brunswick', 'Prince Edward Island', 'Newfoundland and Labrador', 'Elsewhere in Canada'];
 const tel = `tel:+1${brand.mainPhone.replaceAll('-', '')}`;
@@ -28,7 +31,7 @@ const afterSteps = [
 
   <section class="section section--rule work">
     <div class="wrap layout">
-      <form class="form" id="request" novalidate>
+      <form data-endpoint={forms.requestEndpoint || undefined} class="form" id="request" novalidate>
         <!-- 1. The request first: what and where -->
         <fieldset class="service">
           <legend>What do you need?</legend>
@@ -101,11 +104,15 @@ const afterSteps = [
           <label class="field"><span>Phone <span class="opt-tag">(optional)</span></span> <input name="phone" type="tel" autocomplete="tel" /></label>
         </div>
 
+        <!-- Hidden from people; bots fill it in, and the function ignores anything that does -->
+        <label class="hp" aria-hidden="true">Website <input name="website" tabindex="-1" autocomplete="off" /></label>
+
         <p class="to-line" aria-live="polite"></p>
         <div class="submit">
           <button type="submit">Send request</button>
-          <p>We use your details only to respond to this request.</p>
+          <p>We use your details only to respond to this request. <a href={url('/privacy/')}>Privacy</a></p>
         </div>
+        <p class="send-err" hidden role="alert">That didn’t send. Please try again, or call us at <a href={tel}>{brand.mainPhone}</a>.</p>
         <div class="sent" hidden tabindex="-1">
           <p class="sent-title">Request sent.</p>
           <p class="sent-who"></p>
@@ -238,11 +245,30 @@ const afterSteps = [
   const required = [...form.querySelectorAll<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>('[required]')];
   const errFor = (f: Element) => f.closest('.field')?.querySelector<HTMLElement>('.err');
   required.forEach((f) => f.addEventListener('input', () => { if (f.checkValidity()) { f.removeAttribute('aria-invalid'); const e = errFor(f); if (e) e.hidden = true; } }));
-  form.addEventListener('submit', (e) => {
+  const endpoint = form.dataset.endpoint;
+  const errBox = form.querySelector<HTMLElement>('.send-err')!;
+  const button = form.querySelector<HTMLButtonElement>('button[type="submit"]')!;
+  form.addEventListener('submit', async (e) => {
     e.preventDefault();
     const bad = required.filter((f) => !f.checkValidity());
     required.forEach((f) => { const ok = !bad.includes(f); f.toggleAttribute('aria-invalid', !ok); const e = errFor(f); if (e) e.hidden = ok; });
     if (bad.length) { bad[0].focus(); return; }
+    errBox.hidden = true;
+    if (endpoint) {
+      // Send it for real: the function emails the recruiter the card names
+      button.disabled = true; button.textContent = 'Sending…';
+      try {
+        const data = Object.fromEntries(new FormData(form).entries());
+        const res = await fetch(endpoint, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ...data, page: location.pathname }) });
+        if (!res.ok) throw new Error(String(res.status));
+      } catch {
+        button.disabled = false; button.textContent = 'Send request';
+        errBox.hidden = false;
+        return;
+      }
+      form.querySelector<HTMLElement>('.sent-note')!.hidden = true;
+    }
+    document.dispatchEvent(new CustomEvent('isl:track', { detail: { name: 'generate_lead', params: { service: service() } } }));
     form.querySelector<HTMLElement>('.submit')!.hidden = true;
     toLine.hidden = true;
     const sent = form.querySelector<HTMLElement>('.sent')!;
@@ -306,6 +332,8 @@ const afterSteps = [
   .err { color: #b3261e; font-weight: 500; font-size: var(--fs-small); }
 
   .to-line { display: none; margin: var(--s5) 0 0; font-size: var(--fs-small); font-weight: 500; }
+  .hp { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
+  .send-err { margin-top: var(--s3); color: #b42318; font-weight: 500; }
   .submit { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s3) var(--s5); margin-top: var(--s6); }
   .submit button { font: inherit; font-weight: 600; font-size: 1.0625rem; cursor: pointer; padding: 1rem 1.8rem; border: 0; background: var(--isl-blue); color: #fff; }
   .submit button:hover { background: var(--isl-blue-deep); }

@@ -67,6 +67,14 @@ export const testimonials = [
   },
 ];
 
+// Analytics: paste the Google Analytics 4 measurement ID here (e.g. 'G-XXXXXXX') to switch on
+// analytics and the consent banner (src/components/Analytics.astro). Empty = off, no cookies.
+export const analytics = { ga4: '' };
+
+// Forms: the deployed isl-request function's URL (assistant/supabase/functions/isl-request).
+// Empty = the request form shows its confirmation but sends nothing (the sandbox preview).
+export const forms = { requestEndpoint: '' };
+
 export const social = [
   { label: 'LinkedIn', href: 'https://www.linkedin.com/company/integratedstaffing' },
   { label: 'Facebook', href: 'https://www.facebook.com/integratedstaffing' },

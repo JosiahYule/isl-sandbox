@@ -7,6 +7,9 @@
 //        only: "contract" | "direct" lists just that service's industries, as a plain hairline list
 //              (used on the service pages, where the other service's rows would only be noise)
 import { industries } from '../data/industries.js';
+import { url } from '../lib/url.js';
+// Industries with their own page link to it
+const nameOf = (i) => i.slug ? `<a href="${url(`/industries/${i.slug}/`)}">${i.name}</a>` : i.name;
 
 const { initial = 'all', compact = false, only } = Astro.props;
 const other = { contract: 'direct', direct: 'contract' }[only];
@@ -23,7 +26,7 @@ const filters = [
 <ul class="list" data-stagger>
   {listed.map((i) => (
     <li>
-      <span class="name">{i.name}</span>
+      <span class="name" set:html={nameOf(i)} />
       {i[other] && <span class:list={['svc', `svc--${other}`, 'also']}>{otherLabel}</span>}
     </li>
   ))}
@@ -47,7 +50,7 @@ const filters = [
       {industries.map((i) => (
         <tr data-contract={String(i.contract)} data-direct={String(i.direct)}>
           <th scope="row">
-            <span class="name">{i.name}</span>
+            <span class="name" set:html={nameOf(i)} />
             <span class="note">{i.note}</span>
           </th>
           <td class="c">{i.contract ? <span class="mark mark--contract" role="img" aria-label="Yes"></span> : <span class="none" aria-label="No">No</span>}</td>
@@ -96,6 +99,9 @@ const filters = [
   tbody td.c { text-align: center; }
   tbody tr { transition: opacity 220ms var(--ease); }
 
+  .name :global(a) { color: inherit; text-decoration: none; background: linear-gradient(currentColor, currentColor) 0 100% / 0 1.5px no-repeat; transition: background-size 0.3s var(--ease); }
+  .name :global(a):hover, .name :global(a):focus-visible { background-size: 100% 1.5px; color: var(--isl-blue); }
+  .name :global(a)::after { content: ' →'; color: var(--isl-blue); }
   .name {
     display: block; font-weight: 700;
     font-size: 1.12rem; letter-spacing: -0.01em; line-height: 1.25;

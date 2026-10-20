@@ -1,0 +1,84 @@
+---
+// ANALYTICS + CONSENT (Google Analytics 4 with Consent Mode v2).
+// Off until an ID is set in src/data/site.js (analytics.ga4, e.g. 'G-XXXXXXX'). With no ID,
+// this renders nothing: no script, no banner, no cookies.
+//
+// With an ID:
+//   1. Consent starts as "denied", so Google only receives cookieless pings until the visitor agrees.
+//   2. A small banner asks once. Their answer is remembered in this browser (localStorage).
+//   3. Accepting turns on analytics storage only. Ads storage stays denied: the site runs no ads.
+//
+// Events counted (the actions that matter for leads), sent from anywhere on the site with
+//   document.dispatchEvent(new CustomEvent('isl:track', { detail: { name, params } }))
+// plus three picked up automatically: phone_click (any tel: link), apply_click (links to the
+// application form) and email_click (mailto: links). The request form sends generate_lead.
+import { analytics } from '../data/site.js';
+import { url } from '../lib/url.js';
+const id = analytics?.ga4;
+// part="head": the Google tag (must run early). part="body": the banner and the event listeners.
+const { part = 'head' } = Astro.props;
+---
+{id && part === 'head' && (
+    <script is:inline define:vars={{ id }}>
+      window.dataLayer = window.dataLayer || [];
+      window.gtag = function () { dataLayer.push(arguments); };
+      let choice = null;
+      try { choice = localStorage.getItem('isl-consent'); } catch (e) {}
+      gtag('consent', 'default', {
+        analytics_storage: choice === 'granted' ? 'granted' : 'denied',
+        ad_storage: 'denied', ad_user_data: 'denied', ad_personalization: 'denied',
+      });
+      gtag('js', new Date());
+      gtag('config', id);
+      const s = document.createElement('script');
+      s.async = true; s.src = 'https://www.googletagmanager.com/gtag/js?id=' + id;
+      document.head.appendChild(s);
+    </script>
+)}
+{id && part === 'body' && (
+  <>
+    <div class="consent" data-consent hidden role="region" aria-label="Cookie choice">
+      <p>We’d like to count visits to improve this site. No advertising cookies. <a href={url('/privacy/')}>Privacy</a></p>
+      <div class="c-btns">
+        <button type="button" data-consent-choice="granted">Accept</button>
+        <button type="button" data-consent-choice="denied" class="c-no">No thanks</button>
+      </div>
+    </div>
+    <script is:inline>
+      (() => {
+        const box = document.querySelector('[data-consent]');
+        let choice = null;
+        try { choice = localStorage.getItem('isl-consent'); } catch (e) {}
+        if (!choice) box.hidden = false;
+        box.addEventListener('click', (e) => {
+          const b = e.target.closest('[data-consent-choice]');
+          if (!b) return;
+          const v = b.dataset.consentChoice;
+          try { localStorage.setItem('isl-consent', v); } catch (err) {}
+          gtag('consent', 'update', { analytics_storage: v });
+          box.hidden = true;
+        });
+        const send = (name, params) => gtag('event', name, params || {});
+        document.addEventListener('isl:track', (e) => send(e.detail.name, e.detail.params));
+        document.addEventListener('click', (e) => {
+          const a = e.target.closest('a[href]');
+          if (!a) return;
+          const h = a.getAttribute('href');
+          if (h.startsWith('tel:')) send('phone_click', { number: h.slice(4) });
+          else if (h.startsWith('mailto:')) send('email_click');
+          else if (h.includes('/careers/apply')) send('apply_click', { page: location.pathname });
+        });
+      })();
+    </script>
+  </>
+)}
+
+<style>
+  .consent { position: fixed; z-index: 2147482000; left: var(--s4); bottom: var(--s4); max-width: 26rem; background: var(--ink); color: #fff; padding: var(--s4) var(--s5); display: grid; gap: var(--s3); font-size: var(--fs-small); }
+  .consent[hidden] { display: none; }
+  .consent p { margin: 0; line-height: 1.5; }
+  .consent a { color: #fff; }
+  .c-btns { display: flex; gap: var(--s2); }
+  .c-btns button { font: inherit; font-weight: 600; padding: 0.55rem 1rem; border: 1.5px solid #fff; background: #fff; color: var(--ink); cursor: pointer; }
+  .c-btns .c-no { background: transparent; color: #fff; }
+</style>

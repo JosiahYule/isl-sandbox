@@ -2,6 +2,11 @@
 // CLOSING CALL TO ACTION: the dark band that ends most pages.
 import Button from './Button.astro';
 import { brand } from '../data/site.js';
+import { PEOPLE } from '../../assistant/supabase/functions/_shared/routing.js';
+// The people who answer requests, so the promise has faces: each province's contact and Zowie for permanent hires
+const repliers = ['meg', 'kelli', 'chance', 'crystal', 'zowie'].map((k) => PEOPLE[k]).filter(Boolean);
+const names = repliers.map((p) => p.first);
+const nameList = names.slice(0, -1).join(', ') + ' and ' + names.at(-1);
 
 const {
   title = 'Tell us who you need.',
@@ -16,6 +21,10 @@ const tel = `tel:+1${brand.mainPhone.replaceAll('-', '')}`;
     <h2>{title}</h2>
     <div class="side">
       <p>{text}</p>
+      <div class="who">
+        <span class="faces" aria-hidden="true">{repliers.map((p) => <img src={p.photo} alt="" width="40" height="40" loading="lazy" onerror="this.style.visibility='hidden'" />)}</span>
+        <span class="names">{nameList} answer every request.</span>
+      </div>
       <div class="actions">
         <Button href={href} variant="light" size="lg">{label}</Button>
         <a class="phone" href={tel}>Or call {brand.mainPhone}</a>
@@ -29,6 +38,11 @@ const tel = `tel:+1${brand.mainPhone.replaceAll('-', '')}`;
   .inner { display: grid; grid-template-columns: 1.3fr 1fr; gap: var(--s7); align-items: end; }
   h2 { font-size: var(--fs-h1); max-width: 12ch; }
   .side p { color: var(--on-dark-soft); font-size: var(--fs-lead); max-width: 36ch; }
+  .who { display: flex; align-items: center; gap: var(--s3); margin-top: var(--s4); }
+  .faces { display: flex; flex: none; }
+  .faces img { width: 40px; height: 40px; object-fit: cover; object-position: center 20%; background: #2a2a2a; border: 2px solid var(--dark); }
+  .faces img + img { margin-left: -8px; }
+  .names { font-size: var(--fs-small); color: var(--on-dark-soft); line-height: 1.4; }
   .actions { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s5); margin-top: var(--s5); }
   .phone { font-weight: 500; }
   @media (max-width: 860px) { .inner { grid-template-columns: 1fr; } }

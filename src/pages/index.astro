@@ -86,7 +86,7 @@ const ticker = jobs.slice(0, 14);
   </section>
 
   <!-- 4. PROOF: one client quote, with the review count beside it -->
-  <Proof />
+  <Proof index={1} />
 
   <!-- 5. RECRUITMENT INTELLIGENCE: ISL's own tools (src/data/tools.js) -->
   <section class="section section--rule tools">
@@ -138,7 +138,8 @@ const ticker = jobs.slice(0, 14);
   :global(.motion) .hero-bg.is-in :global(img) { transform: none; }
 
   /* Now hiring: real postings scrolling along the bottom edge. Pauses on hover or focus. */
-  .ticker { position: relative; display: flex; min-width: 0; max-width: 100%; align-items: stretch; border-top: 1px solid rgb(255 255 255 / 0.16); background: rgb(20 20 20 / 0.55); backdrop-filter: blur(6px); }
+  .ticker { position: relative; display: flex; min-width: 0; max-width: 100%; align-items: stretch; border-top: 1px solid rgb(255 255 255 / 0.16); background: var(--dark); }
+  /* Solid, not see-through: over a light patch of photo, translucent grey text failed contrast */
   .ticker-label { flex: none; display: flex; align-items: center; gap: var(--s2); margin: 0; padding: 0 var(--s5) 0 var(--gutter); font-size: var(--fs-small); font-weight: 600; background: var(--isl-blue); color: #fff; white-space: nowrap; }
   .pulse { width: 8px; height: 8px; border-radius: 50%; background: #fff; }
   :global(.motion) .pulse { animation: pulse 2s ease-out infinite; }

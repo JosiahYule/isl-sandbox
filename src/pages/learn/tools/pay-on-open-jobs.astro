@@ -43,7 +43,7 @@ const payText = (j) => j.payInfo.unit === 'year' ? `${j.pay} (about ${perHour(j.
   <PageHero compact title="Pay on our open jobs." lead="What employers are offering right now, from every job we’re hiring for." />
 
   <section class="tool" data-pay>
-    <div class="wrap">
+    <div class="wrap pay-wrap">
       <div class="filters">
         <div class="chips" role="group" aria-label="Province">
           {provinces.map(([k, l], i) => <button type="button" data-prov={k} aria-pressed={String(i === 0)}>{l}</button>)}
@@ -246,6 +246,12 @@ const payText = (j) => j.payInfo.unit === 'year' ? `${j.pay} (about ${perHour(j.
   .go--ink:hover { background: #000; }
 
   @media (max-width: 760px) {
+    /* On a phone the dots crowd together, so the table comes first and the chart follows */
+    .pay-wrap { display: flex; flex-direction: column; }
+    .filters { order: 1; }
+    .table, .empty { order: 2; margin-top: 0; margin-bottom: var(--s7); }
+    .chart { order: 3; }
+    .note { order: 4; }
     .chart { --label: 0px; --range: 0px; }
     .row { grid-template-columns: 1fr auto; grid-template-areas: 'fam range' 'strip strip'; padding-top: var(--s4); }
     .fam { grid-area: fam; }

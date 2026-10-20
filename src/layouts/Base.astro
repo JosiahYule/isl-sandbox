@@ -5,6 +5,7 @@ import '@fontsource-variable/dm-sans/opsz.css';   // DM Sans, the ISL brand face
 import '../styles/global.css';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
+import Analytics from '../components/Analytics.astro';
 import { brand, images } from '../data/site.js';
 import { url } from '../lib/url.js';
 
@@ -36,6 +37,7 @@ const fullTitle = title ? `${title} | ${brand.name}` : `${brand.name} | Contract
     <meta property="og:image" content={shareImage} />
     <meta name="twitter:card" content="summary_large_image" />
     {schema && <script type="application/ld+json" set:html={JSON.stringify(schema)} />}
+    <Analytics part="head" />
     <meta name="robots" content="noindex" /><!-- sandbox: keep search engines out -->
     <!-- Turn on the entrance animations only when the visitor's device allows motion.
          This runs before the page paints, so nothing flashes. (See src/scripts/motion.js) -->
@@ -50,6 +52,7 @@ const fullTitle = title ? `${title} | ${brand.name}` : `${brand.name} | Contract
       <slot />
     </main>
     <Footer offices={footerOffices} />
+    <Analytics part="body" />
     <script>import '../scripts/motion.js';</script>
     <!-- Job assistant: the chat widget, running in demo mode (see assistant/README.md and assistant/demo-mode.js) -->
     {assistant && <script is:inline defer src={url('/assistant/widget.js')}></script>}

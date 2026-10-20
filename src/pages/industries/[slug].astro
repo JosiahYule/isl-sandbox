@@ -1,0 +1,123 @@
+---
+// INDUSTRY PAGE  →  /industries/<slug>/
+// One template for the six industries with a `slug` in src/data/industries.js. Each page is
+// built from data the site already has, so it stays current with the job feed:
+//   roles       the roles ISL fills most often (industries.js)
+//   pay         middle and range of HOURLY pay on our open jobs in this industry (src/lib/jobpay.js);
+//               salaried roles are left out (a few manager salaries would skew what an hourly
+//               worker earns), and it only shows with at least three jobs
+//   open jobs   the jobs whose title matches the industry (industryOf in industries.js)
+//   contacts    who an employer talks to in each province (routing.js, as on the Contract page)
+import Base from '../../layouts/Base.astro';
+import PageHero from '../../components/PageHero.astro';
+import Button from '../../components/Button.astro';
+import JobRow from '../../components/JobRow.astro';
+import CtaBand from '../../components/CtaBand.astro';
+import { industryPages } from '../../data/industries.js';
+import { jobs } from '../../data/jobs.js';
+import { readPay, perHour } from '../../lib/jobpay.js';
+import { url } from '../../lib/url.js';
+import { route, provinceName } from '../../../assistant/supabase/functions/_shared/routing.js';
+
+export function getStaticPaths() {
+  return industryPages.map((ind) => ({ params: { slug: ind.slug }, props: { ind } }));
+}
+
+const { ind } = Astro.props;
+const open = jobs.filter((j) => j.industry === ind.slug);
+const paid = open.map((j) => readPay(j.pay)).filter((p) => p && p.unit === 'hour').map((p) => p.hourly).sort((a, b) => a - b);
+const mid = paid.length ? (paid.length % 2 ? paid[(paid.length - 1) / 2] : (paid[paid.length / 2 - 1] + paid[paid.length / 2]) / 2) : null;
+const shortName = ind.name.split(',')[0].toLowerCase();
+const service = ind.contract ? 'contract' : 'direct';
+const hireHref = `/hire/?service=${service}&details=${encodeURIComponent(`${ind.name}: `)}`;
+const local = [['NS', 'Halifax', 'halifax'], ['NB', 'Moncton', 'moncton'], ['PE', 'Charlottetown', 'charlottetown'], ['NL', "St. John's", 'st-johns']]
+  .map(([province, city, key]) => ({ province, key, ...route({ audience: 'employer', service: 'contract', place: { province, city } }) }));
+const tel = (n) => `tel:+1${n.replace(/\D/g, '')}`;
+const services = [ind.contract && ['Contract staffing', '/contract/'], ind.direct && ['Direct hire', '/direct-hire/']].filter(Boolean);
+---
+<Base title={`${ind.name} staffing`} description={`${ind.name} staffing across Atlantic Canada: ${ind.roles.slice(0, 3).join(', ').toLowerCase()} and more, on contract${ind.direct ? ' and permanently' : ''}.`} assistantMode="employer">
+  <PageHero compact title={`${ind.name}.`} lead={ind.note}>
+    <Button href={hireHref}>Request workers</Button>
+    <Button href={`/find-work/?industry=${ind.slug}`} variant="outline">See open jobs</Button>
+  </PageHero>
+
+  <section class="section section--rule">
+    <div class="wrap two">
+      <div>
+        <h2 class="h">Roles we fill</h2>
+        <ul class="roles">{ind.roles.map((r) => <li>{r}</li>)}</ul>
+        <p class="svc-line">{services.map(([label, href], i) => <>{i > 0 && ' · '}<a href={url(href)}>{label}</a></>)}</p>
+      </div>
+      {mid !== null && paid.length >= 3 ? (
+        <div class="pay">
+          <h2 class="h">Hourly pay on our open jobs</h2>
+          <p class="big">{perHour(mid)}</p>
+          <p class="sub">middle, from {perHour(paid[0])} to {perHour(paid.at(-1))} across {paid.length} jobs</p>
+          <a class="more" href={url('/learn/tools/pay-on-open-jobs/')}>Pay across every role</a>
+        </div>
+      ) : (
+        <div class="pay">
+          <h2 class="h">Pay</h2>
+          <p class="sub">Not enough open hourly jobs to show a range right now.</p>
+          <a class="more" href={url('/learn/tools/pay-on-open-jobs/')}>See pay across every role</a>
+        </div>
+      )}
+    </div>
+  </section>
+
+  {open.length > 0 && (
+    <section class="section section--tint">
+      <div class="wrap">
+        <div class="section-head section-head--split jh">
+          <h2>Open now</h2>
+          <p class="lead"><a href={url(`/find-work/?industry=${ind.slug}`)}>See all {open.length}</a></p>
+        </div>
+        <div class="list">{open.slice(0, 6).map((j) => <JobRow job={j} />)}</div>
+      </div>
+    </section>
+  )}
+
+  {ind.contract && (
+    <section class="section">
+      <div class="wrap">
+        <div class="section-head"><h2>Who you’ll talk to</h2></div>
+        <ul class="local">
+          {local.map((l) => (
+            <li>
+              <p class="l-prov">{provinceName(l.province)}</p>
+              <p class="l-name">{l.person?.name ?? `${l.office.city} office`}</p>
+              <a class="l-tel" href={tel(l.person?.phone || l.office.phone)}>{l.person?.phone || l.office.phone}</a>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </section>
+  )}
+
+  <CtaBand title={`Need ${shortName} staff?`} href={hireHref} label="Request workers" />
+</Base>
+
+<style>
+  .two { display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); gap: var(--s7) clamp(2.5rem, 6vw, 6rem); align-items: start; }
+  .h { font-size: var(--fs-h3); margin-bottom: var(--s4); }
+  .roles { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: 1fr 1fr; border-top: 1.5px solid var(--ink); }
+  .roles li { padding: var(--s3) var(--s3) var(--s3) 0; border-bottom: 1px solid var(--line); font-weight: 600; }
+  .svc-line { margin-top: var(--s5); font-weight: 600; color: var(--ink-soft); }
+  .pay { border-top: 1.5px solid var(--ink); padding-top: var(--s4); }
+  .big { margin: 0; font-weight: 300; font-size: clamp(2.6rem, 1.6rem + 3vw, 4rem); letter-spacing: -0.04em; line-height: 1; font-variant-numeric: tabular-nums; }
+  .sub { margin: var(--s3) 0 0; color: var(--ink-soft); }
+  .more { display: inline-block; margin-top: var(--s4); font-weight: 600; }
+  .jh .lead { justify-self: end; font-weight: 600; font-size: var(--fs-body); }
+  .list { border-top: 1.5px solid var(--ink); background: var(--paper); }
+  .local { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--s5); }
+  .local li { border-top: 1.5px solid var(--ink); padding-top: var(--s3); display: grid; gap: 2px; }
+  .l-prov { margin: 0; font-size: var(--fs-small); color: var(--ink-soft); }
+  .l-name { margin: 0; font-weight: 700; }
+  .l-tel { font-weight: 600; color: var(--ink); text-decoration: none; font-variant-numeric: tabular-nums; }
+  @media (max-width: 900px) {
+    .two { grid-template-columns: 1fr; }
+    .local { grid-template-columns: 1fr 1fr; }
+    .jh .lead { justify-self: start; }
+  }
+  @media (max-width: 480px) { .roles { grid-template-columns: 1fr; } }
+</style>
