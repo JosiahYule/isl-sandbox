@@ -164,7 +164,7 @@ const schema = {
   .ask .tel { display: block; color: var(--ink); text-decoration: none; font-size: var(--fs-body); }
 
   /* The posting: a comfortable reading column */
-  .body { grid-column: 1; grid-row: 1; max-width: 68ch; }
+  .body { grid-column: 1; grid-row: 1; max-width: 60ch; } /* a ch is a zero's width, wider than most letters: 60ch is about 75 characters */
   .body > :first-child { margin-top: 0; }
   .body h2 { font-size: var(--fs-h3); letter-spacing: -0.01em; margin: var(--s7) 0 var(--s3); }
   .body p, .body li, .body dd { font-size: var(--fs-body); line-height: 1.7; }

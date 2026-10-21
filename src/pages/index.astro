@@ -3,7 +3,6 @@
 // Built from the shared section system in global.css:
 // hero (job search + now hiring strip), we recruit, offices, proof, free tools, call to action.
 import Base from '../layouts/Base.astro';
-import Button from '../components/Button.astro';
 import AtlanticMap from '../components/AtlanticMap.astro';
 import CtaBand from '../components/CtaBand.astro';
 import Photo from '../components/Photo.astro';
@@ -47,7 +46,7 @@ const ticker = jobs.slice(0, 14);
             <button type="submit">Search</button>
           </div>
         </form>
-        <p class="employer">Hiring? <Button href="/hire/" variant="light">Request talent</Button></p>
+        <p class="employer">Hiring? <a class="employer-go" href={url('/hire/')}>Request talent <span aria-hidden="true">→</span></a></p>
       </div>
     </div>
 
@@ -148,7 +147,10 @@ const ticker = jobs.slice(0, 14);
   .search-bar button { font: inherit; font-weight: var(--fw-bold); cursor: pointer; padding: 0 1.6rem; border: 0; background: var(--isl-blue); color: #fff; }
   .search-bar button:hover { background: var(--isl-blue-deep); }
   .employer { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s3) var(--s4); margin-top: var(--s5); font-weight: var(--fw-text); color: rgb(255 255 255 / 0.86); }
-  .employer a[href^='tel'] { color: #fff; font-size: var(--fs-small); }
+  /* A link, not a second solid button: in greyscale a white button outshone Search */
+  .employer-go { color: #fff; font-weight: var(--fw-bold); text-decoration: underline; text-underline-offset: 0.25em; text-decoration-thickness: 1.5px; }
+  .employer-go span { display: inline-block; transition: transform 0.2s var(--ease); }
+  .employer-go:hover span { transform: translateX(3px); }
 
   /* The photo settles slowly from slightly enlarged */
   :global(.motion) .hero-bg :global(img) { transform: scale(1.08); transition: transform 2.6s var(--ease); }

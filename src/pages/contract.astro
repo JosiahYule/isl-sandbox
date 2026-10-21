@@ -141,6 +141,9 @@ const covered = [
   .l-prov { font-size: var(--fs-small); font-weight: var(--fw-bold); color: var(--ink-soft) !important; margin-bottom: var(--s2); }
   .l-tel { display: block; margin-top: var(--s3); font-weight: var(--fw-bold); color: var(--ink); text-decoration: none; font-variant-numeric: tabular-nums; }
   .local .more { display: inline-block; margin-top: var(--s2); }
+  .local .item { display: grid; grid-row: span 5; grid-template-rows: subgrid; row-gap: 0; align-content: start; } /* rows shared across the cards */
+  .local .item > * { margin-bottom: 0; }
+  .local .item > p:not(.l-prov) { margin-bottom: var(--s2); }
   .cov-grid { display: grid; grid-template-columns: 5fr 6fr; gap: clamp(2rem, 6vw, 6rem); align-items: center; }
   .now { border-top: 1.5px solid var(--ink); padding-top: var(--s4); }
   .now-label { font-size: var(--fs-small); font-weight: var(--fw-bold); color: var(--ink-soft); margin-bottom: var(--s3); }

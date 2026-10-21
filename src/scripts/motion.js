@@ -17,8 +17,9 @@ if (root.classList.contains('motion')) {
     [...list.children].forEach((child, i) => child.style.setProperty('--i', i));
   });
 
-  // Count-up numbers start at zero, keeping any text around them: "92%" starts as "0%"
-  const counters = [...document.querySelectorAll('[data-countup]')].map((el) => {
+  // Count-up numbers were switched off (design review, October 2026): people read these figures,
+  // and a number that's still changing can't be read. The code stays in case one is wanted later.
+  const counters = [].map((el) => {
     const m = el.textContent.trim().match(/^(\D*)([\d,]+)(.*)$/);
     if (!m) return null;
     const [, before, num, after] = m;

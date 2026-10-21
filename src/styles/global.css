@@ -139,15 +139,15 @@ h1 .line, h2 .line { display: block; }
    device allows motion, so with reduced motion or no JavaScript everything is simply visible. */
 .motion .section-head, .motion [data-reveal] {
   opacity: 0; transform: translateY(18px);
-  transition: opacity 0.8s var(--ease), transform 0.8s var(--ease);
-  transition-delay: calc(var(--i, 0) * 70ms);
+  transition: opacity 0.4s var(--ease), transform 0.4s var(--ease);
+  transition-delay: calc(min(var(--i, 0), 4) * 40ms);
 }
 .motion .section-head.is-in, .motion [data-reveal].is-in { opacity: 1; transform: none; }
 
 .motion .items > *, .motion [data-stagger] > * {
   opacity: 0; transform: translateY(18px);
-  transition: opacity 0.7s var(--ease), transform 0.7s var(--ease), background-size 1.1s var(--ease);
-  transition-delay: calc(var(--i, 0) * 90ms);
+  transition: opacity 0.4s var(--ease), transform 0.4s var(--ease), background-size 0.5s var(--ease);
+  transition-delay: calc(min(var(--i, 0), 4) * 40ms); /* the 5th item on waits no longer than the 4th */
 }
 .motion .items > .item, .motion [data-stagger] > .item { background-size: 0% 1.5px; }
 .motion .items.is-in > *, .motion [data-stagger].is-in > * { opacity: 1; transform: none; }

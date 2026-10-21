@@ -26,7 +26,7 @@ const field = [job.category, job.subcategory].filter(Boolean).join(', ');
 <style>
   .job {
     position: relative;
-    display: grid; grid-template-columns: minmax(0, 2.2fr) 0.9fr 1.2fr auto; gap: var(--s4); align-items: center;
+    display: grid; grid-template-columns: minmax(0, 2.2fr) 0.9fr 1.2fr 13rem; /* fixed last column, so every row lines up */ gap: var(--s4); align-items: center;
     padding: var(--s5) 0 var(--s5) var(--s5);
     border-bottom: 1px solid var(--line);
     transition: background-color 150ms var(--ease);
