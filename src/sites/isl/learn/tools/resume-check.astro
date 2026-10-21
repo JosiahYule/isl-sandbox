@@ -4,11 +4,11 @@
 // It also lists the open jobs the resume fits best (rankJobs), and, optionally, compares it with
 // one job to show which of that job's key terms the resume mentions.
 // Everything runs in the browser; the resume is never sent or saved.
-import Base from '../../../layouts/Base.astro';
-import PageHero from '../../../components/PageHero.astro';
-import { jobs } from '../../../data/jobs.js';
-import { keywordsFor, CHECKS } from '../../../lib/resume.js';
-import { url } from '../../../lib/url.js';
+import Base from '../../../../layouts/Base.astro';
+import PageHero from '../../../../components/PageHero.astro';
+import { jobs } from '../../../../data/jobs.js';
+import { keywordsFor, CHECKS } from '../../../../lib/resume.js';
+import { url } from '../../../../lib/url.js';
 
 // Only the terms per job go to the page, not the full postings
 const jobTerms = jobs.map((j) => ({ id: j.id, title: j.title, place: [j.city, j.province].filter(Boolean).join(', '), label: `${j.title}, ${[j.city, j.province].filter(Boolean).join(' ')}`, url: j.url, pay: j.pay, type: j.type, terms: keywordsFor(j) }));
@@ -90,7 +90,7 @@ const groups = [...new Set(CHECKS.map((c) => c.group))];
 </Base>
 
 <script>
-  import { checkResume, matchTerms, rankJobs } from '../../../lib/resume.js';
+  import { checkResume, matchTerms, rankJobs } from '../../../../lib/resume.js';
 
   const root = document.querySelector<HTMLElement>('[data-resume]')!;
   const form = root.querySelector('form')!;
@@ -173,9 +173,9 @@ const groups = [...new Set(CHECKS.map((c) => c.group))];
   .opt { font-weight: var(--fw-text); color: var(--ink-soft); font-size: var(--fs-small); margin-left: 0.3em; }
   textarea, select { font: inherit; padding: 0.8rem 0.9rem; border: 1.5px solid var(--line); background: var(--paper); color: var(--ink); width: 100%; }
   textarea { resize: vertical; min-height: 18rem; font-size: var(--fs-body); line-height: 1.55; }
-  textarea:focus, select:focus { outline: none; border-color: var(--isl-blue); }
-  .go { justify-self: start; display: inline-block; font: inherit; font-weight: var(--fw-bold); background: var(--isl-blue); color: #fff; border: 0; cursor: pointer; text-decoration: none; padding: 0.9rem 1.4rem; }
-  .go:hover { background: var(--isl-blue-deep); color: #fff; }
+  textarea:focus, select:focus { outline: none; border-color: var(--accent); }
+  .go { justify-self: start; display: inline-block; font: inherit; font-weight: var(--fw-bold); background: var(--accent); color: #fff; border: 0; cursor: pointer; text-decoration: none; padding: 0.9rem 1.4rem; }
+  .go:hover { background: var(--accent-deep); color: #fff; }
   .need { margin: 0; font-weight: var(--fw-bold); color: #a3261b; }
   .private { margin: 0; font-size: var(--fs-small); color: var(--ink-soft); }
 
@@ -189,20 +189,20 @@ const groups = [...new Set(CHECKS.map((c) => c.group))];
   .of { font-size: 0.35em; color: var(--ink-soft); letter-spacing: 0; margin-left: 0.15em; }
   .verdict { margin: var(--s3) 0 0; font-weight: var(--fw-bold); }
   .meter { height: 8px; background: rgb(0 0 0 / 0.07); margin-top: var(--s4); }
-  .meter span { display: block; height: 100%; width: 0; background: var(--isl-blue); transition: width 0.6s var(--ease); }
+  .meter span { display: block; height: 100%; width: 0; background: var(--accent); transition: width 0.6s var(--ease); }
   .out h2 { font-size: var(--fs-h3); margin: var(--s6) 0 var(--s3); }
 
   /* The lists below are filled in by the script, so their items are styled with :global()
      (Astro's scoped styles only reach elements written in this file's markup) */
   .fixes { margin: 0; padding: 0; list-style: none; counter-reset: fix; border-top: 1px solid var(--line); }
   .fixes :global(li) { counter-increment: fix; display: grid; grid-template-columns: 1.6rem 1fr; gap: 2px var(--s2); padding: var(--s3) 0; border-bottom: 1px solid var(--line); }
-  .fixes :global(li)::before { content: counter(fix); grid-row: span 2; font-weight: var(--fw-bold); color: var(--isl-blue); font-variant-numeric: tabular-nums; }
+  .fixes :global(li)::before { content: counter(fix); grid-row: span 2; font-weight: var(--fw-bold); color: var(--accent); font-variant-numeric: tabular-nums; }
   .fixes :global(strong) { grid-column: 2; }
   .fixes :global(span) { grid-column: 2; color: var(--ink-soft); font-size: var(--fs-small); line-height: 1.5; }
 
   .terms { list-style: none; margin: var(--s3) 0; padding: 0; display: flex; flex-wrap: wrap; gap: var(--s2); }
   .terms :global(li) { font-size: var(--fs-small); font-weight: var(--fw-text); padding: 0.3rem 0.6rem; border: 1.5px solid var(--line); }
-  .terms :global(li.yes) { border-color: var(--isl-blue); color: var(--isl-blue); }
+  .terms :global(li.yes) { border-color: var(--accent); color: var(--accent); }
   .terms :global(li.yes)::before { content: '✓ '; }
   .terms :global(li.no) { color: var(--ink-soft); border-style: dashed; }
   .hint { font-size: var(--fs-small); color: var(--ink-soft); margin: 0; }

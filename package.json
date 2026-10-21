@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "description": "Design sandbox for the Integrated Staffing website redesign",
+  "description": "Design sandbox for the Integrated Staffing, Accountant Staffing and Administrative Staffing websites",
   "scripts": {
     "sync-assistant": "node scripts/sync-assistant.mjs",
     "predev": "node scripts/sync-assistant.mjs",
@@ -12,7 +12,10 @@
     "build": "astro build",
     "preview": "astro preview",
     "fetch-jobs": "node scripts/fetch-jobs.mjs",
-    "check-jobs": "node scripts/check-jobs.mjs"
+    "check-jobs": "node scripts/check-jobs.mjs",
+    "build:all": "npm run build && BRAND=as astro build && BRAND=ads astro build",
+    "dev:as": "BRAND=as astro dev",
+    "dev:ads": "BRAND=ads astro dev"
   },
   "dependencies": {
     "@fontsource-variable/dm-sans": "^5.3.0",

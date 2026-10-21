@@ -3,18 +3,20 @@
 import Base from '../layouts/Base.astro';
 import AtlanticMap from '../components/AtlanticMap.astro';
 import PageHero from '../components/PageHero.astro';
-import { brand, offices } from '../data/site.js';
+import { brand, offices, links, services } from '../data/site.js';
 import { url } from '../lib/url.js';
 import { areas } from '../data/areas.js';
 
 const tel = (n) => `tel:+1${n.replaceAll('-', '')}`;
 const routes = [
-  { t: "I'm hiring", d: 'Contract workers or a permanent hire.', href: url('/hire/'), cta: 'Request talent', kind: 'primary' },
+  { t: "I'm hiring", d: `${services.contract.ask} or ${services.direct.ask.replace(/^A /, 'a ')}.`, href: url('/hire/'), cta: 'Request talent', kind: 'primary' },
   { t: "I'm looking for work", d: 'Browse open roles or send your resume.', href: url('/find-work/'), cta: 'Browse jobs' },
-  { t: 'I know a company that’s hiring', d: 'Refer them to our team.', href: 'https://www.integratedstaffing.ca/referrals', cta: 'Make a referral' },
-];
+  links.referral && { t: 'I know a company that’s hiring', d: 'Refer them to our team.', href: links.referral, cta: 'Make a referral' },
+].filter(Boolean);
+const cities = offices.map((o) => o.city);
+const cityList = cities.slice(0, -1).join(', ') + ' and ' + cities.at(-1);
 ---
-<Base title="Contact" footerOffices={false} description="Contact Integrated Staffing in Halifax, Moncton, Saint John, Charlottetown and St. John's.">
+<Base title="Contact" footerOffices={false} description={`Contact ${brand.name} in ${cityList}.`}>
   <PageHero title="Talk to the office nearest you." lead="Or start with what you need, and we'll route you to the right recruiter." />
 
   <section class="section section--rule">
@@ -28,7 +30,8 @@ const routes = [
           </li>
         ))}
       </ul>
-      <p class="email">General inquiries: <a href={`mailto:${brand.email}`}>{brand.email}</a></p>
+      {brand.email && <p class="email">General inquiries: <a href={`mailto:${brand.email}`}>{brand.email}</a></p>}
+      {brand.resumeEmail && <p class="email">Resumes: <a href={`mailto:${brand.resumeEmail}`}>{brand.resumeEmail}</a></p>}
     </div>
   </section>
 
@@ -44,7 +47,7 @@ const routes = [
           {offices.map((o, i) => (
             <li data-row={i} aria-current={i === 0 ? 'true' : undefined}>
               <button type="button" class="o-city" data-select={i}>{o.city}, {o.province}{i === 0 && <span>Head office</span>}</button>
-              <span class="o-addr">{o.address} <a class="o-page" href={url(`/offices/${areas.find((a) => a.label === o.city)?.key}/`)}>Office page</a></span>
+              <span class="o-addr">{o.address} {brand.officePages && <a class="o-page" href={url(`/offices/${areas.find((a) => a.label === o.city)?.key}/`)}>Office page</a>}</span>
               <a class="o-tel" href={tel(o.phone)}>{o.phone}</a>
             </li>
           ))}

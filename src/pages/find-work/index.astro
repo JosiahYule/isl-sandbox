@@ -11,6 +11,8 @@ import { jobs, provinces, snapshotDate } from '../../data/jobs.js';
 import { areas } from '../../data/areas.js';
 import { url } from '../../lib/url.js';
 import { industryPages } from '../../data/industries.js';
+import { brand, links, services, jobsNote, field, seekerSteps, seekerFaq } from '../../data/site.js';
+import Steps from '../../components/Steps.astro';
 // Industries that have open jobs right now, for the industry filter
 const industryOptions = industryPages.map((i) => ({ slug: i.slug, name: i.name, n: jobs.filter((j) => j.industry === i.slug).length })).filter((i) => i.n);
 
@@ -21,14 +23,14 @@ const PAGE = 15; // rows shown before "Show all"; search and filters always show
 const areaLinks = areas.map((a) => ({ ...a, n: jobs.filter((j) => j.area === a.key).length }));
 const count = { contract: jobs.filter((j) => j.type === 'contract').length, direct: jobs.filter((j) => j.type === 'direct').length };
 ---
-<Base assistantMode="seeker" title="Find work" description="Contract and permanent jobs across Atlantic Canada and beyond.">
-  <PageHero title="Find your next job." lead="Contract and permanent roles across Atlantic Canada.">
-    <button type="button" class="textlink" data-open-assistant>Or describe what you want to the job assistant</button>
+<Base assistantMode="seeker" title="Find work" description={field ? `Temporary and permanent ${field.short} jobs across Atlantic Canada.` : 'Contract and permanent jobs across Atlantic Canada and beyond.'}>
+  <PageHero title="Find your next job." lead={field ? `Temporary and permanent ${field.short} roles across Atlantic Canada.` : 'Contract and permanent roles across Atlantic Canada.'}>
+    {brand.assistant && <button type="button" class="textlink" data-open-assistant>Or describe what you want to the job assistant</button>}
   </PageHero>
 
   <section class="results">
     <div class="wrap">
-      <form class="search" role="search" data-search>
+      <form class:list={['search', industryOptions.length === 0 && 'search--3']} role="search" data-search>
         <label class="visually-hidden" for="q">Search jobs</label>
         <input id="q" name="q" type="search" placeholder="Job title, skill or city" autocomplete="off" />
         <label class="visually-hidden" for="prov">Province</label>
@@ -36,15 +38,15 @@ const count = { contract: jobs.filter((j) => j.type === 'contract').length, dire
           <option value="">All provinces</option>
           {provinceOptions.map((p) => <option value={p.code}>{p.name}</option>)}
         </select>
-        <label class="visually-hidden" for="ind">Industry</label>
-        <select id="ind" name="industry">
+        {industryOptions.length > 0 && <label class="visually-hidden" for="ind">Industry</label>}
+        {industryOptions.length > 0 && <select id="ind" name="industry">
           <option value="">All industries</option>
           {industryOptions.map((i) => <option value={i.slug}>{i.name}</option>)}
-        </select>
+        </select>}
         <div class="types" role="group" aria-label="Job type">
           <button type="button" class="t" data-type="" aria-pressed="true">All</button>
-          <button type="button" class="t t--contract" data-type="contract" aria-pressed="false">Contract <span>{count.contract}</span></button>
-          <button type="button" class="t t--direct" data-type="direct" aria-pressed="false">Permanent <span>{count.direct}</span></button>
+          <button type="button" class="t t--contract" data-type="contract" aria-pressed="false">{services.contract.jobLabel} <span>{count.contract}</span></button>
+          <button type="button" class="t t--direct" data-type="direct" aria-pressed="false">{services.direct.jobLabel} <span>{count.direct}</span></button>
         </div>
       </form>
       <nav class="near" aria-label="Jobs near an office">
@@ -63,10 +65,10 @@ const count = { contract: jobs.filter((j) => j.type === 'contract').length, dire
       <button type="button" class="more" data-more>Show all {jobs.length} roles</button>
       <div class="empty" data-empty hidden>
         <p class="empty-title">No roles match that search.</p>
-        <p>Try a broader term or another province. Or <a href="https://www.integratedstaffing.ca/careers/general-apply">send us your resume</a> and we'll contact you when something fits.</p>
+        <p>Try a broader term or another province. Or <a href={links.resume}>send us your resume</a> and we'll contact you when something fits.</p>
         <button type="button" data-reset>Clear search and filters</button>
       </div>
-      <p class="note">Sandbox preview: real postings from ISL's job feed as of {snapshotDate}. Some may have been filled since.</p>
+      <p class="note">{jobsNote(snapshotDate)}</p>
     </div>
   </section>
 
@@ -75,17 +77,30 @@ const count = { contract: jobs.filter((j) => j.type === 'contract').length, dire
       <h2>Don't see the right role?</h2>
       <div>
         <p class="lead">Send your resume and we'll contact you when something fits.</p>
-        <a class="apply" href="https://www.integratedstaffing.ca/careers/general-apply">Send your resume</a>
+        <a class="apply" href={links.resume}>Send your resume</a>
       </div>
     </div>
   </section>
+
+  <!-- AS and ADS: every candidate is met and tested before they're put forward, so the steps are shown -->
+  {seekerSteps && (
+    <section class="section section--rule">
+      <div class="wrap">
+        <div class="section-head"><h2>How registering works</h2></div>
+        <Steps steps={seekerSteps} />
+        <dl class="faq">
+          {seekerFaq.map(([q, a]) => <div><dt>{q}</dt><dd>{a}</dd></div>)}
+        </dl>
+      </div>
+    </section>
+  )}
 </Base>
 
 <script>
   const form = document.querySelector('[data-search]');
   const q = form.querySelector('#q');
   const prov = form.querySelector('#prov');
-  const ind = form.querySelector('#ind');
+  const ind = form.querySelector('#ind') ?? { value: '', options: [], addEventListener() {} }; // no industry filter on AS and ADS
   const typeButtons = form.querySelectorAll('.t');
   const rows = [...document.querySelectorAll('[data-list] > *')];
   const countEl = document.querySelector('[data-count]');
@@ -164,7 +179,7 @@ const count = { contract: jobs.filter((j) => j.type === 'contract').length, dire
     font: inherit; font-size: var(--fs-body); padding: 0.85rem 1rem; border: 0; background: transparent; color: var(--ink); min-width: 0;
   }
   .search select { border-left: 1px solid var(--line); cursor: pointer; }
-  .search input:focus, .search select:focus { outline: 2px solid var(--isl-blue); outline-offset: -2px; }
+  .search input:focus, .search select:focus { outline: 2px solid var(--accent); outline-offset: -2px; }
   .types { display: flex; gap: 4px; padding: 4px; border-left: 1px solid var(--line); }
   .t {
     font: inherit; font-size: var(--fs-small); font-weight: var(--fw-bold); cursor: pointer; white-space: nowrap;
@@ -179,6 +194,11 @@ const count = { contract: jobs.filter((j) => j.type === 'contract').length, dire
   .t--direct[aria-pressed='true'] { background: var(--direct); }
 
 
+  .search--3 { grid-template-columns: 1fr 12rem auto; }
+  .faq { margin: clamp(3rem, 6vw, 4.5rem) 0 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 16rem), 1fr)); gap: var(--s5); }
+  .faq div { border-top: 1.5px solid var(--ink); padding-top: var(--s4); }
+  .faq dt { font-weight: var(--fw-bold); margin-bottom: var(--s2); }
+  .faq dd { margin: 0; color: var(--ink-soft); }
   .results { padding-block: 0 clamp(4rem, 8vw, 6.5rem); }
   .near { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s2) var(--s4); margin: calc(-1 * var(--s3)) 0 var(--s6); font-size: var(--fs-small); }
   .near > span { color: var(--ink-soft); }
@@ -208,13 +228,13 @@ const count = { contract: jobs.filter((j) => j.type === 'contract').length, dire
   .note { margin-top: var(--s5); font-size: var(--fs-tiny); color: var(--ink-soft); }
 
   .general-grid { display: grid; grid-template-columns: 1fr 1fr; gap: var(--s7); align-items: end; }
-  .apply { display: inline-block; margin-top: var(--s5); font-weight: var(--fw-bold); background: var(--isl-blue); color: #fff; text-decoration: none; padding: 0.9rem 1.4rem; }
-  .apply:hover { background: var(--isl-blue-deep); color: #fff; }
+  .apply { display: inline-block; margin-top: var(--s5); font-weight: var(--fw-bold); background: var(--accent); color: #fff; text-decoration: none; padding: 0.9rem 1.4rem; }
+  .apply:hover { background: var(--accent-deep); color: #fff; }
 
   /* Mid-size screens: search on its own row, the two filters side by side, job type below */
   @media (max-width: 1100px) {
     .search { grid-template-columns: 1fr 1fr; }
-    .search input, .search .types { grid-column: 1 / -1; }
+    .search input, .search .types, .search--3 select { grid-column: 1 / -1; }
   }
   @media (max-width: 860px) {
     .search { grid-template-columns: 1fr; }

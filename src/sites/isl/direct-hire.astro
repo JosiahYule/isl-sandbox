@@ -1,19 +1,19 @@
 ---
 // DIRECT HIRE (PERMANENT PLACEMENT)  →  /direct-hire/
-import Base from '../layouts/Base.astro';
-import Button from '../components/Button.astro';
-import PageHero from '../components/PageHero.astro';
-import IndustryMatrix from '../components/IndustryMatrix.astro';
-import CanadaMap from '../components/CanadaMap.astro';
-import CtaBand from '../components/CtaBand.astro';
-import Steps from '../components/Steps.astro';
-import UnitChart from '../components/UnitChart.astro';
-import Photo from '../components/Photo.astro';
-import Proof from '../components/Proof.astro';
-import PersonCard from '../components/PersonCard.astro';
-import { stock } from '../data/photos.js';
-import { team } from '../data/team.js';
-import { stats } from '../data/site.js';
+import Base from '../../layouts/Base.astro';
+import Button from '../../components/Button.astro';
+import PageHero from '../../components/PageHero.astro';
+import IndustryMatrix from '../../components/IndustryMatrix.astro';
+import CanadaMap from '../../components/CanadaMap.astro';
+import CtaBand from '../../components/CtaBand.astro';
+import Steps from '../../components/Steps.astro';
+import UnitChart from '../../components/UnitChart.astro';
+import Photo from '../../components/Photo.astro';
+import Proof from '../../components/Proof.astro';
+import PersonCard from '../../components/PersonCard.astro';
+import { stock } from '../../data/photos.js';
+import { team } from '../../data/team.js';
+import { stats } from '../../data/site.js';
 
 const recruiters = team.filter((p) => p.team === 'Direct Hire');
 const retention = stats.find((s) => s.label.includes('retention'))?.value ?? '92%';

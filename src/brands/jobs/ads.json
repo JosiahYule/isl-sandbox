@@ -1,0 +1,54 @@
+{
+ "source": "A sample of recent postings (Sept 14 to Oct 19, 2026): title, type, place and the live posting link. No descriptions or pay yet; those arrive with the Tracker RMS feed.",
+ "saved": "2026-10-20T12:00:00.000Z",
+ "jobs": [
+  {
+   "id": "JOB-18546",
+   "title": "Human Resources Manager",
+   "employment": "Permanent",
+   "jobType": "Permanent",
+   "city": "Halifax",
+   "province": "NS",
+   "category": "",
+   "subcategory": "",
+   "office": "",
+   "pay": "",
+   "posted": "2026-09-29",
+   "description": "",
+   "viewUrl": "https://www.administrativestaffing.ca/job-details?jobcode=JOB-18546",
+   "applyUrl": "https://www.administrativestaffing.ca/job-details?jobcode=JOB-18546"
+  },
+  {
+   "id": "JOB-18542",
+   "title": "Bookkeeper & Office Administrator",
+   "employment": "Temporary / contract",
+   "jobType": "Temporary / contract",
+   "city": "St. John's",
+   "province": "NL",
+   "category": "",
+   "subcategory": "",
+   "office": "",
+   "pay": "",
+   "posted": "2026-09-29",
+   "description": "",
+   "viewUrl": "https://www.administrativestaffing.ca/job-details?jobcode=JOB-18542",
+   "applyUrl": "https://www.administrativestaffing.ca/job-details?jobcode=JOB-18542"
+  },
+  {
+   "id": "JOB-18535",
+   "title": "Accounting & Firm Coordinator",
+   "employment": "Permanent",
+   "jobType": "Permanent",
+   "city": "Halifax",
+   "province": "NS",
+   "category": "",
+   "subcategory": "",
+   "office": "",
+   "pay": "",
+   "posted": "2026-09-14",
+   "description": "",
+   "viewUrl": "https://www.administrativestaffing.ca/job-details?jobcode=JOB-18535",
+   "applyUrl": "https://www.administrativestaffing.ca/job-details?jobcode=JOB-18535"
+  }
+ ]
+}

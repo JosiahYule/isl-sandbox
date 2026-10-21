@@ -5,11 +5,11 @@
 //   rules and pay law       src/lib/jobad.js
 //   pay on our open jobs    payFor() in assistant/.../insights.js (the same answer the assistant gives)
 // Everything runs in the browser; the ad is never sent or saved.
-import Base from '../../../layouts/Base.astro';
-import PageHero from '../../../components/PageHero.astro';
-import { jobs } from '../../../data/jobs.js';
-import { CHECKS, PAY_LAW } from '../../../lib/jobad.js';
-import { url } from '../../../lib/url.js';
+import Base from '../../../../layouts/Base.astro';
+import PageHero from '../../../../components/PageHero.astro';
+import { jobs } from '../../../../data/jobs.js';
+import { CHECKS, PAY_LAW } from '../../../../lib/jobad.js';
+import { url } from '../../../../lib/url.js';
 
 // Only what the pay comparison needs goes to the page
 const payJobs = jobs.filter((j) => j.pay).map((j) => ({ id: j.id, title: j.title, province: j.province, city: j.city, pay: j.pay }));
@@ -122,8 +122,8 @@ Send your resume to jobs@example.ca`;
 </Base>
 
 <script>
-  import { checkAd } from '../../../lib/jobad.js';
-  import { payFor } from '../../../../assistant/supabase/functions/_shared/insights.js';
+  import { checkAd } from '../../../../lib/jobad.js';
+  import { payFor } from '../../../../../assistant/supabase/functions/_shared/insights.js';
 
   const root = document.querySelector<HTMLElement>('[data-ad]')!;
   const form = root.querySelector('form')!;
@@ -208,18 +208,18 @@ Send your resume to jobs@example.ca`;
   .inputs { display: grid; gap: var(--s5); border-top: 1.5px solid var(--ink); padding-top: var(--s5); }
   .field { display: grid; gap: var(--s2); margin: 0; padding: 0; border: 0; min-width: 0; }
   .lbl { font-weight: var(--fw-bold); padding: 0; display: flex; justify-content: space-between; align-items: baseline; gap: var(--s3); }
-  .sample { font: inherit; font-size: var(--fs-small); font-weight: var(--fw-bold); color: var(--isl-blue); background: none; border: 0; padding: 0; cursor: pointer; text-decoration: underline; text-underline-offset: 0.2em; }
+  .sample { font: inherit; font-size: var(--fs-small); font-weight: var(--fw-bold); color: var(--accent); background: none; border: 0; padding: 0; cursor: pointer; text-decoration: underline; text-underline-offset: 0.2em; }
   textarea { font: inherit; padding: 0.8rem 0.9rem; border: 1.5px solid var(--line); background: var(--paper); color: var(--ink); width: 100%; resize: vertical; min-height: 18rem; font-size: var(--fs-body); line-height: 1.55; }
-  textarea:focus { outline: none; border-color: var(--isl-blue); }
+  textarea:focus { outline: none; border-color: var(--accent); }
   .seg { display: grid; grid-template-columns: repeat(5, 1fr); border: 1.5px solid var(--line); }
   .seg label { position: relative; }
   .seg input { position: absolute; opacity: 0; inset: 0; cursor: pointer; }
   .seg span { display: block; text-align: center; padding: 0.7rem 0.2rem; font-weight: var(--fw-bold); font-size: var(--fs-small); }
   .seg label + label span { border-left: 1.5px solid var(--line); }
   .seg input:checked + span { background: var(--ink); color: #fff; }
-  .seg input:focus-visible + span { outline: 2px solid var(--isl-blue); outline-offset: -2px; }
-  .go { justify-self: start; display: inline-block; font: inherit; font-weight: var(--fw-bold); background: var(--isl-blue); color: #fff; border: 0; cursor: pointer; text-decoration: none; padding: 0.9rem 1.4rem; white-space: nowrap; }
-  .go:hover { background: var(--isl-blue-deep); color: #fff; }
+  .seg input:focus-visible + span { outline: 2px solid var(--accent); outline-offset: -2px; }
+  .go { justify-self: start; display: inline-block; font: inherit; font-weight: var(--fw-bold); background: var(--accent); color: #fff; border: 0; cursor: pointer; text-decoration: none; padding: 0.9rem 1.4rem; white-space: nowrap; }
+  .go:hover { background: var(--accent-deep); color: #fff; }
   .need { margin: 0; font-weight: var(--fw-bold); color: #a3261b; }
   .private { margin: 0; font-size: var(--fs-small); color: var(--ink-soft); }
 
@@ -228,19 +228,19 @@ Send your resume to jobs@example.ca`;
   .law-list { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--line); }
   .law-list li { display: flex; justify-content: space-between; gap: var(--s4); padding: var(--s3) 0; border-bottom: 1px solid var(--line); }
   .st { color: var(--ink-soft); font-size: var(--fs-small); text-align: right; }
-  .st--req { color: var(--isl-blue); font-weight: var(--fw-bold); }
+  .st--req { color: var(--accent); font-weight: var(--fw-bold); }
   .ph-sub { margin-top: var(--s4); color: var(--ink-soft); font-size: var(--fs-small); }
 
   .score { margin: 0; font-weight: var(--fw-light); font-size: var(--fs-figure-lg); letter-spacing: -0.04em; line-height: 1; font-variant-numeric: tabular-nums; }
   .of { font-size: 0.35em; color: var(--ink-soft); letter-spacing: 0; margin-left: 0.15em; }
   .verdict { margin: var(--s3) 0 0; font-weight: var(--fw-bold); }
   .meter { height: 8px; background: rgb(0 0 0 / 0.07); margin-top: var(--s4); }
-  .meter span { display: block; height: 100%; width: 0; background: var(--isl-blue); transition: width 0.6s var(--ease); }
+  .meter span { display: block; height: 100%; width: 0; background: var(--accent); transition: width 0.6s var(--ease); }
   .out h2 { font-size: var(--fs-h3); margin: var(--s6) 0 var(--s3); }
 
   .law p { margin: 0 0 var(--s2); }
   .law-st { font-weight: var(--fw-bold); }
-  .law-st.ok { color: var(--isl-blue); }
+  .law-st.ok { color: var(--accent); }
   .law-st.bad { color: #a3261b; }
   .law-st.bad::before { content: '! '; }
   .src { font-size: var(--fs-small); color: var(--ink-soft); }
@@ -249,18 +249,18 @@ Send your resume to jobs@example.ca`;
   .track { position: relative; height: 22px; margin: var(--s4) 0 var(--s2); border-bottom: 1px solid var(--line); }
   .t-range { position: absolute; top: 7px; height: 8px; background: rgb(0 0 0 / 0.14); }
   .t-mid { position: absolute; top: 3px; width: 2px; height: 16px; margin-left: -1px; background: var(--ink); }
-  .t-ad { position: absolute; top: 4px; width: 14px; height: 14px; margin-left: -7px; border-radius: 50%; background: var(--isl-blue); box-shadow: 0 0 0 2px var(--paper); }
+  .t-ad { position: absolute; top: 4px; width: 14px; height: 14px; margin-left: -7px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 0 2px var(--paper); }
   :global(.motion) .t-ad, :global(.motion) .t-mid, :global(.motion) .t-range { transition: left 0.5s var(--ease), width 0.5s var(--ease); }
   .t-key { display: flex; gap: var(--s5); margin: 0 0 var(--s2); font-size: var(--fs-small); color: var(--ink-soft); }
   .k { display: inline-flex; align-items: center; gap: var(--s2); }
   .k::before { content: ''; width: 12px; height: 8px; }
   .k--range::before { background: rgb(0 0 0 / 0.14); }
-  .k--ad::before { width: 10px; height: 10px; border-radius: 50%; background: var(--isl-blue); }
+  .k--ad::before { width: 10px; height: 10px; border-radius: 50%; background: var(--accent); }
   .hint { font-size: var(--fs-small); color: var(--ink-soft); margin: 0; }
 
   .fixes { margin: 0; padding: 0; list-style: none; counter-reset: fix; border-top: 1px solid var(--line); }
   .fixes :global(li) { counter-increment: fix; display: grid; grid-template-columns: 1.6rem 1fr; gap: 2px var(--s2); padding: var(--s3) 0; border-bottom: 1px solid var(--line); }
-  .fixes :global(li)::before { content: counter(fix); grid-row: span 2; font-weight: var(--fw-bold); color: var(--isl-blue); font-variant-numeric: tabular-nums; }
+  .fixes :global(li)::before { content: counter(fix); grid-row: span 2; font-weight: var(--fw-bold); color: var(--accent); font-variant-numeric: tabular-nums; }
   .fixes :global(strong) { grid-column: 2; }
   .fixes :global(span) { grid-column: 2; color: var(--ink-soft); font-size: var(--fs-small); line-height: 1.5; }
   .passed { margin-top: var(--s5); }

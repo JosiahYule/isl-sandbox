@@ -1,6 +1,6 @@
 ---
 // ATLANTIC MAP
-// Real province shapes (src/data/maps.js) with the five offices pinned.
+// Real province shapes (src/data/maps.js) with the brand's offices pinned (ISL five, AS and ADS three).
 // Click or tab to a pin to see that office's address and phone number.
 // Props:
 //   tone: "light" (navy land on a light page, default) | "dark" (for navy sections)
@@ -10,7 +10,7 @@
 //   navigate: selecting a pin opens that office's page (used on the office pages)
 //   towns: optional [{ name, lon, lat }] drawn as small dots (places we staff beyond the office cities)
 import { atlanticMap as map } from '../data/maps.js';
-import { offices } from '../data/site.js';
+import { offices, brand } from '../data/site.js';
 import { areas } from '../data/areas.js';
 import { url } from '../lib/url.js';
 
@@ -36,9 +36,9 @@ const townDots = towns.map((t) => ({ ...t, x: ax * t.lon + bx * t.lat + cx, y: a
 // Which side of the pin each label sits on, so nearby labels don't collide.
 const labelSide = { Halifax: 'right', Moncton: 'left', 'Saint John': 'right', Charlottetown: 'right', "St. John's": 'left' };
 
-const pins = map.offices.map((p) => {
+const pins = map.offices.filter((p) => offices.some((x) => x.city === p.city)).map((p) => {
   const o = offices.find((x) => x.city === p.city);
-  const key = areas.find((a) => a.label === p.city)?.key;
+  const key = brand.officePages ? areas.find((a) => a.label === p.city)?.key : undefined;
   return { ...o, key, left: (p.x / map.width) * 100, top: (p.y / map.height) * 100, side: labelSide[p.city] ?? 'right' };
 });
 const sel = Math.max(0, pins.findIndex((p) => p.city === selected));
@@ -76,7 +76,7 @@ const tel = (n) => `tel:+1${n.replaceAll('-', '')}`;
       ))}
     </div>
   )}
-  <figcaption class="visually-hidden">Map of Atlantic Canada with offices in Halifax, Moncton, Saint John, Charlottetown and St. John's.</figcaption>
+  <figcaption class="visually-hidden">Map of Atlantic Canada with offices in {pins.map((p) => p.city).slice(0, -1).join(', ')} and {pins.at(-1).city}.</figcaption>
 </figure>
 
 <script>
@@ -96,7 +96,7 @@ const tel = (n) => `tel:+1${n.replaceAll('-', '')}`;
 
 <style>
   .amap {
-    --land: var(--isl-blue);
+    --land: var(--map-land);
     --land-edge: #ffffff;
     --context: var(--line);
     --label-bg: var(--ink);
@@ -105,7 +105,7 @@ const tel = (n) => `tel:+1${n.replaceAll('-', '')}`;
   /* Pins are positioned as percentages of this box, so it must hold only the map */
   .canvas { position: relative; aspect-ratio: 900 / 820; }
   .amap--dark {
-    --land: var(--isl-blue);
+    --land: var(--map-land);
     --land-edge: var(--dark);
     --context: #232323;
     --label-bg: var(--ink);

@@ -19,14 +19,14 @@ const { href, variant = 'solid', size = 'md', ...rest } = Astro.props;
   .btn--lg { padding: 1.05rem 1.7rem; font-size: var(--fs-body); }
   .btn--sm { padding: 0.55rem 0.95rem; font-size: var(--fs-small); }
 
-  .btn--solid { background: var(--isl-blue); color: #fff; }
-  .btn--solid:hover { background: var(--isl-blue-deep); }
+  .btn--solid { background: var(--accent); color: #fff; }
+  .btn--solid:hover { background: var(--accent-deep); }
 
   .btn--outline { border-color: var(--ink); color: var(--ink); }
   .btn--outline:hover { background: var(--ink); color: #fff; }
 
   .btn--light { background: #fff; color: var(--dark); }
-  .btn--light:hover { background: var(--isl-blue-tint); }
+  .btn--light:hover { background: var(--accent-tint); }
 
   .btn--ghost-light { border-color: rgb(255 255 255 / 0.45); color: #fff; }
   .btn--ghost-light:hover { border-color: #fff; background: rgb(255 255 255 / 0.08); }

@@ -15,7 +15,7 @@ import Button from '../../components/Button.astro';
 import JobRow from '../../components/JobRow.astro';
 import { jobs, provinces } from '../../data/jobs.js';
 import { areas } from '../../data/areas.js';
-import { brand } from '../../data/site.js';
+import { brand, offices, provinceOffice, field } from '../../data/site.js';
 import { jobBlocks, payFromBlocks, PAY_LABEL } from '../../lib/jobtext.js';
 import { url } from '../../lib/url.js';
 import { route, placeFrom } from '../../../assistant/supabase/functions/_shared/routing.js';
@@ -38,11 +38,20 @@ const where = [job.city, job.province].filter(Boolean).join(', ');
 const longDate = (d) => new Date(d + 'T12:00:00').toLocaleDateString('en-CA', { month: 'long', day: 'numeric', year: 'numeric' });
 const area = areas.find((a) => a.key === job.area);
 
-// Who a job seeker can ask about this posting
-const { person, office } = route({ audience: 'seeker', service: job.type, place: placeFrom(`${job.city} ${provinces[job.province] || job.province}`) });
-const ask = person
-  ? { name: person.name, phone: person.phone, href: url(`/team/${person.slug}/`) }
-  : { name: `Our ${office.city} office`, phone: office.phone, href: url(`/offices/${office.key}/`) };
+// Who a job seeker can ask about this posting.
+// ISL: the chatbot's routing (a named person, or the office that covers the town).
+// AS and ADS: the office that covers the job's province.
+function askFor() {
+  if (!provinceOffice) {
+    const { person, office } = route({ audience: 'seeker', service: job.type, place: placeFrom(`${job.city} ${provinces[job.province] || job.province}`) });
+    return person
+      ? { name: person.name, phone: person.phone, href: url(`/team/${person.slug}/`) }
+      : { name: `Our ${office.city} office`, phone: office.phone, href: url(`/offices/${office.key}/`) };
+  }
+  const o = offices.find((x) => x.city === provinceOffice[job.province]) ?? offices[0];
+  return { name: `Our ${o.city} office`, phone: o.phone, href: url('/contact/') };
+}
+const ask = askFor();
 const tel = (n) => `tel:+1${n.replace(/\D/g, '')}`;
 
 // More jobs: same office area first, then the same province, newest first
@@ -68,13 +77,13 @@ const schema = {
   identifier: { '@type': 'PropertyValue', name: brand.name, value: job.id },
   datePosted: job.posted,
   employmentType: job.type === 'direct' ? 'FULL_TIME' : 'TEMPORARY',
-  hiringOrganization: { '@type': 'Organization', name: brand.name, sameAs: 'https://www.integratedstaffing.ca' },
+  hiringOrganization: { '@type': 'Organization', name: brand.name, sameAs: brand.siteUrl },
   jobLocation: { '@type': 'Place', address: { '@type': 'PostalAddress', addressLocality: job.city, addressRegion: job.province, addressCountry: 'CA' } },
   baseSalary: salary(job.pay),
   directApply: false,
 };
 ---
-<Base title={`${job.title}, ${where}`} description={job.snippet} assistantMode="seeker" assistantJob={job.id} schema={schema}>
+<Base title={`${job.title}, ${where}`} description={job.snippet} assistantMode="seeker" assistantJob={job.id} schema={job.description ? schema : undefined}>
   <article class="jp">
     <header class="wrap jp-head">
       <a class="back" href={url('/find-work/')}>← All jobs</a>
@@ -86,19 +95,26 @@ const schema = {
     <div class="wrap jp-grid">
       <aside class:list={['card', `card--${job.type}`]} aria-label="Job summary">
         <dl class="facts">
-          <div><dt>Pay</dt><dd>{pay || 'Discussed at interview'}</dd></div>
+          <div><dt>Pay</dt><dd>{pay || job.payLabel || 'Discussed at interview'}</dd></div>
           <div><dt>Type</dt><dd>{job.typeLabel}</dd></div>
           {job.posted && <div><dt>Posted</dt><dd><time datetime={job.posted}>{longDate(job.posted)}</time></dd></div>}
         </dl>
         <Button href={job.applyUrl} size="lg">Apply now</Button>
         <!-- Job seekers are the ones scammers target, and this is the page they read -->
         <p class="safe">Applying is free. We never ask for a fee or banking details.</p>
-        <a class="rc" href={url(`/learn/tools/resume-check/?job=${job.id}`)}>Check your resume against this job</a>
+        {!field && <a class="rc" href={url(`/learn/tools/resume-check/?job=${job.id}`)}>Check your resume against this job</a>}
         <button type="button" class="share" data-share>Share this job</button>
         <p class="ask">Questions? <a href={ask.href}>{ask.name}</a> <a class="tel" href={tel(ask.phone)}>{ask.phone}</a></p>
       </aside>
 
       <div class="body">
+        {/* AS and ADS sample jobs carry no description yet: point to the full posting instead */}
+        {blocks.length === 0 && (
+          <div class="nodesc">
+            <p>The full description of this {job.typeLabel.toLowerCase()} {field ? `${field.short} ` : ''}role is on the posting.</p>
+            <p><a href={job.viewUrl}>Read the full posting</a></p>
+          </div>
+        )}
         {blocks.map((b) => (
           b.type === 'heading' ? <h2>{b.text}</h2>
           : b.type === 'list' ? <ul>{b.items.map((i) => <li>{i}</li>)}</ul>
@@ -158,7 +174,7 @@ const schema = {
   .facts dd { margin: 0; font-weight: var(--fw-bold); text-align: right; font-variant-numeric: tabular-nums; }
   .rc { font-size: var(--fs-small); font-weight: var(--fw-bold); }
   .safe { margin: calc(var(--s3) * -1) 0 0; font-size: var(--fs-tiny); color: var(--ink-soft); }
-  .share { justify-self: start; font: inherit; font-size: var(--fs-small); font-weight: var(--fw-bold); color: var(--isl-blue); background: none; border: 0; padding: 0; cursor: pointer; text-decoration: underline; text-underline-offset: 0.2em; }
+  .share { justify-self: start; font: inherit; font-size: var(--fs-small); font-weight: var(--fw-bold); color: var(--accent); background: none; border: 0; padding: 0; cursor: pointer; text-decoration: underline; text-underline-offset: 0.2em; }
   .ask { margin: 0; font-size: var(--fs-small); color: var(--ink-soft); line-height: 1.6; }
   .ask a { font-weight: var(--fw-bold); }
   .ask .tel { display: block; color: var(--ink); text-decoration: none; font-size: var(--fs-body); }
@@ -171,12 +187,14 @@ const schema = {
   .body p { margin: 0 0 var(--s4); }
   .body ul { margin: 0 0 var(--s4); padding-left: 1.2em; }
   .body li { margin-bottom: var(--s2); padding-left: 0.25em; }
-  .body li::marker { color: var(--isl-blue); }
+  .body li::marker { color: var(--accent); }
   .details { margin: 0 0 var(--s4); display: grid; gap: var(--s1); }
   .details div { display: flex; gap: var(--s3); }
   .details dt { font-weight: var(--fw-bold); min-width: 7.5rem; line-height: 1.7; }
   .details dd { margin: 0; }
   .end { margin-top: var(--s7); padding-top: var(--s5); border-top: 1.5px solid var(--ink); display: flex; flex-wrap: wrap; align-items: center; gap: var(--s3) var(--s5); }
+  .nodesc p { font-size: var(--fs-lead); font-weight: var(--fw-light); }
+  .nodesc a { font-weight: var(--fw-bold); font-size: var(--fs-body); }
   .fine { margin: 0; color: var(--ink-soft); font-size: var(--fs-small); max-width: 36ch; }
 
   .more-head .lead { justify-self: end; font-weight: var(--fw-bold); font-size: var(--fs-body); }

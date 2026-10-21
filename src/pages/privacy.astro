@@ -11,7 +11,7 @@ import { url } from '../lib/url.js';
   <ul>
     <li><strong>When you request talent:</strong> your name, work email, company and phone if you give them, where the work is and what you need. We use it to reply to your request and to keep in touch about it.</li>
     <li><strong>When you apply for a job:</strong> applications are completed on our job board, which collects your resume and contact details so our recruiters can consider you for work.</li>
-    <li><strong>When you use the job assistant:</strong> what you type is used to answer you and to pass your request to the right recruiter.</li>
+    {brand.assistant && <li><strong>When you use the job assistant:</strong> what you type is used to answer you and to pass your request to the right recruiter.</li>}
     <li><strong>When you call or email us:</strong> what you tell us, so we can help.</li>
   </ul>
 
@@ -28,7 +28,7 @@ import { url } from '../lib/url.js';
   <p>Only as long as we need it for the reason you gave it to us, or as the law requires.</p>
 
   <h2>Your choices</h2>
-  <p>You can ask to see the information we hold about you, correct it, or have it removed. Email <a href={`mailto:${brand.email}`}>{brand.email}</a> or call {brand.mainPhone}. We follow Canada’s Personal Information Protection and Electronic Documents Act (PIPEDA).</p>
+  <p>You can ask to see the information we hold about you, correct it, or have it removed. {brand.email ? <>Email <a href={`mailto:${brand.email}`}>{brand.email}</a> or call {brand.mainPhone}.</> : <>Call {brand.mainPhone}.</>} We follow Canada’s Personal Information Protection and Electronic Documents Act (PIPEDA).</p>
 
   <h2>Scams</h2>
   <p>{brand.name} never charges job seekers a fee and never asks for banking details to apply. If someone claiming to be us does, call your nearest office.</p>

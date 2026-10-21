@@ -1,0 +1,25 @@
+---
+// ROLES BY LEVEL: what a specialist brand places, junior to senior, in three columns.
+// The roles come from the brand's file (field.levels in src/brands/as.js, ads.js).
+// The three rules above the columns darken from junior to senior, so the order reads at a glance.
+// <RolesByLevel levels={field.levels} />
+const { levels = [] } = Astro.props;
+---
+<div class="levels" data-stagger style={`--n:${levels.length}`}>
+  {levels.map((l, i) => (
+    <section class="level" style={`--i:${i}`} aria-labelledby={`level-${i}`}>
+      <h3 id={`level-${i}`}>{l.name}</h3>
+      <ul>{l.roles.map((r) => <li>{r}</li>)}</ul>
+    </section>
+  ))}
+</div>
+
+<style>
+  .levels { display: grid; grid-template-columns: repeat(var(--n), minmax(0, 1fr)); gap: var(--s6) var(--s5); }
+  /* Junior to senior: the rule above each column goes from a light tint to the full brand colour */
+  .level { --rule: color-mix(in srgb, var(--accent) calc(35% + var(--i) * 32.5%), var(--paper)); border-top: 4px solid var(--rule); padding-top: var(--s4); }
+  h3 { font-size: var(--fs-h3); margin-bottom: var(--s4); }
+  ul { list-style: none; margin: 0; padding: 0; }
+  li { padding-block: var(--s2); border-bottom: 1px solid var(--line); }
+  @media (max-width: 760px) { .levels { grid-template-columns: 1fr; } }
+</style>

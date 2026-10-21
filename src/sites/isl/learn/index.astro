@@ -1,11 +1,11 @@
 ---
 // LEARN (BLOG INDEX)  →  /learn/
 // Lists posts from src/data/posts.js. Posts still live on the real site.
-import Base from '../../layouts/Base.astro';
-import PageHero from '../../components/PageHero.astro';
-import ToolCards from '../../components/ToolCards.astro';
-import { posts } from '../../data/posts.js';
-import { url } from '../../lib/url.js';
+import Base from '../../../layouts/Base.astro';
+import PageHero from '../../../components/PageHero.astro';
+import ToolCards from '../../../components/ToolCards.astro';
+import { posts } from '../../../data/posts.js';
+import { url } from '../../../lib/url.js';
 
 const fmt = (d) => new Date(d + 'T12:00:00').toLocaleDateString('en-CA', { month: 'long', day: 'numeric', year: 'numeric' });
 const audienceLabel = { employers: 'For employers', 'job seekers': 'For job seekers', everyone: 'Market insights' };
@@ -75,9 +75,9 @@ const [featured, ...rest] = posts.filter((p) => p.slug !== 'resume-audit');
   /* One meta line: Latest (a small solid tag) · audience · date */
   .eyebrow { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s2) var(--s4); font-size: var(--fs-small); }
   .new { background: var(--ink); color: #fff; font-weight: var(--fw-bold); font-size: var(--fs-tiny); padding: 0.2rem 0.5rem; }
-  .featured .aud { color: var(--isl-blue); font-weight: var(--fw-bold); }
+  .featured .aud { color: var(--accent); font-weight: var(--fw-bold); }
   .f-title { font-weight: var(--fw-bold); letter-spacing: -0.025em; line-height: 1.05; font-size: var(--fs-h2); max-width: 20ch; }
-  .read { font-weight: var(--fw-bold); color: var(--isl-blue); }
+  .read { font-weight: var(--fw-bold); color: var(--accent); }
   .read span { display: inline-block; transition: transform 0.3s var(--ease); }
   .featured:hover .read span { transform: translateX(4px); }
 
@@ -95,7 +95,7 @@ const [featured, ...rest] = posts.filter((p) => p.slug !== 'resume-audit');
     padding-block: var(--s5); border-bottom: 1px solid var(--line); color: var(--ink); text-decoration: none;
   }
   .list a:hover .title { text-decoration: underline; text-decoration-thickness: 2px; }
-  .arrow { color: var(--isl-blue); font-weight: var(--fw-bold); opacity: 0; transform: translateX(-8px); transition: opacity 0.25s, transform 0.3s var(--ease); }
+  .arrow { color: var(--accent); font-weight: var(--fw-bold); opacity: 0; transform: translateX(-8px); transition: opacity 0.25s, transform 0.3s var(--ease); }
   .list a:hover .arrow, .list a:focus-visible .arrow { opacity: 1; transform: none; }
   time { font-size: var(--fs-small); color: var(--ink-soft); font-variant-numeric: tabular-nums; }
   .title { font-weight: var(--fw-bold); font-size: var(--fs-h3); letter-spacing: -0.01em; line-height: 1.25; }

@@ -74,7 +74,7 @@ const previews = {
   @media (max-width: 1180px) { .tools { grid-template-columns: repeat(2, 1fr); gap: var(--s7) var(--s6); } }
   .card { display: flex; flex-direction: column; height: 100%; color: var(--ink); text-decoration: none; }
   .card:hover h3 { text-decoration: underline; text-underline-offset: 0.15em; text-decoration-thickness: 1.5px; }
-  .card:hover .more { color: var(--isl-blue-deep); }
+  .card:hover .more { color: var(--accent-deep); }
   .card:hover .vis { background: #eeeeee; }
 
   /* The preview panel: the same height and the same four parts in every card */
@@ -89,7 +89,7 @@ const previews = {
   .v-bar { position: relative; display: flex; gap: 3px; height: 8px; margin-top: auto; }
   .seg { display: block; min-width: 2px; }
   .seg--ink { background: var(--ink); }
-  .seg--blue { background: var(--isl-blue); }
+  .seg--blue { background: var(--accent); }
   .seg--off { background: rgb(0 0 0 / 0.1); }
   .v-range { background: rgb(0 0 0 / 0.08); }
   .r-band { position: absolute; top: 0; bottom: 0; background: var(--ink); opacity: 0.35; }
@@ -98,7 +98,7 @@ const previews = {
   .who { font-size: var(--fs-tiny); font-weight: var(--fw-text); color: var(--ink-soft); margin-bottom: var(--s2); }
   h3 { font-size: var(--fs-h3); margin-bottom: var(--s2); }
   .d { color: var(--ink-soft); }
-  .more { margin-top: auto; padding-top: var(--s3); font-weight: var(--fw-bold); color: var(--isl-blue); }
+  .more { margin-top: auto; padding-top: var(--s3); font-weight: var(--fw-bold); color: var(--accent); }
 
   /* Motion: cards rise in; each bar draws in from the left once */
   :global(.motion) .tools > li { opacity: 0; transform: translateY(12px); transition: opacity 0.4s var(--ease), transform 0.4s var(--ease); transition-delay: calc(var(--i) * 40ms); }

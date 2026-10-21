@@ -11,11 +11,11 @@
 // Check an offer: pick a role family and a pay figure; a line marks it on that row and the
 // readout says how many of the open jobs it beats. The filters and the offer live in the
 // address (?province=NB&family=Drivers&offer=21), so a view can be shared.
-import Base from '../../../layouts/Base.astro';
-import PageHero from '../../../components/PageHero.astro';
-import { jobs, snapshotDate } from '../../../data/jobs.js';
-import { payByFamily, perHour } from '../../../lib/jobpay.js';
-import { url } from '../../../lib/url.js';
+import Base from '../../../../layouts/Base.astro';
+import PageHero from '../../../../components/PageHero.astro';
+import { jobs, snapshotDate } from '../../../../data/jobs.js';
+import { payByFamily, perHour } from '../../../../lib/jobpay.js';
+import { url } from '../../../../lib/url.js';
 
 const rows = payByFamily(jobs);
 const counted = rows.reduce((n, r) => n + r.jobs.length, 0);
@@ -263,14 +263,14 @@ const payText = (j) => j.payInfo.unit === 'year' ? `${j.pay} (about ${perHour(j.
   .o-title { margin: 0 var(--s3) 0.7rem 0; font-weight: var(--fw-bold); }
   .o-field { display: grid; gap: var(--s1); font-size: var(--fs-small); font-weight: var(--fw-bold); }
   .o-field select, .o-field input { font: inherit; font-size: var(--fs-body); font-weight: var(--fw-text); padding: 0.55rem 0.7rem; border: 1.5px solid var(--line); background: var(--paper); color: var(--ink); width: 100%; }
-  .o-field select:focus, .o-field input:focus { outline: none; border-color: var(--isl-blue); }
+  .o-field select:focus, .o-field input:focus { outline: none; border-color: var(--accent); }
   .o-money { position: relative; display: block; }
   .o-money > span { position: absolute; left: 0.7rem; top: 50%; transform: translateY(-50%); color: var(--ink-soft); font-weight: var(--fw-text); }
   .o-money input { padding-left: 1.5rem; }
   .o-out { margin: 0 0 0.6rem; font-weight: var(--fw-bold); }
-  .offer-line { position: absolute; top: 4px; bottom: 4px; width: 2px; margin-left: -1px; background: var(--isl-blue); z-index: 3; pointer-events: none; }
+  .offer-line { position: absolute; top: 4px; bottom: 4px; width: 2px; margin-left: -1px; background: var(--accent); z-index: 3; pointer-events: none; }
   .offer-line[hidden] { display: none; }
-  .offer-line span { position: absolute; bottom: 100%; left: 50%; transform: translate(-50%, -2px); font-size: var(--fs-tiny); font-weight: var(--fw-bold); color: var(--isl-blue); white-space: nowrap; }
+  .offer-line span { position: absolute; bottom: 100%; left: 50%; transform: translate(-50%, -2px); font-size: var(--fs-tiny); font-weight: var(--fw-bold); color: var(--accent); white-space: nowrap; }
 
   /* The chart: a label column, the strip, and the middle figure */
   .chart { position: relative; margin: 0; border-top: 1.5px solid var(--ink); }
@@ -295,7 +295,7 @@ const payText = (j) => j.payInfo.unit === 'year' ? `${j.pay} (about ${perHour(j.
   .dot span { width: 11px; height: 11px; background: var(--contract); box-shadow: 0 0 0 2px var(--paper); transition: transform 0.15s; }
   .dot--direct span { background: var(--direct); border-radius: 50%; width: 12px; height: 12px; }
   .dot:hover span, .dot:focus-visible span { transform: scale(1.35); }
-  .dot:focus-visible { outline: 2px solid var(--isl-blue); outline-offset: 0; }
+  .dot:focus-visible { outline: 2px solid var(--accent); outline-offset: 0; }
 
   .tip { position: absolute; z-index: 5; transform: translate(-50%, calc(-100% - 10px)); background: var(--ink); color: #fff; padding: 0.55rem 0.75rem; display: grid; gap: 1px; pointer-events: none; min-width: 12rem; max-width: 18rem; }
   .tip[hidden] { display: none; }
@@ -317,8 +317,8 @@ const payText = (j) => j.payInfo.unit === 'year' ? `${j.pay} (about ${perHour(j.
 
   .two { display: grid; grid-template-columns: 1fr 1fr; gap: var(--s7); }
   .two .lead { margin: var(--s3) 0 var(--s5); }
-  .go { display: inline-block; font-weight: var(--fw-bold); background: var(--isl-blue); color: #fff; text-decoration: none; padding: 0.85rem 1.3rem; }
-  .go:hover { background: var(--isl-blue-deep); color: #fff; }
+  .go { display: inline-block; font-weight: var(--fw-bold); background: var(--accent); color: #fff; text-decoration: none; padding: 0.85rem 1.3rem; }
+  .go:hover { background: var(--accent-deep); color: #fff; }
   .go--ink { background: var(--ink); }
   .go--ink:hover { background: #000; }
 

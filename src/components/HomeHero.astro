@@ -1,44 +1,26 @@
 ---
-// HOMEPAGE  →  /
-// Built from the shared section system in global.css:
-// hero (job search + now hiring strip), we recruit, offices, proof, free tools, call to action.
-import Base from '../layouts/Base.astro';
-import AtlanticMap from '../components/AtlanticMap.astro';
-import CtaBand from '../components/CtaBand.astro';
-import Photo from '../components/Photo.astro';
-import ToolCards from '../components/ToolCards.astro';
-import Proof from '../components/Proof.astro';
-import WeRecruit from '../components/WeRecruit.astro';
-import { photos } from '../data/photos.js';
-import { brand, offices, social } from '../data/site.js';
+// HOMEPAGE HERO: the brand's photo across the full width, the promise over it, one way in for
+// each audience (a job search, and "Request talent"), and a strip of real open jobs.
+// Shared by all three brands' homepages, so they open the same way.
+//
+// <HomeHero photo={{ src, position }} lines={['Workers in hours.', 'Hires that stay.']} lead="..." />
+//   lines:  the headline, one line each (kept whole on wide screens)
+//   ticker: the jobs in the "Now hiring" strip; none (or too few to scroll) leaves the strip out
+import Photo from './Photo.astro';
 import { jobs } from '../data/jobs.js';
 import { url } from '../lib/url.js';
-
-// Structured data: who ISL is and where its offices are (read by search engines)
-const orgSchema = {
-  '@context': 'https://schema.org', '@type': 'EmploymentAgency', name: brand.name, url: 'https://www.integratedstaffing.ca',
-  telephone: '+1-' + brand.mainPhone, email: brand.email, foundingDate: String(brand.since), areaServed: 'Atlantic Canada',
-  sameAs: social.map((s) => s.href),
-  department: offices.map((o) => ({ '@type': 'EmploymentAgency', name: `${brand.name} ${o.city}`, telephone: '+1-' + o.phone, address: o.address })),
-};
-// The "Now hiring" strip in the hero: the newest real postings
-const ticker = jobs.slice(0, 14);
-
+const { photo, lines, lead, ticker = [] } = Astro.props;
 ---
-<Base description="Contract and permanent staffing from five offices across Atlantic Canada. Search open jobs, or tell us who you need." schema={orgSchema}>
-  <!-- 1. HERO: ISL's own photo across the full width, the promise over it,
-       one way in for each audience, and a live strip of real open jobs -->
   <section class="hero">
     <div class="hero-bg" data-animate>
-      <Photo src={photos.warehouse.src} alt="" ratio="16/9" sizes="100vw" position="65% center" eager />
+      <Photo src={photo.src} alt="" ratio="16/9" sizes="100vw" position={photo.position} eager />
     </div>
     <div class="wrap hero-inner">
       <div class="hero-copy" data-stagger>
         <h1 class="hero-title">
-          <span class="line">Workers in hours.</span>{" "}
-          <span class="line">Hires that stay.</span>
+          {lines.map((l, i) => <>{i > 0 && " "}<span class="line">{l}</span></>)}
         </h1>
-        <p class="hero-lead">Contract and permanent staffing across Atlantic Canada. Locally owned since {brand.since}.</p>
+        <p class="hero-lead">{lead}</p>
         <form class="search" action={url('/find-work/')} method="get" role="search">
           <label for="hero-q">Looking for work? Search {jobs.length} open jobs</label>
           <div class="search-bar">
@@ -50,7 +32,7 @@ const ticker = jobs.slice(0, 14);
       </div>
     </div>
 
-    <div class="ticker" aria-label="Now hiring" data-ticker>
+    {ticker.length > 0 && <div class="ticker" aria-label="Now hiring" data-ticker>
       <p class="ticker-label"><span class="pulse" aria-hidden="true"></span>Now hiring</p>
       <!-- Moving content needs a way to stop it (WCAG 2.2.2): hover and focus pause it, but touch screens have neither -->
       <button type="button" class="ticker-toggle" aria-pressed="false" data-ticker-toggle>
@@ -67,39 +49,8 @@ const ticker = jobs.slice(0, 14);
           </ul>
         ))}
       </div>
-    </div>
+    </div>}
   </section>
-
-  <!-- 2. WE RECRUIT. The live site's signature line, with three short lines beside it -->
-  <WeRecruit />
-
-  <!-- 3. WHERE WE ARE: the map runs out to the left edge of the page, the words sit beside it -->
-  <section class="section section--tint local">
-    <div class="wrap local-grid">
-      <div class="local-copy">
-        <h2><span class="line">Five offices.</span> <span class="line">All of Atlantic Canada.</span></h2>
-        <p class="lead">Each office covers its whole province, so we staff towns well beyond our office cities. Select one for its address and phone number.</p>
-      </div>
-      <div class="local-map"><AtlanticMap id="home-map" bleed /></div>
-    </div>
-  </section>
-
-  <!-- 4. PROOF: one client quote, with the review count beside it -->
-  <Proof index={1} />
-
-  <!-- 5. RECRUITMENT INTELLIGENCE: ISL's own tools (src/data/tools.js) -->
-  <section class="section section--rule tools">
-    <div class="wrap">
-      <div class="section-head">
-        <h2>Recruitment Intelligence</h2>
-        <p class="lead">Built by ISL from what our recruiters see across Atlantic Canada.</p>
-      </div>
-      <ToolCards />
-    </div>
-  </section>
-
-  <CtaBand />
-</Base>
 
 <script>
   // The ticker's pause button: pressed = paused
@@ -137,9 +88,9 @@ const ticker = jobs.slice(0, 14);
   .search label { display: block; font-size: var(--fs-small); font-weight: var(--fw-text); margin-bottom: var(--s2); color: rgb(255 255 255 / 0.86); }
   .search-bar { display: flex; background: #fff; }
   .search-bar input { flex: 1; min-width: 0; width: 0; /* width 0: the box's built-in 20-character width otherwise sets a minimum */ font: inherit; font-size: var(--fs-body); padding: 1rem 1.15rem; border: 0; background: transparent; color: var(--ink); }
-  .search-bar input:focus { outline: 2px solid var(--isl-blue); outline-offset: -2px; }
-  .search-bar button { font: inherit; font-weight: var(--fw-bold); cursor: pointer; padding: 0 1.6rem; border: 0; background: var(--isl-blue); color: #fff; }
-  .search-bar button:hover { background: var(--isl-blue-deep); }
+  .search-bar input:focus { outline: 2px solid var(--accent); outline-offset: -2px; }
+  .search-bar button { font: inherit; font-weight: var(--fw-bold); cursor: pointer; padding: 0 1.6rem; border: 0; background: var(--accent); color: #fff; }
+  .search-bar button:hover { background: var(--accent-deep); }
   .employer { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s3) var(--s4); margin-top: var(--s5); font-weight: var(--fw-text); color: rgb(255 255 255 / 0.86); }
   /* A link, not a second solid button: in greyscale a white button outshone Search */
   .employer-go { color: #fff; font-weight: var(--fw-bold); text-decoration: underline; text-underline-offset: 0.25em; text-decoration-thickness: 1.5px; }
@@ -153,7 +104,7 @@ const ticker = jobs.slice(0, 14);
   /* Now hiring: real postings scrolling along the bottom edge. Pauses on hover or focus. */
   .ticker { position: relative; display: flex; min-width: 0; max-width: 100%; align-items: stretch; border-top: 1px solid rgb(255 255 255 / 0.16); background: var(--dark); }
   /* Solid, not see-through: over a light patch of photo, translucent grey text failed contrast */
-  .ticker-label { flex: none; display: flex; align-items: center; gap: var(--s2); margin: 0; padding: 0 var(--s5) 0 var(--gutter); font-size: var(--fs-small); font-weight: var(--fw-bold); background: var(--isl-blue); color: #fff; white-space: nowrap; }
+  .ticker-label { flex: none; display: flex; align-items: center; gap: var(--s2); margin: 0; padding: 0 var(--s5) 0 var(--gutter); font-size: var(--fs-small); font-weight: var(--fw-bold); background: var(--accent); color: #fff; white-space: nowrap; }
   .pulse { width: 8px; height: 8px; border-radius: 50%; background: #fff; }
   :global(.motion) .pulse { animation: pulse 2s ease-out infinite; }
   @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgb(255 255 255 / 0.7); } 70%, 100% { box-shadow: 0 0 0 8px rgb(255 255 255 / 0); } }
@@ -182,26 +133,4 @@ const ticker = jobs.slice(0, 14);
     .search-bar button { padding: 0 1.1rem; }
     .ticker-label { padding-left: var(--s4); padding-right: var(--s4); }
   }
-
-  /* ---------- 3. Local ---------- */
-  /* The map fills the left column and keeps going to the page's left edge; land beyond the map
-     (Quebec, Labrador) runs off the top and left of the section, which clips it. */
-  .local { overflow: hidden; --edge: calc(max(0px, (100vw - var(--max)) / 2) + var(--gutter)); }
-  .local-grid { display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 4fr); gap: clamp(2rem, 5vw, 5rem); align-items: center; }
-  .local-map { grid-column: 1; grid-row: 1; margin-left: calc(-1 * var(--edge)); }
-  .local-copy { grid-column: 2; grid-row: 1; }
-  .local-copy .lead { margin-top: var(--s5); }
-  .local-copy .line { white-space: normal; } /* the hero keeps its lines whole; this narrower column may wrap */
-  .more { font-weight: var(--fw-bold); }
-  @media (max-width: 900px) {
-    .local-grid { grid-template-columns: 1fr; }
-    .local-copy, .local-map { grid-column: 1; grid-row: auto; }
-    .local-map { margin-inline: calc(-1 * var(--gutter)); } /* edge to edge on both sides */
-    .local-map :global(.card) { margin-inline: var(--gutter); } /* the map bleeds; the office card lines up with the text */
-  }
-
-  /* ---------- 4. Proof: see Proof.astro ---------- */
-
-  /* ---------- 5. Tools: see ToolCards.astro ---------- */
-  @media (max-width: 860px) { .jobs-intro { justify-self: start; } }
 </style>

@@ -1,0 +1,76 @@
+---
+// PERMANENT RECRUITMENT  →  /permanent/   (Accountant Staffing and Administrative Staffing)
+// The specialist's version of ISL's Direct hire page: how a search runs, the terms, where
+// candidates come from, and the roles. The process and terms are from the live Employers and
+// Permanent Recruitment FAQ pages (src/brands/specialist.js).
+import Base from '../../layouts/Base.astro';
+import Button from '../../components/Button.astro';
+import PageHero from '../../components/PageHero.astro';
+import Steps from '../../components/Steps.astro';
+import Facts from '../../components/Facts.astro';
+import RolesByLevel from '../../components/RolesByLevel.astro';
+import CtaBand from '../../components/CtaBand.astro';
+import { brand, field, terms, sourcing } from '../../data/site.js';
+
+const steps = [
+  ['Brief', 'We learn your organization and the role: responsibilities, experience, education and the person who’ll fit.'],
+  ['Search', 'We interview registered candidates about their experience, goals and motivations, and choose the best matches.'],
+  ['Shortlist', 'You get a short list with a briefing on each candidate, and we set up the interviews.'],
+  ['Check', `References, and a background check for the person you choose. ${field.testShort}`],
+  ['Offer', 'We help draft the terms and negotiate the offer, and let the other candidates know.'],
+];
+const facts = [
+  ['6 months', 'replacement guarantee', 'direct'],
+  ['No fee', 'unless you hire our candidate', 'direct'],
+  [String(new Date().getFullYear() - brand.since), 'years in Atlantic Canada'],
+];
+const items = [
+  ['How the fee works', `${terms.permanentFee} Nothing is due up front.`],
+  ['If it doesn’t work out', 'If the hire resigns or is let go within six months of starting, we find a replacement at no cost.'],
+  ['Who runs the search', `A recruiter who places only ${field.short} roles, and knows the market.`],
+];
+---
+<Base assistantMode="employer" title={`Permanent ${field.short} recruitment`} description={`Permanent ${field.short} recruitment across Atlantic Canada. No fee unless you hire, and a ${terms.guarantee} guarantee.`}>
+  <PageHero title="Permanent hires, by specialists." lead={`A full search for your ${field.short} role, from people who recruit nothing else.`}>
+    <Button href="/hire/?service=direct" size="lg">Start a search</Button>
+  </PageHero>
+
+  <Facts facts={facts} />
+
+  <section class="section">
+    <div class="wrap">
+      <div class="section-head"><h2>How a search runs</h2></div>
+      <Steps steps={steps} tone="direct" />
+    </div>
+  </section>
+
+  <section class="section section--tint">
+    <div class="wrap">
+      <div class="section-head"><h2>The terms</h2></div>
+      <ul class="items">
+        {items.map(([t, d]) => <li class="item item--blue"><h3>{t}</h3><p>{d}</p></li>)}
+      </ul>
+    </div>
+  </section>
+
+  <section class="section section--rule">
+    <div class="wrap">
+      <div class="section-head section-head--split">
+        <h2>Where candidates come from</h2>
+        <p class="lead">Often the right person isn’t reading job ads.</p>
+      </div>
+      <ul class="items">
+        {sourcing.map(([t, d]) => <li class="item"><h3>{t}</h3><p>{d}</p></li>)}
+      </ul>
+    </div>
+  </section>
+
+  <section class="section section--rule">
+    <div class="wrap">
+      <div class="section-head"><h2>Roles we fill</h2></div>
+      <RolesByLevel levels={field.levels} />
+    </div>
+  </section>
+
+  <CtaBand title="Start your next key hire." text={`Tell us about the role. You pay nothing unless you hire, and every hire has a ${terms.guarantee} guarantee.`} href="/hire/?service=direct" label="Start a search" />
+</Base>

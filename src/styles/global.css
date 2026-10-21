@@ -58,13 +58,13 @@ h3 { font-size: var(--fs-h3); font-weight: var(--fw-bold); line-height: 1.25; le
 p { margin: 0 0 var(--s4); text-wrap: pretty; }
 p:last-child { margin-bottom: 0; }
 
-a { color: var(--isl-blue); text-underline-offset: 0.18em; text-decoration-thickness: 1px; }
-a:hover { color: var(--isl-blue-deep); text-decoration-thickness: 2px; }
+a { color: var(--accent); text-underline-offset: 0.18em; text-decoration-thickness: 1px; }
+a:hover { color: var(--accent-deep); text-decoration-thickness: 2px; }
 a[href^="tel:"] { white-space: nowrap; }
 
-:focus-visible { outline: 2px solid var(--isl-blue); outline-offset: 3px; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
 
-::selection { background: var(--isl-blue); color: #fff; }
+::selection { background: var(--accent); color: #fff; }
 
 /* ---------- Helpers ---------- */
 
@@ -86,7 +86,7 @@ a[href^="tel:"] { white-space: nowrap; }
 .on-dark { background: var(--dark); color: var(--on-dark); }
 .on-dark .lead { color: var(--on-dark-soft); }
 .on-dark a { color: var(--on-dark); }
-.on-dark :focus-visible { outline-color: var(--isl-blue-on-dark); }
+.on-dark :focus-visible { outline-color: var(--accent-on-dark); }
 
 .visually-hidden {
   position: absolute !important; width: 1px; height: 1px; overflow: hidden;
@@ -132,8 +132,8 @@ h1 .line, h2 .line { display: block; }
 .on-dark .item p { color: var(--on-dark-soft); }
 
 /* Plain text link that is really a button (opens the job assistant, etc.) */
-.textlink { font: inherit; font-weight: var(--fw-bold); cursor: pointer; padding: 0; background: none; border: 0; color: var(--isl-blue); text-decoration: underline; text-underline-offset: 0.2em; }
-.textlink:hover { color: var(--isl-blue-deep); text-decoration-thickness: 2px; }
+.textlink { font: inherit; font-weight: var(--fw-bold); cursor: pointer; padding: 0; background: none; border: 0; color: var(--accent); text-decoration: underline; text-underline-offset: 0.2em; }
+.textlink:hover { color: var(--accent-deep); text-decoration-thickness: 2px; }
 
 /* Service markers: the colour key used everywhere */
 /* Service label: the word in ink, with a marker for the colour key (a square for contract, a blue
@@ -143,7 +143,7 @@ h1 .line, h2 .line { display: block; }
 .svc--direct::before { background: var(--direct); border-radius: 50%; }
 .on-dark .svc { color: #fff; }
 .on-dark .svc::before { background: #fff; }
-.on-dark .svc--direct::before { background: var(--isl-blue-on-dark); }
+.on-dark .svc--direct::before { background: var(--accent-on-dark); }
 
 /* ---------- Motion ----------
    One small set of entrance effects, used the same way on every page:

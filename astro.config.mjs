@@ -3,11 +3,43 @@
 // If you ever host it at the root of a domain, delete `base` and update `site`.
 import { defineConfig } from 'astro/config';
 import { writeFileSync, renameSync, existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
-import { join } from 'node:path';
+import { join, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
+// THREE BRANDS, ONE CODEBASE
+// Each build makes one brand's site. BRAND picks which (isl is the default):
+//   npm run build            Integrated Staffing      -> dist/       (/isl-sandbox/)
+//   BRAND=as npm run build   Accountant Staffing      -> dist/as/    (/isl-sandbox/as/)
+//   BRAND=ads npm run build  Administrative Staffing  -> dist/ads/   (/isl-sandbox/ads/)
+// `npm run build:all` builds all three, ISL first (its build empties dist/, so it has to go first).
+// In the sandbox the two specialist sites live in sub-folders of the ISL preview; at launch each
+// brand gets its own domain and `base` goes.
+const BRAND = process.env.BRAND || 'isl';
+if (!['isl', 'as', 'ads'].includes(BRAND)) throw new Error(`Unknown BRAND "${BRAND}". Use isl, as or ads.`);
 const site = 'https://josiahyule.github.io';
-const base = '/isl-sandbox';
+const base = BRAND === 'isl' ? '/isl-sandbox' : `/isl-sandbox/${BRAND}`;
+const outDir = BRAND === 'isl' ? './dist' : `./dist/${BRAND}`;
+
+// PAGES: src/pages/ holds the pages every brand has (jobs, team, contact, the request form,
+// the legal pages), each reading the brand's facts from src/data/site.js. Pages that differ
+// by brand live in src/sites/: isl/ for Integrated Staffing, specialist/ for AS and ADS (the
+// two share a structure, so they share pages). This adds the right folder's pages to the build.
+const pageFolder = { isl: 'isl', as: 'specialist', ads: 'specialist' }[BRAND];
+const brandPages = {
+  name: 'brand-pages',
+  hooks: {
+    'astro:config:setup': ({ injectRoute }) => {
+      const root = fileURLToPath(new URL(`./src/sites/${pageFolder}/`, import.meta.url));
+      const walk = (d) => readdirSync(d).flatMap((f) => { const p = join(d, f); return statSync(p).isDirectory() ? walk(p) : [p]; });
+      for (const file of walk(root).filter((f) => /\.(astro|js)$/.test(f))) {
+        // about.astro -> /about, learn/tools/index.astro -> /learn/tools, redirects.txt.js -> /redirects.txt
+        const rel = relative(root, file).replace(/\\/g, '/').replace(/\.(astro|js)$/, '');
+        const pattern = '/' + rel.replace(/(^|\/)index$/, '');
+        injectRoute({ pattern, entrypoint: `./src/sites/${pageFolder}/${relative(root, file).replace(/\\/g, '/')}` });
+      }
+    },
+  },
+};
 
 // SITEMAP: after every build, list every page Astro actually made, so the sitemap can
 // never fall out of date (new jobs, people and tools appear in it automatically).
@@ -55,4 +87,9 @@ const typography = {
   },
 };
 
-export default defineConfig({ site, base, integrations: [sitemap, typography] });
+export default defineConfig({
+  site, base, outDir,
+  integrations: [brandPages, sitemap, typography],
+  // __BRAND__ ('isl', 'as' or 'ads') can be read in any page, component or script
+  vite: { define: { __BRAND__: JSON.stringify(BRAND) } },
+});

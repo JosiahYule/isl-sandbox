@@ -3,10 +3,10 @@
 // <Proof index={1} />  picks a testimonial from src/data/site.js; tint adds the grey band.
 import { testimonials, stats } from '../data/site.js';
 const { index = 0, tint = false } = Astro.props;
-const quote = testimonials[index] ?? testimonials[0];
+const quote = testimonials[index] ?? testimonials[0]; // no quotes yet (AS, ADS): the section isn't shown
 const reviews = stats.find((s) => s.label.includes('reviews'))?.value ?? '200+';
 ---
-<section class:list={['section', 'proof', tint && 'section--tint']}>
+{quote && <section class:list={['section', 'proof', tint && 'section--tint']}>
   <div class="wrap proof-grid">
     <figure class="quote" data-reveal>
       <blockquote>“{quote.quote}”</blockquote>
@@ -19,7 +19,7 @@ const reviews = stats.find((s) => s.label.includes('reviews'))?.value ?? '200+';
       <p><strong data-countup>{reviews}</strong> five-star reviews on Google from clients and candidates.</p>
     </div>
   </div>
-</section>
+</section>}
 
 <style>
   .proof-grid { display: grid; grid-template-columns: 7fr 4fr; gap: clamp(2rem, 5vw, 5rem); align-items: end; }
@@ -29,9 +29,9 @@ const reviews = stats.find((s) => s.label.includes('reviews'))?.value ?? '200+';
   .quote figcaption { margin-top: var(--s5); color: var(--ink-soft); font-weight: var(--fw-text); }
   .reviews { font-size: var(--fs-small); color: var(--ink-soft); border-top: 1.5px solid var(--ink); padding-top: var(--s4); }
   .stars { display: flex; gap: 4px; margin-bottom: var(--s4); }
-  .stars svg { width: 22px; height: 22px; fill: var(--isl-blue); }
+  .stars svg { width: 22px; height: 22px; fill: var(--accent); }
   :global(.motion) .stars svg { transform: scale(0.4); opacity: 0; transition: transform 0.45s var(--ease), opacity 0.3s; transition-delay: calc(var(--s) * 90ms); }
   :global(.motion) .reviews.is-in .stars svg { transform: none; opacity: 1; }
-  .reviews strong { display: block; color: var(--isl-blue); font-weight: var(--fw-light); font-size: var(--fs-figure-lg); letter-spacing: -0.05em; line-height: 0.95; margin-bottom: var(--s2); }
+  .reviews strong { display: block; color: var(--accent); font-weight: var(--fw-light); font-size: var(--fs-figure-lg); letter-spacing: -0.05em; line-height: 0.95; margin-bottom: var(--s2); }
   @media (max-width: 900px) { .proof-grid { grid-template-columns: 1fr; } }
 </style>

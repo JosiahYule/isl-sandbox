@@ -8,7 +8,7 @@
 //
 // Old job links look like /find-work/job?id=MA8518021108. Netlify can match that ?id= and send
 // each one to the job's own page; Cloudflare ignores query strings and uses the last line instead.
-import { jobs } from '../data/jobs.js';
+import { jobs } from '../../data/jobs.js';
 
 const moved = [
   ['/directhire', '/direct-hire/'],   // older duplicate of the direct hire page

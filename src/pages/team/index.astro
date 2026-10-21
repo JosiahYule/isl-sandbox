@@ -7,21 +7,37 @@ import PageHero from '../../components/PageHero.astro';
 import PersonCard from '../../components/PersonCard.astro';
 import CtaBand from '../../components/CtaBand.astro';
 import { team } from '../../data/team.js';
+import { brand, offices } from '../../data/site.js';
 
 const PROVINCES = [['NS', 'Nova Scotia'], ['NB', 'New Brunswick'], ['PE', 'PEI'], ['NL', 'Newfoundland and Labrador']];
 // Leadership first, then everyone else in the order of the data file.
 const people = [...team.filter((p) => p.team === 'Leadership'), ...team.filter((p) => p.team !== 'Leadership')];
+const provinceNames = Object.fromEntries(PROVINCES);
+const tel = (n) => `tel:+1${n.replace(/\D/g, '')}`;
 const filters = [
   { key: '', label: 'Everyone', n: team.length },
   { key: 'Leadership', label: 'Leadership', n: team.filter((p) => p.team === 'Leadership').length },
   { key: 'Direct Hire', label: 'Direct hire', n: team.filter((p) => p.team === 'Direct Hire').length },
   ...PROVINCES.map(([code, label]) => ({ key: code, label, n: team.filter((p) => p.province === code).length })),
-];
+].filter((f) => f.key === '' || f.n > 0); // no empty filters
 ---
-<Base title="Our team" description="Meet the Integrated Staffing team across Nova Scotia, New Brunswick, PEI, and Newfoundland and Labrador.">
+<Base title="Our team" description={`Meet the ${brand.name} team across ${brand.key === 'isl' ? 'Nova Scotia, New Brunswick, PEI, and Newfoundland and Labrador' : 'Atlantic Canada'}.`}>
   <PageHero title="The people behind every placement." />
 
-  <section class="section section--rule people" data-team>
+  <!-- No profiles yet (AS and ADS): the offices, so the page still gets someone to a person -->
+  {team.length === 0 && (
+    <section class="section section--rule">
+      <div class="wrap">
+        <h2 class="visually-hidden">Our offices</h2>
+        <p class="lead soon">Team profiles are on their way. In the meantime, call the office nearest you.</p>
+        <ul class="items">
+          {offices.map((o) => <li class="item"><h3>{o.city}</h3><p>{provinceNames[o.province]}</p><a class="more" href={tel(o.phone)}>{o.phone}</a></li>)}
+        </ul>
+      </div>
+    </section>
+  )}
+
+  {team.length > 0 && <section class="section section--rule people" data-team>
     <div class="wrap">
       <div class="filters" role="group" aria-label="Filter team">
         {filters.map((f, i) => (
@@ -36,13 +52,13 @@ const filters = [
         ))}
       </ul>
     </div>
-  </section>
+  </section>}
 
   <CtaBand />
 </Base>
 
 <script>
-  const root = document.querySelector('[data-team]')!;
+  const root = document.querySelector('[data-team]') ?? document.createElement('div');
   const buttons = root.querySelectorAll<HTMLButtonElement>('.filters button');
   const cards = root.querySelectorAll<HTMLElement>('.grid li');
   const apply = (b: HTMLButtonElement) => {
@@ -61,6 +77,7 @@ const filters = [
 </script>
 
 <style>
+  .soon { margin-bottom: var(--s7); max-width: 40ch; }
   .filters { display: flex; flex-wrap: wrap; gap: var(--s2); margin-bottom: var(--s6); }
   .filters button {
     font: inherit; font-size: var(--fs-small); font-weight: var(--fw-bold); cursor: pointer;

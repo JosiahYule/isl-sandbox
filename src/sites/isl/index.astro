@@ -1,0 +1,59 @@
+---
+// HOMEPAGE  →  /
+// Built from the shared section system in global.css:
+// hero (job search + now hiring strip), we recruit, offices, proof, free tools, call to action.
+import Base from '../../layouts/Base.astro';
+import HomeHero from '../../components/HomeHero.astro';
+import OfficesSection from '../../components/OfficesSection.astro';
+import CtaBand from '../../components/CtaBand.astro';
+import ToolCards from '../../components/ToolCards.astro';
+import Proof from '../../components/Proof.astro';
+import WeRecruit from '../../components/WeRecruit.astro';
+import { photos } from '../../data/photos.js';
+import { brand, offices, social } from '../../data/site.js';
+import { jobs } from '../../data/jobs.js';
+
+// Structured data: who ISL is and where its offices are (read by search engines)
+const orgSchema = {
+  '@context': 'https://schema.org', '@type': 'EmploymentAgency', name: brand.name, url: 'https://www.integratedstaffing.ca',
+  telephone: '+1-' + brand.mainPhone, email: brand.email, foundingDate: String(brand.since), areaServed: 'Atlantic Canada',
+  sameAs: social.map((s) => s.href),
+  department: offices.map((o) => ({ '@type': 'EmploymentAgency', name: `${brand.name} ${o.city}`, telephone: '+1-' + o.phone, address: o.address })),
+};
+// The "Now hiring" strip in the hero: the newest real postings
+const ticker = jobs.slice(0, 14);
+
+---
+<Base description="Contract and permanent staffing from five offices across Atlantic Canada. Search open jobs, or tell us who you need." schema={orgSchema}>
+  <!-- 1. HERO: ISL's own photo, the promise, a job search, and a strip of real open jobs -->
+  <HomeHero photo={{ src: photos.warehouse.src, position: '65% center' }} lines={['Workers in hours.', 'Hires that stay.']} lead={`Contract and permanent staffing across Atlantic Canada. Locally owned since ${brand.since}.`} ticker={ticker} />
+
+  <!-- 2. WE RECRUIT. The live site's signature line, with three short lines beside it -->
+  <WeRecruit />
+
+  <!-- 3. WHERE WE ARE -->
+  <OfficesSection lines={['Five offices.', 'All of Atlantic Canada.']} lead="Each office covers its whole province, so we staff towns well beyond our office cities. Select one for its address and phone number." />
+
+  <!-- 4. PROOF: one client quote, with the review count beside it -->
+  <Proof index={1} />
+
+  <!-- 5. RECRUITMENT INTELLIGENCE: ISL's own tools (src/data/tools.js) -->
+  <section class="section section--rule tools">
+    <div class="wrap">
+      <div class="section-head">
+        <h2>Recruitment Intelligence</h2>
+        <p class="lead">Built by ISL from what our recruiters see across Atlantic Canada.</p>
+      </div>
+      <ToolCards />
+    </div>
+  </section>
+
+  <CtaBand />
+</Base>
+
+<style>
+  /* ---------- 4. Proof: see Proof.astro ---------- */
+
+  /* ---------- 5. Tools: see ToolCards.astro ---------- */
+  @media (max-width: 860px) { .jobs-intro { justify-self: start; } }
+</style>

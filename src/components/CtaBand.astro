@@ -1,16 +1,17 @@
 ---
 // CLOSING CALL TO ACTION: the dark band that ends most pages.
 import Button from './Button.astro';
-import { brand } from '../data/site.js';
+import { brand, cta } from '../data/site.js';
 import { PEOPLE } from '../../assistant/supabase/functions/_shared/routing.js';
 // The people who answer requests, so the promise has faces: each province's contact and Zowie for permanent hires
-const repliers = ['meg', 'kelli', 'chance', 'crystal', 'zowie'].map((k) => PEOPLE[k]).filter(Boolean);
+// (ISL only for now: AS and ADS show the promise without faces until their team is in the site)
+const repliers = cta.faces ? ['meg', 'kelli', 'chance', 'crystal', 'zowie'].map((k) => PEOPLE[k]).filter(Boolean) : [];
 const names = repliers.map((p) => p.first);
 const nameList = names.slice(0, -1).join(', ') + ' and ' + names.at(-1);
 
 const {
   title = 'Tell us who you need.',
-  text = 'Contract workers or a permanent hire. A recruiter replies within one business day.',
+  text = cta.text,
   href = '/hire/',
   label = 'Request talent',
 } = Astro.props;
@@ -21,10 +22,10 @@ const tel = `tel:+1${brand.mainPhone.replaceAll('-', '')}`;
     <h2>{title}</h2>
     <div class="side">
       <p>{text}</p>
-      <div class="who">
+      {repliers.length > 0 && <div class="who">
         <span class="faces" aria-hidden="true">{repliers.map((p) => <span class="face"><span class="ini">{p.name.split(' ').map((w) => w[0]).join('')}</span><img src={p.photo} alt="" width="40" height="40" loading="lazy" onerror="this.remove()" /></span>)}</span>
         <span class="names">{nameList} answer every request.</span>
-      </div>
+      </div>}
       <div class="actions">
         <Button href={href} variant="light" size="lg">{label}</Button>
         <a class="phone" href={tel}>Or call {brand.mainPhone}</a>

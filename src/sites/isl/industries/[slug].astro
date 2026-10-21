@@ -8,16 +8,16 @@
 //               worker earns), and it only shows with at least three jobs
 //   open jobs   the jobs whose title matches the industry (industryOf in industries.js)
 //   contacts    who an employer talks to in each province (routing.js, as on the Contract page)
-import Base from '../../layouts/Base.astro';
-import PageHero from '../../components/PageHero.astro';
-import Button from '../../components/Button.astro';
-import JobRow from '../../components/JobRow.astro';
-import CtaBand from '../../components/CtaBand.astro';
-import { industryPages } from '../../data/industries.js';
-import { jobs } from '../../data/jobs.js';
-import { readPay, perHour } from '../../lib/jobpay.js';
-import { url } from '../../lib/url.js';
-import { route, provinceName } from '../../../assistant/supabase/functions/_shared/routing.js';
+import Base from '../../../layouts/Base.astro';
+import PageHero from '../../../components/PageHero.astro';
+import Button from '../../../components/Button.astro';
+import JobRow from '../../../components/JobRow.astro';
+import CtaBand from '../../../components/CtaBand.astro';
+import { industryPages } from '../../../data/industries.js';
+import { jobs } from '../../../data/jobs.js';
+import { readPay, perHour } from '../../../lib/jobpay.js';
+import { url } from '../../../lib/url.js';
+import { route, provinceName } from '../../../../assistant/supabase/functions/_shared/routing.js';
 
 export function getStaticPaths() {
   return industryPages.map((ind) => ({ params: { slug: ind.slug }, props: { ind } }));

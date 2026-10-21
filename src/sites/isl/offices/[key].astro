@@ -8,22 +8,22 @@
 //   jobs           src/data/jobs.js       open roles nearby
 //   who to call    assistant/.../routing.js  the same people the chatbot hands employers to
 //   guides         src/data/posts.js      local articles from the blog
-import Base from '../../layouts/Base.astro';
-import PageHero from '../../components/PageHero.astro';
-import AtlanticMap from '../../components/AtlanticMap.astro';
-import ContactCard from '../../components/ContactCard.astro';
-import JobRow from '../../components/JobRow.astro';
-import CtaBand from '../../components/CtaBand.astro';
-import Photo from '../../components/Photo.astro';
-import PersonCard from '../../components/PersonCard.astro';
-import { team } from '../../data/team.js';
-import { offices } from '../../data/site.js';
-import { areas } from '../../data/areas.js';
-import { jobs } from '../../data/jobs.js';
-import { posts } from '../../data/posts.js';
-import { photos } from '../../data/photos.js';
-import { route, provinceName } from '../../../assistant/supabase/functions/_shared/routing.js';
-import { url } from '../../lib/url.js';
+import Base from '../../../layouts/Base.astro';
+import PageHero from '../../../components/PageHero.astro';
+import AtlanticMap from '../../../components/AtlanticMap.astro';
+import ContactCard from '../../../components/ContactCard.astro';
+import JobRow from '../../../components/JobRow.astro';
+import CtaBand from '../../../components/CtaBand.astro';
+import Photo from '../../../components/Photo.astro';
+import PersonCard from '../../../components/PersonCard.astro';
+import { team } from '../../../data/team.js';
+import { offices } from '../../../data/site.js';
+import { areas } from '../../../data/areas.js';
+import { jobs } from '../../../data/jobs.js';
+import { posts } from '../../../data/posts.js';
+import { photos } from '../../../data/photos.js';
+import { route, provinceName } from '../../../../assistant/supabase/functions/_shared/routing.js';
+import { url } from '../../../lib/url.js';
 
 // Local articles for each office (slugs from posts.js). Add more as they're written.
 const GUIDES = {
@@ -153,7 +153,7 @@ const people = team.filter((p) => p.province === office.province);
   .guides a { display: flex; justify-content: space-between; gap: var(--s4); padding-block: var(--s5); border-bottom: 1px solid var(--line); color: var(--ink); text-decoration: none; }
   .g-title { font-weight: var(--fw-bold); font-size: var(--fs-h3); letter-spacing: -0.01em; }
   .guides a:hover .g-title { text-decoration: underline; }
-  .arrow { color: var(--isl-blue); font-weight: var(--fw-bold); transition: transform 0.3s var(--ease); }
+  .arrow { color: var(--accent); font-weight: var(--fw-bold); transition: transform 0.3s var(--ease); }
   .guides a:hover .arrow { transform: translateX(4px); }
 
 

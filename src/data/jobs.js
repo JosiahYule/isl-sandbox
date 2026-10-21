@@ -1,4 +1,8 @@
-// REAL JOBS from ISL's Avionte feed.
+// JOBS for the brand being built.
+// ISL: real jobs from the Avionte feed (below). AS and ADS: a saved sample of recent postings
+// (src/brands/jobs/as.json, ads.json) until the board reads Tracker RMS.
+//
+// ISL's jobs come from its Avionte feed.
 // One file feeds both the website and the job assistant: assistant/data/jobs-snapshot.json.
 // When the AVIONTE_FEED_URL secret is set in GitHub, scripts/fetch-jobs.mjs refreshes it from the
 // live feed before every build (the deploy runs on a schedule, so the board stays current).
@@ -11,15 +15,21 @@
 // Each job gets its own page at /find-work/<slug>/. The slug is the title and city in words
 // (readable, and good for search) plus the posting's ID (so two "Labourer, Halifax" postings
 // never collide, and a job's address never changes while it's open).
-import snapshot from '../../assistant/data/jobs-snapshot.json';
-import meta from '../../assistant/data/jobs-meta.json';
+import islSnapshot from '../../assistant/data/jobs-snapshot.json';
+import islMeta from '../../assistant/data/jobs-meta.json';
+import asSample from '../brands/jobs/as.json';
+import adsSample from '../brands/jobs/ads.json';
 import { areaFor } from './areas.js';
 import { url } from '../lib/url.js';
 import { jobSummary } from '../lib/jobtext.js';
 import { industryOf } from './industries.js';
+import { BRAND, services } from './site.js';
 
-// When the jobs were last read from the feed, e.g. "October 19, 2026"
-export const snapshotDate = new Date(meta.fetched).toLocaleDateString('en-CA', { month: 'long', day: 'numeric', year: 'numeric', timeZone: 'America/Halifax' });
+const source = { isl: { jobs: islSnapshot, saved: islMeta.fetched }, as: { jobs: asSample.jobs, saved: asSample.saved }, ads: { jobs: adsSample.jobs, saved: adsSample.saved } }[BRAND];
+const snapshot = source.jobs;
+
+// When the jobs were last read, e.g. "October 19, 2026"
+export const snapshotDate = new Date(source.saved).toLocaleDateString('en-CA', { month: 'long', day: 'numeric', year: 'numeric', timeZone: 'America/Halifax' });
 
 // Feed titles sometimes carry things that belong elsewhere: a year ("General Labourer 2025")
 // or the town again ("Garbage Collector - Saint John"). Both come off for display.
@@ -51,12 +61,13 @@ export const jobs = snapshot
       title: tidyTitle(j.title, j.city),
       pay: tidyPay(j.pay),
       slug,
+      payLabel: j.description ? '' : 'Pay on the posting', // the AS and ADS samples carry no pay yet
       url: url(`/find-work/${slug}/`),
       area: areaFor(j.city),
-      industry: industryOf(j.title), // '' when it's none of the six industry pages
+      industry: BRAND === 'isl' ? industryOf(j.title) : '', // '' when it's none of ISL's six industry pages
       type: j.employment === 'Permanent' ? 'direct' : 'contract',
-      typeLabel: j.employment === 'Permanent' ? 'Permanent' : j.employment === 'Temp to perm' ? 'Temp to perm' : 'Contract',
-      snippet: jobSummary(j.description, j.title),
+      typeLabel: j.employment === 'Permanent' ? services.direct.jobLabel : j.employment === 'Temp to perm' ? 'Temp to perm' : services.contract.jobLabel,
+      snippet: jobSummary(j.description, j.title) || `${j.note ? `${j.note} ` : ''}${j.employment === 'Permanent' ? 'permanent' : 'temporary'} role in ${j.city}, ${j.province}.`.replace(/^./, (c) => c.toUpperCase()),
     };
   })
   // Newest first

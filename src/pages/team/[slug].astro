@@ -9,6 +9,7 @@ import Base from '../../layouts/Base.astro';
 import PersonCard from '../../components/PersonCard.astro';
 import CtaBand from '../../components/CtaBand.astro';
 import { team } from '../../data/team.js';
+import { brand } from '../../data/site.js';
 import { sized } from '../../lib/img.js';
 import { url } from '../../lib/url.js';
 import { PEOPLE, provinceName } from '../../../assistant/supabase/functions/_shared/routing.js';
@@ -33,7 +34,7 @@ const hireHref = isDirect || slug === 'zowie-tucker'
   ? '/hire/?service=direct'
   : `/hire/?service=contract&where=${encodeURIComponent(provinceName(p.province))}`;
 ---
-<Base title={p.name} description={`${p.name}, ${p.role} at Integrated Staffing${p.province ? `, ${provinceName(p.province)}` : ''}.`}>
+<Base title={p.name} description={`${p.name}, ${p.role} at ${brand.name}${p.province ? `, ${provinceName(p.province)}` : ''}.`}>
   <section class="person">
     <div class="wrap grid">
       <div class:list={['shot', !p.photo && 'none']} data-reveal>
@@ -116,8 +117,8 @@ const hireHref = isDirect || slug === 'zowie-tucker'
 
   .hiring { margin-top: var(--s7); padding: var(--s5); background: var(--mist); display: flex; flex-wrap: wrap; gap: var(--s4); align-items: center; justify-content: space-between; }
   .h-text { margin: 0; font-weight: var(--fw-text); max-width: 44ch; }
-  .h-go { font-weight: var(--fw-bold); background: var(--isl-blue); color: #fff; text-decoration: none; padding: 0.8rem 1.3rem; }
-  .h-go:hover { background: var(--isl-blue-deep); color: #fff; }
+  .h-go { font-weight: var(--fw-bold); background: var(--accent); color: #fff; text-decoration: none; padding: 0.8rem 1.3rem; }
+  .h-go:hover { background: var(--accent-deep); color: #fff; }
 
   .person-row-head .lead { justify-self: end; font-weight: var(--fw-bold); font-size: var(--fs-body); }
   @media (max-width: 860px) { .person-row-head .lead { justify-self: start; } }

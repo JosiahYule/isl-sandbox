@@ -2,7 +2,7 @@
 // SITE HEADER
 // Menu items come from src/data/site.js. The mobile menu uses <details>, which opens
 // and closes with no JavaScript.
-import { brand, nav, offices } from '../data/site.js';
+import { brand, nav, offices, links, BRAND } from '../data/site.js';
 import Button from './Button.astro';
 import { url } from '../lib/url.js';
 import { jobs } from '../data/jobs.js';
@@ -12,35 +12,38 @@ import { tools, guides } from '../data/tools.js';
 import { industryPages } from '../data/industries.js';
 
 // Dropdowns: built from the same data as the pages, so the numbers are always current.
+// Industries, Learn and the office pages are ISL's; Find work is on every brand.
+const isl = BRAND === 'isl';
 const menus = {
-  '/contract/': [
+  ...(isl && { '/contract/': [
     ...industryPages.map((i) => ({ label: i.name, href: url(`/industries/${i.slug}/`) })),
     { label: 'How contract staffing works', href: url('/contract/'), rule: true },
-  ],
+  ] }),
   '/find-work/': [
     { label: 'All open jobs', href: url('/find-work/'), meta: String(jobs.length) },
     ...areas.map((a) => ({ label: `Near ${a.label}`, href: url(`/find-work/?area=${a.key}`), meta: String(jobs.filter((j) => j.area === a.key).length) })),
-    { label: 'Send your resume', href: 'https://www.integratedstaffing.ca/careers/general-apply', rule: true },
+    { label: 'Send your resume', href: links.resume, rule: true },
   ],
-  '/learn/': [
+  ...(isl && { '/learn/': [
     ...tools.map((t) => ({ label: t.title, href: t.url, meta: 'Tool' })),
     ...guides.map((g) => ({ label: g.title, href: g.url, meta: 'Guide' })),
     { label: 'All tools and articles', href: url('/learn/'), meta: String(posts.length + tools.length), rule: true },
-  ],
-  '/contact/': [
+  ] }),
+  ...(brand.officePages && { '/contact/': [
     ...areas.map((a) => ({ label: a.label, href: url(`/offices/${a.key}/`), meta: offices.find((o) => o.city === a.label)?.phone })),
     { label: 'All ways to reach us', href: url('/contact/'), rule: true },
-  ],
+  ] }),
 };
 
+const [logoW, logoH] = brand.logoSize ?? [190, 46];
 const current = Astro.url.pathname;
 const isCurrent = (href) => current.startsWith(url(href));
 ---
 <header class="header">
   <div class="wrap bar">
     <a class="logo" href={url('/')} aria-label={`${brand.name} home`}>
-      <img src={brand.logo} alt="" width="190" height="46" onerror="this.parentElement.classList.add('no-img'); this.remove();" />
-      <span class="wordmark" aria-hidden="true">Integrated<br />Staffing</span>
+      <img src={brand.logo} alt="" width={logoW} height={logoH} style={brand.logoHeight ? `height:${brand.logoHeight}px` : undefined} onerror="this.parentElement.classList.add('no-img'); this.remove();" />
+      <span class="wordmark" aria-hidden="true">{brand.wordmark[0]}<br />{brand.wordmark[1]}</span>
     </a>
 
     <nav class="primary" aria-label="Main">
@@ -62,7 +65,7 @@ const isCurrent = (href) => current.startsWith(url(href));
     </nav>
 
     <div class="tools">
-      <a class="login" href={brand.loginUrl}>Log in</a>
+      {brand.loginUrl && <a class="login" href={brand.loginUrl}>Log in</a>}
       <Button href="/hire/" size="sm">Request talent</Button>
     </div>
 
@@ -86,7 +89,7 @@ const isCurrent = (href) => current.startsWith(url(href));
         </nav>
         <div class="sheet-tools">
           <Button href="/hire/" size="lg">Request talent</Button>
-          <a class="login" href={brand.loginUrl}>Log in to your account</a>
+          {brand.loginUrl && <a class="login" href={brand.loginUrl}>Log in to your account</a>}
         </div>
       </div>
     </details>
@@ -135,7 +138,7 @@ const isCurrent = (href) => current.startsWith(url(href));
   }
   .primary a::after {
     content: ''; position: absolute; left: 0; right: 0; bottom: 0; height: 2px;
-    background: var(--isl-blue); transform: scaleX(0); transform-origin: left;
+    background: var(--accent); transform: scaleX(0); transform-origin: left;
     transition: transform 200ms var(--ease);
   }
   .primary a:hover::after, .primary a[aria-current='page']::after { transform: scaleX(1); }
@@ -173,7 +176,7 @@ const isCurrent = (href) => current.startsWith(url(href));
 
   .mobile { display: none; }
   .call-m { display: none; align-items: center; gap: var(--s2); margin-left: auto; padding: var(--s2) var(--s3); font-weight: var(--fw-bold); color: var(--ink); text-decoration: none; }
-  .call-m svg { width: 18px; height: 18px; color: var(--isl-blue); }
+  .call-m svg { width: 18px; height: 18px; color: var(--accent); }
   .mobile summary {
     list-style: none; cursor: pointer; font-weight: var(--fw-bold);
     padding: var(--s2) var(--s4); border: 2px solid var(--ink); border-radius: var(--radius);
@@ -191,7 +194,7 @@ const isCurrent = (href) => current.startsWith(url(href));
     font-size: var(--fs-h2); letter-spacing: -0.02em; color: var(--ink); text-decoration: none;
     padding-block: var(--s3); border-bottom: 1px solid var(--line);
   }
-  .sheet nav a[aria-current='page'] { color: var(--isl-blue); }
+  .sheet nav a[aria-current='page'] { color: var(--accent); }
   .sheet-tools { display: grid; gap: var(--s4); padding-bottom: var(--s6); }
 
   /* 7 menu items plus the logo and button need about 1140px; below that, use the Menu button */

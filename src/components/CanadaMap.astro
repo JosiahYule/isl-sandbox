@@ -26,11 +26,11 @@ const order = (id) => Math.max(0, westward.indexOf(id));
 <style>
   .cmap { margin: 0; }
   svg { width: 100%; height: auto; }
-  .rest { fill: none; stroke: var(--isl-blue); stroke-width: 1.4; stroke-linejoin: round; }
-  .atl { fill: var(--isl-blue); stroke: var(--paper); stroke-width: 1; }
+  .rest { fill: none; stroke: var(--accent); stroke-width: 1.4; stroke-linejoin: round; }
+  .atl { fill: var(--accent); stroke: var(--paper); stroke-width: 1; }
   circle { fill: #fff; stroke: var(--ink); stroke-width: 2.5; }
-  .cmap--dark .rest { stroke: var(--isl-blue-on-dark); }
-  .cmap--dark .atl { fill: var(--isl-blue-on-dark); stroke: var(--dark); }
+  .cmap--dark .rest { stroke: var(--accent-on-dark); }
+  .cmap--dark .atl { fill: var(--accent-on-dark); stroke: var(--dark); }
   /* Motion: Atlantic fills, offices appear, then the rest of Canada draws in westward */
   circle { transform-box: fill-box; transform-origin: center; }
   :global(.motion) .cmap .atl { opacity: 0; transition: opacity 0.7s var(--ease); }
@@ -43,8 +43,8 @@ const order = (id) => Math.max(0, westward.indexOf(id));
   figcaption { display: flex; gap: var(--s5); margin-top: var(--s3); font-size: var(--fs-small); font-weight: var(--fw-text); }
   .key { display: inline-flex; align-items: center; gap: var(--s2); }
   .key::before { content: ''; width: 14px; height: 14px; border-radius: 1px; }
-  .key--atl::before { background: var(--isl-blue); }
-  .key--rest::before { border: 1.5px solid var(--isl-blue); }
-  .cmap--dark .key--atl::before { background: var(--isl-blue-on-dark); }
-  .cmap--dark .key--rest::before { border-color: var(--isl-blue-on-dark); }
+  .key--atl::before { background: var(--accent); }
+  .key--rest::before { border: 1.5px solid var(--accent); }
+  .cmap--dark .key--atl::before { background: var(--accent-on-dark); }
+  .cmap--dark .key--rest::before { border-color: var(--accent-on-dark); }
 </style>

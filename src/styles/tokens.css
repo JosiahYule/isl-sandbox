@@ -28,15 +28,18 @@
   --line-strong: #1a1a1a;   /* heavier rule that opens a list or table */
   --line-dark: #3a3a3a;     /* hairlines on dark */
 
-  /* Brand + meaning */
-  --isl-blue: #0070ca;
-  --isl-blue-deep: #005aaa; /* hover */
-  --isl-blue-tint: #e6f1fa; /* light blue wash */
-  --isl-blue-on-dark: #4da3e8; /* ISL blue lifted so it reads on near-black */
-  --direct: var(--isl-blue);
+  /* Brand + meaning. The accent is the brand's colour: ISL blue here. Accountant Staffing and
+     Administrative Staffing swap in their own four values (src/brands/as.js, ads.js), which
+     src/layouts/Base.astro sets on the page. Everything else on this page stays the same for all three. */
+  --accent: #0070ca;
+  --accent-deep: #005aaa; /* hover */
+  --accent-tint: #e6f1fa; /* light wash */
+  --accent-on-dark: #4da3e8; /* lifted so it reads on near-black */
+  --map-land: var(--accent); /* the land on the office maps (ADS uses its navy, so the map isn't a wall of orange) */
+  --direct: var(--accent);
   --contract: var(--ink);
   --contract-on-dark: #ffffff;
-  --focus: rgb(0 112 202 / 0.35);
+  --focus: color-mix(in srgb, var(--accent) 35%, transparent);
 
   /* Type: DM Sans throughout */
   /* 'DM Sans Fallback' is Arial resized to DM Sans's proportions (global.css), so text doesn't jump when DM Sans arrives */

@@ -11,10 +11,18 @@
 import Base from '../layouts/Base.astro';
 import PageHero from '../components/PageHero.astro';
 import Steps from '../components/Steps.astro';
-import { brand, forms } from '../data/site.js';
+import { brand, forms, hire, services, offices, provinceOffice } from '../data/site.js';
 import { url } from '../lib/url.js';
 
-const locations = ['Nova Scotia', 'New Brunswick', 'Prince Edward Island', 'Newfoundland and Labrador', 'Elsewhere in Canada'];
+const locations = hire.locations;
+// What the script needs from the brand: how it names things, and (AS, ADS) which office answers each province
+const said = {
+  short: brand.short,
+  routing: hire.routing,
+  temp: services.contract.ask,
+  guarantee: brand.key === 'isl' ? '90-day' : 'six-month',
+  offices: provinceOffice ? Object.fromEntries(Object.entries(provinceOffice).map(([code, city]) => [code, offices.find((o) => o.city === city)])) : null,
+};
 const tel = `tel:+1${brand.mainPhone.replaceAll('-', '')}`;
 // From the live /hire page: the four steps from request to filled position.
 const afterSteps = [
@@ -24,27 +32,27 @@ const afterSteps = [
   ['Your position is filled', 'We handle the paperwork and follow up after placement.'],
 ];
 ---
-<Base assistantMode="employer" title="Request talent" description="Request contract workers or start a permanent search. A recruiter replies within one business day.">
-  <PageHero compact title="Tell us who you need." lead="Contract workers anywhere in Atlantic Canada, permanent hires anywhere in Canada. A recruiter replies within one business day.">
+<Base assistantMode="employer" title="Request talent" description={`Request ${services.contract.ask.toLowerCase()} or start a permanent search.${brand.key === 'isl' ? ' A recruiter replies within one business day.' : ''}`}>
+  <PageHero compact title="Tell us who you need." lead={hire.lead}>
     <a class="textlink" href={tel}>Prefer to talk? Call {brand.mainPhone}</a>
   </PageHero>
 
   <section class="section section--rule work">
     <div class="wrap layout">
-      <form data-endpoint={forms.requestEndpoint || undefined} class="form" id="request" novalidate>
+      <form data-endpoint={forms.requestEndpoint || undefined} data-said={JSON.stringify(said)} class="form" id="request" novalidate>
         <!-- 1. The request first: what and where -->
         <fieldset class="service">
           <legend>What do you need?</legend>
           <div class="options">
             <label class="opt opt--contract">
               <input type="radio" name="service" value="contract" />
-              <span class="opt-name">Contract workers</span>
-              <span class="opt-meta">For a set time, on site within hours</span>
+              <span class="opt-name">{services.contract.ask}</span>
+              <span class="opt-meta">{services.contract.askMeta}</span>
             </label>
             <label class="opt opt--direct">
               <input type="radio" name="service" value="direct" />
-              <span class="opt-name">A permanent hire</span>
-              <span class="opt-meta">A targeted search with a 90-day guarantee</span>
+              <span class="opt-name">{services.direct.ask}</span>
+              <span class="opt-meta">{services.direct.askMeta}</span>
             </label>
             <label class="opt opt--unsure">
               <input type="radio" name="service" value="unsure" />
@@ -140,7 +148,7 @@ const afterSteps = [
         </div>
         <p class="r-reach"><a class="r-tel" href={tel}>{brand.mainPhone}</a><a class="r-mail" hidden></a></p>
         <p class="r-note" hidden></p>
-        <p class="r-promise">Replies within one business day.</p>
+        {hire.routing === 'people' && <p class="r-promise">Replies within one business day.</p>}
       </div>
     </div>
   </section>
@@ -157,6 +165,7 @@ const afterSteps = [
   import { route, provinceName } from '../../assistant/supabase/functions/_shared/routing.js';
 
   const form = document.getElementById('request') as HTMLFormElement;
+  const said = JSON.parse(form.dataset.said!); // the brand's words and routing (set in the page's frontmatter)
   const radios = [...form.querySelectorAll<HTMLInputElement>('input[name="service"]')];
   const loc = form.querySelector<HTMLSelectElement>('[name="location"]')!;
   const helper = form.querySelector<HTMLElement>('.helper')!;
@@ -181,14 +190,26 @@ const afterSteps = [
   function updateReply() {
     const choice = loc.value;
     const svc = service();
-    const outside = choice === 'Elsewhere in Canada';
+    const outside = choice.startsWith('Elsewhere');
     const place = outside ? { outside: true, province: '', city: '' } : CODES[choice] ? { province: CODES[choice], city: '', outside: false } : null;
     if (!place && svc !== 'direct') {
       $('.r-name').textContent = 'The office nearest the work';
       $('.r-role').textContent = 'Choose where the work is to see who it goes to.';
-      $('.r-ini').textContent = 'ISL'; (card.querySelector('.r-face img') as HTMLImageElement).hidden = true;
+      $('.r-ini').textContent = said.short; (card.querySelector('.r-face img') as HTMLImageElement).hidden = true;
       $('.r-mail').hidden = true; $('.r-note').hidden = true;
       toLine.textContent = ''; replier = 'A recruiter';
+      return;
+    }
+    // AS and ADS: the office that covers the province (outside Atlantic Canada, the head office)
+    if (said.routing === 'office') {
+      const o = (place && place.province && said.offices[place.province]) || Object.values(said.offices)[0];
+      $('.r-name').textContent = `Our ${o.city} office`;
+      $('.r-role').textContent = o.address;
+      $('.r-ini').textContent = said.short; (card.querySelector('.r-face img') as HTMLImageElement).hidden = true;
+      const telA = $('.r-tel') as HTMLAnchorElement; telA.textContent = o.phone; telA.href = 'tel:+1' + o.phone.replace(/\D/g, '');
+      $('.r-mail').hidden = true; $('.r-note').hidden = true;
+      replier = `Our ${o.city} office`;
+      toLine.textContent = `This goes to our ${o.city} office.`;
       return;
     }
     // Contract can't be staffed outside Atlantic Canada: that request goes to a permanent search
@@ -220,9 +241,10 @@ const afterSteps = [
     const { length, start, trial } = answers;
     if (!length || !start || !trial) return;
     let svc: string, text: string;
-    if (length === 'temp') { svc = 'contract'; text = 'Contract workers fit a set stretch of work.'; }
+    const temp = said.temp.replace(/^A /, 'a ');
+    if (length === 'temp') { svc = 'contract'; text = `${said.temp} fits a set stretch of work.`.replace('workers fits', 'workers fit'); }
     else if (trial === 'yes') { svc = 'contract'; text = 'Start on contract, then hire them when you’re sure.'; }
-    else { svc = 'direct'; text = start === 'now' ? 'A permanent search. If the seat can’t wait, a contract worker can cover it meanwhile.' : 'A permanent search, with a 90-day guarantee.'; }
+    else { svc = 'direct'; text = start === 'now' ? `A permanent search. If the seat can’t wait, ${temp.toLowerCase().replace('contract workers', 'a contract worker')} can cover it meanwhile.` : `A permanent search, with a ${said.guarantee} guarantee.`; }
     result.textContent = `${text} We’ve selected it above.`;
     result.hidden = false;
     helperChose = true;
@@ -282,7 +304,7 @@ const afterSteps = [
     form.querySelector<HTMLElement>('.submit')!.hidden = true;
     toLine.hidden = true;
     const sent = form.querySelector<HTMLElement>('.sent')!;
-    form.querySelector('.sent-who')!.textContent = `${replier} will reply within one business day.`;
+    form.querySelector('.sent-who')!.textContent = said.routing === 'office' ? `${replier} will be in touch.` : `${replier} will reply within one business day.`;
     sent.hidden = false;
     sent.focus();
   });
@@ -312,10 +334,10 @@ const afterSteps = [
   .opt-meta { font-weight: var(--fw-text); color: var(--ink-soft); font-size: var(--fs-small); line-height: 1.4; }
   .opt:hover { border-color: var(--ink-soft); }
   .opt:has(input:checked) { border-color: var(--ink); background: var(--mist); }
-  .opt--direct:has(input:checked) { border-color: var(--direct); background: var(--isl-blue-tint); }
-  .opt:has(input:focus-visible) { outline: 2px solid var(--isl-blue); outline-offset: 2px; }
+  .opt--direct:has(input:checked) { border-color: var(--direct); background: var(--accent-tint); }
+  .opt:has(input:focus-visible) { outline: 2px solid var(--accent); outline-offset: 2px; }
   .opt.flash { animation: flash 1.2s var(--ease); }
-  @keyframes flash { 0% { box-shadow: 0 0 0 0 rgb(0 112 202 / 0.45); } 100% { box-shadow: 0 0 0 14px rgb(0 112 202 / 0); } }
+  @keyframes flash { 0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--accent) 45%, transparent); } 100% { box-shadow: 0 0 0 14px transparent; } }
 
   .helper { margin-top: var(--s3); padding: var(--s4) var(--s5) var(--s5); background: var(--mist); display: grid; gap: var(--s4); }
   .helper[hidden] { display: none; }
@@ -346,10 +368,10 @@ const afterSteps = [
   .hp { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
   .send-err { margin-top: var(--s3); color: #b42318; font-weight: var(--fw-bold); }
   .submit { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s3) var(--s5); margin-top: var(--s6); }
-  .submit button { font: inherit; font-weight: var(--fw-bold); font-size: var(--fs-body); cursor: pointer; padding: 1rem 1.8rem; border: 0; background: var(--isl-blue); color: #fff; }
-  .submit button:hover { background: var(--isl-blue-deep); }
+  .submit button { font: inherit; font-weight: var(--fw-bold); font-size: var(--fs-body); cursor: pointer; padding: 1rem 1.8rem; border: 0; background: var(--accent); color: #fff; }
+  .submit button:hover { background: var(--accent-deep); }
   .submit p { font-size: var(--fs-small); color: var(--ink-soft); margin: 0; }
-  .sent { margin-top: var(--s6); padding-top: var(--s4); border-top: 3px solid var(--isl-blue); }
+  .sent { margin-top: var(--s6); padding-top: var(--s4); border-top: 3px solid var(--accent); }
   .sent-title { font-weight: var(--fw-bold); font-size: var(--fs-h3); margin-bottom: var(--s2); }
   .sent-note { color: var(--ink-soft); font-size: var(--fs-small); }
 

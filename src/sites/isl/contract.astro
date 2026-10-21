@@ -1,16 +1,16 @@
 ---
 // CONTRACT STAFFING  →  /contract/
-import Base from '../layouts/Base.astro';
-import Button from '../components/Button.astro';
-import PageHero from '../components/PageHero.astro';
-import IndustryMatrix from '../components/IndustryMatrix.astro';
-import CtaBand from '../components/CtaBand.astro';
-import Photo from '../components/Photo.astro';
-import Proof from '../components/Proof.astro';
-import AtlanticMap from '../components/AtlanticMap.astro';
-import { jobs } from '../data/jobs.js';
-import { areas } from '../data/areas.js';
-import { places } from '../data/places.js';
+import Base from '../../layouts/Base.astro';
+import Button from '../../components/Button.astro';
+import PageHero from '../../components/PageHero.astro';
+import IndustryMatrix from '../../components/IndustryMatrix.astro';
+import CtaBand from '../../components/CtaBand.astro';
+import Photo from '../../components/Photo.astro';
+import Proof from '../../components/Proof.astro';
+import AtlanticMap from '../../components/AtlanticMap.astro';
+import { jobs } from '../../data/jobs.js';
+import { areas } from '../../data/areas.js';
+import { places } from '../../data/places.js';
 
 // Proof that we staff beyond the office cities: towns with open contract roles right now
 // that aren't in any office's own area (from the live job snapshot, so it updates with the feed).
@@ -18,9 +18,9 @@ const officeTowns = new Set(areas.flatMap((a) => a.towns));
 const beyond = [...new Set(jobs.filter((j) => j.type === 'contract' && j.city && !officeTowns.has(j.city.toLowerCase())).map((j) => j.city.replace(' - ', '-')))];
 const townDots = beyond.map((name) => ({ name, ll: places[name.toLowerCase()] || places[name.toLowerCase().replace('-', ' - ')] }))
   .filter((t) => t.ll).map((t) => ({ name: t.name, lon: t.ll[0], lat: t.ll[1] }));
-import { stock } from '../data/photos.js';
-import { route, provinceName } from '../../assistant/supabase/functions/_shared/routing.js';
-import { url } from '../lib/url.js';
+import { stock } from '../../data/photos.js';
+import { route, provinceName } from '../../../assistant/supabase/functions/_shared/routing.js';
+import { url } from '../../lib/url.js';
 
 // Who takes contract requests in each province: the same routing the chatbot uses
 const local = [['NS', 'Halifax', 'halifax'], ['NB', 'Moncton', 'moncton'], ['PE', 'Charlottetown', 'charlottetown'], ['NL', "St. John's", 'st-johns']]
@@ -171,7 +171,7 @@ const covered = [
   .stack li { display: grid; grid-template-columns: 20px 1fr; column-gap: var(--s3); padding-block: var(--s4); }
   .stack li + li { border-top: 1px solid var(--line); }
   .check { width: 20px; height: 20px; grid-row: span 2; margin-top: 2px; }
-  .check path { fill: none; stroke: var(--isl-blue); stroke-width: 2.4; stroke-linecap: square; }
+  .check path { fill: none; stroke: var(--accent); stroke-width: 2.4; stroke-linecap: square; }
   .c-t { font-weight: var(--fw-bold); }
   .c-d { grid-column: 2; color: var(--ink-soft); font-size: var(--fs-small); }
 

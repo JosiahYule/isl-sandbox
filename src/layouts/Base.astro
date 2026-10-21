@@ -1,7 +1,7 @@
 ---
 // BASE LAYOUT: the frame around every page (<head>, header, footer).
 // The page's own content drops in where <slot /> is.
-import '@fontsource-variable/dm-sans/opsz.css';   // DM Sans, the ISL brand face, self-hosted
+import '@fontsource-variable/dm-sans/opsz.css';   // DM Sans, the brand face of all three sites, self-hosted
 // The Latin file is the one every page needs first, so it's requested before the CSS asks for it
 import dmSansLatin from '@fontsource-variable/dm-sans/files/dm-sans-latin-opsz-normal.woff2?url';
 import '../styles/global.css';
@@ -16,13 +16,18 @@ import { url } from '../lib/url.js';
 // assistantJob: on a job page, that job's ID, so the assistant answers questions about the posting
 // footerOffices: false hides the footer's office row (the contact page already lists the offices)
 // schema: optional structured data (an object or a list) that search engines read, e.g. an office's address
-const { title, description = brand.scope, assistant = true, assistantMode, assistantJob, footerOffices = true, schema } = Astro.props;
+const { title, description = brand.scope, assistantMode, assistantJob, footerOffices = true, schema } = Astro.props;
+const assistant = (Astro.props.assistant ?? true) && brand.assistant; // AS and ADS: off for now
 const canonical = new URL(Astro.url.pathname, Astro.site).href;
-const shareImage = images.hero.replace(/format=\d+w/, 'format=1500w');
-const fullTitle = title ? `${title} | ${brand.name}` : `${brand.name} | Contract and permanent staffing in Atlantic Canada`;
+const heroSrc = typeof images.hero === 'string' ? images.hero : images.hero.src;
+const shareImage = heroSrc.includes('format=') ? heroSrc.replace(/format=\d+w/, 'format=1500w') : `${heroSrc}?format=1500w`;
+const fullTitle = title ? `${title} | ${brand.name}` : `${brand.name} | ${brand.titleTail}`;
+// The brand's colours (src/brands/). ISL's are the defaults in tokens.css, so it sets none.
+const c = brand.colors;
+const colorVars = c ? `--accent:${c.accent};--accent-deep:${c.deep};--accent-tint:${c.tint};--accent-on-dark:${c.onDark}${c.map ? `;--map-land:${c.map}` : ''}` : undefined;
 ---
 <!doctype html>
-<html lang="en-CA" data-assistant-mode={assistantMode} data-assistant-job={assistantJob}>
+<html lang="en-CA" data-brand={brand.key} style={colorVars} data-assistant-mode={assistantMode} data-assistant-job={assistantJob}>
   <head>
     <meta charset="utf-8" />
     <link rel="preload" href={dmSansLatin} as="font" type="font/woff2" crossorigin />
@@ -30,7 +35,7 @@ const fullTitle = title ? `${title} | ${brand.name}` : `${brand.name} | Contract
     <title>{fullTitle}</title>
     <meta name="description" content={description} />
     <meta name="theme-color" content="#1a1a1a" />
-    <link rel="icon" href={url('/favicon.svg')} type="image/svg+xml" />
+    <link rel="icon" href={url(brand.favicon)} type="image/svg+xml" />
     <link rel="canonical" href={canonical} />
     <!-- Link previews (LinkedIn, Facebook, Teams, iMessage) -->
     <meta property="og:type" content="website" />
@@ -67,7 +72,7 @@ const fullTitle = title ? `${title} | ${brand.name}` : `${brand.name} | Contract
 <style>
   .skip {
     position: absolute; left: var(--s4); top: -100px; z-index: 100;
-    background: var(--isl-blue); color: #fff; font-weight: var(--fw-bold);
+    background: var(--accent); color: #fff; font-weight: var(--fw-bold);
     padding: var(--s2) var(--s4); border-radius: var(--radius);
   }
   .skip:focus { top: var(--s4); }

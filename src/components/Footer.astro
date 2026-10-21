@@ -1,20 +1,23 @@
 ---
 // SITE FOOTER
 // The offices row is the most useful thing in a staffing footer: a direct line to each office.
-import { brand, nav, offices, social, images } from '../data/site.js';
+import { brand, nav, offices, social, images, links } from '../data/site.js';
 import { url } from '../lib/url.js';
 import { areas } from '../data/areas.js';
 const { offices: showOffices = true } = Astro.props;
 const year = new Date().getFullYear(); // never goes stale
 const tel = (n) => `tel:+1${n.replaceAll('-', '')}`;
 const areaKey = (city) => areas.find((a) => a.label === city)?.key;
+const officeKey = (city) => brand.officePages && areaKey(city); // only ISL has a page per office
+const [logoW, logoH] = brand.logoSize ?? [190, 46];
+const sandboxSites = [{ key: 'isl', name: 'Integrated Staffing', href: '/isl-sandbox/' }, { key: 'as', name: 'Accountant Staffing', href: '/isl-sandbox/as/' }, { key: 'ads', name: 'Administrative Staffing', href: '/isl-sandbox/ads/' }];
 ---
 <footer class="footer on-dark">
   <div class="wrap">
-    {showOffices && <div class="offices">
+    {showOffices && <div class="offices" style={`--n:${offices.length}`}>
       {offices.map((o) => (
         <div class="office">
-          {areaKey(o.city) ? <a class="city" href={url(`/offices/${areaKey(o.city)}/`)}>{o.city}<span>{o.province}</span></a> : <p class="city">{o.city}<span>{o.province}</span></p>}
+          {officeKey(o.city) ? <a class="city" href={url(`/offices/${officeKey(o.city)}/`)}>{o.city}<span>{o.province}</span></a> : <p class="city">{o.city}<span>{o.province}</span></p>}
           <a class="phone" href={tel(o.phone)}>{o.phone}</a>
           <p class="addr">{o.address.replace(/,\s*(NS|NB|PE|NL)\s.*$/, '')}</p>
           {areaKey(o.city) && <a class="near" href={url(`/find-work/?area=${areaKey(o.city)}`)}>Jobs near {o.city}</a>}
@@ -25,24 +28,27 @@ const areaKey = (city) => areas.find((a) => a.label === city)?.key;
     <div class:list={['lower', !showOffices && 'lower--top']}>
       <div class="about">
         <a class="flogo" href={url('/')} aria-label={`${brand.name} home`}>
-          <img src={brand.logo} alt="" width="190" height="46" loading="lazy" onerror="this.parentElement.classList.add('no-img'); this.remove();" />
-          <span class="fword" aria-hidden="true">Integrated<br />Staffing</span>
+          <img class:list={[!brand.logoWhite && 'invert']} src={brand.logoWhite ?? brand.logo} alt="" width={logoW} height={logoH} loading="lazy" onerror="this.parentElement.classList.add('no-img'); this.remove();" />
+          <span class="fword" aria-hidden="true">{brand.wordmark[0]}<br />{brand.wordmark[1]}</span>
         </a>
         <p>{brand.name} has connected employers and job seekers since {brand.since}. Locally owned and operated.</p>
-        <div class="badges">
+        {images.badgeBestPlaces && <div class="badges">
           <img src={images.badgeBestPlaces} alt="Best Places to Work" width="64" height="64" loading="lazy" onerror="this.remove()" />
           <img src={images.badgeCor} alt="COR certified" width="64" height="64" loading="lazy" onerror="this.remove()" />
-        </div>
+        </div>}
+        {links.sister && <p class="sister">Hiring for {links.sister.what}? <a href={links.sister.href}>{links.sister.name}</a></p>}
       </div>
       <nav aria-label="Footer">
         <ul>{nav.map((i) => <li><a href={url(i.href)}>{i.label}</a></li>)}</ul>
-        <ul>{social.map((s) => <li><a href={s.href}>{s.label}</a></li>)}</ul>
+        {social.length > 0 && <ul>{social.map((s) => <li><a href={s.href}>{s.label}</a></li>)}</ul>}
       </nav>
     </div>
 
     <!-- TODO: confirm this wording with ISL before going live -->
     <p class="scam"><strong>Recruitment scam alert.</strong> {brand.name} never charges job seekers a fee and never asks for banking details to apply. If someone claiming to be us does, call your nearest office.</p>
     <p class="legal">© {year} {brand.name}. All rights reserved. <a href={url('/privacy/')}>Privacy</a> <a href={url('/terms/')}>Terms</a> <a href={url('/accessibility/')}>Accessibility</a></p>
+    <!-- Sandbox only: jump between the three brands' previews. Remove at launch. -->
+    <p class="legal sandbox">Sandbox previews: {sandboxSites.map((b) => b.key === brand.key ? <span aria-current="page">{b.name}</span> : <a href={b.href}>{b.name}</a>)}</p>
   </div>
 </footer>
 
@@ -52,7 +58,7 @@ const areaKey = (city) => areas.find((a) => a.label === city)?.key;
   .footer a:hover { text-decoration: underline; }
 
   .offices {
-    display: grid; grid-template-columns: repeat(5, 1fr);
+    display: grid; grid-template-columns: repeat(var(--n), 1fr);
     border-top: 1px solid var(--line-dark);
   }
   .office { display: flex; flex-direction: column; align-items: flex-start; padding: var(--s5) var(--s4) var(--s5) 0; }
@@ -72,10 +78,13 @@ const areaKey = (city) => areas.find((a) => a.label === city)?.key;
   .lower--top { margin-top: 0; }
   /* The logo file is dark; brightness(0) + invert(1) turns every colour in it to white for the dark footer */
   .flogo { display: inline-block; margin-bottom: var(--s4); color: #fff; }
-  .flogo img { height: 40px; width: auto; filter: brightness(0) invert(1); }
+  .flogo img { height: 40px; width: auto; }
+  .flogo img.invert { filter: brightness(0) invert(1); }
   .fword { display: none; font-weight: var(--fw-bold); font-size: var(--fs-h3); line-height: 1; letter-spacing: -0.01em; }
   .flogo:global(.no-img) .fword { display: block; }
   .about p { color: var(--on-dark-soft); max-width: 42ch; }
+  .sister { margin-top: var(--s4); }
+  .sister a { color: #fff; font-weight: var(--fw-bold); text-decoration: underline !important; text-underline-offset: 0.2em; }
   .badges { display: flex; gap: var(--s4); margin-top: var(--s5); }
   .badges img { height: 56px; width: auto; }
   nav { display: grid; grid-template-columns: 1fr 1fr; gap: var(--s5); }
@@ -87,6 +96,8 @@ const areaKey = (city) => areas.find((a) => a.label === city)?.key;
   .legal { margin-top: var(--s4); font-size: var(--fs-tiny); color: var(--on-dark-soft); }
   .legal a { color: var(--on-dark-soft); margin-left: var(--s4); text-decoration: underline !important; text-underline-offset: 0.2em; }
   .legal a:hover { color: #fff; }
+  .sandbox { margin-top: var(--s2); }
+  .sandbox span { margin-left: var(--s4); color: #fff; }
 
   @media (max-width: 900px) {
     .offices { grid-template-columns: repeat(auto-fill, minmax(min(100%, 8.5rem), 1fr)); } /* two across, one when there isn't room */

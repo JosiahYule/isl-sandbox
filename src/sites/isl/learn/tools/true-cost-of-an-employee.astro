@@ -5,10 +5,10 @@
 // on the server with a $20 example, then the script redraws it as the inputs change.
 // The figures live in the address (?wage=22&hours=37.5&province=NB&wcb=1.4): the assistant
 // links here that way, and a visitor can copy the link to share their numbers.
-import Base from '../../../layouts/Base.astro';
-import PageHero from '../../../components/PageHero.astro';
-import { trueCost, money, RATES, SOURCES } from '../../../lib/payroll.js';
-import { url } from '../../../lib/url.js';
+import Base from '../../../../layouts/Base.astro';
+import PageHero from '../../../../components/PageHero.astro';
+import { trueCost, money, RATES, SOURCES } from '../../../../lib/payroll.js';
+import { url } from '../../../../lib/url.js';
 
 const start = { wage: 20, hours: 40, province: 'NS' };
 const r = trueCost(start);
@@ -97,7 +97,7 @@ const rate = (v) => `${Number((v * 100).toFixed(3))}%`;
 </Base>
 
 <script>
-  import { trueCost, money, RATES } from '../../../lib/payroll.js';
+  import { trueCost, money, RATES } from '../../../../lib/payroll.js';
 
   const root = document.querySelector<HTMLElement>('[data-cost]')!;
   const form = root.querySelector('form')!;
@@ -181,7 +181,7 @@ const rate = (v) => `${Number((v * 100).toFixed(3))}%`;
   .unit { font-weight: var(--fw-text); color: var(--ink-soft); font-size: var(--fs-small); margin-left: 0.3em; }
   .hint { font-size: var(--fs-small); color: var(--ink-soft); }
   input[type='number'] { font: inherit; font-size: var(--fs-h3); font-variant-numeric: tabular-nums; padding: 0.7rem 0.9rem; border: 1.5px solid var(--line); background: var(--paper); color: var(--ink); width: 100%; }
-  input[type='number']:focus { outline: none; border-color: var(--isl-blue); }
+  input[type='number']:focus { outline: none; border-color: var(--accent); }
   .money { position: relative; display: block; }
   .money > span { position: absolute; left: 0.9rem; top: 50%; transform: translateY(-50%); font-size: var(--fs-h3); color: var(--ink-soft); }
   .money input { padding-left: 1.9rem; }
@@ -191,7 +191,7 @@ const rate = (v) => `${Number((v * 100).toFixed(3))}%`;
   .seg span { display: block; text-align: center; padding: 0.7rem 0; font-weight: var(--fw-bold); }
   .seg label + label span { border-left: 1.5px solid var(--line); }
   .seg input:checked + span { background: var(--ink); color: #fff; }
-  .seg input:focus-visible + span { outline: 2px solid var(--isl-blue); outline-offset: -2px; }
+  .seg input:focus-visible + span { outline: 2px solid var(--accent); outline-offset: -2px; }
 
   /* Result */
   .result { border-top: 1.5px solid var(--ink); padding-top: var(--s5); }
@@ -201,12 +201,12 @@ const rate = (v) => `${Number((v * 100).toFixed(3))}%`;
   .bar { display: flex; gap: 2px; height: 14px; margin-top: var(--s6); }
   .bar span { display: block; min-width: 2px; transition: flex-grow 0.35s var(--ease); }
   .seg-wage { background: var(--ink); }
-  .seg-add { background: var(--isl-blue); }
+  .seg-add { background: var(--accent); }
   .key { display: flex; gap: var(--s5); margin: var(--s3) 0 0; font-size: var(--fs-small); color: var(--ink-soft); }
   .k { display: inline-flex; align-items: center; gap: var(--s2); }
   .k::before { content: ''; width: 12px; height: 12px; }
   .k--wage::before { background: var(--ink); }
-  .k--add::before { background: var(--isl-blue); }
+  .k--add::before { background: var(--accent); }
 
   .lines { width: 100%; border-collapse: collapse; margin-top: var(--s6); font-variant-numeric: tabular-nums; }
   .lines th, .lines td { padding: 0.65rem 0; border-bottom: 1px solid var(--line); text-align: right; font-weight: var(--fw-text); }
@@ -216,18 +216,18 @@ const rate = (v) => `${Number((v * 100).toFixed(3))}%`;
   .lines tbody tr:first-child th, .lines tbody tr:first-child td { font-weight: var(--fw-bold); }
   .lines tfoot th, .lines tfoot td { font-weight: var(--fw-bold); border-bottom: 0; border-top: 1.5px solid var(--ink); }
 
-  .copy { margin-top: var(--s4); font: inherit; font-size: var(--fs-small); font-weight: var(--fw-bold); color: var(--isl-blue); background: none; border: 0; padding: 0; cursor: pointer; text-decoration: underline; text-underline-offset: 0.2em; }
+  .copy { margin-top: var(--s4); font: inherit; font-size: var(--fs-small); font-weight: var(--fw-bold); color: var(--accent); background: none; border: 0; padding: 0; cursor: pointer; text-decoration: underline; text-underline-offset: 0.2em; }
 
   /* Call to action */
   .cta { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: var(--s5) var(--s7); align-items: end; }
   .cta .lead { margin-top: var(--s4); max-width: 52ch; }
-  .go { font-weight: var(--fw-bold); background: var(--isl-blue); color: #fff; text-decoration: none; padding: 1rem 1.5rem; white-space: nowrap; }
-  .go:hover { background: var(--isl-blue-deep); color: #fff; }
+  .go { font-weight: var(--fw-bold); background: var(--accent); color: #fff; text-decoration: none; padding: 1rem 1.5rem; white-space: nowrap; }
+  .go:hover { background: var(--accent-deep); color: #fff; }
 
   .how { max-width: 72ch; }
   .how h2 { font-size: var(--fs-h3); margin-bottom: var(--s4); }
   .how ul { margin: 0; padding-left: 1.2em; display: grid; gap: var(--s3); color: var(--ink-soft); }
-  .how li::marker { color: var(--isl-blue); }
+  .how li::marker { color: var(--accent); }
   .src { margin-top: var(--s5); font-size: var(--fs-small); color: var(--ink-soft); max-width: 70ch; }
 
   @media (max-width: 900px) {

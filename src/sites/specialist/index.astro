@@ -1,0 +1,62 @@
+---
+// HOMEPAGE  →  /   (Accountant Staffing and Administrative Staffing)
+// The same opening as ISL's homepage (src/sites/isl/index.astro), with the specialist's words:
+// hero (job search), one field at every level (the two services), the roles by level,
+// the offices, and the closing call to action.
+// Everything brand-specific comes from the brand's file (src/brands/as.js or ads.js).
+import Base from '../../layouts/Base.astro';
+import HomeHero from '../../components/HomeHero.astro';
+import WeRecruit from '../../components/WeRecruit.astro';
+import RolesByLevel from '../../components/RolesByLevel.astro';
+import OfficesSection from '../../components/OfficesSection.astro';
+import CtaBand from '../../components/CtaBand.astro';
+import { brand, offices, social, images, field, services, terms } from '../../data/site.js';
+import { jobs } from '../../data/jobs.js';
+
+const orgSchema = {
+  '@context': 'https://schema.org', '@type': 'EmploymentAgency', name: brand.name, url: brand.siteUrl,
+  telephone: '+1-' + brand.mainPhone, foundingDate: String(brand.since), areaServed: 'Atlantic Canada',
+  sameAs: social.map((s) => s.href),
+  department: offices.map((o) => ({ '@type': 'EmploymentAgency', name: `${brand.name} ${o.city}`, telephone: '+1-' + o.phone, address: o.address })),
+};
+// A moving strip needs enough postings to fill it; with only a few, the search alone is cleaner
+const ticker = jobs.length >= 6 ? jobs.slice(0, 14) : [];
+const cities = offices.map((o) => o.city);
+
+// The two services, permanent first (as in the menu), with the figures from the brand's own terms
+const svcs = [
+  { key: 'direct', name: services.direct.name, href: services.direct.href, go: 'How a permanent search works',
+    figs: [['6 months', 'replacement guarantee'], ['No fee', 'unless you hire our candidate']] },
+  { key: 'contract', name: services.contract.name, href: services.contract.href, go: 'How temporary staffing works',
+    figs: [['One rate', 'pay, EI, CPP and payroll included'], [terms.tempToPerm, 'contracts become permanent']] },
+];
+---
+<Base description={`${brand.tagline} Temporary and permanent, junior to senior. Search open jobs, or tell us who you need.`} schema={orgSchema}>
+  <!-- 1. HERO -->
+  <HomeHero photo={images.hero} lines={field.heroLines} lead={field.heroLead} ticker={ticker} />
+
+  <!-- 2. ONE FIELD, EVERY LEVEL: the specialist's version of ISL's "We recruit." -->
+  <WeRecruit
+    title={['One field.', 'Every level.']}
+    lines={[`Based in Halifax, with offices in ${cities.slice(1).join(' and ')}.`, 'No fee unless you hire one of our candidates.']}
+    before="Placing"
+    words={field.roll}
+    services={svcs}
+  />
+
+  <!-- 3. WHAT WE PLACE: the roles at each level -->
+  <section class="section section--rule">
+    <div class="wrap">
+      <div class="section-head section-head--split">
+        <h2>What we place</h2>
+        <p class="lead">Temporary or permanent, at every level.</p>
+      </div>
+      <RolesByLevel levels={field.levels} />
+    </div>
+  </section>
+
+  <!-- 4. WHERE WE ARE -->
+  <OfficesSection lines={['Three offices.', 'All of Atlantic Canada.']} lead="We place people across the region, not just in our office cities. Select an office for its address and phone number." />
+
+  <CtaBand />
+</Base>

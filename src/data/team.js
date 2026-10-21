@@ -6,6 +6,7 @@
 // Titles, provinces, contact details and bios come from src/data/bios.js (merged in below).
 
 import { bios } from './bios.js';
+import { BRAND } from './site.js';
 
 const cdn = (path) => `https://images.squarespace-cdn.com/content/v1/691490c94119776708e69bbe/${path}`;
 
@@ -42,5 +43,8 @@ const people = [
   { name: 'Josiah Yule', slug: 'josiah-yule', role: 'Marketing Coordinator', photo: cdn('0f317710-5e34-4396-8ea2-b3f16f46e21f/Untitled+%28Instagram+Post+%2845%29%29+%284%29+%281%29.png') },
 ];
 
-// Each person, with their title, province, contact details and bio from bios.js
-export const team = people.map((p) => ({ ...p, ...(bios[p.slug] || {}), role: bios[p.slug]?.title || p.role }));
+// Each person, with their title, province, contact details and bio from bios.js.
+// These are ISL's people. AS and ADS have their own team (TODO: their names, titles and photos),
+// so their sites show an empty team for now.
+const islTeam = people.map((p) => ({ ...p, ...(bios[p.slug] || {}), role: bios[p.slug]?.title || p.role }));
+export const team = BRAND === 'isl' ? islTeam : [];

@@ -1,0 +1,35 @@
+---
+// OFFICES ON THE MAP: the map runs out to the left edge of the page, the words sit beside it.
+// Used on the homepage of every brand. Select a pin for that office's address and phone number.
+// <OfficesSection lines={['Five offices.', 'All of Atlantic Canada.']} lead="..." />
+import AtlanticMap from './AtlanticMap.astro';
+const { lines, lead } = Astro.props;
+---
+  <section class="section section--tint local">
+    <div class="wrap local-grid">
+      <div class="local-copy">
+        <h2>{lines.map((t, i) => <>{i > 0 && " "}<span class="line">{t}</span></>)}</h2>
+        <p class="lead">{lead}</p>
+      </div>
+      <div class="local-map"><AtlanticMap id="home-map" bleed /></div>
+    </div>
+  </section>
+
+<style>
+  /* ---------- 3. Local ---------- */
+  /* The map fills the left column and keeps going to the page's left edge; land beyond the map
+     (Quebec, Labrador) runs off the top and left of the section, which clips it. */
+  .local { overflow: hidden; --edge: calc(max(0px, (100vw - var(--max)) / 2) + var(--gutter)); }
+  .local-grid { display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 4fr); gap: clamp(2rem, 5vw, 5rem); align-items: center; }
+  .local-map { grid-column: 1; grid-row: 1; margin-left: calc(-1 * var(--edge)); }
+  .local-copy { grid-column: 2; grid-row: 1; }
+  .local-copy .lead { margin-top: var(--s5); }
+  .local-copy .line { white-space: normal; } /* the hero keeps its lines whole; this narrower column may wrap */
+  @media (max-width: 900px) {
+    .local-grid { grid-template-columns: 1fr; }
+    .local-copy, .local-map { grid-column: 1; grid-row: auto; }
+    .local-map { margin-inline: calc(-1 * var(--gutter)); } /* edge to edge on both sides */
+    .local-map :global(.card) { margin-inline: var(--gutter); } /* the map bleeds; the office card lines up with the text */
+  }
+  .line { display: block; }
+</style>

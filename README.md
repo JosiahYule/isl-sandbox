@@ -1,6 +1,10 @@
 # ISL website sandbox
 
-A playground for redesigning the Integrated Staffing website. Nothing here touches the live Squarespace site. Every change pushed to GitHub rebuilds the preview at **https://josiahyule.github.io/isl-sandbox/**.
+A playground for redesigning the websites of the three sister firms: Integrated Staffing, Accountant Staffing and Administrative Staffing. Nothing here touches the live Squarespace sites. Every change pushed to GitHub rebuilds the previews:
+
+- Integrated Staffing: **https://josiahyule.github.io/isl-sandbox/**
+- Accountant Staffing: **https://josiahyule.github.io/isl-sandbox/as/**
+- Administrative Staffing: **https://josiahyule.github.io/isl-sandbox/ads/**
 
 ## How it works, in plain terms
 
@@ -12,7 +16,7 @@ There are four ideas to understand.
 
 ### 1. Pages: the file name is the URL
 
-Every file in `src/pages/` becomes a page:
+Every file in `src/pages/` becomes a page (and so does every file in a brand's folder in `src/sites/`; see "Three brands" below):
 
 | File | URL |
 | --- | --- |
@@ -40,14 +44,48 @@ An `.astro` file has two parts. The top, between the `---` lines, is JavaScript 
 
 ### 4. Data files: one source of truth
 
-Facts that appear in many places live in `src/data/`:
+Facts that appear in many places live in `src/data/` and `src/brands/`:
 
-- `site.js`: offices, phone numbers, the navigation menu, stats, testimonials, social links, logo and image URLs
+- `src/brands/isl.js`, `as.js`, `ads.js`: each brand's offices, phone numbers, menu, colours, logo, stats, testimonials and social links. Pages read them through `src/data/site.js`.
 - `team.js`: team members
 - `industries.js`: industries served
 - `posts.js`: blog posts (they link to the live site)
 
-Change a phone number in `site.js` and it updates on every page that shows it.
+Change a phone number in the brand's file and it updates on every page of that brand's site.
+
+## Three brands, one codebase
+
+The three sites share everything that makes them look and work alike: the layout, the header and footer, the type, the spacing, the job board, the request form, the map. What differs lives in one file per brand, so the sites stay aligned without being copies of each other.
+
+**The build is run once per brand.** A setting called `BRAND` picks which:
+
+| Command | Builds | Into |
+| --- | --- | --- |
+| `npm run build` | Integrated Staffing | `dist/` |
+| `BRAND=as npm run build` | Accountant Staffing | `dist/as/` |
+| `BRAND=ads npm run build` | Administrative Staffing | `dist/ads/` |
+| `npm run build:all` | all three, ISL first | (the deploy uses this) |
+
+`astro.config.mjs` reads `BRAND` and sets three things from it: the brand's web address prefix (`base`), the output folder, and a constant `__BRAND__` that any file can read. `src/brands/index.js` uses that constant to pick the brand's file, and `src/data/site.js` passes its facts on to the pages. So when a page says `brand.name`, it gets "Integrated Staffing" in one build and "Accountant Staffing" in another, from the same line of code.
+
+**Where pages live:**
+
+- `src/pages/`: pages every brand has, written once (Find work and each job, Team, Contact, the request form, Privacy, Terms, Accessibility, 404).
+- `src/sites/isl/`: pages only ISL has, or that ISL words differently (homepage, Contract staffing, Direct hire, About, office pages, industry pages, Learn and the tools).
+- `src/sites/specialist/`: the same for Accountant and Administrative Staffing, which share these pages because they share a structure (homepage, Permanent recruitment, Temporary staffing, About). Their words come from each brand's file.
+
+A small piece of `astro.config.mjs` (`brandPages`) adds the right `src/sites/` folder's pages to each build.
+
+**What differs, and where it's set:**
+
+- **Colour:** each brand's `colors` (ISL blue is the default in `tokens.css`). The accent is the logo's colour, deepened where needed so text and buttons on white pass contrast. The logo colour itself is used on dark backgrounds.
+- **Logo, name and contact details:** the `brand` object in each brand's file.
+- **Services:** ISL has Contract staffing and Direct hire; the specialists have Temporary staffing and Permanent recruitment. Each brand's `services` names them, and the job board, job pages and request form use those names. The colour key stays the same everywhere: near-black square for contract or temporary, brand colour circle for permanent.
+- **The field:** AS and ADS have a `field` block with their roles at each level (junior, intermediate, senior), headline and story.
+- **Jobs:** ISL reads its Avionte feed. AS and ADS use a saved sample (`src/brands/jobs/as.json`, `ads.json`) until their board reads Tracker RMS.
+- **Team:** ISL's people are in `team.js`. AS and ADS show their offices on the Team page until their people are added.
+
+A sandbox-only line at the bottom of every footer links the three previews, so you can compare them. Remove it at launch.
 
 ### One rule for internal links
 
@@ -108,11 +146,15 @@ All the entrance animations come from one small system, so they feel like one fa
 
 ```
 src/
-  pages/        one file per page (file name = URL)
+  pages/        pages every brand has (file name = URL)
+  sites/        pages that differ by brand: isl/ and specialist/ (AS and ADS)
+  brands/       one file per brand (isl.js, as.js, ads.js), what AS and ADS share
+                (specialist.js), and their sample jobs (jobs/)
   layouts/      Base.astro, the frame around every page
   components/   Header, Footer, Button, PageHero, CtaBand, AtlanticMap, CanadaMap,
                 IndustryMatrix, JobRow, Photo
-  data/         site facts, team, industries, jobs, office areas, blog posts, map shapes
+  data/         site.js (the brand being built), team, industries, jobs, office areas,
+                blog posts, map shapes
   lib/          url.js, the internal-link helper
   styles/       tokens.css (design knobs) and global.css (base styles)
 scripts/        generate-maps.mjs (rebuilds the map shapes)
@@ -147,6 +189,7 @@ The same snapshot feeds the job lists on the homepage and Find work page (`src/d
 - **The logo and badge images** load from Squarespace's image server. Before this ever goes live, download them into a `public/` folder.
 - **Office areas** in `src/data/areas.js` decide which towns count as "near" each office for the Jobs near links. Check them with each office.
 - **The scam notice** in the footer is placeholder wording for ISL to approve.
+- **Accountant and Administrative Staffing:** the jobs are a sample (no descriptions or pay yet), the team isn't in yet, there are no client quotes, the photos are stock, and the Administrative Staffing logo is a small stand-in until there's an SVG or large PNG.
 - Items marked `TODO` in the code need a decision: which Moncton address is current, and which retention and review numbers are right.
 
 ## Previews
