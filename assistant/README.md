@@ -5,6 +5,8 @@ A chat window for integratedstaffing.ca with two jobs:
 - **Job seekers:** match them to open postings from the Avionte feed, and get them to Apply.
 - **Employers:** take a request like "3 labourers in rural Nova Scotia", ask only for what's missing (role, place, contract or permanent, start date), then hand them to the right person at ISL with the request form already filled in.
 
+Both can also ask what a role pays ("what do forklift operators make in NB?", answered from ISL's open jobs) and what an employee really costs ("what would a $20/hour worker cost me?", the True cost calculator's maths). On a job's own page it answers questions about that posting ("what are the hours?") from the posting itself, and hands off to the recruiter when the posting doesn't say.
+
 ## What's in here
 
 | Path | What it is |
@@ -13,6 +15,8 @@ A chat window for integratedstaffing.ca with two jobs:
 | `supabase/functions/_shared/jobs.js` | Cleans the Avionte feed and searches it. No AI in here. |
 | `supabase/functions/_shared/assistant.js` | The bot's instructions and the tools it may call. Edit the tone and rules here. |
 | `supabase/functions/_shared/routing.js` | **Who handles what.** The offices, the people, and the rules that pick one for each request. |
+| `supabase/functions/_shared/insights.js` | Pay on open jobs for a role, the true cost of an employee, and answers from one posting. No AI in here. |
+| `supabase/functions/_shared/pay.js`, `payroll.js`, `jobtext.js` | The same pay, payroll and posting-reading code the website's tools use (the site imports them from here). |
 | `demo-engine.js` | The conversation without AI (rule-based), used until the backend is live. Same search and routing. |
 | `demo-mode.js` | Starts the widget in demo mode on the website. |
 | `widget/widget.js` | The chat bubble that goes on the website. |
@@ -85,12 +89,16 @@ You've done every one of these steps before on the onboarding portal.
 
 - The **apply and job-detail URL formats** at the top of `jobs.js` (`SITE`). They're built from your job board work but should be clicked through on the real site.
 - The **Employers** wording in `assistant.js` points people somewhere real.
+- `SITE.hirePath` and `SITE.toolsPath` in `jobs.js`: the request form and the tools are only on the sandbox so far.
+- The payroll rates in `payroll.js` each January, and the pay-in-job-ads rules in `src/lib/jobad.js` when a province changes them (Nova Scotia and Newfoundland and Labrador are expected to).
 
 ## Running the tests
 
 ```
 node test/search.test.mjs data/feed.json     # search quality on real postings
 node test/edge.sim.mjs <bundled edge.js> data/feed.json   # full backend loop with a fake Claude
+node --experimental-strip-types test/edge.tools.sim.mjs   # pay and cost tools, job-page context, caching, rate limit
+node test/conversation.test.mjs                           # scripted chats through the demo engine (run npm run sync-assistant first)
 ```
 
 ## The request form (isl-request)
