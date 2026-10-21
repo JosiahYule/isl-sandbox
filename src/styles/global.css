@@ -1,3 +1,14 @@
+/* Fallback while DM Sans loads: Arial (or its metric twin, Liberation Sans) scaled to DM Sans's
+   width and line metrics, worked out from the font files (lowercase average width 0.518 em vs Arial 0.482). */
+@font-face {
+  font-family: 'DM Sans Fallback';
+  src: local('Arial'), local('ArialMT'), local('Liberation Sans');
+  size-adjust: 107.46%;
+  ascent-override: 92.31%;
+  descent-override: 28.85%;
+  line-gap-override: 0%;
+}
+
 /*
   GLOBAL STYLES
   Base rules for plain HTML elements and a handful of shared helpers.
@@ -124,10 +135,14 @@ h1 .line, h2 .line { display: block; }
 .textlink:hover { color: var(--isl-blue-deep); text-decoration-thickness: 2px; }
 
 /* Service markers: the colour key used everywhere */
+/* Service label: the word in ink, with a marker for the colour key (a square for contract, a blue
+   circle for permanent, as on the pay chart). Blue text would read as a link. */
 .svc { font-weight: var(--fw-bold); font-size: var(--fs-small); color: var(--ink); }
-.svc--direct { color: var(--direct); }
+.svc::before { content: ''; display: inline-block; width: 0.55em; height: 0.55em; margin-right: 0.45em; vertical-align: 0.05em; background: var(--contract); }
+.svc--direct::before { background: var(--direct); border-radius: 50%; }
 .on-dark .svc { color: #fff; }
-.on-dark .svc--direct { color: var(--isl-blue-on-dark); }
+.on-dark .svc::before { background: #fff; }
+.on-dark .svc--direct::before { background: var(--isl-blue-on-dark); }
 
 /* ---------- Motion ----------
    One small set of entrance effects, used the same way on every page:

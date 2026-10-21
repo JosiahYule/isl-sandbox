@@ -22,7 +22,7 @@ const tel = `tel:+1${brand.mainPhone.replaceAll('-', '')}`;
     <div class="side">
       <p>{text}</p>
       <div class="who">
-        <span class="faces" aria-hidden="true">{repliers.map((p) => <img src={p.photo} alt="" width="40" height="40" loading="lazy" onerror="this.style.visibility='hidden'" />)}</span>
+        <span class="faces" aria-hidden="true">{repliers.map((p) => <span class="face"><span class="ini">{p.name.split(' ').map((w) => w[0]).join('')}</span><img src={p.photo} alt="" width="40" height="40" loading="lazy" onerror="this.remove()" /></span>)}</span>
         <span class="names">{nameList} answer every request.</span>
       </div>
       <div class="actions">
@@ -40,8 +40,11 @@ const tel = `tel:+1${brand.mainPhone.replaceAll('-', '')}`;
   .side p { color: var(--on-dark-soft); font-size: var(--fs-lead); max-width: 36ch; }
   .who { display: flex; align-items: center; gap: var(--s3); margin-top: var(--s4); }
   .faces { display: flex; flex: none; }
-  .faces img { width: 40px; height: 40px; object-fit: cover; object-position: center 20%; background: #2a2a2a; border: 2px solid var(--dark); }
-  .faces img + img { margin-left: -8px; }
+  /* Each face: initials underneath, the photo over them (if a photo ever fails, the initials show) */
+  .face { position: relative; display: grid; place-items: center; width: 40px; height: 40px; background: #2a2a2a; border: 2px solid var(--dark); }
+  .face + .face { margin-left: -8px; }
+  .face .ini { font-size: var(--fs-tiny); font-weight: var(--fw-bold); color: var(--on-dark-soft); }
+  .face img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center 20%; }
   .names { font-size: var(--fs-small); color: var(--on-dark-soft); line-height: 1.4; }
   .actions { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s5); margin-top: var(--s5); }
   .phone { font-weight: var(--fw-bold); }

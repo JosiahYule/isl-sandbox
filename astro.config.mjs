@@ -2,7 +2,8 @@
 // `site` + `base` tell Astro where the sandbox is hosted: https://josiahyule.github.io/isl-sandbox/
 // If you ever host it at the root of a domain, delete `base` and update `site`.
 import { defineConfig } from 'astro/config';
-import { writeFileSync, renameSync, existsSync } from 'node:fs';
+import { writeFileSync, renameSync, existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
+import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const site = 'https://josiahyule.github.io';
@@ -29,4 +30,29 @@ const sitemap = {
   },
 };
 
-export default defineConfig({ site, base, integrations: [sitemap] });
+// TYPOGRAPHY: curly apostrophes in the text people read ("you’ll", "St. John’s").
+// Copy comes from many places (pages, data files, the job feed), so rather than retype it all,
+// the built pages are tidied once at the end. Only text between tags changes: attributes, scripts,
+// styles, code and form fields are left exactly as they were, so nothing that matches on text breaks.
+const typography = {
+  name: 'isl-typography',
+  hooks: {
+    'astro:build:done': ({ dir }) => {
+      const walk = (d) => readdirSync(d).flatMap((f) => { const p = join(d, f); return statSync(p).isDirectory() ? walk(p) : p.endsWith('.html') ? [p] : []; });
+      // Split into: whole raw-text elements (script, style, textarea, pre, code), single tags, and text.
+      // Raw-text elements are taken whole, because code inside them can contain < and >.
+      const TOKENS = /(<(script|style|textarea|pre|code)\b[\s\S]*?<\/\2>|<[^>]+>)/i;
+      for (const file of walk(fileURLToPath(dir))) {
+        const parts = readFileSync(file, 'utf8').split(new RegExp(TOKENS.source, 'gi'));
+        for (let i = 0; i < parts.length; i += 3) {
+          // split() with two capture groups gives [text, token, tagName, text, token, tagName, ...]
+          parts[i] = (parts[i] || '').replace(/(\w)(?:'|&#39;|&#x27;)(\w)/g, '$1’$2');
+        }
+        for (let i = 2; i < parts.length; i += 3) parts[i] = ''; // drop the captured tag names
+        writeFileSync(file, parts.join(''));
+      }
+    },
+  },
+};
+
+export default defineConfig({ site, base, integrations: [sitemap, typography] });

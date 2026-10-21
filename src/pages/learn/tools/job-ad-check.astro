@@ -53,6 +53,7 @@ Send your resume to jobs@example.ca`;
           </div>
         </fieldset>
         <button type="button" class="go" data-run>Check my ad</button>
+        <p class="need" data-need hidden>Paste your job ad above first, or try the example.</p>
         <p class="private">Nothing is sent or saved. The check runs on this page only.</p>
       </form>
 
@@ -134,6 +135,8 @@ Send your resume to jobs@example.ca`;
 
   function run() {
     const t = text.value.trim();
+    const need = root.querySelector<HTMLElement>('[data-need]')!;
+    need.hidden = t.length >= 40; // say what to do, rather than just moving focus
     if (t.length < 40) { text.focus(); return; }
     const province = String(new FormData(form).get('province'));
     const r = checkAd(t, province);
@@ -217,6 +220,7 @@ Send your resume to jobs@example.ca`;
   .seg input:focus-visible + span { outline: 2px solid var(--isl-blue); outline-offset: -2px; }
   .go { justify-self: start; display: inline-block; font: inherit; font-weight: var(--fw-bold); background: var(--isl-blue); color: #fff; border: 0; cursor: pointer; text-decoration: none; padding: 0.9rem 1.4rem; white-space: nowrap; }
   .go:hover { background: var(--isl-blue-deep); color: #fff; }
+  .need { margin: 0; font-weight: var(--fw-bold); color: #a3261b; }
   .private { margin: 0; font-size: var(--fs-small); color: var(--ink-soft); }
 
   .out { border-top: 1.5px solid var(--ink); padding-top: var(--s5); position: sticky; top: calc(72px + var(--s5)); }

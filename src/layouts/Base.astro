@@ -2,6 +2,8 @@
 // BASE LAYOUT: the frame around every page (<head>, header, footer).
 // The page's own content drops in where <slot /> is.
 import '@fontsource-variable/dm-sans/opsz.css';   // DM Sans, the ISL brand face, self-hosted
+// The Latin file is the one every page needs first, so it's requested before the CSS asks for it
+import dmSansLatin from '@fontsource-variable/dm-sans/files/dm-sans-latin-opsz-normal.woff2?url';
 import '../styles/global.css';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
@@ -23,6 +25,7 @@ const fullTitle = title ? `${title} | ${brand.name}` : `${brand.name} | Contract
 <html lang="en-CA" data-assistant-mode={assistantMode} data-assistant-job={assistantJob}>
   <head>
     <meta charset="utf-8" />
+    <link rel="preload" href={dmSansLatin} as="font" type="font/woff2" crossorigin />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{fullTitle}</title>
     <meta name="description" content={description} />

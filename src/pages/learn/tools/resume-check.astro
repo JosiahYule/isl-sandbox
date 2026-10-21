@@ -32,6 +32,7 @@ const groups = [...new Set(CHECKS.map((c) => c.group))];
           </select>
         </label>
         <button type="button" class="go" data-run>Check my resume</button>
+        <p class="need" data-need hidden>Paste your resume above first, then check it.</p>
         <p class="private">Nothing is sent or saved. The check runs on this page only.</p>
       </form>
 
@@ -106,6 +107,8 @@ const groups = [...new Set(CHECKS.map((c) => c.group))];
 
   function run() {
     const t = text.value.trim();
+    const need = root.querySelector<HTMLElement>('[data-need]')!;
+    need.hidden = t.length >= 40; // say what to do, rather than just moving focus
     if (t.length < 40) { text.focus(); return; }
     const r = checkResume(t);
     $('[data-placeholder]').hidden = true;
@@ -173,6 +176,7 @@ const groups = [...new Set(CHECKS.map((c) => c.group))];
   textarea:focus, select:focus { outline: none; border-color: var(--isl-blue); }
   .go { justify-self: start; display: inline-block; font: inherit; font-weight: var(--fw-bold); background: var(--isl-blue); color: #fff; border: 0; cursor: pointer; text-decoration: none; padding: 0.9rem 1.4rem; }
   .go:hover { background: var(--isl-blue-deep); color: #fff; }
+  .need { margin: 0; font-weight: var(--fw-bold); color: #a3261b; }
   .private { margin: 0; font-size: var(--fs-small); color: var(--ink-soft); }
 
   .out { border-top: 1.5px solid var(--ink); padding-top: var(--s5); position: sticky; top: calc(72px + var(--s5)); }

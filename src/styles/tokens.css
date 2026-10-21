@@ -39,7 +39,8 @@
   --focus: rgb(0 112 202 / 0.35);
 
   /* Type: DM Sans throughout */
-  --font: 'DM Sans Variable', 'DM Sans', system-ui, sans-serif;
+  /* 'DM Sans Fallback' is Arial resized to DM Sans's proportions (global.css), so text doesn't jump when DM Sans arrives */
+  --font: 'DM Sans Variable', 'DM Sans', 'DM Sans Fallback', system-ui, sans-serif;
 
   /* The type scale. Every font-size on the site uses one of these steps, so sizes differ
      clearly or not at all. Display steps first, then text. */
