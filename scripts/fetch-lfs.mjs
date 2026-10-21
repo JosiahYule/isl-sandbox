@@ -19,10 +19,12 @@ const OUT = new URL('../src/data/lfs/latest.json', import.meta.url);
 const GEOS = ['Canada', 'Nova Scotia', 'New Brunswick', 'Prince Edward Island', 'Newfoundland and Labrador'];
 const CODE = { Canada: 'CA', 'Nova Scotia': 'NS', 'New Brunswick': 'NB', 'Prince Edward Island': 'PE', 'Newfoundland and Labrador': 'NL' };
 
+const HEADERS = { 'Content-Type': 'application/json', Accept: 'application/json', 'User-Agent': 'isl-sandbox job market tool (github.com/JosiahYule/isl-sandbox)' };
 async function post(method, body) {
-  const res = await fetch(API + method, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
-  if (!res.ok) throw new Error(`${method}: HTTP ${res.status}`);
-  return res.json();
+  const res = await fetch(API + method, { method: 'POST', headers: HEADERS, body: JSON.stringify(body) });
+  const text = await res.text();
+  try { return JSON.parse(text); }
+  catch { throw new Error(`${method}: HTTP ${res.status} ${res.headers.get('content-type')} ${res.url} :: ${text.replace(/\s+/g, ' ').slice(0, 400)}`); }
 }
 
 // A table's dimensions, with a lookup from member name to member ID
