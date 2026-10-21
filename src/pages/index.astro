@@ -73,20 +73,14 @@ const ticker = jobs.slice(0, 14);
   <!-- 2. WE RECRUIT. The live site's signature line, with three short lines beside it -->
   <WeRecruit />
 
-  <!-- 3. WHERE WE ARE: the map and the people in those offices -->
+  <!-- 3. WHERE WE ARE: the map runs out to the left edge of the page, the words sit beside it -->
   <section class="section section--tint local">
-    <div class="wrap">
-      <div class="section-head">
+    <div class="wrap local-grid">
+      <div class="local-copy">
         <h2><span class="line">Five offices.</span> <span class="line">All of Atlantic Canada.</span></h2>
         <p class="lead">Each office covers its whole province, so we staff towns well beyond our office cities. Select one for its address and phone number.</p>
       </div>
-    </div>
-    <div class="wrap local-grid">
-      <AtlanticMap id="home-map" />
-      <div class="local-photo">
-        <Photo src={photos.teamNL.src} alt={photos.teamNL.alt} ratio="4/5" sizes="(max-width: 900px) 100vw, 36vw" caption="Our Newfoundland and Labrador team, December 2025" />
-        <a class="more" href={url('/team/')}>Meet the team</a>
-      </div>
+      <div class="local-map"><AtlanticMap id="home-map" bleed /></div>
     </div>
   </section>
 
@@ -190,10 +184,21 @@ const ticker = jobs.slice(0, 14);
   }
 
   /* ---------- 3. Local ---------- */
-  .local-grid { display: grid; grid-template-columns: 7fr 4fr; gap: clamp(2rem, 5vw, 5rem); align-items: start; }
-  .local-photo { display: grid; gap: var(--s4); }
+  /* The map fills the left column and keeps going to the page's left edge; land beyond the map
+     (Quebec, Labrador) runs off the top and left of the section, which clips it. */
+  .local { overflow: hidden; --edge: calc(max(0px, (100vw - var(--max)) / 2) + var(--gutter)); }
+  .local-grid { display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 4fr); gap: clamp(2rem, 5vw, 5rem); align-items: center; }
+  .local-map { grid-column: 1; grid-row: 1; margin-left: calc(-1 * var(--edge)); }
+  .local-copy { grid-column: 2; grid-row: 1; }
+  .local-copy .lead { margin-top: var(--s5); }
+  .local-copy .line { white-space: normal; } /* the hero keeps its lines whole; this narrower column may wrap */
   .more { font-weight: var(--fw-bold); }
-  @media (max-width: 900px) { .local-grid { grid-template-columns: 1fr; } }
+  @media (max-width: 900px) {
+    .local-grid { grid-template-columns: 1fr; }
+    .local-copy, .local-map { grid-column: 1; grid-row: auto; }
+    .local-map { margin-inline: calc(-1 * var(--gutter)); } /* edge to edge on both sides */
+    .local-map :global(.card) { margin-inline: var(--gutter); } /* the map bleeds; the office card lines up with the text */
+  }
 
   /* ---------- 4. Proof: see Proof.astro ---------- */
 
