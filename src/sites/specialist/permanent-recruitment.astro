@@ -1,0 +1,34 @@
+---
+// PERMANENT RECRUITMENT FAQ  →  /permanent-recruitment/   (AS and ADS; the live sites' address)
+// The live FAQ (src/brands/copy/), with its three key terms as figures above it.
+// The process itself is on the Employers page.
+import Base from '../../layouts/Base.astro';
+import Button from '../../components/Button.astro';
+import PageHero from '../../components/PageHero.astro';
+import Facts from '../../components/Facts.astro';
+import Faq from '../../components/Faq.astro';
+import CtaBand from '../../components/CtaBand.astro';
+import { field, copy } from '../../data/site.js';
+import { url } from '../../lib/url.js';
+
+const c = copy.permanent;
+const facts = [
+  ['6 months', 'guarantee on every permanent hire', 'direct'],
+  ['No fees', 'unless you hire one of our candidates', 'direct'],
+  ['One fee', 'based on first-year compensation'],
+];
+---
+<Base assistantMode="employer" title={c.title} description={`Permanent ${field.short} recruitment in Atlantic Canada: how long it takes, what it costs, and the six-month guarantee.`}>
+  <PageHero title={c.title} lead={`Permanent ${field.short} recruitment across Atlantic Canada.`}>
+    <Button href="/hire/?service=direct" size="lg">Start a search</Button>
+    <a class="textlink" href={url('/employers/')}>How our process works</a>
+  </PageHero>
+
+  <Facts facts={facts} />
+
+  <section class="section">
+    <div class="wrap"><h2 class="visually-hidden">Questions</h2><Faq items={c.faq} /></div>
+  </section>
+
+  <CtaBand href="/hire/?service=direct" label="Start a search" />
+</Base>

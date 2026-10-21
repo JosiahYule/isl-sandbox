@@ -1,0 +1,62 @@
+---
+// JOB SEEKERS  →  /job-seekers/   (AS and ADS; the live sites' address)
+// The live Job Seekers page (src/brands/copy/): what we do for candidates, the roles we place,
+// meeting with us, and the questions candidates ask.
+import Base from '../../layouts/Base.astro';
+import Button from '../../components/Button.astro';
+import PageHero from '../../components/PageHero.astro';
+import Steps from '../../components/Steps.astro';
+import RolesByLevel from '../../components/RolesByLevel.astro';
+import Faq from '../../components/Faq.astro';
+import { field, links, copy } from '../../data/site.js';
+import { jobs } from '../../data/jobs.js';
+
+const c = copy.seekers;
+---
+<Base assistantMode="seeker" title="Job Seekers" description={`${c.title} ${c.intro[0]}`}>
+  <PageHero title={c.title} lead={c.intro[0]}>
+    <Button href="/find-work/" size="lg">See {jobs.length} open jobs</Button>
+    <a class="textlink" href={links.resume}>Send your resume</a>
+  </PageHero>
+
+  <section class="section section--rule">
+    <div class="wrap intro">{c.intro.slice(1).map((p) => <p class="lead">{p}</p>)}</div>
+  </section>
+
+  <section class="section section--tint">
+    <div class="wrap">
+      <div class="section-head"><h2>{c.meetTitle}</h2></div>
+      <Steps steps={c.meet} tone="direct" />
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="wrap">
+      <div class="section-head"><h2>{copy.home.rolesTitle}</h2></div>
+      <RolesByLevel levels={field.levels} />
+    </div>
+  </section>
+
+  <section class="section section--rule">
+    <div class="wrap">
+      <div class="section-head"><h2>Frequently asked questions</h2></div>
+      <Faq items={c.faq} />
+    </div>
+  </section>
+
+  <section class="section section--tint">
+    <div class="wrap find">
+      <div>
+        <h2>{c.findTitle}</h2>
+        <p class="lead">{c.findText}</p>
+      </div>
+      <Button href="/find-work/" size="lg">Job Opportunities</Button>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .intro .lead { max-width: 60ch; }
+  .find { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: end; gap: var(--s5); }
+  .find .lead { margin-top: var(--s3); }
+</style>

@@ -1,58 +1,39 @@
 ---
-// ABOUT  →  /about/   (Accountant Staffing and Administrative Staffing)
-// The same shape as ISL's About page: the promise, the key figures, then what makes the firm
-// itself (here: its history, how it matches, and the family of firms it belongs to).
-// From the live About pages (src/brands/as.js, ads.js: field.history).
+// ABOUT US  →  /about/   (Accountant Staffing and Administrative Staffing)
+// The same shape as ISL's About page: the promise, the key figures, then the firm itself,
+// in the live About page's words (src/brands/copy/), and the family of firms it belongs to.
 import Base from '../../layouts/Base.astro';
 import Button from '../../components/Button.astro';
 import PageHero from '../../components/PageHero.astro';
 import Facts from '../../components/Facts.astro';
 import CtaBand from '../../components/CtaBand.astro';
-import { brand, offices, field, terms } from '../../data/site.js';
+import { brand, offices, terms, copy } from '../../data/site.js';
 
-const years = new Date().getFullYear() - brand.since;
+const c = copy.about;
 const facts = [
-  [String(years), 'years in Atlantic Canada'],
+  [String(new Date().getFullYear() - brand.since), 'years in Atlantic Canada'],
   [String(offices.length), 'local offices'],
-  ['6 months', 'guarantee on permanent hires'],
-  [terms.tempToPerm, 'contracts become permanent'],
-];
-// How the match is made (About and Job Seekers pages: "our business is people", "fit")
-const approach = [
-  ['Listening', 'We learn what the employer needs and what the candidate wants from their career.'],
-  ['Testing', field.testing],
-  ['Fit', 'Skills and experience get someone to the shortlist. Fit with the team decides the hire.'],
+  ['6 months', 'guarantee on permanent hires', 'direct'],
+  [terms.tempToPerm, 'contracts become permanent', 'direct'],
 ];
 // The three sister firms
 const family = [
   { name: 'Accountant Staffing', what: 'Accounting and finance professionals', href: 'https://www.accountantstaffing.ca' },
-  { name: 'Administrative Staffing', what: 'Office and administrative professionals', href: 'https://www.administrativestaffing.ca' },
+  { name: 'Administrative Staffing', what: 'Administrative professionals', href: 'https://www.administrativestaffing.ca' },
   { name: 'Integrated Staffing', what: 'Contract and permanent staffing in every industry', href: 'https://www.integratedstaffing.ca' },
 ];
 ---
-<Base title="About" description={`${brand.tagline} Locally owned and operated since ${brand.since}.`}>
-  <PageHero title={field.aboutTitle} lead={`Temporary and permanent ${field.short} recruitment for Atlantic Canadian employers, from junior to senior roles.`}>
-    <Button href="/hire/">I'm hiring</Button>
-    <Button href="/find-work/" variant="outline">I'm looking for work</Button>
+<Base title="About Us" description={c.text[0]}>
+  <PageHero title={c.title} lead={c.text[0]}>
+    <Button href="/employers/">For Employers</Button>
+    <Button href="/job-seekers/" variant="outline">For Job Seekers</Button>
   </PageHero>
 
   <Facts facts={facts} />
 
   <section class="section">
-    <div class="wrap">
-      <div class="section-head"><h2>Our story</h2></div>
-      <ol class="history" data-stagger>
-        {field.history.map(([y, d]) => <li><span class="figure">{y}</span><p>{d}</p></li>)}
-      </ol>
-    </div>
-  </section>
-
-  <section class="section section--tint">
-    <div class="wrap">
-      <div class="section-head"><h2>How we match people</h2></div>
-      <dl class="values" data-stagger>
-        {approach.map(([t, d]) => <div class="value"><dt>{t}</dt><dd>{d}</dd></div>)}
-      </dl>
+    <div class="wrap story">
+      {c.text.slice(1).map((p) => <p>{p}</p>)}
     </div>
   </section>
 
@@ -78,18 +59,7 @@ const family = [
 </Base>
 
 <style>
-  .history { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 16rem), 1fr)); gap: var(--s6) var(--s5); }
-  .history li { border-top: 1.5px solid var(--ink); padding-top: var(--s4); }
-  .history li:last-child { border-top-color: var(--direct); }
-  .history .figure { display: block; font-size: var(--fs-figure); margin-bottom: var(--s2); }
-  .history li:last-child .figure { color: var(--direct); }
-  .history p { color: var(--ink-soft); max-width: 32ch; }
-
-  .values { margin: 0; border-top: 1.5px solid var(--ink); }
-  .value { display: grid; grid-template-columns: minmax(10rem, 1fr) minmax(0, 3fr); gap: var(--s6); align-items: baseline; padding-block: var(--s5); border-bottom: 1px solid var(--line); }
-  dt { font-weight: var(--fw-bold); font-size: var(--fs-h3); line-height: 1.25; }
-  dd { margin: 0; color: var(--ink-soft); font-size: var(--fs-lead); font-weight: var(--fw-light); max-width: 46ch; }
+  .story { display: grid; gap: var(--s5); max-width: 62ch; }
+  .story p { font-size: var(--fs-lead); font-weight: var(--fw-light); line-height: 1.55; }
   .here { display: inline-block; margin-top: var(--s3); font-weight: var(--fw-bold); color: var(--direct); }
-
-  @media (max-width: 900px) { .value { grid-template-columns: 1fr; gap: var(--s2); } }
 </style>

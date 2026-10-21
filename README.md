@@ -73,15 +73,15 @@ The three sites share everything that makes them look and work alike: the layout
 - `src/pages/`: pages every brand has, written once (Find work and each job, Team, Contact, the request form, Privacy, Terms, Accessibility, 404).
 - `src/sites/isl/`: pages only ISL has, or that ISL words differently (homepage, Contract staffing, Direct hire, About, office pages, industry pages, Learn, the tools list and Pay on our open jobs).
 - The other three tools (True cost of an employee, Job ad check, Resume check) are in `src/pages/learn/tools/`, shared. Each brand's `tools` block says which tools it lists and the words around them; AS and ADS leave out the pay tool until their jobs carry pay.
-- `src/sites/specialist/`: the same for Accountant and Administrative Staffing, which share these pages because they share a structure (homepage, Permanent recruitment, Temporary staffing, About, Learn). Their words come from each brand's file.
+- `src/sites/specialist/`: the same for Accountant and Administrative Staffing, which share these pages because they share a structure (homepage, Employers, Job Seekers, Permanent and Temporary Recruitment FAQ, About Us, Learn). Their words come from the live sites, in `src/brands/copy/as.js` and `ads.js`; each block there says whether it's word for word or still to be replaced with the exact text. Their words come from each brand's file.
 
 A small piece of `astro.config.mjs` (`brandPages`) adds the right `src/sites/` folder's pages to each build.
 
 **What differs, and where it's set:**
 
-- **Colour:** each brand's `colors` (ISL blue is the default in `tokens.css`). The accent is the logo's colour, deepened where needed so text and buttons on white pass contrast. The logo colour itself is used on dark backgrounds.
+- **Colour:** each brand's `colors` can set any design token from `tokens.css` by name (ISL's are the defaults). AS and ADS use the palettes from their live sites' stylesheets: navy for buttons, links and the dark sections; AS's blue and ADS's orange for permanent work and the big figures (deepened on white so text passes contrast). ADS's closing band is its orange.
 - **Logo, name and contact details:** the `brand` object in each brand's file.
-- **Services:** ISL has Contract staffing and Direct hire; the specialists have Temporary staffing and Permanent recruitment. Each brand's `services` names them, and the job board, job pages and request form use those names. The colour key stays the same everywhere: near-black square for contract or temporary, brand colour circle for permanent.
+- **Services and menus:** ISL has Contract staffing and Direct hire; the specialists keep their live sites' menu (Employers, Job Seekers, Job Opportunities, About Us, Our Team, Contact Us) and page addresses (/employers/, /job-seekers/, /permanent-recruitment/, /temporary-recruitment/). Each brand's `services` names them, and the job board, job pages and request form use those names. The colour key stays the same everywhere: near-black square for contract or temporary, brand colour circle for permanent.
 - **The field:** AS and ADS have a `field` block with their roles at each level (junior, intermediate, senior), headline and story.
 - **Jobs:** ISL reads its Avionte feed. AS and ADS use a saved sample (`src/brands/jobs/as.json`, `ads.json`) until their board reads Tracker RMS.
 - **Team:** ISL's people are in `team.js`. AS and ADS show their offices on the Team page until their people are added.

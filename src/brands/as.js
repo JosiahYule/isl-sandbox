@@ -3,13 +3,14 @@
 import { url } from '../lib/url.js';
 import { stock } from '../data/photos.js';
 import * as shared from './specialist.js';
+import { copy } from './copy/as.js';
 
 export const brand = {
   key: 'as',
   name: 'Accountant Staffing',
   short: 'AS',
   wordmark: ['Accountant', 'Staffing'],
-  tagline: 'Atlantic Canada’s accounting and finance recruitment specialists.',
+  tagline: 'Atlantic Canada’s specialist recruitment firm for accounting and finance professionals.', // the live footer
   since: 2002,
   scope: 'Accounting and finance recruitment across Atlantic Canada.',
   titleTail: 'Accounting and finance recruitment in Atlantic Canada',
@@ -22,37 +23,31 @@ export const brand = {
   email: '', // TODO: a general inquiries address, if there is one
   resumeEmail: 'apply@accountantstaffing.com',
   mainPhone: '902-491-1301',
+  footerAbout: 'Atlantic Canada’s specialist recruitment firm for accounting and finance professionals. Locally owned and operated.', // the live footer, word for word
   loginUrl: '',
-  // From the logo: its cyan (#009cd8) is too light for text and buttons on white (3.1:1),
-  // so the accent is the same hue made deeper (5.2:1, like ISL blue's 5.0:1). The logo cyan
-  // itself is used on dark backgrounds, where it reads well.
-  colors: { accent: '#0074a8', deep: '#005c87', tint: '#e5f3fa', onDark: '#1fb0e6' },
+  // Colours from accountantstaffing.ca's own stylesheet (its Squarespace palette):
+  //   navy   hsl(215 69% 19%) #0f2b52  links, buttons, headings
+  //   blue   hsl(201 63% 55%) #44a2d5  borders and highlights
+  //   orange hsl(23 65% 54%)  #d6783d  the logo's single dot
+  // Navy does the work ISL's near-black and blue do: buttons, links and the dark sections.
+  // Blue marks permanent work and the big figures; on white it's deepened to #1d78ae so text
+  // passes contrast (4.8:1), and the site's own blue is used on navy, where it reads (5.0:1).
+  colors: {
+    accent: '#0f2b52', 'accent-deep': '#081a33', 'accent-tint': '#e6f1f9', 'accent-on-dark': '#44a2d5',
+    direct: '#1d78ae', 'map-land': '#44a2d5',
+    dark: '#0f2b52', 'dark-raised': '#173a66', 'line-dark': '#2a4670', 'on-dark-soft': '#b8c4d6', wash: 'rgb(9 26 50)',
+    ink: '#14233a', 'line-strong': '#14233a', 'ink-soft': '#556070',
+    mist: '#f1f6fa', 'mist-deep': '#e4edf5',
+  },
   assistant: false,  // the job assistant comes later for AS and ADS
   officePages: false,
 };
 
 // The field, and the roles placed in it at each level (from the live Employers and Job Seekers pages)
 export const field = {
-  short: 'accounting and finance',
+  short: 'accounting and finance',     // "permanent accounting and finance recruitment"
   people: 'accounting and finance professionals',
-  peak: 'Year end, audits, tax season and other busy stretches.', // Temporary staffing: what a peak period means in this field
-  heroLines: ['Accounting and finance.', 'Nothing else.'],
-  heroLead: 'Atlantic Canada’s only recruitment firm that places accounting and finance professionals, from clerk to CFO. Locally owned since 2002.',
-  roll: ['accounting clerks', 'payroll specialists', 'bookkeepers', 'financial analysts', 'controllers', 'CFOs'],
-  levels: [
-    { name: 'Junior', roles: ['Accounting clerk', 'Junior accountant', 'Accounting technician', 'AP / AR specialist', 'Payroll clerk', 'Tax clerk', 'Data entry clerk'] },
-    { name: 'Intermediate', roles: ['General accountant', 'Property accountant', 'Bookkeeper', 'Office manager', 'Financial or budget analyst', 'AR / AP supervisor', 'Payroll specialist', 'Procurement manager'] },
-    { name: 'Senior', roles: ['CFO', 'VP Finance', 'Director of Finance', 'Controller', 'Accounting manager', 'Assistant controller', 'Senior accountant', 'Senior financial analyst', 'Internal auditor', 'Financial reporting officer'] },
-  ],
-  // The test registered candidates take. CPAs have their designation verified instead.
-  testShort: 'Every candidate is tested at their level; CPAs have their designation verified.',
-  testing: 'An accounting test at the right level for every registered candidate. Fully designated CPAs have their designation verified instead.',
-  aboutTitle: 'The only financial recruitment specialists in Atlantic Canada.',
-  history: [
-    ['2002', 'Founded in Halifax to place accounting and finance professionals.'],
-    ['2006', 'Administrative Staffing added, for general office hiring.'],
-    ['Today', 'Offices in Halifax, Moncton and St. John’s, placing people across Atlantic Canada.'],
-  ],
+  levels: copy.levels, // the roles at each level, from the live site (src/brands/copy/as.js)
 };
 
 export const images = {
@@ -73,7 +68,8 @@ export const social = [
   { label: 'Instagram', href: 'https://www.instagram.com/accountantstaffing' },
 ];
 
-export const { offices, provinceOffice, nav, services, terms, sourcing, seekerSteps, seekerFaq, analytics, forms, stats, testimonials } = shared;
+export { copy };
+export const { offices, provinceOffice, nav, services, terms, sourcing, analytics, forms, stats, testimonials } = shared;
 export const hire = { ...shared.hire, lead: 'Accounting and finance roles, temporary or permanent, junior to senior. No fee unless you hire.' };
 export const cta = shared.cta;
 export const tools = {

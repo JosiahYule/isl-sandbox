@@ -23,6 +23,5 @@ export const tools = current.tools;
 export const field = current.field ?? null;
 export const terms = current.terms ?? null;
 export const sourcing = current.sourcing ?? null;
-export const seekerSteps = current.seekerSteps ?? null;
-export const seekerFaq = current.seekerFaq ?? null;
+export const copy = current.copy ?? null; // the words on each page (src/brands/copy/)
 export const provinceOffice = current.provinceOffice ?? null;

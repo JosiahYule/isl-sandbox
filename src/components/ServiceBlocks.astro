@@ -1,0 +1,37 @@
+---
+// SERVICE BLOCKS: the two services side by side, each with a coloured top edge (near-black for
+// contract or temporary, the brand colour for permanent), two figures and a link to its page.
+// Used under "We recruit." on ISL's homepage and under "Why Choose..." on AS and ADS's.
+// <ServiceBlocks services={[{ key: 'contract' | 'direct', name, href, go, figs: [[figure, what], ...] }]} />
+import { url } from '../lib/url.js';
+const { services = [] } = Astro.props;
+---
+<ul class="svcs" data-stagger>
+      {services.map((s) => (
+        <li>
+          <a class:list={['sb', `sb--${s.key}`]} href={url(s.href)}>
+            <span class="sb-name">{s.name}</span>
+            <span class="sb-figs">{s.figs.map(([f, d]) => <span class="sb-fig"><span class="figure">{f}</span><span class="fd">{d}</span></span>)}</span>
+            <span class="sb-go">{s.go} <span aria-hidden="true">→</span></span>
+          </a>
+        </li>
+      ))}
+</ul>
+
+<style>
+  /* The two services: a coloured top edge (near-black contract, blue direct hire), two figures, a link */
+  .svcs { list-style: none; margin: clamp(3rem, 6vw, 5rem) 0 0; padding: 0; display: grid; grid-template-columns: 1fr 1fr; gap: var(--s5); }
+  .sb { display: grid; gap: var(--s4); height: 100%; padding: var(--s5) var(--s5) var(--s5); border-top: 4px solid var(--contract); background: var(--mist); color: var(--ink); text-decoration: none; transition: background 0.2s; }
+  .sb--direct { border-top-color: var(--direct); }
+  .sb:hover { background: var(--mist-deep); }
+  .sb-name { font-weight: var(--fw-bold); font-size: var(--fs-h3); }
+  .sb-figs { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 13rem), 1fr)); gap: var(--s4); } /* two side by side, stacked when there isn't room for "Temp to perm" */
+  .sb-fig { display: grid; gap: var(--s1); }
+  .sb .figure { font-size: var(--fs-figure); } /* may wrap rather than ever spill out of the card */
+  .sb--direct .figure { color: var(--direct); }
+  .fd { color: var(--ink-soft); font-size: var(--fs-small); }
+  .sb-go { font-weight: var(--fw-bold); color: var(--accent); }
+  .sb-go span { display: inline-block; transition: transform 0.3s var(--ease); }
+  .sb:hover .sb-go span { transform: translateX(4px); }
+  @media (max-width: 900px) { .svcs { grid-template-columns: 1fr; } }
+</style>

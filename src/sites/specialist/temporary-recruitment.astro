@@ -1,0 +1,33 @@
+---
+// TEMPORARY RECRUITMENT FAQ  →  /temporary-recruitment/   (AS and ADS; the live sites' address)
+// The live FAQ (src/brands/copy/), with its key terms as figures above it.
+import Base from '../../layouts/Base.astro';
+import Button from '../../components/Button.astro';
+import PageHero from '../../components/PageHero.astro';
+import Facts from '../../components/Facts.astro';
+import Faq from '../../components/Faq.astro';
+import CtaBand from '../../components/CtaBand.astro';
+import { field, terms, copy } from '../../data/site.js';
+import { url } from '../../lib/url.js';
+
+const c = copy.temporary;
+const facts = [
+  ['One rate', 'salary, EI, CPP, payroll and fees, all in'],
+  ['No penalty', 'to end a contract early, or extend it'],
+  [terms.tempToPerm, 'contracts become permanent', 'direct'],
+];
+---
+<Base assistantMode="employer" title={c.title} description={`Temporary ${field.short} staffing in Atlantic Canada: how fast, how long, what it costs, and moving a contractor to permanent.`}>
+  <PageHero title={c.title} lead={`Temporary ${field.short} staffing across Atlantic Canada.`}>
+    <Button href="/hire/?service=contract" size="lg">Request a contractor</Button>
+    <a class="textlink" href={url('/employers/')}>How our process works</a>
+  </PageHero>
+
+  <Facts facts={facts} />
+
+  <section class="section">
+    <div class="wrap"><h2 class="visually-hidden">Questions</h2><Faq items={c.faq} /></div>
+  </section>
+
+  <CtaBand href="/hire/?service=contract" label="Request a contractor" />
+</Base>

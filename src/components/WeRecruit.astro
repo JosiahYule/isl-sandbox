@@ -9,7 +9,7 @@
 //
 // Accessibility: the rolling word is decoration (aria-hidden). Screen readers get the
 // full sentence with every word instead. With reduced motion the word stays put.
-import { url } from '../lib/url.js';
+import ServiceBlocks from './ServiceBlocks.astro';
 const {
   title = ['We recruit.', 'It’s that simple.'],
   lines = ['Based in Halifax, with offices across Atlantic Canada.', 'People matched to work that fits their skills and goals.'],
@@ -39,19 +39,7 @@ const list = industries.slice(0, -1).join(', ') + ' and ' + industries.at(-1);
       <li>{lines[1]}</li>
     </ul>
   </div>
-  <div class="wrap">
-    <ul class="svcs" data-stagger>
-      {services.map((s) => (
-        <li>
-          <a class:list={['sb', `sb--${s.key}`]} href={url(s.href)}>
-            <span class="sb-name">{s.name}</span>
-            <span class="sb-figs">{s.figs.map(([f, d]) => <span class="sb-fig"><span class="figure">{f}</span><span class="fd">{d}</span></span>)}</span>
-            <span class="sb-go">{s.go} <span aria-hidden="true">→</span></span>
-          </a>
-        </li>
-      ))}
-    </ul>
-  </div>
+  <div class="wrap"><ServiceBlocks services={services} /></div>
 </section>
 
 <script>
@@ -79,7 +67,7 @@ const list = industries.slice(0, -1).join(', ') + ' and ' + industries.at(-1);
 <style>
   .we-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: var(--s6) var(--s8); align-items: center; }
   .we-title { font-weight: var(--fw-light); font-size: var(--fs-h1); letter-spacing: -0.035em; line-height: 1.02; margin: 0; }
-  .we-blue { color: var(--accent); }
+  .we-blue { color: var(--direct); }
 
   /* Three lines between hairlines, the same rhythm as the site's other lists */
   .we-lines { list-style: none; margin: 0; padding: 0; border-top: 1.5px solid var(--ink); }
@@ -89,28 +77,13 @@ const list = industries.slice(0, -1).join(', ') + ' and ' + industries.at(-1);
      longest one and nothing around it shifts. Each word carries its own full stop, so a short
      word never leaves a gap before the period. The current word is in place; the next waits
      below, the last slides out above. */
-  .roll { display: inline-grid; vertical-align: bottom; overflow: hidden; color: var(--accent); font-weight: var(--fw-bold); }
+  .roll { display: inline-grid; vertical-align: bottom; overflow: hidden; color: var(--direct); font-weight: var(--fw-bold); }
   .word { grid-area: 1 / 1; white-space: nowrap; opacity: 0; transform: translateY(100%); }
   .word.on { opacity: 1; transform: none; }
   :global(.motion) .word { transition: transform 0.55s var(--ease), opacity 0.4s; }
   :global(.motion) .word.out { opacity: 0; transform: translateY(-100%); }
 
-  /* The two services: a coloured top edge (near-black contract, blue direct hire), two figures, a link */
-  .svcs { list-style: none; margin: clamp(3rem, 6vw, 5rem) 0 0; padding: 0; display: grid; grid-template-columns: 1fr 1fr; gap: var(--s5); }
-  .sb { display: grid; gap: var(--s4); height: 100%; padding: var(--s5) var(--s5) var(--s5); border-top: 4px solid var(--contract); background: var(--mist); color: var(--ink); text-decoration: none; transition: background 0.2s; }
-  .sb--direct { border-top-color: var(--direct); }
-  .sb:hover { background: #eeeeee; }
-  .sb-name { font-weight: var(--fw-bold); font-size: var(--fs-h3); }
-  .sb-figs { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 13rem), 1fr)); gap: var(--s4); } /* two side by side, stacked when there isn't room for "Temp to perm" */
-  .sb-fig { display: grid; gap: var(--s1); }
-  .sb .figure { font-size: var(--fs-figure); } /* may wrap rather than ever spill out of the card */
-  .sb--direct .figure { color: var(--direct); }
-  .fd { color: var(--ink-soft); font-size: var(--fs-small); }
-  .sb-go { font-weight: var(--fw-bold); color: var(--accent); }
-  .sb-go span { display: inline-block; transition: transform 0.3s var(--ease); }
-  .sb:hover .sb-go span { transform: translateX(4px); }
-
   @media (max-width: 900px) {
-    .we-grid, .svcs { grid-template-columns: 1fr; }
+    .we-grid { grid-template-columns: 1fr; }
   }
 </style>

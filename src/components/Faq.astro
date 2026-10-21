@@ -1,0 +1,22 @@
+---
+// FAQ: questions and answers in rows, the question on the left and the answer beside it
+// (stacked on phones). Used for AS and ADS's FAQ and Job Seekers pages, from their live sites.
+// <Faq items={[['How long does it take to fill a position?', 'As a local...'], ...]} />
+const { items = [] } = Astro.props;
+---
+<dl class="faq" data-stagger>
+  {items.map(([q, a]) => (
+    <div class="row">
+      <dt>{q}</dt>
+      <dd>{a}</dd>
+    </div>
+  ))}
+</dl>
+
+<style>
+  .faq { margin: 0; border-top: 1.5px solid var(--ink); }
+  .row { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: var(--s3) var(--s7); padding-block: var(--s5); border-bottom: 1px solid var(--line); }
+  dt { font-weight: var(--fw-bold); font-size: var(--fs-h3); line-height: 1.3; max-width: 30ch; }
+  dd { margin: 0; color: var(--ink-soft); max-width: 60ch; }
+  @media (max-width: 860px) { .row { grid-template-columns: 1fr; } }
+</style>

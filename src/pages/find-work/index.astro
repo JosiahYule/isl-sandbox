@@ -11,8 +11,7 @@ import { jobs, provinces, snapshotDate } from '../../data/jobs.js';
 import { areas } from '../../data/areas.js';
 import { url } from '../../lib/url.js';
 import { industryPages } from '../../data/industries.js';
-import { brand, links, services, jobsNote, field, seekerSteps, seekerFaq } from '../../data/site.js';
-import Steps from '../../components/Steps.astro';
+import { brand, links, services, jobsNote, field } from '../../data/site.js';
 // Industries that have open jobs right now, for the industry filter
 const industryOptions = industryPages.map((i) => ({ slug: i.slug, name: i.name, n: jobs.filter((j) => j.industry === i.slug).length })).filter((i) => i.n);
 
@@ -24,7 +23,7 @@ const areaLinks = areas.map((a) => ({ ...a, n: jobs.filter((j) => j.area === a.k
 const count = { contract: jobs.filter((j) => j.type === 'contract').length, direct: jobs.filter((j) => j.type === 'direct').length };
 ---
 <Base assistantMode="seeker" title="Find work" description={field ? `Temporary and permanent ${field.short} jobs across Atlantic Canada.` : 'Contract and permanent jobs across Atlantic Canada and beyond.'}>
-  <PageHero title="Find your next job." lead={field ? `Temporary and permanent ${field.short} roles across Atlantic Canada.` : 'Contract and permanent roles across Atlantic Canada.'}>
+  <PageHero title={field ? 'Job Opportunities' : 'Find your next job.'} lead={field ? `Temporary and permanent ${field.short} roles across Atlantic Canada.` : 'Contract and permanent roles across Atlantic Canada.'}>
     {brand.assistant && <button type="button" class="textlink" data-open-assistant>Or describe what you want to the job assistant</button>}
   </PageHero>
 
@@ -82,18 +81,6 @@ const count = { contract: jobs.filter((j) => j.type === 'contract').length, dire
     </div>
   </section>
 
-  <!-- AS and ADS: every candidate is met and tested before they're put forward, so the steps are shown -->
-  {seekerSteps && (
-    <section class="section section--rule">
-      <div class="wrap">
-        <div class="section-head"><h2>How registering works</h2></div>
-        <Steps steps={seekerSteps} />
-        <dl class="faq">
-          {seekerFaq.map(([q, a]) => <div><dt>{q}</dt><dd>{a}</dd></div>)}
-        </dl>
-      </div>
-    </section>
-  )}
 </Base>
 
 <script>
@@ -195,10 +182,6 @@ const count = { contract: jobs.filter((j) => j.type === 'contract').length, dire
 
 
   .search--3 { grid-template-columns: 1fr 12rem auto; }
-  .faq { margin: clamp(3rem, 6vw, 4.5rem) 0 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 16rem), 1fr)); gap: var(--s5); }
-  .faq div { border-top: 1.5px solid var(--ink); padding-top: var(--s4); }
-  .faq dt { font-weight: var(--fw-bold); margin-bottom: var(--s2); }
-  .faq dd { margin: 0; color: var(--ink-soft); }
   .results { padding-block: 0 clamp(4rem, 8vw, 6.5rem); }
   .near { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s2) var(--s4); margin: calc(-1 * var(--s3)) 0 var(--s6); font-size: var(--fs-small); }
   .near > span { color: var(--ink-soft); }

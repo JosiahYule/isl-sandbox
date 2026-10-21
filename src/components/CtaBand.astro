@@ -10,14 +10,14 @@ const names = repliers.map((p) => p.first);
 const nameList = names.slice(0, -1).join(', ') + ' and ' + names.at(-1);
 
 const {
-  title = 'Tell us who you need.',
+  title = cta.title ?? 'Tell us who you need.',
   text = cta.text,
   href = '/hire/',
   label = 'Request talent',
 } = Astro.props;
 const tel = `tel:+1${brand.mainPhone.replaceAll('-', '')}`;
 ---
-<section class="cta on-dark">
+<section class:list={['cta', brand.ctaTone === 'bright' ? 'cta--bright' : 'on-dark']}>
   <div class="wrap inner">
     <h2>{title}</h2>
     <div class="side">
@@ -49,5 +49,8 @@ const tel = `tel:+1${brand.mainPhone.replaceAll('-', '')}`;
   .names { font-size: var(--fs-small); color: var(--on-dark-soft); line-height: 1.4; }
   .actions { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s5); margin-top: var(--s5); }
   .phone { font-weight: var(--fw-bold); }
+  /* ADS: the band in the brand's bright colour, with dark text */
+  .cta--bright { background: var(--bright); color: var(--bright-ink); border-bottom: 0; }
+  .cta--bright h2, .cta--bright .side p, .cta--bright .phone { color: var(--bright-ink); }
   @media (max-width: 860px) { .inner { grid-template-columns: 1fr; } }
 </style>

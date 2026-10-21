@@ -17,20 +17,23 @@ export const offices = [
 // Which office answers for each province (PEI has no office of its own; Halifax covers it)
 export const provinceOffice = { NS: 'Halifax', PE: 'Halifax', NB: 'Moncton', NL: "St. John's" };
 
-// Permanent first: it's the bigger half of the specialist business, and the live sites lead with it
+// The menu, as the live sites label it. Employers opens the two FAQ pages (Header.astro).
+// The live pages' addresses are kept where the page exists here (/employers/, /job-seekers/,
+// /permanent-recruitment/, /temporary-recruitment/), so old links keep working at launch.
+// TODO at launch: redirect /job-opportunities, /our-team, /about-us and /contact-us to their pages here.
 export const nav = [
-  { label: 'Permanent recruitment', href: '/permanent/' },
-  { label: 'Temporary staffing', href: '/temporary/' },
-  { label: 'Find work', href: '/find-work/' },
-  { label: 'About', href: '/about/' },
-  { label: 'Team', href: '/team/' },
+  { label: 'Employers', href: '/employers/' },
+  { label: 'Job Seekers', href: '/job-seekers/' },
+  { label: 'Job Opportunities', href: '/find-work/' },
+  { label: 'About Us', href: '/about/' },
+  { label: 'Our Team', href: '/team/' },
   { label: 'Learn', href: '/learn/' },
-  { label: 'Contact', href: '/contact/' },
+  { label: 'Contact Us', href: '/contact/' },
 ];
 
 export const services = {
-  contract: { name: 'Temporary staffing', href: '/temporary/', jobLabel: 'Temporary', ask: 'A temporary contractor', askMeta: 'Pre-screened, on short notice' },
-  direct: { name: 'Permanent recruitment', href: '/permanent/', jobLabel: 'Permanent', ask: 'A permanent hire', askMeta: 'A full search with a six-month guarantee' },
+  contract: { name: 'Temporary Recruitment', href: '/temporary-recruitment/', jobLabel: 'Temporary', ask: 'A temporary contractor', askMeta: 'Pre-screened, ready at a moment’s notice' },
+  direct: { name: 'Permanent Recruitment', href: '/permanent-recruitment/', jobLabel: 'Permanent', ask: 'A permanent hire', askMeta: 'A full search with a six-month guarantee' },
 };
 
 // The terms, as the live FAQ pages state them
@@ -49,26 +52,14 @@ export const sourcing = [
   ['Targeted ads', 'Our sites, job boards, professional networks and social media.'],
 ];
 
-// Registering as a candidate (Job Seekers page), and the questions candidates ask most
-export const seekerSteps = [
-  ['Send your resume', 'Apply to a posting, or send it in for roles that haven’t been posted yet.'],
-  ['Meet a consultant', 'If your background fits our openings, we talk through your goals and the way you like to work.'],
-  ['A short skills test', 'About 30 minutes, online. We also take references and your salary expectations.'],
-  ['We call when it fits', 'Your resume stays on file, and goes to an employer only with your OK.'],
-];
-export const seekerFaq = [
-  ['Does it cost anything?', 'No. Employers pay all our fees.'],
-  ['Is my search confidential?', 'Yes. We never share your resume with an employer without your approval.'],
-  ['Why take a contract?', 'It builds experience and contacts, moves faster than a permanent search, and lets you try a company. About 1 in 4 of our contracts become permanent.'],
-];
-
 export const hire = {
   locations: ['Nova Scotia', 'New Brunswick', 'Prince Edward Island', 'Newfoundland and Labrador', 'Elsewhere'],
   routing: 'office', // the card names the office that covers the province
 };
 
 export const cta = {
-  text: 'Permanent or temporary, junior to senior. You pay nothing unless you hire.',
+  title: 'We’d love to hear from you.', // the live sites' closing line
+  text: 'Looking for your next opportunity or need staff support?',
   faces: false,
 };
 

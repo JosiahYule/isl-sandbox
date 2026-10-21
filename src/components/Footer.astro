@@ -31,7 +31,7 @@ const sandboxSites = [{ key: 'isl', name: 'Integrated Staffing', href: '/isl-san
           <img class:list={[!brand.logoWhite && 'invert']} src={brand.logoWhite ?? brand.logo} alt="" width={logoW} height={logoH} loading="lazy" onerror="this.parentElement.classList.add('no-img'); this.remove();" />
           <span class="fword" aria-hidden="true">{brand.wordmark[0]}<br />{brand.wordmark[1]}</span>
         </a>
-        <p>{brand.name} has connected employers and job seekers since {brand.since}. Locally owned and operated.</p>
+        <p>{brand.footerAbout ?? `${brand.name} has connected employers and job seekers since ${brand.since}. Locally owned and operated.`}</p>
         {images.badgeBestPlaces && <div class="badges">
           <img src={images.badgeBestPlaces} alt="Best Places to Work" width="64" height="64" loading="lazy" onerror="this.remove()" />
           <img src={images.badgeCor} alt="COR certified" width="64" height="64" loading="lazy" onerror="this.remove()" />

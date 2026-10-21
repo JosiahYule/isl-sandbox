@@ -1,19 +1,19 @@
 ---
 // HOMEPAGE  →  /   (Accountant Staffing and Administrative Staffing)
-// The same opening as ISL's homepage (src/sites/isl/index.astro), with the specialist's words:
-// hero (job search), one field at every level (the two services), the roles by level,
-// the offices, and the closing call to action.
-// Everything brand-specific comes from the brand's file (src/brands/as.js or ads.js).
+// The same opening as ISL's homepage (src/sites/isl/index.astro), with the live site's words
+// (src/brands/copy/): hero and job search, why choose us and the two services, the roles at
+// each level, locally owned and the offices, the tools, and the closing call to action.
 import Base from '../../layouts/Base.astro';
 import HomeHero from '../../components/HomeHero.astro';
-import WeRecruit from '../../components/WeRecruit.astro';
+import ServiceBlocks from '../../components/ServiceBlocks.astro';
 import RolesByLevel from '../../components/RolesByLevel.astro';
 import OfficesSection from '../../components/OfficesSection.astro';
 import CtaBand from '../../components/CtaBand.astro';
 import ToolCards from '../../components/ToolCards.astro';
-import { brand, offices, social, images, field, services, terms } from '../../data/site.js';
+import { brand, offices, social, images, field, services, terms, copy } from '../../data/site.js';
 import { jobs } from '../../data/jobs.js';
 
+const c = copy.home;
 const orgSchema = {
   '@context': 'https://schema.org', '@type': 'EmploymentAgency', name: brand.name, url: brand.siteUrl,
   telephone: '+1-' + brand.mainPhone, foundingDate: String(brand.since), areaServed: 'Atlantic Canada',
@@ -22,42 +22,43 @@ const orgSchema = {
 };
 // A moving strip needs enough postings to fill it; with only a few, the search alone is cleaner
 const ticker = jobs.length >= 6 ? jobs.slice(0, 14) : [];
-const cities = offices.map((o) => o.city);
 
-// The two services, permanent first (as in the menu), with the figures from the brand's own terms
+// The two services, permanent first (as on the live sites), with figures from their FAQ pages
 const svcs = [
-  { key: 'direct', name: services.direct.name, href: services.direct.href, go: 'How a permanent search works',
-    figs: [['6 months', 'replacement guarantee'], ['No fee', 'unless you hire our candidate']] },
-  { key: 'contract', name: services.contract.name, href: services.contract.href, go: 'How temporary staffing works',
-    figs: [['One rate', 'pay, EI, CPP and payroll included'], [terms.tempToPerm, 'contracts become permanent']] },
+  { key: 'direct', name: services.direct.name, href: services.direct.href, go: 'Permanent Recruitment FAQ',
+    figs: [['6 months', 'guarantee on every permanent hire'], ['No fees', 'unless you hire one of our candidates']] },
+  { key: 'contract', name: services.contract.name, href: services.contract.href, go: 'Temporary Recruitment FAQ',
+    figs: [['One rate', 'salary, EI, CPP, payroll and fees'], [terms.tempToPerm, 'contracts become permanent']] },
 ];
 ---
-<Base description={`${brand.tagline} Temporary and permanent, junior to senior. Search open jobs, or tell us who you need.`} schema={orgSchema}>
+<Base description={`${c.lead}`} schema={orgSchema}>
   <!-- 1. HERO -->
-  <HomeHero photo={images.hero} lines={field.heroLines} lead={field.heroLead} ticker={ticker} />
+  <HomeHero photo={images.hero} lines={c.h1} lead={c.lead} ticker={ticker} findJob={c.findJob} long />
 
-  <!-- 2. ONE FIELD, EVERY LEVEL: the specialist's version of ISL's "We recruit." -->
-  <WeRecruit
-    title={['One field.', 'Every level.']}
-    lines={[`Based in Halifax, with offices in ${cities.slice(1).join(' and ')}.`, 'No fee unless you hire one of our candidates.']}
-    before="Placing"
-    words={field.roll}
-    services={svcs}
-  />
+  <!-- 2. WHY CHOOSE US, then the two services -->
+  <section class="section">
+    <div class="wrap">
+      <div class="section-head"><h2>{c.whyTitle}</h2></div>
+      <ul class="items why" data-stagger>
+        {c.why.map(([t, d]) => <li class="item"><h3>{t}</h3><p>{d}</p></li>)}
+      </ul>
+    </div>
+    <div class="wrap"><ServiceBlocks services={svcs} /></div>
+  </section>
 
-  <!-- 3. WHAT WE PLACE: the roles at each level -->
+  <!-- 3. WHAT OUR CLIENTS ARE LOOKING FOR: the roles at each level -->
   <section class="section section--rule">
     <div class="wrap">
       <div class="section-head section-head--split">
-        <h2>What we place</h2>
-        <p class="lead">Temporary or permanent, at every level.</p>
+        <h2>{c.rolesTitle}</h2>
+        <div class="roles-text">{c.rolesText.map((p) => <p>{p}</p>)}</div>
       </div>
       <RolesByLevel levels={field.levels} />
     </div>
   </section>
 
-  <!-- 4. WHERE WE ARE -->
-  <OfficesSection lines={['Three offices.', 'All of Atlantic Canada.']} lead="We place people across the region, not just in our office cities. Select an office for its address and phone number." />
+  <!-- 4. LOCALLY OWNED & OPERATED, with the offices -->
+  <OfficesSection lines={[c.localTitle]} lead={c.localText} />
 
   <!-- 5. FREE TOOLS: the same tools as ISL's Recruitment Intelligence -->
   <section class="section section--rule">
@@ -72,3 +73,10 @@ const svcs = [
 
   <CtaBand />
 </Base>
+
+<style>
+  /* Five reasons: three across, then two */
+  .why { grid-template-columns: repeat(auto-fit, minmax(min(100%, 18rem), 1fr)); }
+  .roles-text p { color: var(--ink-soft); max-width: 60ch; }
+  .roles-text p + p { margin-top: var(--s3); }
+</style>

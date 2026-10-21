@@ -30,6 +30,12 @@ const menus = {
     isl ? { label: 'All tools and articles', href: url('/learn/'), meta: String(posts.length + tools.length), rule: true }
       : { label: 'All tools', href: url('/learn/'), meta: String(tools.length), rule: true },
   ],
+  // AS and ADS: Employers opens the two FAQ pages, as on their live sites
+  ...(!isl && { '/employers/': [
+    { label: 'Permanent Recruitment FAQ', href: url('/permanent-recruitment/') },
+    { label: 'Temporary Recruitment FAQ', href: url('/temporary-recruitment/') },
+    { label: 'Our process', href: url('/employers/'), rule: true },
+  ] }),
   ...(brand.officePages && { '/contact/': [
     ...areas.map((a) => ({ label: a.label, href: url(`/offices/${a.key}/`), meta: offices.find((o) => o.city === a.label)?.phone })),
     { label: 'All ways to reach us', href: url('/contact/'), rule: true },

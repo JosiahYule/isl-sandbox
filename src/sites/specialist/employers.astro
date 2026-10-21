@@ -1,0 +1,96 @@
+---
+// EMPLOYERS  →  /employers/   (AS and ADS; the live sites' address)
+// The live Employers page (src/brands/copy/): who we are for employers, our approach (where
+// candidates come from) and our process, step by step. Links on to the two FAQ pages.
+import Base from '../../layouts/Base.astro';
+import Button from '../../components/Button.astro';
+import PageHero from '../../components/PageHero.astro';
+import ServiceBlocks from '../../components/ServiceBlocks.astro';
+import CtaBand from '../../components/CtaBand.astro';
+import { field, services, terms, copy } from '../../data/site.js';
+import { url } from '../../lib/url.js';
+
+const c = copy.employers;
+const svcs = [
+  { key: 'direct', name: services.direct.name, href: services.direct.href, go: 'Permanent Recruitment FAQ',
+    figs: [['6 months', 'guarantee on every permanent hire'], ['No fees', 'unless you hire one of our candidates']] },
+  { key: 'contract', name: services.contract.name, href: services.contract.href, go: 'Temporary Recruitment FAQ',
+    figs: [['One rate', 'salary, EI, CPP, payroll and fees'], [terms.tempToPerm, 'contracts become permanent']] },
+];
+---
+<Base assistantMode="employer" title="Employers" description={`${c.title} Permanent and temporary ${field.short} recruitment across Atlantic Canada.`}>
+  <PageHero title={c.title} lead={c.intro[0]}>
+    <Button href="/hire/" size="lg">Request talent</Button>
+  </PageHero>
+
+  <section class="section section--rule">
+    <div class="wrap intro">
+      {c.intro.slice(1).map((p) => <p class="lead">{p}</p>)}
+    </div>
+    <div class="wrap"><ServiceBlocks services={svcs} /></div>
+  </section>
+
+  <section class="section section--tint">
+    <div class="wrap approach">
+      <div class="section-head">
+        <h2>{c.approachTitle}</h2>
+        <p class="sub">{c.approachSub}</p>
+        {c.approachText.map((p) => <p class="body">{p}</p>)}
+      </div>
+      <ul class="sources" data-stagger>
+        {c.sources.map((s) => <li>{s}</li>)}
+      </ul>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="wrap">
+      <div class="section-head">
+        <h2>{c.processTitle}</h2>
+        {c.processIntro && <p class="lead">{c.processIntro}</p>}
+      </div>
+      <ol class="process" data-stagger>
+        {c.steps.map(([t, d], i) => (
+          <li>
+            <span class="num figure" aria-hidden="true">{String(i + 1).padStart(2, '0')}</span>
+            <h3>{t}</h3>
+            <p>{d}</p>
+          </li>
+        ))}
+      </ol>
+      <p class="faqs">
+        <a href={url(services.direct.href)}>Permanent Recruitment FAQ</a>
+        <a href={url(services.contract.href)}>Temporary Recruitment FAQ</a>
+      </p>
+    </div>
+  </section>
+
+  <CtaBand />
+</Base>
+
+<style>
+  .intro .lead { max-width: 60ch; }
+  .intro { margin-bottom: clamp(2rem, 4vw, 3rem); }
+
+  .approach { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: var(--s6) clamp(2rem, 6vw, 6rem); align-items: start; }
+  .approach .section-head { margin-bottom: 0; }
+  .sub { font-weight: var(--fw-bold); font-size: var(--fs-h3); margin-top: var(--s4); }
+  .body { color: var(--ink-soft); margin-top: var(--s3); max-width: 52ch; }
+  .sources { list-style: none; margin: 0; padding: 0; border-top: 1.5px solid var(--ink); }
+  .sources li { padding: var(--s4) 0 var(--s4) var(--s5); border-bottom: 1px solid var(--line); position: relative; }
+  .sources li::before { content: ''; position: absolute; left: 0; top: calc(var(--s4) + 0.55em); width: 8px; height: 8px; background: var(--direct); border-radius: 50%; }
+
+  /* The process: a numbered row per step, the name on the left and the detail beside it */
+  .process { list-style: none; margin: 0; padding: 0; border-top: 1.5px solid var(--ink); }
+  .process li { display: grid; grid-template-columns: 4rem minmax(0, 4fr) minmax(0, 7fr); gap: var(--s3) var(--s6); padding-block: var(--s5); border-bottom: 1px solid var(--line); align-items: baseline; }
+  .num { font-size: var(--fs-figure); color: var(--direct); line-height: 1; }
+  .process h3 { font-size: var(--fs-h3); }
+  .process p { color: var(--ink-soft); max-width: 62ch; }
+  .faqs { display: flex; flex-wrap: wrap; gap: var(--s3) var(--s6); margin-top: var(--s6); font-weight: var(--fw-bold); }
+
+  @media (max-width: 900px) {
+    .approach { grid-template-columns: 1fr; }
+    .process li { grid-template-columns: 3rem minmax(0, 1fr); }
+    .process p { grid-column: 2; }
+  }
+</style>

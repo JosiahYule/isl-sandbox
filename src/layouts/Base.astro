@@ -22,9 +22,9 @@ const canonical = new URL(Astro.url.pathname, Astro.site).href;
 const heroSrc = typeof images.hero === 'string' ? images.hero : images.hero.src;
 const shareImage = heroSrc.includes('format=') ? heroSrc.replace(/format=\d+w/, 'format=1500w') : `${heroSrc}?format=1500w`;
 const fullTitle = title ? `${title} | ${brand.name}` : `${brand.name} | ${brand.titleTail}`;
-// The brand's colours (src/brands/). ISL's are the defaults in tokens.css, so it sets none.
-const c = brand.colors;
-const colorVars = c ? `--accent:${c.accent};--accent-deep:${c.deep};--accent-tint:${c.tint};--accent-on-dark:${c.onDark}${c.map ? `;--map-land:${c.map}` : ''}` : undefined;
+// The brand's colours (src/brands/): any design token from tokens.css, by name.
+// ISL's are the defaults in tokens.css, so it sets none.
+const colorVars = brand.colors ? Object.entries(brand.colors).map(([k, v]) => `--${k}:${v}`).join(';') : undefined;
 ---
 <!doctype html>
 <html lang="en-CA" data-brand={brand.key} style={colorVars} data-assistant-mode={assistantMode} data-assistant-job={assistantJob}>
@@ -34,7 +34,7 @@ const colorVars = c ? `--accent:${c.accent};--accent-deep:${c.deep};--accent-tin
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{fullTitle}</title>
     <meta name="description" content={description} />
-    <meta name="theme-color" content="#1a1a1a" />
+    <meta name="theme-color" content={brand.colors?.dark ?? '#1a1a1a'} />
     <link rel="icon" href={url(brand.favicon)} type="image/svg+xml" />
     <link rel="canonical" href={canonical} />
     <!-- Link previews (LinkedIn, Facebook, Teams, iMessage) -->
