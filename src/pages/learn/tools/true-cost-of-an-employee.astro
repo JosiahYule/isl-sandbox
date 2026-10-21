@@ -228,7 +228,7 @@ const rate = (v) => `${Number((v * 100).toFixed(3))}%`;
   .how h2 { font-size: var(--fs-h3); margin-bottom: var(--s4); }
   .how ul { margin: 0; padding-left: 1.2em; display: grid; gap: var(--s3); color: var(--ink-soft); }
   .how li::marker { color: var(--isl-blue); }
-  .src { margin-top: var(--s5); font-size: var(--fs-small); color: var(--ink-soft); }
+  .src { margin-top: var(--s5); font-size: var(--fs-small); color: var(--ink-soft); max-width: 70ch; }
 
   @media (max-width: 900px) {
     .grid, .cta { grid-template-columns: 1fr; }

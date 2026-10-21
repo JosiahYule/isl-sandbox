@@ -1,3 +1,11 @@
+/*
+  GLOBAL STYLES
+  Base rules for plain HTML elements and a handful of shared helpers.
+  Anything specific to one component lives inside that component's .astro file.
+*/
+
+@import './tokens.css';
+
 /* Fallback while DM Sans loads: Arial (or its metric twin, Liberation Sans) scaled to DM Sans's
    width and line metrics, worked out from the font files (lowercase average width 0.518 em vs Arial 0.482). */
 @font-face {
@@ -9,13 +17,6 @@
   line-gap-override: 0%;
 }
 
-/*
-  GLOBAL STYLES
-  Base rules for plain HTML elements and a handful of shared helpers.
-  Anything specific to one component lives inside that component's .astro file.
-*/
-
-@import './tokens.css';
 
 *, *::before, *::after { box-sizing: border-box; }
 html { -webkit-text-size-adjust: 100%; scroll-padding-top: 88px; }
