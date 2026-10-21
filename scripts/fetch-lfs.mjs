@@ -19,7 +19,7 @@ const OUT = new URL('../src/data/lfs/latest.json', import.meta.url);
 const GEOS = ['Canada', 'Nova Scotia', 'New Brunswick', 'Prince Edward Island', 'Newfoundland and Labrador'];
 const CODE = { Canada: 'CA', 'Nova Scotia': 'NS', 'New Brunswick': 'NB', 'Prince Edward Island': 'PE', 'Newfoundland and Labrador': 'NL' };
 
-const HEADERS = { 'Content-Type': 'application/json', Accept: 'application/json', 'User-Agent': 'isl-sandbox job market tool (github.com/JosiahYule/isl-sandbox)' };
+const HEADERS = { 'Content-Type': 'application/json', 'User-Agent': 'isl-sandbox job market tool (github.com/JosiahYule/isl-sandbox)' };
 async function post(method, body) {
   const res = await fetch(API + method, { method: 'POST', headers: HEADERS, body: JSON.stringify(body) });
   const text = await res.text();
@@ -68,6 +68,11 @@ async function series(pid, requests, latestN) {
 }
 
 async function main() {
+  {
+    const res = await fetch(API + 'getCodeSets', { headers: { 'User-Agent': HEADERS['User-Agent'] } });
+    const t = await res.text();
+    console.log(`::notice::probe getCodeSets HTTP ${res.status} ${res.headers.get('content-type')} ${t.slice(0, 120).replace(/\s+/g, ' ')}`);
+  }
   const data = { source: 'Statistics Canada, Labour Force Survey', fetched: new Date().toISOString(), provinces: {}, industries: {}, wages: {} };
 
   // 1. Labour force characteristics, seasonally adjusted
