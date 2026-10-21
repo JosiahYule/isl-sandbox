@@ -1,7 +1,8 @@
 ---
 // TOOL: RESUME CHECK  →  /learn/tools/resume-check/
 // Paste a resume, get a score and the fixes that matter most (rules in src/lib/resume.js).
-// Optional: pick one of our open jobs to see which of its key terms the resume mentions.
+// It also lists the open jobs the resume fits best (rankJobs), and, optionally, compares it with
+// one job to show which of that job's key terms the resume mentions.
 // Everything runs in the browser; the resume is never sent or saved.
 import Base from '../../../layouts/Base.astro';
 import PageHero from '../../../components/PageHero.astro';
@@ -10,11 +11,11 @@ import { keywordsFor, CHECKS } from '../../../lib/resume.js';
 import { url } from '../../../lib/url.js';
 
 // Only the terms per job go to the page, not the full postings
-const jobTerms = jobs.map((j) => ({ id: j.id, label: `${j.title}, ${[j.city, j.province].filter(Boolean).join(' ')}`, url: j.url, apply: j.applyUrl, terms: keywordsFor(j) }));
+const jobTerms = jobs.map((j) => ({ id: j.id, title: j.title, place: [j.city, j.province].filter(Boolean).join(', '), label: `${j.title}, ${[j.city, j.province].filter(Boolean).join(' ')}`, url: j.url, pay: j.pay, type: j.type, terms: keywordsFor(j) }));
 const groups = [...new Set(CHECKS.map((c) => c.group))];
 ---
 <Base title="Resume check" description="Paste your resume for a score and the fixes that matter most to recruiters. It never leaves your browser." assistantMode="seeker">
-  <PageHero compact title="Resume check." lead="Paste your resume for a score and the fixes that matter most. It never leaves your browser." />
+  <PageHero compact title="Resume check." lead="Paste your resume for a score, the fixes that matter most and the open jobs it fits. It never leaves your browser." />
 
   <section class="tool" data-resume>
     <div class="wrap grid">
@@ -52,6 +53,12 @@ const groups = [...new Set(CHECKS.map((c) => c.group))];
             <p class="hint">Add a missing term only if it’s true for you. <a data-job-link href="#">View the job</a></p>
           </div>
 
+          <div class="fit">
+            <h2>Our open jobs that fit</h2>
+            <ol class="fits" data-fits></ol>
+            <p class="hint" data-fits-none hidden>None of our open jobs is a close match yet. <a href="https://www.integratedstaffing.ca/careers/general-apply">Send your resume</a> and we’ll contact you when one is.</p>
+          </div>
+
           <div data-fixes-wrap>
             <h2>Fix these first</h2>
             <ol class="fixes" data-fixes></ol>
@@ -82,13 +89,14 @@ const groups = [...new Set(CHECKS.map((c) => c.group))];
 </Base>
 
 <script>
-  import { checkResume, matchTerms } from '../../../lib/resume.js';
+  import { checkResume, matchTerms, rankJobs } from '../../../lib/resume.js';
 
   const root = document.querySelector<HTMLElement>('[data-resume]')!;
   const form = root.querySelector('form')!;
   const text = form.elements.namedItem('text') as HTMLTextAreaElement;
   const job = form.elements.namedItem('job') as HTMLSelectElement;
-  const jobsData: { id: string; label: string; url: string; terms: string[] }[] = JSON.parse(document.getElementById('job-terms')!.textContent!);
+  type Job = { id: string; title: string; place: string; label: string; url: string; pay: string; type: string; terms: string[] };
+  const jobsData: Job[] = JSON.parse(document.getElementById('job-terms')!.textContent!);
   const $ = (s: string) => root.querySelector<HTMLElement>(s)!;
   const li = (t: string, cls = '') => { const el = document.createElement('li'); el.textContent = t; if (cls) el.className = cls; return el; };
 
@@ -119,6 +127,22 @@ const groups = [...new Set(CHECKS.map((c) => c.group))];
     $('[data-fixes-wrap]').hidden = !r.fixes.length;
     $('[data-passed]').replaceChildren(...r.passed.map((p) => li(p.label)));
     $('[data-passed-n]').textContent = `(${r.passed.length})`;
+
+    // The jobs it fits: title, where and pay, what matched, and a button to compare in detail
+    const fits = rankJobs(t, jobsData);
+    $('[data-fits]').replaceChildren(...fits.map((f) => {
+      const el = document.createElement('li');
+      el.className = `fit-${f.type}`;
+      const a = document.createElement('a'); a.href = f.url; a.textContent = f.title;
+      const meta = document.createElement('span'); meta.className = 'fit-meta'; meta.textContent = [f.place, f.pay].filter(Boolean).join(' · ');
+      const why = document.createElement('span'); why.className = 'fit-why'; why.textContent = `Mentions ${f.found.slice(0, 4).join(', ')}`;
+      const cmp = document.createElement('button'); cmp.type = 'button'; cmp.className = 'fit-cmp'; cmp.textContent = 'Compare';
+      cmp.setAttribute('aria-label', `Compare your resume with ${f.title}`);
+      cmp.addEventListener('click', () => { job.value = f.id; run(); $('[data-match]').scrollIntoView({ block: 'nearest' }); });
+      el.append(a, cmp, meta, why);
+      return el;
+    }));
+    $('[data-fits-none]').hidden = fits.length > 0;
 
     const chosen = jobsData.find((j) => j.id === job.value);
     $('[data-match]').hidden = !chosen;
@@ -179,6 +203,15 @@ const groups = [...new Set(CHECKS.map((c) => c.group))];
   .terms :global(li.no) { color: var(--ink-soft); border-style: dashed; }
   .hint { font-size: var(--fs-small); color: var(--ink-soft); margin: 0; }
   .hint a { font-weight: 600; }
+
+  /* Jobs it fits: near-black edge for contract, blue for permanent (the site's colour key) */
+  .fits { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--line); }
+  .fits :global(li) { display: grid; grid-template-columns: 1fr auto; gap: 2px var(--s3); padding: var(--s3) 0 var(--s3) var(--s3); border-bottom: 1px solid var(--line); border-left: 3px solid var(--contract); }
+  .fits :global(li.fit-direct) { border-left-color: var(--direct); }
+  .fits :global(a) { font-weight: 600; }
+  .fits :global(.fit-meta), .fits :global(.fit-why) { grid-column: 1; font-size: var(--fs-small); color: var(--ink-soft); }
+  .fits :global(.fit-cmp) { grid-column: 2; grid-row: 1 / span 3; align-self: center; font: inherit; font-size: var(--fs-small); font-weight: 600; background: none; border: 1.5px solid var(--ink); padding: 0.35rem 0.7rem; cursor: pointer; }
+  .fits :global(.fit-cmp:hover) { background: var(--ink); color: #fff; }
 
   .passed { margin-top: var(--s5); }
   .passed summary { cursor: pointer; font-weight: 600; }

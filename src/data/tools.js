@@ -25,7 +25,7 @@ export const tools = [
     key: 'resume-check', preview: 'resume',
     title: 'Resume check',
     who: 'For job seekers',
-    d: 'Paste your resume for a score and the fixes that matter most. It never leaves your browser.',
+    d: 'A score, the fixes that matter most, and which of our open jobs it fits. It never leaves your browser.',
     cta: 'Check my resume',
   },
 ].map((t) => ({ ...t, url: url(`/learn/tools/${t.key}/`) }));

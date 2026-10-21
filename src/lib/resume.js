@@ -111,7 +111,8 @@ const TERMS = [
   ['CPA', /\bcpa\b/i], ['Bilingual', /bilingual|french/i], ['Scheduling', /\bscheduling\b/i], ['Supervision', /\bsupervis(ing|ion|ed)\b|lead a team|team lead/i],
   ['Data entry', /data entry/i], ['ERP', /\berp\b/i], ['Mechanical', /mechanic/i], ['Electrical', /electric/i], ['Hydraulics', /hydraulic/i],
 ];
-const GENERIC = new Set(['senior', 'junior', 'level', 'temporary', 'casual', 'general', 'and', 'the', 'ii', 'iii', 'i', '1', '2', '3', '2025', '2026', 'overnight', 'light', 'duty', 'heavy', 'skilled', 'lead']);
+const GENERIC = new Set(['senior', 'junior', 'level', 'temporary', 'casual', 'general', 'and', 'the', 'ii', 'iii', 'i', '1', '2', '3', '2025', '2026', 'overnight', 'light', 'duty', 'heavy', 'skilled', 'lead', 'worker', 'team', 'member', 'staff', 'person', 'part', 'time', 'full']);
+const TERM_LABELS = new Set(TERMS.map(([label]) => label));
 
 export function keywordsFor(job) {
   const body = jobBlocks(job.description || '', job.title)
@@ -134,4 +135,30 @@ export function matchTerms(text, terms) {
     const re = known ? known[1] : new RegExp(`\\b${stem}`, 'i');
     return { term, found: re.test(t) };
   });
+}
+
+// ---- Which of our open jobs fit this resume ------------------------------
+// For every job, how many of its terms the resume mentions. The job title's own words count
+// double: a resume that says "forklift" fits a Forklift Operator job better than one that only
+// shares "WHMIS". A job is listed when the resume covers a title word and about a third of the
+// job's terms, or at least three terms of any kind.
+// Jobs in the province the resume's address names get a small lift, so nearby fits come first.
+const PROV_IN = [['NS', /nova scotia|\bNS\b|halifax|dartmouth|truro|sydney|bedford/], ['NB', /new brunswick|\bNB\b|moncton|saint john|fredericton|dieppe/],
+  ['PE', /prince edward island|\bPEI?\b|charlottetown|summerside/], ['NL', /newfoundland|labrador|\bNL\b|st\.? john'?s|mount pearl/]];
+export function rankJobs(text, jobs, n = 5) {
+  const head = String(text).split('\n').slice(0, 6).join(' '); // the address is near the top
+  const home = (PROV_IN.find(([, re]) => re.test(head)) || [])[0];
+  return jobs.map((job) => {
+    const m = matchTerms(text, job.terms);
+    const title = m.filter((x) => !TERM_LABELS.has(x.term));
+    const skills = m.filter((x) => TERM_LABELS.has(x.term));
+    const th = title.filter((x) => x.found).length;
+    const sh = skills.filter((x) => x.found).length;
+    const fit = (th * 2 + sh) / Math.max(1, title.length * 2 + skills.length);
+    const near = home && String(job.place || '').endsWith(home) ? 0.15 : 0;
+    return { ...job, fit, rank: fit + near, titleHits: th, found: m.filter((x) => x.found).map((x) => x.term) };
+  })
+    .filter((r) => (r.titleHits > 0 && r.fit >= 0.35) || r.found.length >= 3)
+    .sort((a, b) => b.rank - a.rank || b.found.length - a.found.length)
+    .slice(0, n);
 }
