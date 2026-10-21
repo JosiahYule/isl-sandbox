@@ -3,6 +3,8 @@
 // Enter a wage, hours and province; see what each hour worked really costs.
 // The maths and every rate (with sources) are in src/lib/payroll.js. The page is drawn once
 // on the server with a $20 example, then the script redraws it as the inputs change.
+// The figures live in the address (?wage=22&hours=37.5&province=NB&wcb=1.4): the assistant
+// links here that way, and a visitor can copy the link to share their numbers.
 import Base from '../../../layouts/Base.astro';
 import PageHero from '../../../components/PageHero.astro';
 import { trueCost, money, RATES, SOURCES } from '../../../lib/payroll.js';
@@ -65,6 +67,7 @@ const rate = (v) => `${Number((v * 100).toFixed(3))}%`;
           </tbody>
           <tfoot><tr><th scope="row">Total</th><td data-out="perHour2">{money(r.perHour)}</td><td data-out="total">{money(r.total, false)}</td></tr></tfoot>
         </table>
+        <button type="button" class="copy" data-copy>Copy a link to these figures</button>
       </div>
     </div>
   </section>
@@ -104,7 +107,17 @@ const rate = (v) => `${Number((v * 100).toFixed(3))}%`;
   const hireBase = hire.getAttribute('href')!;
   const wcbInput = form.elements.namedItem('wcb') as HTMLInputElement;
   const wcbHint = root.querySelector<HTMLElement>('[data-wcb-hint]')!;
-  let lastProvince = 'NS';
+  // Start from the address, if it has figures
+  const q = new URLSearchParams(location.search);
+  const wageIn = form.elements.namedItem('wage') as HTMLInputElement;
+  const hoursIn = form.elements.namedItem('hours') as HTMLInputElement;
+  const qp = String(q.get('province') || '').toUpperCase();
+  let lastProvince = RATES.provinces[qp] ? qp : 'NS';
+  if (Number(q.get('wage')) > 0) wageIn.value = String(Number(q.get('wage')));
+  if (Number(q.get('hours')) > 0) hoursIn.value = String(Number(q.get('hours')));
+  form.querySelector<HTMLInputElement>(`input[name="province"][value="${lastProvince}"]`)!.checked = true;
+  wcbInput.value = q.get('wcb') && Number(q.get('wcb')) >= 0 ? String(Number(q.get('wcb'))) : String(RATES.provinces[lastProvince].wcb);
+  wcbHint.textContent = `The ${RATES.provinces[lastProvince].name} average. Yours depends on your industry.`;
 
   function update() {
     const data = new FormData(form);
@@ -136,6 +149,11 @@ const rate = (v) => `${Number((v * 100).toFixed(3))}%`;
     root.querySelector<HTMLElement>('[data-bar="wage"]')!.style.flexGrow = String(r.wage);
     root.querySelector<HTMLElement>('[data-bar="add"]')!.style.flexGrow = String(r.perHour - r.wage);
 
+    // Keep the figures in the address (workers' comp only when it isn't the province average)
+    const params = new URLSearchParams({ wage: String(wage), hours: String(hours), province });
+    if (wcb !== RATES.provinces[province].wcb) params.set('wcb', String(wcb));
+    history.replaceState(null, '', `?${params}`);
+
     // The request form opens pre-filled with this role's details
     const details = `Contract worker at about ${money(wage)}/hour, ${hours} hours a week.`;
     hire.href = `${hireBase}&where=${encodeURIComponent(r.province.name)}&details=${encodeURIComponent(details)}`;
@@ -143,6 +161,13 @@ const rate = (v) => `${Number((v * 100).toFixed(3))}%`;
 
   form.addEventListener('input', update);
   update();
+
+  const copy = root.querySelector<HTMLButtonElement>('[data-copy]')!;
+  copy.addEventListener('click', async () => {
+    try { await navigator.clipboard.writeText(location.href); copy.textContent = 'Link copied'; }
+    catch { copy.textContent = 'Copy the address bar to share'; }
+    setTimeout(() => (copy.textContent = 'Copy a link to these figures'), 2500);
+  });
 </script>
 
 <style>
@@ -190,6 +215,8 @@ const rate = (v) => `${Number((v * 100).toFixed(3))}%`;
   .lines thead th { font-size: var(--fs-small); color: var(--ink-soft); font-weight: 500; }
   .lines tbody tr:first-child th, .lines tbody tr:first-child td { font-weight: 600; }
   .lines tfoot th, .lines tfoot td { font-weight: 700; border-bottom: 0; border-top: 1.5px solid var(--ink); }
+
+  .copy { margin-top: var(--s4); font: inherit; font-size: var(--fs-small); font-weight: 600; color: var(--isl-blue); background: none; border: 0; padding: 0; cursor: pointer; text-decoration: underline; text-underline-offset: 0.2em; }
 
   /* Call to action */
   .cta { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: var(--s5) var(--s7); align-items: end; }

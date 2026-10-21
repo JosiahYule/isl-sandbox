@@ -1,0 +1,273 @@
+---
+// TOOL: JOB AD CHECK  →  /learn/tools/job-ad-check/
+// For employers. Paste a job ad, pick the province: get a score, the fixes that matter most,
+// whether the province requires pay in the ad, and how the pay compares with ISL's open jobs.
+//   rules and pay law       src/lib/jobad.js
+//   pay on our open jobs    payFor() in assistant/.../insights.js (the same answer the assistant gives)
+// Everything runs in the browser; the ad is never sent or saved.
+import Base from '../../../layouts/Base.astro';
+import PageHero from '../../../components/PageHero.astro';
+import { jobs } from '../../../data/jobs.js';
+import { CHECKS, PAY_LAW } from '../../../lib/jobad.js';
+import { url } from '../../../lib/url.js';
+
+// Only what the pay comparison needs goes to the page
+const payJobs = jobs.filter((j) => j.pay).map((j) => ({ id: j.id, title: j.title, province: j.province, city: j.city, pay: j.pay }));
+const groups = [...new Set(CHECKS.map((c) => c.group))];
+const provinces = [['NS', 'NS'], ['NB', 'NB'], ['PE', 'PEI'], ['NL', 'NL'], ['OTHER', 'Elsewhere']];
+const fullName = { NS: 'Nova Scotia', NB: 'New Brunswick', PE: 'Prince Edward Island', NL: 'Newfoundland and Labrador' };
+
+// A weak example, so a visitor can see what the tool does before pasting their own
+const sample = `WAREHOUSE ROCKSTAR WANTED!!!
+
+We are a fast-paced environment looking for a young, energetic self-starter to join our family. Competitive pay.
+
+Must have 3 years experience
+Must have forklift ticket
+Must have WHMIS
+Must be able to lift 50 lbs
+Must have own vehicle
+Must have Canadian experience
+Must be available evenings
+Other duties as assigned.
+
+Send your resume to jobs@example.ca`;
+---
+<Base title="Job ad check" description="Paste a job ad for a score, the fixes that matter most, the pay rules in your province and how your pay compares with our open jobs." assistantMode="employer">
+  <PageHero compact title="Job ad check." lead="Paste a job ad for a score, the fixes that matter most and how your pay compares with our open jobs. It never leaves your browser." />
+
+  <section class="tool" data-ad>
+    <div class="wrap grid">
+      <form class="inputs" onsubmit="return false" aria-label="Your job ad">
+        <label class="field">
+          <span class="lbl">Your job ad <button type="button" class="sample" data-sample>Try an example</button></span>
+          <textarea name="text" rows="16" placeholder="Paste the whole ad here, starting with the job title." spellcheck="false"></textarea>
+        </label>
+        <fieldset class="field">
+          <legend class="lbl">Where the job is</legend>
+          <div class="seg">
+            {provinces.map(([code, label]) => (
+              <label><input type="radio" name="province" value={code} checked={code === 'NS'} /><span>{label}</span></label>
+            ))}
+          </div>
+        </fieldset>
+        <button type="button" class="go" data-run>Check my ad</button>
+        <p class="private">Nothing is sent or saved. The check runs on this page only.</p>
+      </form>
+
+      <div class="out" aria-live="polite">
+        <div class="placeholder" data-placeholder>
+          <p class="ph-title">Pay in job ads</p>
+          <ul class="law-list">
+            {provinces.slice(0, 4).map(([code, label]) => (
+              <li><span>{fullName[code]}</span>
+                <span class:list={['st', PAY_LAW[code].status === 'required' && 'st--req']}>{PAY_LAW[code].status === 'required' ? `Required since ${PAY_LAW[code].since}` : 'Not required yet'}</span></li>
+            ))}
+          </ul>
+          <p class="ph-sub">Plus {CHECKS.length} checks on what job seekers look for, in {groups.length} areas: {groups.join(', ').toLowerCase()}.</p>
+        </div>
+
+        <div class="results" data-results hidden>
+          <p class="score"><span data-score>0</span><span class="of">/100</span></p>
+          <p class="verdict" data-verdict></p>
+          <div class="meter" aria-hidden="true"><span data-meter></span></div>
+
+          <div class="law" data-law>
+            <h2>Pay rules here</h2>
+            <p class="law-st" data-law-st></p>
+            <p data-law-text></p>
+            <p class="src"><a data-law-src href="#"></a>. Checked October 2026. Not legal advice.</p>
+          </div>
+
+          <div class="cmp" data-cmp hidden>
+            <h2>Your pay against our open jobs</h2>
+            <p data-cmp-sum></p>
+            <!-- The range of our open jobs, their middle, and where the ad sits -->
+            <div class="track" aria-hidden="true">
+              <span class="t-range" data-t-range></span>
+              <span class="t-mid" data-t-mid></span>
+              <span class="t-ad" data-t-ad></span>
+            </div>
+            <p class="t-key" aria-hidden="true"><span class="k k--range">Our open jobs</span><span class="k k--ad">Your ad</span></p>
+            <p class="hint" data-cmp-basis></p>
+          </div>
+
+          <div data-fixes-wrap>
+            <h2>Fix these first</h2>
+            <ol class="fixes" data-fixes></ol>
+          </div>
+          <details class="passed">
+            <summary>Already good <span data-passed-n></span></summary>
+            <ul data-passed></ul>
+          </details>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section section--tint">
+    <div class="wrap next">
+      <div>
+        <h2>Rather we found them?</h2>
+        <p class="lead">We write the ad, post it, screen everyone who applies and send you the people worth meeting.</p>
+      </div>
+      <a class="go" href={url('/hire/')} data-hire>Request workers</a>
+    </div>
+  </section>
+
+  <script type="application/json" id="pay-jobs" set:html={JSON.stringify(payJobs)} />
+  <script type="application/json" id="ad-sample" set:html={JSON.stringify(sample)} />
+</Base>
+
+<script>
+  import { checkAd } from '../../../lib/jobad.js';
+  import { payFor } from '../../../../assistant/supabase/functions/_shared/insights.js';
+
+  const root = document.querySelector<HTMLElement>('[data-ad]')!;
+  const form = root.querySelector('form')!;
+  const text = form.elements.namedItem('text') as HTMLTextAreaElement;
+  const payJobs = JSON.parse(document.getElementById('pay-jobs')!.textContent!);
+  const $ = (s: string) => root.querySelector<HTMLElement>(s)!;
+  const money = (n: number) => '$' + (Math.round(n * 100) / 100).toFixed(n % 1 ? 2 : 0);
+  const NAMES: Record<string, string> = { NS: 'Nova Scotia', NB: 'New Brunswick', PE: 'PEI', NL: 'Newfoundland and Labrador', OTHER: 'other provinces' };
+
+  function run() {
+    const t = text.value.trim();
+    if (t.length < 40) { text.focus(); return; }
+    const province = String(new FormData(form).get('province'));
+    const r = checkAd(t, province);
+    $('[data-placeholder]').hidden = true;
+    $('[data-results]').hidden = false;
+    $('[data-score]').textContent = String(r.score);
+    $('[data-meter]').style.width = `${r.score}%`;
+    $('[data-verdict]').textContent = r.score === 100 ? 'Ready to post.' : r.score >= 85 ? 'Strong. Ready to post after a small fix or two.'
+      : r.score >= 60 ? 'Decent. The fixes below will bring in more of the right people.'
+      : 'Likely to underperform. Start at the top of the list.';
+
+    // Pay law in this province, and whether this ad meets it
+    const required = r.law.status === 'required';
+    const st = $('[data-law-st]');
+    st.className = 'law-st' + (required ? (r.pay ? ' ok' : ' bad') : '');
+    st.textContent = required ? (r.pay ? `Required in ${NAMES[province]}, and your ad has it.` : `Required in ${NAMES[province]}, and your ad doesn’t have it.`)
+      : r.law.status === 'varies' ? 'Depends on the province.' : `Not required in ${NAMES[province]} yet.`;
+    $('[data-law-text]').textContent = (required ? `Since ${r.law.since}. ` : '') + r.law.text;
+    const src = root.querySelector<HTMLAnchorElement>('[data-law-src]')!;
+    src.textContent = r.law.source[0]; src.href = r.law.source[1];
+
+    // How the ad's pay compares with ours, for the role in its title
+    const prov = province === 'OTHER' ? '' : province;
+    const market = r.pay && r.title ? payFor(payJobs, { role: r.title.replace(/[^A-Za-z /]+/g, ' '), province: prov }) : null;
+    $('[data-cmp]').hidden = !(r.pay && market);
+    if (r.pay && market) {
+      const diff = (r.pay.mid - market.hourly) / market.hourly;
+      const where = Math.abs(diff) < 0.05 ? 'in line with' : diff < 0 ? `${Math.round(-diff * 100)}% below` : `${Math.round(diff * 100)}% above`;
+      $('[data-cmp-sum]').textContent = `Your ad offers ${money(r.pay.mid)}/hour${r.pay.range ? ' at the middle of its range' : ''}. That’s ${where} the middle of our open jobs like it (${money(market.hourly)}/hour).`;
+      const lo = Math.min(market.unit === 'year' ? market.low / 2080 : market.low, r.pay.mid) * 0.9;
+      const hi = Math.max(market.unit === 'year' ? market.high / 2080 : market.high, r.pay.mid) * 1.1;
+      const x = (v: number) => `${((v - lo) / (hi - lo)) * 100}%`;
+      const mLo = market.unit === 'year' ? market.low / 2080 : market.low, mHi = market.unit === 'year' ? market.high / 2080 : market.high;
+      Object.assign($('[data-t-range]').style, { left: x(mLo), width: `calc(${x(mHi)} - ${x(mLo)})` });
+      $('[data-t-mid]').style.left = x(market.hourly);
+      $('[data-t-ad]').style.left = x(r.pay.mid);
+      const region = market.province ? NAMES[market.province] : 'Atlantic Canada';
+      $('[data-cmp-basis]').textContent = market.basis === 'role'
+        ? `From ${market.count} open ISL ${market.count === 1 ? 'job' : 'jobs'} with “${market.role.trim()}” in the title, in ${region}.`
+        : `We don’t have enough open jobs with that title, so this is our ${market.family.toLowerCase()} jobs in ${region} (${market.count}).`;
+    }
+
+    $('[data-fixes]').replaceChildren(...r.fixes.map((f) => {
+      const el = document.createElement('li');
+      const b = document.createElement('strong'); b.textContent = f.label;
+      const p = document.createElement('span'); p.textContent = f.fix;
+      el.append(b, p);
+      return el;
+    }));
+    $('[data-fixes-wrap]').hidden = !r.fixes.length;
+    $('[data-passed]').replaceChildren(...r.passed.map((p) => { const li = document.createElement('li'); li.textContent = p.label; return li; }));
+    $('[data-passed-n]').textContent = `(${r.passed.length})`;
+
+    // The request form opens with the role from the ad's title
+    const hire = document.querySelector<HTMLAnchorElement>('[data-hire]')!;
+    hire.search = new URLSearchParams({ details: `${r.title}${r.pay ? `, about ${money(r.pay.mid)}/hour` : ''}.` }).toString();
+    $('[data-results]').scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'nearest' });
+  }
+
+  root.querySelector('[data-run]')!.addEventListener('click', run);
+  root.querySelector('[data-sample]')!.addEventListener('click', () => { text.value = JSON.parse(document.getElementById('ad-sample')!.textContent!); run(); });
+  form.addEventListener('change', (e) => { if ((e.target as HTMLElement).matches('[name="province"]') && !$('[data-results]').hidden) run(); });
+</script>
+
+<style>
+  .tool { padding-block: var(--s5) clamp(3rem, 6vw, 5rem); }
+  .grid { display: grid; grid-template-columns: minmax(0, 6fr) minmax(0, 5fr); gap: var(--s7) clamp(2.5rem, 6vw, 6rem); align-items: start; }
+
+  .inputs { display: grid; gap: var(--s5); border-top: 1.5px solid var(--ink); padding-top: var(--s5); }
+  .field { display: grid; gap: var(--s2); margin: 0; padding: 0; border: 0; min-width: 0; }
+  .lbl { font-weight: 600; padding: 0; display: flex; justify-content: space-between; align-items: baseline; gap: var(--s3); }
+  .sample { font: inherit; font-size: var(--fs-small); font-weight: 600; color: var(--isl-blue); background: none; border: 0; padding: 0; cursor: pointer; text-decoration: underline; text-underline-offset: 0.2em; }
+  textarea { font: inherit; padding: 0.8rem 0.9rem; border: 1.5px solid var(--line); background: var(--paper); color: var(--ink); width: 100%; resize: vertical; min-height: 18rem; font-size: 0.95rem; line-height: 1.55; }
+  textarea:focus { outline: none; border-color: var(--isl-blue); }
+  .seg { display: grid; grid-template-columns: repeat(5, 1fr); border: 1.5px solid var(--line); }
+  .seg label { position: relative; }
+  .seg input { position: absolute; opacity: 0; inset: 0; cursor: pointer; }
+  .seg span { display: block; text-align: center; padding: 0.7rem 0.2rem; font-weight: 600; font-size: var(--fs-small); }
+  .seg label + label span { border-left: 1.5px solid var(--line); }
+  .seg input:checked + span { background: var(--ink); color: #fff; }
+  .seg input:focus-visible + span { outline: 2px solid var(--isl-blue); outline-offset: -2px; }
+  .go { justify-self: start; display: inline-block; font: inherit; font-weight: 600; background: var(--isl-blue); color: #fff; border: 0; cursor: pointer; text-decoration: none; padding: 0.9rem 1.4rem; white-space: nowrap; }
+  .go:hover { background: var(--isl-blue-deep); color: #fff; }
+  .private { margin: 0; font-size: var(--fs-small); color: var(--ink-soft); }
+
+  .out { border-top: 1.5px solid var(--ink); padding-top: var(--s5); position: sticky; top: calc(72px + var(--s5)); }
+  .ph-title { font-weight: 600; margin: 0 0 var(--s3); }
+  .law-list { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--line); }
+  .law-list li { display: flex; justify-content: space-between; gap: var(--s4); padding: var(--s3) 0; border-bottom: 1px solid var(--line); }
+  .st { color: var(--ink-soft); font-size: var(--fs-small); text-align: right; }
+  .st--req { color: var(--isl-blue); font-weight: 600; }
+  .ph-sub { margin-top: var(--s4); color: var(--ink-soft); font-size: var(--fs-small); }
+
+  .score { margin: 0; font-weight: 300; font-size: clamp(3.4rem, 2rem + 5vw, 6rem); letter-spacing: -0.04em; line-height: 1; font-variant-numeric: tabular-nums; }
+  .of { font-size: 0.35em; color: var(--ink-soft); letter-spacing: 0; margin-left: 0.15em; }
+  .verdict { margin: var(--s3) 0 0; font-weight: 600; }
+  .meter { height: 8px; background: rgb(0 0 0 / 0.07); margin-top: var(--s4); }
+  .meter span { display: block; height: 100%; width: 0; background: var(--isl-blue); transition: width 0.6s var(--ease); }
+  .out h2 { font-size: 1.15rem; margin: var(--s6) 0 var(--s3); }
+
+  .law p { margin: 0 0 var(--s2); }
+  .law-st { font-weight: 600; }
+  .law-st.ok { color: var(--isl-blue); }
+  .law-st.bad { color: #a3261b; }
+  .law-st.bad::before { content: '! '; }
+  .src { font-size: var(--fs-small); color: var(--ink-soft); }
+
+  /* Pay comparison: our range as a bar, our middle as a tick, the ad as a dot */
+  .track { position: relative; height: 22px; margin: var(--s4) 0 var(--s2); border-bottom: 1px solid var(--line); }
+  .t-range { position: absolute; top: 7px; height: 8px; background: rgb(0 0 0 / 0.14); }
+  .t-mid { position: absolute; top: 3px; width: 2px; height: 16px; margin-left: -1px; background: var(--ink); }
+  .t-ad { position: absolute; top: 4px; width: 14px; height: 14px; margin-left: -7px; border-radius: 50%; background: var(--isl-blue); box-shadow: 0 0 0 2px var(--paper); }
+  :global(.motion) .t-ad, :global(.motion) .t-mid, :global(.motion) .t-range { transition: left 0.5s var(--ease), width 0.5s var(--ease); }
+  .t-key { display: flex; gap: var(--s5); margin: 0 0 var(--s2); font-size: var(--fs-small); color: var(--ink-soft); }
+  .k { display: inline-flex; align-items: center; gap: var(--s2); }
+  .k::before { content: ''; width: 12px; height: 8px; }
+  .k--range::before { background: rgb(0 0 0 / 0.14); }
+  .k--ad::before { width: 10px; height: 10px; border-radius: 50%; background: var(--isl-blue); }
+  .hint { font-size: var(--fs-small); color: var(--ink-soft); margin: 0; }
+
+  .fixes { margin: 0; padding: 0; list-style: none; counter-reset: fix; border-top: 1px solid var(--line); }
+  .fixes :global(li) { counter-increment: fix; display: grid; grid-template-columns: 1.6rem 1fr; gap: 2px var(--s2); padding: var(--s3) 0; border-bottom: 1px solid var(--line); }
+  .fixes :global(li)::before { content: counter(fix); grid-row: span 2; font-weight: 600; color: var(--isl-blue); font-variant-numeric: tabular-nums; }
+  .fixes :global(strong) { grid-column: 2; }
+  .fixes :global(span) { grid-column: 2; color: var(--ink-soft); font-size: var(--fs-small); line-height: 1.5; }
+  .passed { margin-top: var(--s5); }
+  .passed summary { cursor: pointer; font-weight: 600; }
+  .passed ul { margin: var(--s3) 0 0; padding-left: 1.2em; color: var(--ink-soft); font-size: var(--fs-small); display: grid; gap: var(--s1); }
+
+  .next { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: var(--s5) var(--s7); align-items: end; }
+  .next .lead { margin-top: var(--s4); max-width: 52ch; }
+
+  @media (max-width: 900px) {
+    .grid, .next { grid-template-columns: 1fr; }
+    .out { position: static; }
+  }
+  @media (max-width: 420px) { .seg { grid-template-columns: repeat(3, 1fr); } .seg label:nth-child(4) span { border-left: 0; } .seg label:nth-child(n+4) span { border-top: 1.5px solid var(--line); } }
+</style>

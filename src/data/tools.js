@@ -22,6 +22,13 @@ export const tools = [
     cta: 'See the pay',
   },
   {
+    key: 'job-ad-check', preview: 'ad',
+    title: 'Job ad check',
+    who: 'For employers',
+    d: 'A score and fixes for your job ad, the pay rules in your province, and your pay against our open jobs.',
+    cta: 'Check my ad',
+  },
+  {
     key: 'resume-check', preview: 'resume',
     title: 'Resume check',
     who: 'For job seekers',

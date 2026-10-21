@@ -6,12 +6,17 @@
 // Every number is computed, never typed in:
 //   cost:   trueCost() for a $20/hour, 40-hour job in Nova Scotia (src/lib/payroll.js)
 //   pay:    the four busiest role families on our open jobs (src/lib/jobpay.js)
+//   ad:     whether each Atlantic province requires pay in job ads (src/lib/jobad.js)
 //   resume: the checks and areas the resume check runs (src/lib/resume.js)
 import { tools } from '../data/tools.js';
 import { jobs } from '../data/jobs.js';
 import { trueCost, money } from '../lib/payroll.js';
 import { payByFamily } from '../lib/jobpay.js';
 import { CHECKS } from '../lib/resume.js';
+import { PAY_LAW } from '../lib/jobad.js';
+
+const lawRows = [['PEI', 'PE'], ['New Brunswick', 'NB'], ['Nova Scotia', 'NS'], ['Newfoundland and Labrador', 'NL']]
+  .map(([name, code]) => ({ name, required: PAY_LAW[code].status === 'required', year: (PAY_LAW[code].since || '').slice(-4) }));
 
 // Cost: wage, then the added costs in three plain groups
 const c = trueCost({ wage: 20, hours: 40, province: 'NS' });
@@ -63,6 +68,16 @@ const areaRows = areas.map((a) => ({ ...a, ticks: Array.from({ length: a.n }, ()
               <p class="p-axis"><span>$15</span><span>$30</span><span>$45+</span></p>
             </>
           )}
+          {t.preview === 'ad' && (
+            <>
+              <p class="vis-cap">Pay in job ads</p>
+              <ul class="law">
+                {lawRows.map((r, j) => (
+                  <li style={`--j:${j}`}><span>{r.name}</span><span class:list={['l-st', r.required && 'l-st--req']}>{r.required ? `Required since ${r.year}` : 'Not yet'}</span></li>
+                ))}
+              </ul>
+            </>
+          )}
           {t.preview === 'resume' && (
             <>
               <p class="vis-cap">{CHECKS.length} checks in {areas.length} areas</p>
@@ -87,7 +102,9 @@ const areaRows = areas.map((a) => ({ ...a, ticks: Array.from({ length: a.n }, ()
 </ul>
 
 <style>
-  .tools { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--s6) var(--s5); }
+  /* Four tools: one row on wide screens, two by two on tablets, so no card sits alone */
+  .tools { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--s6) var(--s5); }
+  @media (max-width: 1180px) { .tools { grid-template-columns: repeat(2, 1fr); gap: var(--s7) var(--s6); } }
   .card { display: flex; flex-direction: column; height: 100%; color: var(--ink); text-decoration: none; }
   .card:hover h3 { text-decoration: underline; text-underline-offset: 0.15em; text-decoration-thickness: 1.5px; }
   .card:hover .more { color: var(--isl-blue-deep); }
@@ -114,6 +131,11 @@ const areaRows = areas.map((a) => ({ ...a, ticks: Array.from({ length: a.n }, ()
   :global(.section--tint) .p-dot { box-shadow: 0 0 0 1.5px var(--paper); }
   .p-axis { display: flex; justify-content: space-between; margin: 6px 0 0; font-size: var(--fs-tiny); color: var(--ink-soft); font-variant-numeric: tabular-nums; }
 
+  /* Job ad: pay rules by province */
+  .law li { display: flex; justify-content: space-between; gap: var(--s3); font-size: var(--fs-small); padding-bottom: 6px; border-bottom: 1px solid rgb(0 0 0 / 0.08); }
+  .l-st { color: var(--ink-soft); white-space: nowrap; }
+  .l-st--req { color: var(--isl-blue); font-weight: 600; }
+
   /* Resume: one short bar per check */
   .audit li { display: grid; grid-template-columns: 6.2rem 1fr; align-items: center; gap: var(--s3); }
   .a-name { font-size: var(--fs-tiny); font-weight: 500; line-height: 1.2; }
@@ -128,10 +150,10 @@ const areaRows = areas.map((a) => ({ ...a, ticks: Array.from({ length: a.n }, ()
   /* Motion: rows and dots settle in, the checks fill one by one */
   :global(.motion) .tools > li { opacity: 0; transform: translateY(18px); transition: opacity 0.7s var(--ease), transform 0.7s var(--ease); transition-delay: calc(var(--i) * 110ms); }
   :global(.motion) .tools > li:has(.is-in) { opacity: 1; transform: none; }
-  :global(.motion) .cost li, :global(.motion) .pay li { opacity: 0; transition: opacity 0.5s var(--ease); transition-delay: calc(0.25s + var(--j, 4) * 110ms); }
-  :global(.motion) .is-in .cost li, :global(.motion) .is-in .pay li { opacity: 1; }
+  :global(.motion) .cost li, :global(.motion) .pay li, :global(.motion) .law li { opacity: 0; transition: opacity 0.5s var(--ease); transition-delay: calc(0.25s + var(--j, 4) * 110ms); }
+  :global(.motion) .is-in .cost li, :global(.motion) .is-in .pay li, :global(.motion) .is-in .law li { opacity: 1; }
   :global(.motion) .tick { background: rgb(0 0 0 / 0.1); transition: background 0.15s; transition-delay: calc(0.3s + var(--k) * 40ms); }
   :global(.motion) .is-in .tick { background: var(--ink); }
 
-  @media (max-width: 900px) { .tools { grid-template-columns: 1fr; } }
+  @media (max-width: 700px) { .tools { grid-template-columns: 1fr; } }
 </style>

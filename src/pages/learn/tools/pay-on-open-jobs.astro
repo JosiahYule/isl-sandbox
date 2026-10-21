@@ -8,6 +8,9 @@
 // vertical line in each row is the middle (median) pay for that family. The table below
 // carries the same numbers for anyone who'd rather read than look.
 // Filters (province, type) redraw the rows and the table from the dots that remain.
+// Check an offer: pick a role family and a pay figure; a line marks it on that row and the
+// readout says how many of the open jobs it beats. The filters and the offer live in the
+// address (?province=NB&family=Drivers&offer=21), so a view can be shared.
 import Base from '../../../layouts/Base.astro';
 import PageHero from '../../../components/PageHero.astro';
 import { jobs, snapshotDate } from '../../../data/jobs.js';
@@ -54,6 +57,17 @@ const payText = (j) => j.payInfo.unit === 'year' ? `${j.pay} (about ${perHour(j.
         <p class="legend" aria-hidden="true"><span class="lg lg--contract">Contract</span><span class="lg lg--direct">Permanent</span><span class="lg lg--mid">Middle pay</span></p>
       </div>
 
+      <form class="offer" onsubmit="return false" aria-label="Check an offer">
+        <p class="o-title">Check an offer</p>
+        <label class="o-field"><span>Role</span>
+          <select name="family">{rows.map((r) => <option value={r.family}>{r.family}</option>)}</select>
+        </label>
+        <label class="o-field"><span>Pay</span>
+          <span class="o-money"><span aria-hidden="true">$</span><input name="offer" type="number" inputmode="decimal" min="0" step="0.25" placeholder="per hour, or a salary" /></span>
+        </label>
+        <p class="o-out" aria-live="polite" data-offer-out>Enter a figure to see where it sits.</p>
+      </form>
+
       <!-- A figure, not role="img": its dots are links, and an image can't contain links -->
       <figure class="chart">
         <figcaption class="visually-hidden">Pay by role family. Each job is a link; the same figures are in the table below.</figcaption>
@@ -66,6 +80,7 @@ const payText = (j) => j.payInfo.unit === 'year' ? `${j.pay} (about ${perHour(j.
             <div class="strip">
               {ticks.map((t) => <span class="grid" style={`left:${x(t)}%`} aria-hidden="true"></span>)}
               <span class="mid" data-mid style={`left:${x(r.median)}%`} aria-hidden="true"></span>
+              <span class="offer-line" data-offer-line hidden aria-hidden="true"><span>Your offer</span></span>
               {r.jobs.map((j) => (
                 <a class:list={['dot', `dot--${j.type}`]} href={j.url} style={`left:${x(j.payInfo.hourly)}%;--lane:${j.lane}`}
                    data-v={j.payInfo.hourly} data-prov={j.province} data-type={j.type}
@@ -124,7 +139,16 @@ const payText = (j) => j.payInfo.unit === 'year' ? `${j.pay} (about ${perHour(j.
   const x = (v: number) => ((Math.min(Math.max(v, AXIS[0]), AXIS[1]) - AXIS[0]) / (AXIS[1] - AXIS[0])) * 100;
   const perHour = (v: number) => '$' + (Math.round(v * 100) / 100).toFixed(v % 1 ? 2 : 0) + '/hour';
   const median = (xs: number[]) => { const s = [...xs].sort((a, b) => a - b); const k = Math.floor(s.length / 2); return s.length % 2 ? s[k] : (s[k - 1] + s[k]) / 2; };
-  let prov = '', type = '';
+  const params = new URLSearchParams(location.search);
+  let prov = ['NS', 'NB', 'PE', 'NL'].includes(params.get('province') || '') ? params.get('province')! : '';
+  let type = ['contract', 'direct'].includes(params.get('type') || '') ? params.get('type')! : '';
+  const offerForm = root.querySelector<HTMLFormElement>('.offer')!;
+  const famSel = offerForm.elements.namedItem('family') as HTMLSelectElement;
+  const offerIn = offerForm.elements.namedItem('offer') as HTMLInputElement;
+  const offerOut = root.querySelector<HTMLElement>('[data-offer-out]')!;
+  if ([...famSel.options].some((o) => o.value === params.get('family'))) famSel.value = params.get('family')!;
+  if (Number(params.get('offer')) > 0) offerIn.value = params.get('offer')!;
+  const PROV_NAME: Record<string, string> = { NS: 'Nova Scotia', NB: 'New Brunswick', PE: 'PEI', NL: 'Newfoundland and Labrador' };
 
   function apply() {
     let any = false;
@@ -151,7 +175,38 @@ const payText = (j) => j.payInfo.unit === 'year' ? `${j.pay} (about ${perHour(j.
     });
     root.querySelector<HTMLElement>('[data-empty]')!.hidden = any;
     root.querySelector<HTMLElement>('[data-table]')!.hidden = !any;
+    offer();
   }
+
+  // Where an offer sits among the open jobs in one family (with the filters applied)
+  function offer() {
+    chart.querySelectorAll<HTMLElement>('[data-offer-line]').forEach((l) => (l.hidden = true));
+    let v = Number(offerIn.value);
+    const fam = famSel.value;
+    const q = new URLSearchParams();
+    if (prov) q.set('province', prov);
+    if (type) q.set('type', type);
+    if (v > 0) { q.set('family', fam); q.set('offer', String(v)); }
+    history.replaceState(null, '', q.toString() ? `?${q}` : location.pathname);
+    if (!(v > 0)) { offerOut.textContent = 'Enter a figure to see where it sits.'; return; }
+    const salary = v >= 1000;
+    const typed = v;
+    if (salary) v = v / 2080; // a yearly salary, compared per hour like the chart
+    const row = [...chart.querySelectorAll<HTMLElement>('[data-row]')].find((r) => r.querySelector('.fam-name')!.textContent === fam)!;
+    const vals = [...row.querySelectorAll<HTMLElement>('.dot')].filter((d) => !d.hidden).map((d) => Number(d.dataset.v));
+    const where = [type === 'contract' ? 'contract' : type === 'direct' ? 'permanent' : '', fam.toLowerCase(), 'jobs', prov ? `in ${PROV_NAME[prov]}` : ''].filter(Boolean).join(' ');
+    if (!vals.length) { offerOut.textContent = `No open ${where} to compare with. Try All.`; return; }
+    const below = vals.filter((x) => x < v).length;
+    const same = vals.filter((x) => Math.abs(x - v) < 0.005).length;
+    const fig = salary ? `$${Math.round(typed).toLocaleString('en-CA')} a year (${perHour(v)})` : perHour(v);
+    offerOut.textContent = below === vals.length ? `${fig} is above every one of our ${vals.length} open ${where}.`
+      : below === 0 && !same ? `${fig} is below every one of our ${vals.length} open ${where}.`
+      : `${fig} is higher than ${below} of our ${vals.length} open ${where}${same ? `, and level with ${same}` : ''}. The middle is ${perHour(median(vals))}.`;
+    const line = row.querySelector<HTMLElement>('[data-offer-line]')!;
+    line.style.left = `${x(v)}%`;
+    line.hidden = false;
+  }
+  offerForm.addEventListener('input', offer);
 
   const bind = (attr: string, setv: (v: string) => void) => {
     const btns = root.querySelectorAll<HTMLButtonElement>(`.chips [data-${attr}]`);
@@ -163,6 +218,10 @@ const payText = (j) => j.payInfo.unit === 'year' ? `${j.pay} (about ${perHour(j.
   };
   bind('prov', (v) => (prov = v));
   bind('type', (v) => (type = v));
+  // Start from the address: press the chips it names, then draw
+  root.querySelectorAll<HTMLButtonElement>('.chips [data-prov]').forEach((b) => b.setAttribute('aria-pressed', String((b.dataset.prov || '') === prov)));
+  root.querySelectorAll<HTMLButtonElement>('.chips [data-type]').forEach((b) => b.setAttribute('aria-pressed', String((b.dataset.type || '') === type)));
+  apply();
 
   // Readout: pay first (it's what the reader wants), then the job and where
   function show(d: HTMLElement) {
@@ -196,6 +255,20 @@ const payText = (j) => j.payInfo.unit === 'year' ? `${j.pay} (about ${perHour(j.
   .lg--contract::before { background: var(--contract); }
   .lg--direct::before { background: var(--direct); border-radius: 50%; }
   .lg--mid::before { width: 2px; height: 16px; background: var(--ink); }
+
+  /* Check an offer: one line of inputs, the readout beside them */
+  .offer { display: grid; grid-template-columns: auto minmax(12rem, 16rem) minmax(9rem, 12rem) 1fr; align-items: end; gap: var(--s3) var(--s4); margin: 0 0 var(--s6); padding: var(--s4) var(--s5); background: var(--mist); }
+  .o-title { margin: 0 var(--s3) 0.7rem 0; font-weight: 700; }
+  .o-field { display: grid; gap: var(--s1); font-size: var(--fs-small); font-weight: 600; }
+  .o-field select, .o-field input { font: inherit; font-size: 1rem; font-weight: 400; padding: 0.55rem 0.7rem; border: 1.5px solid var(--line); background: var(--paper); color: var(--ink); width: 100%; }
+  .o-field select:focus, .o-field input:focus { outline: none; border-color: var(--isl-blue); }
+  .o-money { position: relative; display: block; }
+  .o-money > span { position: absolute; left: 0.7rem; top: 50%; transform: translateY(-50%); color: var(--ink-soft); font-weight: 400; }
+  .o-money input { padding-left: 1.5rem; }
+  .o-out { margin: 0 0 0.6rem; font-weight: 600; }
+  .offer-line { position: absolute; top: 4px; bottom: 4px; width: 2px; margin-left: -1px; background: var(--isl-blue); z-index: 3; pointer-events: none; }
+  .offer-line[hidden] { display: none; }
+  .offer-line span { position: absolute; bottom: 100%; left: 50%; transform: translate(-50%, -2px); font-size: var(--fs-tiny); font-weight: 700; color: var(--isl-blue); white-space: nowrap; }
 
   /* The chart: a label column, the strip, and the middle figure */
   .chart { position: relative; margin: 0; border-top: 1.5px solid var(--ink); }
@@ -259,6 +332,8 @@ const payText = (j) => j.payInfo.unit === 'year' ? `${j.pay} (about ${perHour(j.
     .strip { grid-area: strip; height: 3.25rem; }
     .axis { margin: 0; }
     .legend { margin-left: 0; width: 100%; }
+    .offer { order: 1; grid-template-columns: 1fr; margin-bottom: var(--s6); }
+    .o-title, .o-out { grid-column: 1 / -1; margin: 0; }
     .two { grid-template-columns: 1fr; }
     .table th, .table td { padding-inline: var(--s2); font-size: var(--fs-small); }
   }
