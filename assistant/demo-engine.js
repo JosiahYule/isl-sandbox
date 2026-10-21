@@ -289,7 +289,7 @@ export function createEngine({ loadJobs, siteUrl = (path) => SITE.base + path })
     findWork: siteUrl('/find-work/'),
     payTool: siteUrl('/learn/tools/pay-on-open-jobs/'),
     resumeCheck: siteUrl('/learn/tools/resume-check/'),
-    jobAdCheck: siteUrl('/learn/tools/job-ad-check/'),
+    jobsReport: siteUrl('/learn/tools/jobs-report/'),
   };
 
   return async function respond(messages, context = {}) {
@@ -316,7 +316,8 @@ export function createEngine({ loadJobs, siteUrl = (path) => SITE.base + path })
     if (st.dataQ?.kind === 'cost') return costTurn(st, asked, context);
     if (st.dataQ?.kind === 'pay') return payTurn(st, context, seed);
     if (faq === 'resumecheck') return { reply: 'Our Resume check scores your resume, shows the fixes that matter most and lists the open jobs it fits. It runs in your browser, so your resume never leaves your device.', choices: [{ label: 'Check my resume', href: links.resumeCheck }, 'Show me jobs'], meta: { mode: 'seeker' } };
-    if (faq === 'jobad') return { reply: 'Paste it into our Job ad check. It scores the ad, compares the pay with our open jobs and flags the provinces where pay has to be in the ad.', choices: [{ label: 'Check my job ad', href: links.jobAdCheck }], meta: { mode: 'employer', ask: asked } };
+    // Job ads: we'd rather run the search than coach the ad, so offer that and carry on as an employer
+    if (faq === 'jobad') { st.mode = 'employer'; const t = employerTurn(st, asked, seed); return { ...t, reply: `We can take that off your plate: we write the ad, post it, screen everyone who applies and send you the people worth meeting. ${t.reply}` }; }
     if (st.mode === 'employer') return employerTurn(st, asked, seed);
     if (faq && faq !== 'more' && faq !== 'elsewhere') return seekerFaq(faq, st);
     if (!st.mode && !st.seek.keywords.length && !st.seek.place) {

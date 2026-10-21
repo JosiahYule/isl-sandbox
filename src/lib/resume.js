@@ -90,6 +90,8 @@ export function checkResume(text) {
   return {
     score: Math.round((got / TOTAL) * 100),
     words: words(t).length,
+    // Each area's checks, in order, so the page can show where the points were won and lost
+    areas: [...new Set(results.map((r) => r.group))].map((g) => ({ group: g, checks: results.filter((r) => r.group === g).map((r) => ({ label: r.label, pass: r.pass, weight: r.weight })) })),
     fixes: results.filter((r) => !r.pass).sort((a, b) => b.weight - a.weight),
     passed: results.filter((r) => r.pass),
   };
@@ -119,7 +121,9 @@ export function keywordsFor(job) {
     .map((b) => b.text || (b.items || []).map((i) => (typeof i === 'string' ? i : `${i.label}: ${i.value}`)).join('\n')).join('\n');
   const text = `${job.title}\n${body}`;
   const found = TERMS.filter(([, re]) => re.test(text)).map(([label]) => label);
-  const titleWords = (job.title.match(/[A-Za-z][A-Za-z-]+/g) || [])
+  // A place after a dash isn't a skill ("General Labourers - Prince County"), so it's left out
+  const role = job.title.split(/\s+[-–]\s*|\s*[-–]\s+/)[0];
+  const titleWords = (role.match(/[A-Za-z][A-Za-z-]+/g) || [])
     .map((w) => w.toLowerCase().replace(/s$/, ''))
     .filter((w) => w.length > 2 && !GENERIC.has(w));
   return [...new Set([...titleWords.map((w) => w.charAt(0).toUpperCase() + w.slice(1)), ...found])].slice(0, 12);

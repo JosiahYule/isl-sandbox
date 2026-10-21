@@ -11,8 +11,15 @@ import { trueCost, money, RATES, SOURCES } from '../../../lib/payroll.js';
 import { url } from '../../../lib/url.js';
 import { tools } from '../../../data/site.js';
 
-const start = { wage: tools.cost.wage, hours: 40, province: 'NS' };
+const start = { wage: tools.cost.wage, hours: 40, province: 'NS', people: 1 };
 const r = trueCost(start);
+// The same job in every province (each at its own average workers' comp rate), for the comparison
+const across = Object.keys(RATES.provinces).map((code) => ({ code, ...trueCost({ ...start, province: code }) }));
+const acrossMax = Math.max(...across.map((a) => a.perHour - a.wage));
+// Where the paid hours go: worked, paid holidays, vacation
+const hoursOf = (x) => ({ paid: 52 * start.hours, worked: x.worked, holidays: x.province.holidays * (start.hours / 5), vacation: RATES.vacationWeeks * start.hours });
+const h = hoursOf(r);
+const n0 = (v) => Math.round(v).toLocaleString('en-CA');
 const provinces = Object.entries(RATES.provinces);
 const pct = (v) => `${(v * 100).toFixed(1)}%`;
 // Rates in the explanation keep their real precision: 5.95%, not 5.9%
@@ -41,6 +48,10 @@ const rate = (v) => `${Number((v * 100).toFixed(3))}%`;
           </div>
         </fieldset>
         <label class="field">
+          <span class="lbl">People in this role</span>
+          <input name="people" type="number" inputmode="numeric" min="1" max="500" step="1" value={start.people} />
+        </label>
+        <label class="field">
           <span class="lbl">Workers’ comp rate <span class="unit">per $100 of payroll</span></span>
           <input name="wcb" type="number" inputmode="decimal" min="0" max="15" step="0.01" value={RATES.provinces[start.province].wcb} />
           <span class="hint" data-wcb-hint>The {RATES.provinces[start.province].name} average. Yours depends on your industry.</span>
@@ -52,24 +63,73 @@ const rate = (v) => `${Number((v * 100).toFixed(3))}%`;
         <p class="per">per hour worked</p>
         <p class="sub"><span data-out="uplift">{pct(r.uplift)}</span> more than the <span data-out="wage">{money(r.wage)}</span> wage.</p>
 
-        <!-- One bar: the wage, then everything added on top -->
+        <!-- One bar, one piece per cost: the wage first, then each cost the law adds, as wide as what it adds -->
         <div class="bar" aria-hidden="true">
-          <span class="seg-wage" data-bar="wage" style={`flex-grow:${r.wage}`}></span>
-          <span class="seg-add" data-bar="add" style={`flex-grow:${r.perHour - r.wage}`}></span>
+          {r.lines.map((l, i) => <span class:list={['piece', `piece--${l.key}`]} data-bar={l.key} style={`flex-grow:${l.hour};--i:${i}`}></span>)}
         </div>
-        <p class="key" aria-hidden="true"><span class="k k--wage">Wage</span><span class="k k--add">Added costs</span></p>
+        <!-- The added costs, up close: the same pieces without the wage, so the small ones can be seen -->
+        <div class="zoom" aria-hidden="true">
+          <p class="z-label"><span data-out="added">{money(r.perHour - r.wage)}</span> added to every hour, up close</p>
+          <div class="z-bar">
+            {r.lines.slice(1).map((l) => <span class:list={['piece', `piece--${l.key}`]} data-zoom={l.key} style={`flex-grow:${l.hour}`}><span class="z-v" data-zv={l.key}>{money(l.hour)}</span></span>)}
+          </div>
+        </div>
 
         <table class="lines">
           <thead><tr><th scope="col">Cost</th><th scope="col">Per hour worked</th><th scope="col">Per year</th></tr></thead>
           <tbody>
             {r.lines.map((l) => (
-              <tr data-line={l.key}><th scope="row">{l.label}</th><td>{money(l.hour)}</td><td>{money(l.year, false)}</td></tr>
+              <tr data-line={l.key}><th scope="row"><span class:list={['sw', `piece--${l.key}`]} aria-hidden="true"></span><span data-label>{l.label}</span></th><td>{money(l.hour)}</td><td>{money(l.year, false)}</td></tr>
             ))}
           </tbody>
-          <tfoot><tr><th scope="row">Total</th><td data-out="perHour2">{money(r.perHour)}</td><td data-out="total">{money(r.total, false)}</td></tr></tfoot>
+          <tfoot>
+            <tr><th scope="row">Total</th><td data-out="perHour2">{money(r.perHour)}</td><td data-out="total">{money(r.total, false)}</td></tr>
+            <tr class="team" data-team hidden><th scope="row" colspan="2">For <span data-out="people">1</span> people in this role</th><td data-out="teamTotal">{money(r.total, false)}</td></tr>
+          </tfoot>
         </table>
         <button type="button" class="copy" data-copy>Copy a link to these figures</button>
       </div>
+    </div>
+  </section>
+
+  <!-- Why an hour worked costs more than the wage: the year's paid hours, and where they go -->
+  <section class="section section--rule">
+    <div class="wrap hours-grid">
+      <div class="section-head">
+        <h2>You pay for hours nobody works.</h2>
+        <p class="lead">Vacation and paid holidays are paid but not worked, so the cost of every working hour rises.</p>
+      </div>
+      <div class="hours" data-animate>
+        <p class="h-figs"><span><span class="figure" data-out="paidHours">{n0(h.paid)}</span> hours paid</span><span><span class="figure" data-out="workedHours">{n0(h.worked)}</span> hours worked</span></p>
+        <div class="h-bar" aria-hidden="true">
+          <span class="h-worked" data-h="worked" style={`flex-grow:${h.worked}`}></span>
+          <span class="h-hol" data-h="holidays" style={`flex-grow:${h.holidays}`}></span>
+          <span class="h-vac" data-h="vacation" style={`flex-grow:${h.vacation}`}></span>
+        </div>
+        <p class="key" aria-hidden="true"><span class="k k--worked">Worked</span><span class="k k--hol"><span data-out="holHours">{n0(h.holidays)}</span> hours of paid holidays</span><span class="k k--vac"><span data-out="vacHours">{n0(h.vacation)}</span> hours of vacation</span></p>
+      </div>
+    </div>
+  </section>
+
+  <!-- The same job in each province -->
+  <section class="section section--rule">
+    <div class="wrap">
+      <div class="section-head section-head--split">
+        <h2>The same job, province by province</h2>
+        <p class="lead">What the law adds to each hour at <span data-out="wageLine">{money(start.wage)}/hour</span>, with each province’s average workers’ comp rate.</p>
+      </div>
+      <ul class="across" data-animate>
+        {across.map((a) => (
+          <li data-prov={a.code} aria-current={a.code === start.province ? 'true' : undefined}>
+            <span class="a-name">{a.province.name}</span>
+            <span class="a-bar" aria-hidden="true" style={`--w:${((a.perHour - a.wage) / acrossMax) * 100}%`}>
+              {a.lines.slice(1).map((l) => <span class:list={['piece', `piece--${l.key}`]} data-ak={l.key} style={`flex-grow:${l.hour}`}></span>)}
+            </span>
+            <span class="a-fig"><strong data-a="added">+{money(a.perHour - a.wage)}</strong><span data-a="perHour">{money(a.perHour)} in all</span></span>
+          </li>
+        ))}
+      </ul>
+      <p class="key" aria-hidden="true">{r.lines.slice(1).map((l) => <span class:list={['k', `k--${l.key}`]}>{l.key === 'holidays' ? 'Paid holidays' : l.label.replace(/ \(4%\)|, employer share|, employer premium/, '')}</span>)}</p>
     </div>
   </section>
 
@@ -102,7 +162,7 @@ const rate = (v) => `${Number((v * 100).toFixed(3))}%`;
 
   const root = document.querySelector<HTMLElement>('[data-cost]')!;
   const form = root.querySelector('form')!;
-  const out = (k: string) => root.querySelectorAll<HTMLElement>(`[data-out="${k}"]`);
+  const out = (k: string) => document.querySelectorAll<HTMLElement>(`[data-out="${k}"]`); // the figures sit in several sections
   const set = (k: string, v: string) => out(k).forEach((el) => (el.textContent = v));
   const hire = document.querySelector<HTMLAnchorElement>('[data-hire]')!;
   const hireBase = hire.getAttribute('href')!;
@@ -112,6 +172,9 @@ const rate = (v) => `${Number((v * 100).toFixed(3))}%`;
   const q = new URLSearchParams(location.search);
   const wageIn = form.elements.namedItem('wage') as HTMLInputElement;
   const hoursIn = form.elements.namedItem('hours') as HTMLInputElement;
+  const peopleIn = form.elements.namedItem('people') as HTMLInputElement;
+  if (Number(q.get('people')) > 1) peopleIn.value = String(Math.round(Number(q.get('people'))));
+  const n0 = (v: number) => Math.round(v).toLocaleString('en-CA');
   const qp = String(q.get('province') || '').toUpperCase();
   let lastProvince = RATES.provinces[qp] ? qp : 'NS';
   if (Number(q.get('wage')) > 0) wageIn.value = String(Number(q.get('wage')));
@@ -142,21 +205,49 @@ const rate = (v) => `${Number((v * 100).toFixed(3))}%`;
     set('total', money(r.total, false));
     for (const l of r.lines) {
       const row = root.querySelector(`[data-line="${l.key}"]`)!;
-      row.querySelector('th')!.textContent = l.label;
+      row.querySelector('[data-label]')!.textContent = l.label;
       const [h, y] = row.querySelectorAll('td');
       h.textContent = money(l.hour);
       y.textContent = money(l.year, false);
+      root.querySelector<HTMLElement>(`[data-bar="${l.key}"]`)!.style.flexGrow = String(l.hour);
+      const z = root.querySelector<HTMLElement>(`[data-zoom="${l.key}"]`);
+      if (z) { z.style.flexGrow = String(l.hour); z.querySelector('.z-v')!.textContent = money(l.hour); }
     }
-    root.querySelector<HTMLElement>('[data-bar="wage"]')!.style.flexGrow = String(r.wage);
-    root.querySelector<HTMLElement>('[data-bar="add"]')!.style.flexGrow = String(r.perHour - r.wage);
+    set('added', money(r.perHour - r.wage));
+    // More than one person: the yearly total for all of them
+    const people = Math.max(1, Math.round(Number(peopleIn.value) || 1));
+    const team = root.querySelector<HTMLElement>('[data-team]')!;
+    team.hidden = people < 2;
+    set('people', String(people));
+    set('teamTotal', money(r.total * people, false));
+
+    // Where the paid hours go
+    const paid = 52 * hours, hol = r.province.holidays * (hours / 5), vac = RATES.vacationWeeks * hours;
+    set('paidHours', n0(paid)); set('workedHours', n0(r.worked)); set('holHours', n0(hol)); set('vacHours', n0(vac));
+    const hb = (k: string, v: number) => (document.querySelector<HTMLElement>(`[data-h="${k}"]`)!.style.flexGrow = String(v));
+    hb('worked', r.worked); hb('holidays', hol); hb('vacation', vac);
+
+    // The same job in every province (each at its own average workers' comp rate)
+    const all = Object.keys(RATES.provinces).map((code) => ({ code, ...trueCost({ wage, hours, province: code }) }));
+    const top = Math.max(...all.map((a) => a.perHour - a.wage));
+    set('wageLine', `${money(wage)}/hour`);
+    for (const a of all) {
+      const li = document.querySelector<HTMLElement>(`.across [data-prov="${a.code}"]`)!;
+      a.code === province ? li.setAttribute('aria-current', 'true') : li.removeAttribute('aria-current');
+      li.querySelector<HTMLElement>('.a-bar')!.style.setProperty('--w', `${((a.perHour - a.wage) / top) * 100}%`);
+      for (const l of a.lines.slice(1)) li.querySelector<HTMLElement>(`[data-ak="${l.key}"]`)!.style.flexGrow = String(l.hour);
+      li.querySelector<HTMLElement>('[data-a="added"]')!.textContent = `+${money(a.perHour - a.wage)}`;
+      li.querySelector<HTMLElement>('[data-a="perHour"]')!.textContent = `${money(a.perHour)} in all`;
+    }
 
     // Keep the figures in the address (workers' comp only when it isn't the province average)
     const params = new URLSearchParams({ wage: String(wage), hours: String(hours), province });
+    if (people > 1) params.set('people', String(people));
     if (wcb !== RATES.provinces[province].wcb) params.set('wcb', String(wcb));
     history.replaceState(null, '', `?${params}`);
 
     // The request form opens pre-filled with this role's details
-    const details = `${hire.dataset.details} at about ${money(wage)}/hour, ${hours} hours a week.`;
+    const details = `${people > 1 ? `${people} people: ` : ''}${hire.dataset.details} at about ${money(wage)}/hour, ${hours} hours a week.`;
     hire.href = `${hireBase}&where=${encodeURIComponent(r.province.name)}&details=${encodeURIComponent(details)}`;
   }
 
@@ -199,15 +290,64 @@ const rate = (v) => `${Number((v * 100).toFixed(3))}%`;
   .big { margin: 0; font-weight: var(--fw-light); font-size: var(--fs-figure-lg); letter-spacing: -0.04em; line-height: 1; font-variant-numeric: tabular-nums; }
   .per { margin: var(--s2) 0 0; font-weight: var(--fw-bold); }
   .sub { margin: var(--s2) 0 0; color: var(--ink-soft); }
-  .bar { display: flex; gap: 2px; height: 14px; margin-top: var(--s6); }
-  .bar span { display: block; min-width: 2px; transition: flex-grow 0.35s var(--ease); }
-  .seg-wage { background: var(--ink); }
-  .seg-add { background: var(--accent); }
-  .key { display: flex; gap: var(--s5); margin: var(--s3) 0 0; font-size: var(--fs-small); color: var(--ink-soft); }
+  /* The breakdown: the wage in ink, then each added cost in a step of the brand colour */
+  .bar { display: flex; gap: 2px; height: 22px; margin-top: var(--s6); }
+  .bar span { display: block; min-width: 3px; transition: flex-grow 0.45s var(--ease); }
+  .piece--wage { background: var(--ink); }
+  .piece--holidays { background: var(--accent); }
+  .piece--vacation { background: color-mix(in srgb, var(--accent) 78%, var(--paper)); }
+  .piece--cpp { background: color-mix(in srgb, var(--accent) 58%, var(--paper)); }
+  .piece--ei { background: color-mix(in srgb, var(--accent) 40%, var(--paper)); }
+  .piece--wcb { background: color-mix(in srgb, var(--accent) 24%, var(--paper)); }
+  :global(.motion) .bar { clip-path: inset(0 100% 0 0); animation: draw 0.8s var(--ease) 0.2s forwards; }
+  @keyframes draw { to { clip-path: inset(0 0 0 0); } }
+  .sw { display: inline-block; width: 12px; height: 12px; margin-right: var(--s3); vertical-align: -1px; }
+  .key { display: flex; flex-wrap: wrap; gap: var(--s2) var(--s5); margin: var(--s3) 0 0; font-size: var(--fs-small); color: var(--ink-soft); }
   .k { display: inline-flex; align-items: center; gap: var(--s2); }
   .k::before { content: ''; width: 12px; height: 12px; }
-  .k--wage::before { background: var(--ink); }
-  .k--add::before { background: var(--accent); }
+  .k--wage::before, .k--worked::before { background: var(--ink); }
+  .k--add::before, .k--hol::before { background: var(--accent); }
+  .k--vac::before { background: color-mix(in srgb, var(--accent) 45%, var(--paper)); }
+  .lines .team th, .lines .team td { border-top: 0; font-weight: var(--fw-text); color: var(--ink-soft); padding-top: 0; }
+  .lines .team td { color: var(--ink); font-weight: var(--fw-bold); }
+
+  /* Paid hours and worked hours */
+  .hours-grid { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: var(--s6) clamp(2.5rem, 6vw, 6rem); align-items: end; }
+  .hours-grid .section-head { margin-bottom: 0; }
+  .h-figs { display: flex; gap: var(--s7); margin: 0 0 var(--s4); color: var(--ink-soft); }
+  .h-figs .figure { display: block; font-size: var(--fs-figure); color: var(--ink); line-height: 1; margin-bottom: var(--s1); font-variant-numeric: tabular-nums; }
+  .h-bar { display: flex; gap: 2px; height: 22px; }
+  .h-bar span { display: block; transition: flex-grow 0.45s var(--ease); }
+  .h-worked { background: var(--ink); }
+  .h-hol { background: var(--accent); }
+  .h-vac { background: color-mix(in srgb, var(--accent) 45%, var(--paper)); }
+  :global(.motion) .h-bar { clip-path: inset(0 100% 0 0); transition: clip-path 0.8s var(--ease); }
+  :global(.motion) .is-in .h-bar { clip-path: inset(0 0 0 0); }
+
+  /* Province by province */
+  .across { list-style: none; margin: 0; padding: 0; border-top: 1.5px solid var(--ink); }
+  .across li { display: grid; grid-template-columns: minmax(0, 15rem) minmax(0, 1fr) 11rem; gap: var(--s5); align-items: center; padding-block: var(--s4); border-bottom: 1px solid var(--line); transition: background 0.2s; }
+  .across li[aria-current='true'] { background: var(--mist); }
+  .across li[aria-current='true'] .a-name { font-weight: var(--fw-bold); }
+  .a-bar { display: flex; gap: 2px; height: 16px; width: var(--w); transition: width 0.45s var(--ease); }
+  .a-bar span { transition: flex-grow 0.45s var(--ease); }
+  .k--holidays::before { background: var(--accent); }
+  .k--vacation::before { background: color-mix(in srgb, var(--accent) 78%, var(--paper)); }
+  .k--cpp::before { background: color-mix(in srgb, var(--accent) 58%, var(--paper)); }
+  .k--ei::before { background: color-mix(in srgb, var(--accent) 40%, var(--paper)); }
+  .k--wcb::before { background: color-mix(in srgb, var(--accent) 24%, var(--paper)); }
+  /* Up close */
+  .zoom { margin-top: var(--s4); }
+  .z-label { font-size: var(--fs-small); color: var(--ink-soft); margin: 0 0 var(--s2); }
+  .z-label span { font-weight: var(--fw-bold); color: var(--ink); }
+  .z-bar { display: flex; gap: 2px; }
+  .z-bar .piece { display: flex; align-items: center; min-width: 3.4rem; height: 34px; padding-left: 6px; transition: flex-grow 0.45s var(--ease); }
+  /* Each value sits on its own white tab, so it reads on every shade (and in every brand's colour) */
+  .z-v { font-size: var(--fs-tiny); font-weight: var(--fw-bold); font-variant-numeric: tabular-nums; color: var(--ink); background: var(--paper); padding: 1px 5px; line-height: 1.4; }
+  :global(.motion) .across .a-bar { clip-path: inset(0 100% 0 0); transition: clip-path 0.8s var(--ease), width 0.45s var(--ease); }
+  :global(.motion) .across.is-in .a-bar { clip-path: inset(0 0 0 0); }
+  .a-fig { display: flex; justify-content: flex-end; align-items: baseline; gap: var(--s3); font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .a-fig span { color: var(--ink-soft); font-size: var(--fs-small); }
 
   .lines { width: 100%; border-collapse: collapse; margin-top: var(--s6); font-variant-numeric: tabular-nums; }
   .lines th, .lines td { padding: 0.65rem 0; border-bottom: 1px solid var(--line); text-align: right; font-weight: var(--fw-text); }
@@ -232,7 +372,9 @@ const rate = (v) => `${Number((v * 100).toFixed(3))}%`;
   .src { margin-top: var(--s5); font-size: var(--fs-small); color: var(--ink-soft); max-width: 70ch; }
 
   @media (max-width: 900px) {
-    .grid, .cta { grid-template-columns: 1fr; }
+    .grid, .cta, .hours-grid { grid-template-columns: 1fr; }
+    .across li { grid-template-columns: minmax(0, 1fr) auto; }
+    .a-bar { grid-column: 1 / -1; grid-row: 2; }
     .go { justify-self: start; }
   }
 </style>

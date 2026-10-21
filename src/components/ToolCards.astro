@@ -5,6 +5,7 @@
 // Every preview has the same four parts, so the row reads as one set:
 //   a label, one figure, one line saying what it means, and one bar along the bottom.
 // Every number is computed from the tool's own data, never typed in:
+//   jobs:   Atlantic unemployment from the latest Labour Force Survey, one segment per province (src/lib/lfs.js)
 //   cost:   trueCost() for a $20/hour, 40-hour job in Nova Scotia (src/lib/payroll.js)
 //   pay:    middle and range of pay in the busiest role family on our open jobs (src/lib/jobpay.js)
 //   ad:     how many Atlantic provinces require pay in job ads (src/lib/jobad.js)
@@ -16,6 +17,7 @@ import { payByFamily, perHour } from '../lib/jobpay.js';
 import { CHECKS } from '../lib/resume.js';
 import { PAY_LAW } from '../lib/jobad.js';
 import { tools as brandTools } from '../data/site.js';
+import { lfs, GEOS, SHORT, at, monthName } from '../lib/lfs.js';
 
 const dollars = (v) => perHour(v).replace('/hour', '');
 const list = (xs) => (xs.length > 1 ? `${xs.slice(0, -1).join(', ')} and ${xs.at(-1)}` : xs[0]);
@@ -36,7 +38,17 @@ const required = law.filter((l) => l.required);
 // Resume: one segment per area, as wide as its number of checks
 const areas = [...new Set(CHECKS.map((k) => k.group))].map((g) => ({ g, n: CHECKS.filter((k) => k.group === g).length }));
 
+// Jobs report: the region's unemployment rate, and one segment per province shaded by its rate (as on the map)
+const ur = lfs ? GEOS.map((g) => ({ g, v: at(lfs.provinces[g]?.unemploymentRate, lfs.month) })).filter((r) => r.v != null) : [];
+const sumOf = (k) => GEOS.reduce((t, g) => t + (at(lfs.provinces[g]?.[k], lfs.month) ?? 0), 0);
+const urLo = Math.min(...ur.map((r) => r.v)), urHi = Math.max(...ur.map((r) => r.v));
+const jobsPreview = ur.length
+  ? { label: `Unemployment, ${monthName(lfs.month)}`, figure: `${((1 - sumOf('employment') / sumOf('labourForce')) * 100).toFixed(1)}%`, line: `across Atlantic Canada: ${ur.map((r) => `${SHORT[r.g]} ${r.v.toFixed(1)}%`).join(', ')}`,
+      bar: ur.map((r) => ({ w: 1, k: 'shade', s: urHi > urLo ? (r.v - urLo) / (urHi - urLo) : 0.5 })) }
+  : { label: 'Labour Force Survey', figure: 'Monthly', line: 'unemployment, jobs and wages in the four Atlantic provinces', bar: GEOS.map(() => ({ w: 1, k: 'off' })) };
+
 const previews = {
+  jobs: jobsPreview,
   cost: { label: `A $${brandTools.cost.wage}/hour job in Nova Scotia`, figure: money(c.perHour), line: `per hour worked, ${Math.round(c.uplift * 100)}% on top of the wage`,
     bar: [{ w: c.wage, k: 'ink' }, { w: c.perHour - c.wage, k: 'blue' }] },
   pay: { label: top.family, figure: dollars(top.median), unit: '/hour', line: `the middle of ${top.jobs.length} open jobs, ${dollars(top.low)} to ${dollars(top.high)}`,
@@ -56,7 +68,7 @@ const previews = {
             <p class="v-label">{v.label}</p>
             <p class="v-fig">{v.figure}{v.unit && <span class="v-unit">{v.unit}</span>}</p>
             <p class="v-line">{v.line}</p>
-            {v.bar && <span class="v-bar">{v.bar.map((seg, j) => <span class:list={['seg', `seg--${seg.k}`]} style={`flex-grow:${seg.w};--j:${j}`}></span>)}</span>}
+            {v.bar && <span class="v-bar">{v.bar.map((seg, j) => <span class:list={['seg', `seg--${seg.k}`]} style={`flex-grow:${seg.w};--j:${j}${seg.s != null ? `;--s:${seg.s}` : ''}`}></span>)}</span>}
             {v.range && <span class="v-bar v-range"><span class="r-band" style={`left:${v.range.lo};right:calc(100% - ${v.range.hi})`}></span><span class="r-mid" style={`left:${v.range.mid}`}></span></span>}
           </div>
         ); })()}
@@ -94,6 +106,7 @@ const previews = {
   .seg--ink { background: var(--ink); }
   .seg--blue { background: var(--accent); }
   .seg--off { background: rgb(0 0 0 / 0.1); }
+  .seg--shade { background: color-mix(in srgb, var(--accent) calc(22% + var(--s) * 78%), var(--paper)); }
   .v-range { background: rgb(0 0 0 / 0.08); }
   .r-band { position: absolute; top: 0; bottom: 0; background: var(--ink); opacity: 0.35; }
   .r-mid { position: absolute; top: -4px; bottom: -4px; width: 3px; margin-left: -1.5px; background: var(--ink); }

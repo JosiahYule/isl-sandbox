@@ -11,11 +11,13 @@
 // Check an offer: pick a role family and a pay figure; a line marks it on that row and the
 // readout says how many of the open jobs it beats. The filters and the offer live in the
 // address (?province=NB&family=Drivers&offer=21), so a view can be shared.
+// Pick a province and a line marks its minimum wage (src/lib/minwage.js) on every row.
 import Base from '../../../../layouts/Base.astro';
 import PageHero from '../../../../components/PageHero.astro';
 import { jobs, snapshotDate } from '../../../../data/jobs.js';
 import { payByFamily, perHour } from '../../../../lib/jobpay.js';
 import { url } from '../../../../lib/url.js';
+import { MIN_WAGE } from '../../../../lib/minwage.js';
 
 const rows = payByFamily(jobs);
 const counted = rows.reduce((n, r) => n + r.jobs.length, 0);
@@ -49,12 +51,12 @@ const payText = (j) => j.payInfo.unit === 'year' ? `${j.pay} (about ${perHour(j.
     <div class="wrap pay-wrap">
       <div class="filters">
         <div class="chips" role="group" aria-label="Province">
-          {provinces.map(([k, l], i) => <button type="button" data-prov={k} aria-pressed={String(i === 0)}>{l}</button>)}
+          {provinces.map(([k, l], i) => <button type="button" data-prov={k} data-min={MIN_WAGE[k]?.rate} aria-pressed={String(i === 0)}>{l}</button>)}
         </div>
         <div class="chips" role="group" aria-label="Job type">
           {types.map(([k, l], i) => <button type="button" data-type={k} aria-pressed={String(i === 0)}>{l}</button>)}
         </div>
-        <p class="legend" aria-hidden="true"><span class="lg lg--contract">Contract</span><span class="lg lg--direct">Permanent</span><span class="lg lg--mid">Middle pay</span></p>
+        <p class="legend" aria-hidden="true"><span class="lg lg--contract">Contract</span><span class="lg lg--direct">Permanent</span><span class="lg lg--mid">Middle pay</span><span class="lg lg--min" data-min-key hidden>Minimum wage</span></p>
       </div>
 
       <form class="offer" onsubmit="return false" aria-label="Check an offer">
@@ -73,6 +75,7 @@ const payText = (j) => j.payInfo.unit === 'year' ? `${j.pay} (about ${perHour(j.
         <figcaption class="visually-hidden">Pay by role family. Each job is a link; the same figures are in the table below.</figcaption>
         <div class="axis" aria-hidden="true">
           {ticks.map((t) => <span style={`left:${x(t)}%`}>${t}</span>)}
+          <span class="axis-min" data-axis-min hidden></span>
         </div>
         {rows.map((r) => (
           <div class="row" data-row>
@@ -80,6 +83,7 @@ const payText = (j) => j.payInfo.unit === 'year' ? `${j.pay} (about ${perHour(j.
             <div class="strip">
               {ticks.map((t) => <span class="grid" style={`left:${x(t)}%`} aria-hidden="true"></span>)}
               <span class="mid" data-mid style={`left:${x(r.median)}%`} aria-hidden="true"></span>
+              <span class="minw" data-minw hidden aria-hidden="true"></span>
               <span class="offer-line" data-offer-line hidden aria-hidden="true"><span>Your offer</span></span>
               {r.jobs.map((j) => (
                 <a class:list={['dot', `dot--${j.type}`]} href={j.url} style={`left:${x(j.payInfo.hourly)}%;--lane:${j.lane}`}
@@ -109,7 +113,7 @@ const payText = (j) => j.payInfo.unit === 'year' ? `${j.pay} (about ${perHour(j.
       </table>
       </div>
 
-      <p class="note">{counted} of our {jobs.length} open jobs, as of {snapshotDate}. {left > 0 && `${left} without a stated pay, or with only a part-time yearly figure, aren’t shown. `}Salaries are shown per hour over a 2,080-hour year. Select a dot to open that job.</p>
+      <p class="note">{counted} of our {jobs.length} open jobs, as of {snapshotDate}. {left > 0 && `${left} without a stated pay, or with only a part-time yearly figure, aren’t shown. `}Salaries are shown per hour over a 2,080-hour year. Select a dot to open that job. Minimum wages: {Object.entries(MIN_WAGE).map(([k, m], i) => <>{i > 0 && ', '}{k === 'PE' ? 'PEI' : k} ${m.rate.toFixed(2)}</>)}, the general rate in each province today.</p>
     </div>
   </section>
 
@@ -135,7 +139,7 @@ const payText = (j) => j.payInfo.unit === 'year' ? `${j.pay} (about ${perHour(j.
   const chart = root.querySelector<HTMLElement>('.chart')!;
   const tip = chart.querySelector<HTMLElement>('.tip')!;
   const AXIS = (() => {
-    const labels = [...chart.querySelectorAll<HTMLElement>('.axis span')];
+    const labels = [...chart.querySelectorAll<HTMLElement>('.axis span:not(.axis-min)')];
     return [15, Number(labels.at(-1)!.textContent!.replace('$', ''))];
   })();
   const x = (v: number) => ((Math.min(Math.max(v, AXIS[0]), AXIS[1]) - AXIS[0]) / (AXIS[1] - AXIS[0])) * 100;
@@ -152,8 +156,17 @@ const payText = (j) => j.payInfo.unit === 'year' ? `${j.pay} (about ${perHour(j.
   if (Number(params.get('offer')) > 0) offerIn.value = params.get('offer')!;
   const PROV_NAME: Record<string, string> = { NS: 'Nova Scotia', NB: 'New Brunswick', PE: 'PEI', NL: 'Newfoundland and Labrador' };
 
+  // The province's minimum wage, from its chip
+  const minFor = (p: string) => Number(root.querySelector<HTMLElement>(`.chips [data-prov="${p}"]`)?.dataset.min) || 0;
+
   function apply() {
     let any = false;
+    const min = prov ? minFor(prov) : 0;
+    root.querySelector<HTMLElement>('[data-min-key]')!.hidden = !min;
+    const am = root.querySelector<HTMLElement>('[data-axis-min]')!;
+    am.hidden = !min;
+    chart.classList.toggle('has-min', !!min);
+    if (min) { am.style.left = `${x(min)}%`; am.textContent = `${PROV_NAME[prov]} minimum $${min.toFixed(2)}`; }
     chart.querySelectorAll<HTMLElement>('[data-row]').forEach((row) => {
       const dots = [...row.querySelectorAll<HTMLElement>('.dot')];
       const shown = dots.filter((d) => (!prov || d.dataset.prov === prov) && (!type || d.dataset.type === type));
@@ -163,6 +176,9 @@ const payText = (j) => j.payInfo.unit === 'year' ? `${j.pay} (about ${perHour(j.
       row.hidden = trow.hidden = !shown.length;
       if (!shown.length) return;
       any = true;
+      const mw = row.querySelector<HTMLElement>('[data-minw]')!;
+      mw.hidden = !min;
+      if (min) mw.style.left = `${x(min)}%`;
       const vals = shown.map((d) => Number(d.dataset.v));
       const mid = median(vals);
       row.querySelector<HTMLElement>('[data-mid]')!.style.left = `${x(mid)}%`;
@@ -198,6 +214,13 @@ const payText = (j) => j.payInfo.unit === 'year' ? `${j.pay} (about ${perHour(j.
     const vals = [...row.querySelectorAll<HTMLElement>('.dot')].filter((d) => !d.hidden).map((d) => Number(d.dataset.v));
     const where = [type === 'contract' ? 'contract' : type === 'direct' ? 'permanent' : '', fam.toLowerCase(), 'jobs', prov ? `in ${PROV_NAME[prov]}` : ''].filter(Boolean).join(' ');
     if (!vals.length) { offerOut.textContent = `No open ${where} to compare with. Try All.`; return; }
+    const min = prov ? minFor(prov) : 0;
+    const fig0 = salary ? `$${Math.round(typed).toLocaleString('en-CA')} a year (${perHour(v)})` : perHour(v);
+    if (min && v < min) {
+      offerOut.textContent = `${fig0} is below ${PROV_NAME[prov]}’s minimum wage of $${min.toFixed(2)} an hour.`;
+      const l = row.querySelector<HTMLElement>('[data-offer-line]')!; l.style.left = `${x(v)}%`; l.hidden = false;
+      return;
+    }
     const below = vals.filter((x) => x < v).length;
     const same = vals.filter((x) => Math.abs(x - v) < 0.005).length;
     const fig = salary ? `$${Math.round(typed).toLocaleString('en-CA')} a year (${perHour(v)})` : perHour(v);
@@ -270,6 +293,14 @@ const payText = (j) => j.payInfo.unit === 'year' ? `${j.pay} (about ${perHour(j.
   .o-out { margin: 0 0 0.6rem; font-weight: var(--fw-bold); }
   .offer-line { position: absolute; top: 4px; bottom: 4px; width: 2px; margin-left: -1px; background: var(--accent); z-index: 3; pointer-events: none; }
   .offer-line[hidden] { display: none; }
+  /* The province's minimum wage: a dark line through every row, labelled once on the first */
+  .minw { position: absolute; top: 0; bottom: 0; width: 0; border-left: 2px dashed var(--ink); z-index: 1; pointer-events: none; }
+  .minw[hidden] { display: none; }
+  .axis .axis-min { bottom: auto; top: 0.2rem; transform: none; margin-left: -1px; padding-left: 6px; border-left: 2px dashed var(--ink); font-weight: var(--fw-bold); color: var(--ink); white-space: nowrap; }
+  .axis .axis-min[hidden] { display: none; }
+  .has-min .axis { height: 3.2rem; }
+  .lg--min::before { width: 0; height: 14px; border-left: 2px dashed var(--ink); }
+  .lg[hidden] { display: none; }
   .offer-line span { position: absolute; bottom: 100%; left: 50%; transform: translate(-50%, -2px); font-size: var(--fs-tiny); font-weight: var(--fw-bold); color: var(--accent); white-space: nowrap; }
 
   /* The chart: a label column, the strip, and the middle figure */

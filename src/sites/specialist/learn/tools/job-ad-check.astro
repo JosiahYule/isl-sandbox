@@ -1,16 +1,17 @@
 ---
-// TOOL: JOB AD CHECK  →  /learn/tools/job-ad-check/
+// TOOL: JOB AD CHECK  →  /learn/tools/job-ad-check/   (AS and ADS only: ISL took it off, since
+// it coaches employers to do the job ISL is hired for)
 // For employers. Paste a job ad, pick the province: get a score, the fixes that matter most,
 // whether the province requires pay in the ad, and how the pay compares with ISL's open jobs.
 //   rules and pay law       src/lib/jobad.js
 //   pay on our open jobs    payFor() in assistant/.../insights.js (the same answer the assistant gives)
 // Everything runs in the browser; the ad is never sent or saved.
-import Base from '../../../layouts/Base.astro';
-import PageHero from '../../../components/PageHero.astro';
-import { jobs } from '../../../data/jobs.js';
-import { CHECKS, PAY_LAW } from '../../../lib/jobad.js';
-import { url } from '../../../lib/url.js';
-import { brand, tools } from '../../../data/site.js';
+import Base from '../../../../layouts/Base.astro';
+import PageHero from '../../../../components/PageHero.astro';
+import { jobs } from '../../../../data/jobs.js';
+import { CHECKS, PAY_LAW } from '../../../../lib/jobad.js';
+import { url } from '../../../../lib/url.js';
+import { brand, tools } from '../../../../data/site.js';
 
 // Only what the pay comparison needs goes to the page
 const payJobs = jobs.filter((j) => j.pay).map((j) => ({ id: j.id, title: j.title, province: j.province, city: j.city, pay: j.pay }));
@@ -112,8 +113,8 @@ const sample = tools.ad.sample;
 </Base>
 
 <script>
-  import { checkAd } from '../../../lib/jobad.js';
-  import { payFor } from '../../../../assistant/supabase/functions/_shared/insights.js';
+  import { checkAd } from '../../../../lib/jobad.js';
+  import { payFor } from '../../../../../assistant/supabase/functions/_shared/insights.js';
 
   const root = document.querySelector<HTMLElement>('[data-ad]')!;
   const form = root.querySelector('form')!;

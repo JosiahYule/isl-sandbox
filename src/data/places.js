@@ -2,6 +2,9 @@
 // Add a town here when it shows up in the job feed and isn't on the map yet.
 // [longitude, latitude]
 export const places = {
+  // Towns inside an office's area (used when a map shows towns one by one)
+  'dartmouth': [-63.57, 44.67], 'bedford': [-63.66, 44.73], 'timberlea': [-63.75, 44.66], 'prospect bay': [-63.81, 44.56],
+  'goffs': [-63.62, 44.87], 'scoudouc': [-64.53, 46.21], 'alexandra': [-63.03, 46.19], 'paradise': [-52.87, 47.53],
   'bridgewater': [-64.52, 44.38], 'stellarton': [-62.66, 45.56], 'new glasgow': [-62.65, 45.59], 'truro': [-63.28, 45.37],
   'antigonish': [-61.99, 45.62], 'sydney': [-60.19, 46.14], 'yarmouth': [-66.12, 43.84], 'kentville': [-64.50, 45.08],
   'amherst': [-64.21, 45.83], 'windsor': [-64.13, 44.99], 'digby': [-65.76, 44.62], 'port hawkesbury': [-61.35, 45.62],

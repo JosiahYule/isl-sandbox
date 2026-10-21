@@ -9,6 +9,13 @@ const post = (slug) => posts.find((p) => p.slug === slug);
 
 export const tools = [
   {
+    key: 'jobs-report', preview: 'jobs',
+    title: 'Atlantic jobs report',
+    who: 'For employers and job seekers',
+    d: 'Statistics Canada’s monthly jobs numbers for the four Atlantic provinces, in charts. Updated each month.',
+    cta: 'See this month',
+  },
+  {
     key: 'true-cost-of-an-employee', preview: 'cost',
     title: 'True cost of an employee',
     who: 'For employers',
@@ -39,6 +46,7 @@ export const tools = [
 ]
   // Each brand lists the tools it has (src/brands/): AS and ADS have no pay tool yet
   .filter((t) => brandTools.list.includes(t.key))
+  .sort((a, b) => brandTools.list.indexOf(a.key) - brandTools.list.indexOf(b.key)) // in the brand's order
   .map((t) => ({ ...t, url: url(`/learn/tools/${t.key}/`) }))
   // Without pay on their open jobs, the job ad check can't compare pay (AS, ADS for now)
   .map((t) => (t.key === 'job-ad-check' && !brandTools.list.includes('pay-on-open-jobs') ? { ...t, d: 'A score and fixes for your job ad, and the pay rules in your province.' } : t));

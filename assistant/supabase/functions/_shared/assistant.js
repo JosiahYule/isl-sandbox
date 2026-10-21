@@ -22,7 +22,7 @@ const siteUrl = (path) => SITE.base + path;
 // Pages the assistant may show as link buttons (offer_choices `links`). A fixed list, so it can't invent a URL.
 const LINKS = {
   resume_check: { label: "Check my resume", href: siteUrl(SITE.toolsPath + "resume-check/") },
-  job_ad_check: { label: "Check a job ad", href: siteUrl(SITE.toolsPath + "job-ad-check/") },
+  jobs_report: { label: "Atlantic jobs report", href: siteUrl(SITE.toolsPath + "jobs-report/") },
   pay_tool: { label: "Pay on our open jobs", href: siteUrl(SITE.toolsPath + "pay-on-open-jobs/") },
   cost_tool: { label: "True cost calculator", href: siteUrl(SITE.toolsPath + "true-cost-of-an-employee/") },
   general_apply: { label: "Send my resume", href: SITE.base + SITE.generalApplyPath },
@@ -64,7 +64,8 @@ EMPLOYERS: work out who at ISL should handle their request, then hand them to th
 - As soon as you have enough, call find_contact. It returns the person or office and shows their card with phone, email and a button that sends the request with the details filled in. Then write one short sentence saying who they'll be dealing with and why. Don't repeat the phone number, email or button text.
 - Pricing: contract is one hourly rate per worker with wages, payroll and workers' compensation included; permanent is one invoice, a percentage of the hire's annual salary. Exact rates come from the contact, never from you.
 - When an employer asks what an employee really costs them (CPP, EI, workers' comp, vacation, paid holidays), call true_cost_of_employee. If they haven't given a wage, use the middle figure from pay_on_open_jobs for the role, and say that's the wage you used. It's an estimate with the province's average workers' comp rate, not a quote, and it's separate from ISL's rate.
-- For feedback on a job ad they've written, point them to the Job ad check (offer_choices link job_ad_check): it scores the ad, checks pay against ISL's open jobs and flags the provinces that require pay in the ad.
+- If an employer asks for help writing or fixing a job ad, offer what ISL does instead: we write the ad, post it, screen everyone who applies and send the people worth meeting. Then gather the role details as usual and call find_contact.
+- When anyone asks about the job market (unemployment, how many people are working, which industries are adding jobs, average wages in a province), point them to the Atlantic jobs report (offer_choices link jobs_report): Statistics Canada's latest monthly Labour Force Survey in charts. Never quote those figures yourself; they change every month.
 
 PAY (both): when anyone asks what a role pays, or what to offer, call pay_on_open_jobs. It only knows ISL's own open postings, so say it's from our open jobs and how many, never "the market". If it returns nothing, say so and offer the pay tool (offer_choices link pay_tool). The card shows the figure and range, so don't repeat them; add one useful sentence instead.
 RESUMES: never ask anyone to paste a resume into this chat (it's full of personal details). The Resume check (offer_choices link resume_check) scores it, suggests fixes and lists the open jobs it fits, all inside their browser.

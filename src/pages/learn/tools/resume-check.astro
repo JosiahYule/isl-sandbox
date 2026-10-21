@@ -48,6 +48,9 @@ const groups = [...new Set(CHECKS.map((c) => c.group))];
           <p class="verdict" data-verdict></p>
           <div class="meter" aria-hidden="true"><span data-meter></span></div>
 
+          <h2>By area</h2>
+          <ul class="areas" data-areas></ul>
+
           <div class="match" data-match hidden>
             <h2>Against this job</h2>
             <p data-match-sum></p>
@@ -120,6 +123,19 @@ const groups = [...new Set(CHECKS.map((c) => c.group))];
       : r.score >= 60 ? 'Good start. The fixes below will make the biggest difference.'
       : 'Worth an hour of work. Start at the top of the list.';
 
+    // By area: one square per check, filled where it passed, wider for the checks worth more
+    $('[data-areas]').replaceChildren(...r.areas.map((a) => {
+      const el = document.createElement('li');
+      const name = document.createElement('span'); name.className = 'a-name'; name.textContent = a.group;
+      const bar = document.createElement('span'); bar.className = 'a-bar'; bar.setAttribute('aria-hidden', 'true');
+      for (const c of a.checks) { const seg = document.createElement('span'); seg.className = c.pass ? 'on' : 'off'; seg.style.flexGrow = String(c.weight); seg.title = c.label; bar.append(seg); }
+      const n = document.createElement('span'); n.className = 'a-n';
+      const got = a.checks.filter((c) => c.pass).length;
+      n.textContent = `${got} of ${a.checks.length}`;
+      el.append(name, bar, n);
+      return el;
+    }));
+
     const fixes = $('[data-fixes]');
     fixes.replaceChildren(...r.fixes.map((f) => {
       const el = document.createElement('li');
@@ -140,10 +156,12 @@ const groups = [...new Set(CHECKS.map((c) => c.group))];
       const a = document.createElement('a'); a.href = f.url; a.textContent = f.title;
       const meta = document.createElement('span'); meta.className = 'fit-meta'; meta.textContent = [f.place, f.pay].filter(Boolean).join(' · ');
       const why = document.createElement('span'); why.className = 'fit-why'; why.textContent = `Mentions ${f.found.slice(0, 4).join(', ')}`;
+      const fit = document.createElement('span'); fit.className = 'fit-bar'; fit.setAttribute('aria-hidden', 'true');
+      const fill = document.createElement('span'); fill.style.width = `${Math.round(Math.min(1, f.fit) * 100)}%`; fit.append(fill);
       const cmp = document.createElement('button'); cmp.type = 'button'; cmp.className = 'fit-cmp'; cmp.textContent = 'Compare';
       cmp.setAttribute('aria-label', `Compare your resume with ${f.title}`);
       cmp.addEventListener('click', () => { job.value = f.id; run(); $('[data-match]').scrollIntoView({ block: 'nearest' }); });
-      el.append(a, cmp, meta, why);
+      el.append(a, cmp, meta, why, fit);
       return el;
     }));
     $('[data-fits-none]').hidden = fits.length > 0;
@@ -217,6 +235,18 @@ const groups = [...new Set(CHECKS.map((c) => c.group))];
   .fits :global(.fit-meta), .fits :global(.fit-why) { grid-column: 1; font-size: var(--fs-small); color: var(--ink-soft); }
   .fits :global(.fit-cmp) { grid-column: 2; grid-row: 1 / span 3; align-self: center; font: inherit; font-size: var(--fs-small); font-weight: var(--fw-bold); background: none; border: 1.5px solid var(--ink); padding: 0.35rem 0.7rem; cursor: pointer; }
   .fits :global(.fit-cmp:hover) { background: var(--ink); color: #fff; }
+
+  /* By area: a row per area, a segment per check */
+  .areas { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--line); }
+  .areas :global(li) { display: grid; grid-template-columns: 8rem minmax(0, 1fr) 3.5rem; gap: var(--s3); align-items: center; padding-block: var(--s2); border-bottom: 1px solid var(--line); font-size: var(--fs-small); }
+  .areas :global(.a-name) { font-weight: var(--fw-bold); }
+  .areas :global(.a-bar) { display: flex; gap: 3px; height: 10px; }
+  .areas :global(.a-bar span.on) { background: var(--accent); }
+  .areas :global(.a-bar span.off) { background: rgb(0 0 0 / 0.08); }
+  .areas :global(.a-n) { text-align: right; color: var(--ink-soft); font-variant-numeric: tabular-nums; }
+  .fits :global(.fit-bar) { grid-column: 1; display: block; height: 4px; margin-top: var(--s2); background: rgb(0 0 0 / 0.08); max-width: 14rem; }
+  .fits :global(.fit-bar span) { display: block; height: 100%; background: var(--accent); }
+  .fits :global(li.fit-contract .fit-bar span) { background: var(--contract); }
 
   .passed { margin-top: var(--s5); }
   .passed summary { cursor: pointer; font-weight: var(--fw-bold); }

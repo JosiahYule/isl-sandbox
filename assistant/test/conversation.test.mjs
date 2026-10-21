@@ -68,7 +68,7 @@ await talk('Employer request survives a pay question', ['We need 3 forklift oper
   (r) => expect(r.contact?.name === 'Kelli Wetmore' && r.summary.find(([k]) => k === 'Role')[1] === 'Three forklift operators', 'request intact, routed to Kelli'));
 await talk('Pay: unknown role', ['what does a marine biologist make'], (r) => expect(!r.insight && r.choices?.[0]?.href, 'honest miss with link'));
 await talk('Resume check pointer', ['can you check my resume?'], (r) => expect(r.choices[0].href.includes('resume-check'), 'resume tool link'));
-await talk('Job ad pointer', ['can you review my job posting?'], (r) => expect(r.choices[0].href.includes('job-ad-check'), 'job ad tool link'));
+await talk('Job ad: offer to run the search', ['can you review my job posting?'], (r) => expect(/write the ad/.test(r.reply) && !JSON.stringify(r).includes('job-ad-check'), 'offers the service, no job ad tool'));
 
 // ---- On a job page ----
 const dock = jobs.find((j) => /Overnight Dock Worker/.test(j.title));

@@ -71,8 +71,8 @@ The three sites share everything that makes them look and work alike: the layout
 **Where pages live:**
 
 - `src/pages/`: pages every brand has, written once (Find work and each job, Team, Contact, the request form, Privacy, Terms, Accessibility, 404).
-- `src/sites/isl/`: pages only ISL has, or that ISL words differently (homepage, Contract staffing, Direct hire, About, office pages, industry pages, Learn, the tools list and Pay on our open jobs).
-- The other three tools (True cost of an employee, Job ad check, Resume check) are in `src/pages/learn/tools/`, shared. Each brand's `tools` block says which tools it lists and the words around them; AS and ADS leave out the pay tool until their jobs carry pay.
+- `src/sites/isl/`: pages only ISL has, or that ISL words differently (homepage, Contract staffing, Direct hire, About, office pages, industry pages, Learn, the tools list, the Atlantic jobs report and Pay on our open jobs).
+- True cost of an employee and Resume check are in `src/pages/learn/tools/`, shared. Job ad check is AS and ADS only (`src/sites/specialist/learn/tools/`): ISL dropped it, since it coaches employers to do what we do. Each brand's `tools` block says which tools it lists and the words around them; AS and ADS leave out the pay tool until their jobs carry pay.
 - `src/sites/specialist/`: the same for Accountant and Administrative Staffing, which share these pages because they share a structure (homepage, Employers, Job Seekers, Permanent and Temporary Recruitment FAQ, About Us, Learn). Their words come from the live sites, in `src/brands/copy/as.js` and `ads.js`; each block there says whether it's word for word or still to be replaced with the exact text. Their words come from each brand's file.
 
 A small piece of `astro.config.mjs` (`brandPages`) adds the right `src/sites/` folder's pages to each build.
@@ -130,9 +130,22 @@ Everything follows the ISL brand (the same tokens as the "editorial minimal" blo
 | `UnitChart` | 100 dots with 92 filled: the retention figure as something you can see. |
 | `Facts` | A row of key figures that count up (contract page, About). |
 | `HeroFigure` | The one number on the right of an inner page's intro (Hire, Find work, Team, Learn, Contact). |
-| `ToolCards` | The three free tools, each previewed with real numbers from the tool itself. |
+| `ToolCards` | The free tools, each previewed with real numbers from the tool itself. |
 
 The map shapes are generated data in `src/data/maps.js` (Natural Earth boundaries). `scripts/generate-maps.mjs` rebuilds them if the framing ever needs to change.
+
+## The Atlantic jobs report (updates itself)
+
+`/learn/tools/jobs-report/` turns Statistics Canada's monthly Labour Force Survey into charts for the four Atlantic provinces: unemployment on a map, jobs gained or lost over the year, two years of unemployment against Canada, out of every 100 adults (working, looking, neither), young people, industries and wages (with each province's minimum wage from `src/lib/minwage.js`).
+
+How the monthly update works:
+
+1. `.github/workflows/update-lfs.yml` runs on GitHub three times every weekday (about 10 am, 2 pm and 6 pm Atlantic). It has to run there: this sandbox can't reach Statistics Canada.
+2. It runs `scripts/fetch-lfs.mjs`, which downloads three tables as CSV files (14-10-0287, 14-10-0355, 14-10-0063), keeps Canada and the Atlantic provinces, and writes `src/data/lfs/latest.json`.
+3. If the month in that file is new, the workflow commits it and starts a deploy. Otherwise it does nothing. If Statistics Canada's site is down, it keeps the figures it has and tries again at the next run.
+4. `src/lib/lfs.js` reads the file for the page and its tool card. Until the first file arrives, the page says the report is on its way.
+
+The survey comes out once a month (usually the first Friday, 8:30 am Eastern), so the page changes within a few hours of each release.
 
 ## Motion
 

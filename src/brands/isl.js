@@ -114,7 +114,7 @@ export const cta = {
 
 // The Learn tools: which this brand has, and the words around them
 export const tools = {
-  list: ['true-cost-of-an-employee', 'pay-on-open-jobs', 'job-ad-check', 'resume-check'],
+  list: ['jobs-report', 'true-cost-of-an-employee', 'pay-on-open-jobs', 'resume-check'], // no Job ad check: it coaches employers to do our job
   cost: {
     wage: 20, // the calculator's starting wage, and the tool card's example
     title: 'One rate covers all of it.',
