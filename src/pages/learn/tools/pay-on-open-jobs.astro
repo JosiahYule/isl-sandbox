@@ -97,6 +97,7 @@ const payText = (j) => j.payInfo.unit === 'year' ? `${j.pay} (about ${perHour(j.
       </figure>
       <p class="empty" hidden data-empty>No jobs with a stated pay match these filters right now.</p>
 
+      <div class="table-scroll" role="region" aria-label="Pay by role family" tabindex="0">
       <table class="table" data-table>
         <caption>Pay by role family, per hour</caption>
         <thead><tr><th scope="col">Role family</th><th scope="col">Jobs</th><th scope="col">Lowest</th><th scope="col">Middle</th><th scope="col">Highest</th></tr></thead>
@@ -106,6 +107,7 @@ const payText = (j) => j.payInfo.unit === 'year' ? `${j.pay} (about ${perHour(j.
           ))}
         </tbody>
       </table>
+      </div>
 
       <p class="note">{counted} of our {jobs.length} open jobs, as of {snapshotDate}. {left > 0 && `${left} without a stated pay, or with only a part-time yearly figure, aren’t shown. `}Salaries are shown per hour over a 2,080-hour year. Select a dot to open that job.</p>
     </div>
@@ -302,7 +304,9 @@ const payText = (j) => j.payInfo.unit === 'year' ? `${j.pay} (about ${perHour(j.
   .tip .t-where { font-size: var(--fs-tiny); color: rgb(255 255 255 / 0.75); }
 
   .empty { padding: var(--s6) 0; color: var(--ink-soft); }
-  .table { width: 100%; border-collapse: collapse; margin-top: clamp(2.5rem, 5vw, 4rem); font-variant-numeric: tabular-nums; }
+  /* A wide table scrolls inside its own box, so the page itself never scrolls sideways */
+  .table-scroll { overflow-x: auto; margin-top: clamp(2.5rem, 5vw, 4rem); }
+  .table { width: 100%; min-width: 22rem; border-collapse: collapse; font-variant-numeric: tabular-nums; }
   .table[hidden], .table tr[hidden] { display: none; }
   .table caption { text-align: left; font-weight: 700; font-size: var(--fs-h3); margin-bottom: var(--s4); }
   .table th, .table td { text-align: right; padding: 0.65rem var(--s3); border-bottom: 1px solid var(--line); font-weight: 400; }
@@ -322,7 +326,7 @@ const payText = (j) => j.payInfo.unit === 'year' ? `${j.pay} (about ${perHour(j.
     /* On a phone the dots crowd together, so the table comes first and the chart follows */
     .pay-wrap { display: flex; flex-direction: column; }
     .filters { order: 1; }
-    .table, .empty { order: 2; margin-top: 0; margin-bottom: var(--s7); }
+    .table-scroll, .empty { order: 2; margin-top: 0; margin-bottom: var(--s7); }
     .chart { order: 3; }
     .note { order: 4; }
     .chart { --label: 0px; --range: 0px; }

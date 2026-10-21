@@ -85,8 +85,9 @@ const routes = [
   .o-city span { margin-left: var(--s2); font-weight: 500; font-size: var(--fs-tiny); color: var(--ink-soft); }
   .o-city:hover { text-decoration: underline; }
   .o-addr { grid-column: 1; font-size: var(--fs-small); color: var(--ink-soft); }
-  .o-page { position: relative; z-index: 1; margin-left: var(--s2); font-weight: 600; white-space: nowrap; }
+  .o-page { position: relative; z-index: 1; display: block; width: fit-content; margin-top: 2px; font-weight: 600; }
   .o-tel { position: relative; z-index: 1; grid-column: 2; grid-row: 1 / span 2; align-self: center; font-weight: 700; color: var(--ink); font-variant-numeric: tabular-nums; }
 
   @media (max-width: 900px) { .off-grid { grid-template-columns: 1fr; } }
+  @media (max-width: 420px) { .offices li { grid-template-columns: 1fr; } .o-tel { grid-column: 1; grid-row: auto; margin-top: var(--s2); } }
 </style>

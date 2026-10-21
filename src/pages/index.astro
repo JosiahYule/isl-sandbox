@@ -51,8 +51,14 @@ const ticker = jobs.slice(0, 14);
       </div>
     </div>
 
-    <div class="ticker" aria-label="Now hiring">
+    <div class="ticker" aria-label="Now hiring" data-ticker>
       <p class="ticker-label"><span class="pulse" aria-hidden="true"></span>Now hiring</p>
+      <!-- Moving content needs a way to stop it (WCAG 2.2.2): hover and focus pause it, but touch screens have neither -->
+      <button type="button" class="ticker-toggle" aria-pressed="false" data-ticker-toggle>
+        <svg class="i-pause" viewBox="0 0 16 16" aria-hidden="true"><rect x="3.5" y="3" width="3" height="10"/><rect x="9.5" y="3" width="3" height="10"/></svg>
+        <svg class="i-play" viewBox="0 0 16 16" aria-hidden="true"><path d="M5 3l8 5-8 5z"/></svg>
+        <span class="visually-hidden">Pause the job list</span>
+      </button>
       <div class="ticker-track">
         {[0, 1].map((copy) => (
           <ul class="ticker-list" aria-hidden={copy === 1 ? 'true' : undefined}>
@@ -102,6 +108,17 @@ const ticker = jobs.slice(0, 14);
   <CtaBand />
 </Base>
 
+<script>
+  // The ticker's pause button: pressed = paused
+  const tk = document.querySelector<HTMLElement>('[data-ticker]');
+  const tb = tk?.querySelector<HTMLButtonElement>('[data-ticker-toggle]');
+  tb?.addEventListener('click', () => {
+    const paused = tk!.classList.toggle('is-paused');
+    tb.setAttribute('aria-pressed', String(paused));
+    tb.querySelector('.visually-hidden')!.textContent = paused ? 'Play the job list' : 'Pause the job list';
+  });
+</script>
+
 <style>
   /* ---------- 1. Hero ---------- */
   /* The photo fills the hero; a dark wash from the left keeps the white text readable */
@@ -126,7 +143,7 @@ const ticker = jobs.slice(0, 14);
   .search { margin-top: var(--s7); max-width: 36rem; }
   .search label { display: block; font-size: var(--fs-small); font-weight: 500; margin-bottom: var(--s2); color: rgb(255 255 255 / 0.86); }
   .search-bar { display: flex; background: #fff; }
-  .search-bar input { flex: 1; min-width: 0; font: inherit; font-size: 1.05rem; padding: 1rem 1.15rem; border: 0; background: transparent; color: var(--ink); }
+  .search-bar input { flex: 1; min-width: 0; width: 0; /* width 0: the box's built-in 20-character width otherwise sets a minimum */ font: inherit; font-size: 1.05rem; padding: 1rem 1.15rem; border: 0; background: transparent; color: var(--ink); }
   .search-bar input:focus { outline: 2px solid var(--isl-blue); outline-offset: -2px; }
   .search-bar button { font: inherit; font-weight: 600; cursor: pointer; padding: 0 1.6rem; border: 0; background: var(--isl-blue); color: #fff; }
   .search-bar button:hover { background: var(--isl-blue-deep); }
@@ -147,7 +164,15 @@ const ticker = jobs.slice(0, 14);
   .ticker-track { display: flex; overflow: hidden; flex: 1; min-width: 0; mask-image: linear-gradient(90deg, transparent, #000 4%, #000 96%, transparent); }
   .ticker-list { display: flex; flex: none; list-style: none; margin: 0; padding: 0; }
   :global(.motion) .ticker-list { animation: ticker 70s linear infinite; }
-  .ticker:hover .ticker-list, .ticker:focus-within .ticker-list { animation-play-state: paused; }
+  .ticker:hover .ticker-list, .ticker:focus-within .ticker-list, .ticker.is-paused .ticker-list { animation-play-state: paused; }
+  .ticker.is-paused .pulse { animation: none; }
+  /* Pause / play: only shown when the list actually moves */
+  .ticker-toggle { display: none; flex: none; place-items: center; width: 44px; border: 0; border-right: 1px solid rgb(255 255 255 / 0.16); background: var(--dark); color: #fff; cursor: pointer; }
+  :global(.motion) .ticker-toggle { display: grid; }
+  .ticker-toggle svg { width: 14px; height: 14px; fill: currentColor; }
+  .ticker-toggle .i-play, .ticker.is-paused .ticker-toggle .i-pause { display: none; }
+  .ticker.is-paused .ticker-toggle .i-play { display: block; }
+  .ticker-toggle:hover { background: #000; }
   @keyframes ticker { to { transform: translateX(-100%); } }
   .ticker-list a { display: flex; gap: var(--s3); align-items: baseline; padding: var(--s4) var(--s6) var(--s4) 0; margin-left: var(--s6); color: #fff; text-decoration: none; white-space: nowrap; font-size: var(--fs-small); border-left: 1px solid rgb(255 255 255 / 0.16); padding-left: var(--s6); margin-left: 0; }
   .ticker-list a span { color: rgb(255 255 255 / 0.66); }

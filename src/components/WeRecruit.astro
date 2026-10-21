@@ -93,7 +93,7 @@ import { url } from '../lib/url.js';
   .sb--direct { border-top-color: var(--direct); }
   .sb:hover { background: #eeeeee; }
   .sb-name { font-weight: 700; font-size: 1.15rem; }
-  .sb-figs { display: grid; grid-template-columns: 1fr 1fr; gap: var(--s4); }
+  .sb-figs { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 10rem), 1fr)); gap: var(--s4); } /* two side by side, stacked when there isn't room */
   .sb-fig { display: grid; gap: var(--s1); }
   .sb .figure { font-size: clamp(1.9rem, 1.2rem + 1.6vw, 2.6rem); white-space: nowrap; }
   .sb--direct .figure { color: var(--direct); }

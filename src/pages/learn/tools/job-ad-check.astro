@@ -39,10 +39,11 @@ Send your resume to jobs@example.ca`;
   <section class="tool" data-ad>
     <div class="wrap grid">
       <form class="inputs" onsubmit="return false" aria-label="Your job ad">
-        <label class="field">
-          <span class="lbl">Your job ad <button type="button" class="sample" data-sample>Try an example</button></span>
-          <textarea name="text" rows="16" placeholder="Paste the whole ad here, starting with the job title." spellcheck="false"></textarea>
-        </label>
+        <div class="field">
+          <!-- The button sits outside the label: a label names the first control inside it -->
+          <div class="lbl"><label for="ad-text">Your job ad</label> <button type="button" class="sample" data-sample>Try an example</button></div>
+          <textarea id="ad-text" name="text" rows="16" placeholder="Paste the whole ad here, starting with the job title." spellcheck="false"></textarea>
+        </div>
         <fieldset class="field">
           <legend class="lbl">Where the job is</legend>
           <div class="seg">

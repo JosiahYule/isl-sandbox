@@ -81,27 +81,35 @@ const afterSteps = [
         </fieldset>
 
         <div class="fields">
-          <label class="field field--wide">What are you hiring for?
-            <textarea name="role" rows="3" required placeholder="The role, how many people, and when you need them to start"></textarea>
-            <span class="err" hidden>Tell us the role, even roughly.</span>
-          </label>
-          <label class="field field--wide">Where's the work?
-            <select name="location" required>
+          <!-- Each field: label, optional hint, the control, then its error (linked with aria-describedby) -->
+          <div class="field field--wide">
+            <label for="f-role">What are you hiring for?</label>
+            <span class="hint" id="h-role">The role, how many people, and when you need them to start</span>
+            <textarea id="f-role" name="role" rows="3" required aria-describedby="h-role e-role"></textarea>
+            <span class="err" id="e-role" hidden>Tell us the role, even roughly.</span>
+          </div>
+          <div class="field field--wide">
+            <label for="f-location">Where's the work?</label>
+            <select id="f-location" name="location" required aria-describedby="e-location">
               <option value="" selected disabled>Choose a province</option>
               {locations.map((l) => <option>{l}</option>)}
             </select>
-            <span class="err" hidden>Choose where the work is.</span>
-          </label>
+            <span class="err" id="e-location" hidden>Choose where the work is.</span>
+          </div>
 
           <!-- 2. Then the person -->
-          <label class="field">Your name <input name="name" autocomplete="name" required />
-            <span class="err" hidden>Add your name.</span>
-          </label>
-          <label class="field">Work email <input name="email" type="email" autocomplete="email" required />
-            <span class="err" hidden>Add an email address we can reply to.</span>
-          </label>
-          <label class="field"><span>Company <span class="opt-tag">(optional)</span></span> <input name="company" autocomplete="organization" /></label>
-          <label class="field"><span>Phone <span class="opt-tag">(optional)</span></span> <input name="phone" type="tel" autocomplete="tel" /></label>
+          <div class="field">
+            <label for="f-name">Your name</label>
+            <input id="f-name" name="name" autocomplete="name" required aria-describedby="e-name" />
+            <span class="err" id="e-name" hidden>Enter your name.</span>
+          </div>
+          <div class="field">
+            <label for="f-email">Work email</label>
+            <input id="f-email" name="email" type="email" autocomplete="email" required aria-describedby="e-email" />
+            <span class="err" id="e-email" hidden data-empty="Enter an email address we can reply to." data-bad="Enter an email address like name@company.ca.">Enter an email address we can reply to.</span>
+          </div>
+          <div class="field"><label for="f-company">Company <span class="opt-tag">(optional)</span></label><input id="f-company" name="company" autocomplete="organization" /></div>
+          <div class="field"><label for="f-phone">Phone <span class="opt-tag">(optional)</span></label><input id="f-phone" name="phone" type="tel" autocomplete="tel" /></div>
         </div>
 
         <!-- Hidden from people; bots fill it in, and the function ignores anything that does -->
@@ -251,7 +259,9 @@ const afterSteps = [
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
     const bad = required.filter((f) => !f.checkValidity());
-    required.forEach((f) => { const ok = !bad.includes(f); f.toggleAttribute('aria-invalid', !ok); const e = errFor(f); if (e) e.hidden = ok; });
+    required.forEach((f) => { const ok = !bad.includes(f); if (ok) f.removeAttribute('aria-invalid'); else f.setAttribute('aria-invalid', 'true'); const e = errFor(f); if (!e) return; e.hidden = ok;
+      // An email that's there but mistyped gets its own message, not "enter an email"
+      if (e.dataset.bad) e.textContent = (f as HTMLInputElement).value.trim() ? e.dataset.bad : e.dataset.empty!; });
     if (bad.length) { bad[0].focus(); return; }
     errBox.hidden = true;
     if (endpoint) {
@@ -322,6 +332,7 @@ const afterSteps = [
   .field { display: grid; gap: var(--s1); align-content: start; }
   .field--wide { grid-column: 1 / -1; }
   .opt-tag { font-weight: 400; color: var(--ink-soft); }
+  .hint { font-weight: 400; color: var(--ink-soft); }
   input:not([type='radio']), select, textarea {
     font: inherit; font-size: 1rem; font-weight: 400; color: var(--ink);
     padding: 0.75rem 0.85rem; border: 1.5px solid var(--line); background: var(--paper); width: 100%;
