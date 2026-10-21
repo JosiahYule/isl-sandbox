@@ -166,61 +166,61 @@ const groups = [...new Set(CHECKS.map((c) => c.group))];
 
   .inputs { display: grid; gap: var(--s5); border-top: 1.5px solid var(--ink); padding-top: var(--s5); }
   .field { display: grid; gap: var(--s2); }
-  .lbl { font-weight: 600; }
-  .opt { font-weight: 400; color: var(--ink-soft); font-size: var(--fs-small); margin-left: 0.3em; }
+  .lbl { font-weight: var(--fw-bold); }
+  .opt { font-weight: var(--fw-text); color: var(--ink-soft); font-size: var(--fs-small); margin-left: 0.3em; }
   textarea, select { font: inherit; padding: 0.8rem 0.9rem; border: 1.5px solid var(--line); background: var(--paper); color: var(--ink); width: 100%; }
-  textarea { resize: vertical; min-height: 18rem; font-size: 0.95rem; line-height: 1.55; }
+  textarea { resize: vertical; min-height: 18rem; font-size: var(--fs-body); line-height: 1.55; }
   textarea:focus, select:focus { outline: none; border-color: var(--isl-blue); }
-  .go { justify-self: start; display: inline-block; font: inherit; font-weight: 600; background: var(--isl-blue); color: #fff; border: 0; cursor: pointer; text-decoration: none; padding: 0.9rem 1.4rem; }
+  .go { justify-self: start; display: inline-block; font: inherit; font-weight: var(--fw-bold); background: var(--isl-blue); color: #fff; border: 0; cursor: pointer; text-decoration: none; padding: 0.9rem 1.4rem; }
   .go:hover { background: var(--isl-blue-deep); color: #fff; }
   .private { margin: 0; font-size: var(--fs-small); color: var(--ink-soft); }
 
   .out { border-top: 1.5px solid var(--ink); padding-top: var(--s5); position: sticky; top: calc(72px + var(--s5)); }
   .placeholder { color: var(--ink-soft); }
-  .ph-title { font-weight: 600; color: var(--ink); margin: 0 0 var(--s3); }
+  .ph-title { font-weight: var(--fw-bold); color: var(--ink); margin: 0 0 var(--s3); }
   .placeholder ul { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: 1fr 1fr; gap: var(--s2) var(--s4); }
   .placeholder li { padding-bottom: var(--s2); border-bottom: 1px solid var(--line); }
 
-  .score { margin: 0; font-weight: 300; font-size: clamp(3.4rem, 2rem + 5vw, 6rem); letter-spacing: -0.04em; line-height: 1; font-variant-numeric: tabular-nums; }
+  .score { margin: 0; font-weight: var(--fw-light); font-size: var(--fs-figure-lg); letter-spacing: -0.04em; line-height: 1; font-variant-numeric: tabular-nums; }
   .of { font-size: 0.35em; color: var(--ink-soft); letter-spacing: 0; margin-left: 0.15em; }
-  .verdict { margin: var(--s3) 0 0; font-weight: 600; }
+  .verdict { margin: var(--s3) 0 0; font-weight: var(--fw-bold); }
   .meter { height: 8px; background: rgb(0 0 0 / 0.07); margin-top: var(--s4); }
   .meter span { display: block; height: 100%; width: 0; background: var(--isl-blue); transition: width 0.6s var(--ease); }
-  .out h2 { font-size: 1.15rem; margin: var(--s6) 0 var(--s3); }
+  .out h2 { font-size: var(--fs-h3); margin: var(--s6) 0 var(--s3); }
 
   /* The lists below are filled in by the script, so their items are styled with :global()
      (Astro's scoped styles only reach elements written in this file's markup) */
   .fixes { margin: 0; padding: 0; list-style: none; counter-reset: fix; border-top: 1px solid var(--line); }
   .fixes :global(li) { counter-increment: fix; display: grid; grid-template-columns: 1.6rem 1fr; gap: 2px var(--s2); padding: var(--s3) 0; border-bottom: 1px solid var(--line); }
-  .fixes :global(li)::before { content: counter(fix); grid-row: span 2; font-weight: 600; color: var(--isl-blue); font-variant-numeric: tabular-nums; }
+  .fixes :global(li)::before { content: counter(fix); grid-row: span 2; font-weight: var(--fw-bold); color: var(--isl-blue); font-variant-numeric: tabular-nums; }
   .fixes :global(strong) { grid-column: 2; }
   .fixes :global(span) { grid-column: 2; color: var(--ink-soft); font-size: var(--fs-small); line-height: 1.5; }
 
   .terms { list-style: none; margin: var(--s3) 0; padding: 0; display: flex; flex-wrap: wrap; gap: var(--s2); }
-  .terms :global(li) { font-size: var(--fs-small); font-weight: 500; padding: 0.3rem 0.6rem; border: 1.5px solid var(--line); }
+  .terms :global(li) { font-size: var(--fs-small); font-weight: var(--fw-text); padding: 0.3rem 0.6rem; border: 1.5px solid var(--line); }
   .terms :global(li.yes) { border-color: var(--isl-blue); color: var(--isl-blue); }
   .terms :global(li.yes)::before { content: '✓ '; }
   .terms :global(li.no) { color: var(--ink-soft); border-style: dashed; }
   .hint { font-size: var(--fs-small); color: var(--ink-soft); margin: 0; }
-  .hint a { font-weight: 600; }
+  .hint a { font-weight: var(--fw-bold); }
 
   /* Jobs it fits: near-black edge for contract, blue for permanent (the site's colour key) */
   .fits { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--line); }
   .fits :global(li) { display: grid; grid-template-columns: 1fr auto; gap: 2px var(--s3); padding: var(--s3) 0 var(--s3) var(--s3); border-bottom: 1px solid var(--line); border-left: 3px solid var(--contract); }
   .fits :global(li.fit-direct) { border-left-color: var(--direct); }
-  .fits :global(a) { font-weight: 600; }
+  .fits :global(a) { font-weight: var(--fw-bold); }
   .fits :global(.fit-meta), .fits :global(.fit-why) { grid-column: 1; font-size: var(--fs-small); color: var(--ink-soft); }
-  .fits :global(.fit-cmp) { grid-column: 2; grid-row: 1 / span 3; align-self: center; font: inherit; font-size: var(--fs-small); font-weight: 600; background: none; border: 1.5px solid var(--ink); padding: 0.35rem 0.7rem; cursor: pointer; }
+  .fits :global(.fit-cmp) { grid-column: 2; grid-row: 1 / span 3; align-self: center; font: inherit; font-size: var(--fs-small); font-weight: var(--fw-bold); background: none; border: 1.5px solid var(--ink); padding: 0.35rem 0.7rem; cursor: pointer; }
   .fits :global(.fit-cmp:hover) { background: var(--ink); color: #fff; }
 
   .passed { margin-top: var(--s5); }
-  .passed summary { cursor: pointer; font-weight: 600; }
+  .passed summary { cursor: pointer; font-weight: var(--fw-bold); }
   .passed ul { margin: var(--s3) 0 0; padding-left: 1.2em; color: var(--ink-soft); font-size: var(--fs-small); display: grid; gap: var(--s1); }
 
   .next { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: var(--s5) var(--s7); align-items: end; }
   .next .lead { margin-top: var(--s4); max-width: 52ch; }
   .next-go { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s4); }
-  .textlink { font-weight: 600; }
+  .textlink { font-weight: var(--fw-bold); }
 
   @media (max-width: 900px) {
     .grid, .next { grid-template-columns: 1fr; }

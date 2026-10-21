@@ -142,10 +142,10 @@ const schema = {
 
 <style>
   .jp { padding-block: clamp(2.5rem, 5vw, 4rem) clamp(3.5rem, 7vw, 6rem); }
-  .back { display: inline-block; margin-bottom: var(--s6); font-size: var(--fs-small); font-weight: 600; text-decoration: none; }
+  .back { display: inline-block; margin-bottom: var(--s6); font-size: var(--fs-small); font-weight: var(--fw-bold); text-decoration: none; }
   .back:hover { text-decoration: underline; }
   .jp-head h1 { font-size: var(--fs-h1); letter-spacing: -0.025em; max-width: 22ch; margin-top: var(--s2); }
-  .where { margin-top: var(--s3); font-size: var(--fs-lead); font-weight: 300; }
+  .where { margin-top: var(--s3); font-size: var(--fs-lead); font-weight: var(--fw-light); }
 
   /* The summary card sits on the right and stays in view while the posting scrolls */
   .jp-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(280px, 340px); gap: var(--s6) clamp(2.5rem, 6vw, 6rem); margin-top: clamp(2rem, 4vw, 3rem); align-items: start; }
@@ -155,31 +155,31 @@ const schema = {
   .facts { margin: 0; display: grid; gap: var(--s3); }
   .facts div { display: flex; justify-content: space-between; gap: var(--s4); padding-bottom: var(--s3); border-bottom: 1px solid var(--line); }
   .facts dt { color: var(--ink-soft); font-size: var(--fs-small); }
-  .facts dd { margin: 0; font-weight: 600; text-align: right; font-variant-numeric: tabular-nums; }
-  .rc { font-size: var(--fs-small); font-weight: 600; }
+  .facts dd { margin: 0; font-weight: var(--fw-bold); text-align: right; font-variant-numeric: tabular-nums; }
+  .rc { font-size: var(--fs-small); font-weight: var(--fw-bold); }
   .safe { margin: calc(var(--s3) * -1) 0 0; font-size: var(--fs-tiny); color: var(--ink-soft); }
-  .share { justify-self: start; font: inherit; font-size: var(--fs-small); font-weight: 600; color: var(--isl-blue); background: none; border: 0; padding: 0; cursor: pointer; text-decoration: underline; text-underline-offset: 0.2em; }
+  .share { justify-self: start; font: inherit; font-size: var(--fs-small); font-weight: var(--fw-bold); color: var(--isl-blue); background: none; border: 0; padding: 0; cursor: pointer; text-decoration: underline; text-underline-offset: 0.2em; }
   .ask { margin: 0; font-size: var(--fs-small); color: var(--ink-soft); line-height: 1.6; }
-  .ask a { font-weight: 600; }
-  .ask .tel { display: block; color: var(--ink); text-decoration: none; font-size: 1rem; }
+  .ask a { font-weight: var(--fw-bold); }
+  .ask .tel { display: block; color: var(--ink); text-decoration: none; font-size: var(--fs-body); }
 
   /* The posting: a comfortable reading column */
   .body { grid-column: 1; grid-row: 1; max-width: 68ch; }
   .body > :first-child { margin-top: 0; }
-  .body h2 { font-size: 1.3rem; letter-spacing: -0.01em; margin: var(--s7) 0 var(--s3); }
-  .body p, .body li, .body dd { font-size: 1.06rem; line-height: 1.7; }
+  .body h2 { font-size: var(--fs-h3); letter-spacing: -0.01em; margin: var(--s7) 0 var(--s3); }
+  .body p, .body li, .body dd { font-size: var(--fs-body); line-height: 1.7; }
   .body p { margin: 0 0 var(--s4); }
   .body ul { margin: 0 0 var(--s4); padding-left: 1.2em; }
   .body li { margin-bottom: var(--s2); padding-left: 0.25em; }
   .body li::marker { color: var(--isl-blue); }
   .details { margin: 0 0 var(--s4); display: grid; gap: var(--s1); }
   .details div { display: flex; gap: var(--s3); }
-  .details dt { font-weight: 600; min-width: 7.5rem; line-height: 1.7; }
+  .details dt { font-weight: var(--fw-bold); min-width: 7.5rem; line-height: 1.7; }
   .details dd { margin: 0; }
   .end { margin-top: var(--s7); padding-top: var(--s5); border-top: 1.5px solid var(--ink); display: flex; flex-wrap: wrap; align-items: center; gap: var(--s3) var(--s5); }
   .fine { margin: 0; color: var(--ink-soft); font-size: var(--fs-small); max-width: 36ch; }
 
-  .more-head .lead { justify-self: end; font-weight: 600; font-size: var(--fs-body); }
+  .more-head .lead { justify-self: end; font-weight: var(--fw-bold); font-size: var(--fs-body); }
   .list { border-top: 1.5px solid var(--ink); background: var(--paper); }
 
   @media (max-width: 900px) {

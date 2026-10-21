@@ -57,12 +57,12 @@ const areaKey = (city) => areas.find((a) => a.label === city)?.key;
   }
   .office { display: flex; flex-direction: column; align-items: flex-start; padding: var(--s5) var(--s4) var(--s5) 0; }
   .office + .office { padding-left: var(--s4); border-left: 1px solid var(--line-dark); }
-  .city { font-weight: 700;
-    font-size: 1.15rem; letter-spacing: -0.01em; margin-bottom: var(--s2);
+  .city { font-weight: var(--fw-bold);
+    font-size: var(--fs-h3); letter-spacing: -0.01em; margin-bottom: var(--s2);
   }
   a.city { color: #fff; display: block; }
-  .city span { margin-left: 0.4em; color: var(--on-dark-soft); font-weight: 500; font-size: 0.8em; }
-  .phone { font-weight: 500; color: #fff; font-variant-numeric: tabular-nums; }
+  .city span { margin-left: 0.4em; color: var(--on-dark-soft); font-weight: var(--fw-text); font-size: var(--fs-small); }
+  .phone { font-weight: var(--fw-bold); color: #fff; font-variant-numeric: tabular-nums; }
   .addr { color: var(--on-dark-soft); font-size: var(--fs-small); margin-top: var(--s2); line-height: 1.45; }
 
   .lower {
@@ -73,7 +73,7 @@ const areaKey = (city) => areas.find((a) => a.label === city)?.key;
   /* The logo file is dark; brightness(0) + invert(1) turns every colour in it to white for the dark footer */
   .flogo { display: inline-block; margin-bottom: var(--s4); color: #fff; }
   .flogo img { height: 40px; width: auto; filter: brightness(0) invert(1); }
-  .fword { display: none; font-weight: 700; font-size: 1.15rem; line-height: 1; letter-spacing: -0.01em; }
+  .fword { display: none; font-weight: var(--fw-bold); font-size: var(--fs-h3); line-height: 1; letter-spacing: -0.01em; }
   .flogo:global(.no-img) .fword { display: block; }
   .about p { color: var(--on-dark-soft); max-width: 42ch; }
   .badges { display: flex; gap: var(--s4); margin-top: var(--s5); }
@@ -83,13 +83,13 @@ const areaKey = (city) => areas.find((a) => a.label === city)?.key;
   .near { display: inline-block; margin-top: auto; padding-top: var(--s3); font-size: var(--fs-small); text-decoration: underline !important; text-underline-offset: 0.2em; color: var(--on-dark-soft); }
   .near:hover { color: #fff; }
   .scam { margin-top: var(--s7); padding-top: var(--s4); border-top: 1px solid var(--line-dark); font-size: var(--fs-small); color: var(--on-dark-soft); }
-  .scam strong { color: #fff; font-weight: 600; }
+  .scam strong { color: #fff; font-weight: var(--fw-bold); }
   .legal { margin-top: var(--s4); font-size: var(--fs-tiny); color: var(--on-dark-soft); }
   .legal a { color: var(--on-dark-soft); margin-left: var(--s4); text-decoration: underline !important; text-underline-offset: 0.2em; }
   .legal a:hover { color: #fff; }
 
   @media (max-width: 900px) {
-    .offices { grid-template-columns: 1fr 1fr; }
+    .offices { grid-template-columns: repeat(auto-fill, minmax(min(100%, 8.5rem), 1fr)); } /* two across, one when there isn't room */
     .office, .office + .office { padding: var(--s4) var(--s3) var(--s4) 0; border-left: 0; border-bottom: 1px solid var(--line-dark); }
     .lower { grid-template-columns: 1fr; gap: var(--s6); }
   }

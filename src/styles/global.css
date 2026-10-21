@@ -24,10 +24,13 @@ body {
 img, svg { display: block; max-width: 100%; }
 img { height: auto; }
 
+/* Bold text uses the site's one bold weight (browsers default to 700) */
+b, strong, th { font-weight: var(--fw-bold); }
+
 /* Headings: DM Sans, bold, tight tracking at display sizes */
 h1, h2, h3 {
   font-family: var(--font);
-  font-weight: 700;
+  font-weight: var(--fw-bold);
   line-height: 1.04;
   letter-spacing: -0.025em;
   margin: 0;
@@ -35,10 +38,10 @@ h1, h2, h3 {
 }
 h1 { font-size: var(--fs-h1); }
 h2 { font-size: var(--fs-h2); }
-h3 { font-size: var(--fs-h3); font-weight: 600; line-height: 1.25; letter-spacing: -0.01em; }
+h3 { font-size: var(--fs-h3); font-weight: var(--fw-bold); line-height: 1.25; letter-spacing: -0.01em; }
 
 /* Large numbers use the brand's light weight (as in the blog stat strip) */
-.figure { font-weight: 300; letter-spacing: -0.04em; line-height: 0.95; font-variant-numeric: tabular-nums; }
+.figure { font-weight: var(--fw-light); letter-spacing: -0.04em; line-height: 0.95; font-variant-numeric: tabular-nums; }
 
 p { margin: 0 0 var(--s4); text-wrap: pretty; }
 p:last-child { margin-bottom: 0; }
@@ -62,7 +65,7 @@ a[href^="tel:"] { white-space: nowrap; }
 
 .lead {
   font-size: var(--fs-lead);
-  font-weight: 300;
+  font-weight: var(--fw-light);
   line-height: 1.6;
   color: var(--ink);
   max-width: 54ch;
@@ -112,16 +115,16 @@ h1 .line, h2 .line { display: block; }
 .item--blue, .item--direct { --rule: var(--direct); }
 .item h3 { margin-bottom: var(--s2); }
 .item p { color: var(--ink-soft); }
-.item .more { display: inline-block; margin-top: var(--s3); font-weight: 600; }
+.item .more { display: inline-block; margin-top: var(--s3); font-weight: var(--fw-bold); }
 .on-dark .item { --rule: var(--on-dark); }
 .on-dark .item p { color: var(--on-dark-soft); }
 
 /* Plain text link that is really a button (opens the job assistant, etc.) */
-.textlink { font: inherit; font-weight: 600; cursor: pointer; padding: 0; background: none; border: 0; color: var(--isl-blue); text-decoration: underline; text-underline-offset: 0.2em; }
+.textlink { font: inherit; font-weight: var(--fw-bold); cursor: pointer; padding: 0; background: none; border: 0; color: var(--isl-blue); text-decoration: underline; text-underline-offset: 0.2em; }
 .textlink:hover { color: var(--isl-blue-deep); text-decoration-thickness: 2px; }
 
 /* Service markers: the colour key used everywhere */
-.svc { font-weight: 600; font-size: var(--fs-small); color: var(--ink); }
+.svc { font-weight: var(--fw-bold); font-size: var(--fs-small); color: var(--ink); }
 .svc--direct { color: var(--direct); }
 .on-dark .svc { color: #fff; }
 .on-dark .svc--direct { color: var(--isl-blue-on-dark); }

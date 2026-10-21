@@ -94,34 +94,34 @@ const hireHref = isDirect || slug === 'zowie-tucker'
 
   .shot { position: relative; aspect-ratio: 4 / 5; overflow: hidden; background: var(--mist); }
   .shot img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center 20%; }
-  .ini { position: absolute; inset: 0; display: none; place-items: center; font-size: clamp(3rem, 2rem + 4vw, 6rem); font-weight: 300; letter-spacing: -0.04em; color: var(--ink-soft); }
+  .ini { position: absolute; inset: 0; display: none; place-items: center; font-size: var(--fs-figure-lg); font-weight: var(--fw-light); letter-spacing: -0.04em; color: var(--ink-soft); }
   .shot.none .ini { display: grid; }
 
-  .back { display: inline-block; margin-bottom: var(--s6); font-size: var(--fs-small); font-weight: 600; text-decoration: none; }
+  .back { display: inline-block; margin-bottom: var(--s6); font-size: var(--fs-small); font-weight: var(--fw-bold); text-decoration: none; }
   .back:hover { text-decoration: underline; }
   h1 { font-size: var(--fs-h1); letter-spacing: -0.025em; }
-  .role { margin-top: var(--s3); font-size: var(--fs-lead); font-weight: 300; }
+  .role { margin-top: var(--s3); font-size: var(--fs-lead); font-weight: var(--fw-light); }
   .where { margin-top: var(--s2); color: var(--ink-soft); font-size: var(--fs-small); }
 
-  .reach { list-style: none; margin: var(--s6) 0 0; padding: var(--s4) 0 0; border-top: 1.5px solid var(--ink); display: flex; flex-wrap: wrap; gap: var(--s2) var(--s6); font-weight: 600; }
+  .reach { list-style: none; margin: var(--s6) 0 0; padding: var(--s4) 0 0; border-top: 1.5px solid var(--ink); display: flex; flex-wrap: wrap; gap: var(--s2) var(--s6); font-weight: var(--fw-bold); }
   .reach a { color: var(--ink); text-decoration: none; }
   .reach a:hover { text-decoration: underline; }
 
-  .bio { margin-top: var(--s6); font-size: 1.12rem; line-height: 1.7; max-width: 60ch; }
+  .bio { margin-top: var(--s6); font-size: var(--fs-lead); line-height: 1.7; max-width: 60ch; }
 
   .spec { margin-top: var(--s6); }
-  .spec-label { font-size: var(--fs-small); font-weight: 600; color: var(--ink-soft); margin-bottom: var(--s2); }
+  .spec-label { font-size: var(--fs-small); font-weight: var(--fw-bold); color: var(--ink-soft); margin-bottom: var(--s2); }
   .spec ul { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: var(--s2); }
-  .spec li { border: 1.5px solid var(--line); padding: 0.4rem 0.75rem; font-size: var(--fs-small); font-weight: 500; }
+  .spec li { border: 1.5px solid var(--line); padding: 0.4rem 0.75rem; font-size: var(--fs-small); font-weight: var(--fw-text); }
 
   .hiring { margin-top: var(--s7); padding: var(--s5); background: var(--mist); display: flex; flex-wrap: wrap; gap: var(--s4); align-items: center; justify-content: space-between; }
-  .h-text { margin: 0; font-weight: 500; max-width: 44ch; }
-  .h-go { font-weight: 600; background: var(--isl-blue); color: #fff; text-decoration: none; padding: 0.8rem 1.3rem; }
+  .h-text { margin: 0; font-weight: var(--fw-text); max-width: 44ch; }
+  .h-go { font-weight: var(--fw-bold); background: var(--isl-blue); color: #fff; text-decoration: none; padding: 0.8rem 1.3rem; }
   .h-go:hover { background: var(--isl-blue-deep); color: #fff; }
 
-  .person-row-head .lead { justify-self: end; font-weight: 600; font-size: var(--fs-body); }
+  .person-row-head .lead { justify-self: end; font-weight: var(--fw-bold); font-size: var(--fs-body); }
   @media (max-width: 860px) { .person-row-head .lead { justify-self: start; } }
-  .all { display: inline-block; margin-top: var(--s5); font-weight: 600; }
+  .all { display: inline-block; margin-top: var(--s5); font-weight: var(--fw-bold); }
   .row { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: var(--s5) var(--s4); }
   @media (max-width: 1100px) { .row { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
   /* On phones, two columns of four: seven big cards made a long scroll, and "See all" covers the rest */

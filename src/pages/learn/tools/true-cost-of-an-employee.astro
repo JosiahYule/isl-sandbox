@@ -177,26 +177,26 @@ const rate = (v) => `${Number((v * 100).toFixed(3))}%`;
   /* Inputs */
   .inputs { display: grid; gap: var(--s5); border-top: 1.5px solid var(--ink); padding-top: var(--s5); }
   .field { display: grid; gap: var(--s2); margin: 0; padding: 0; border: 0; min-width: 0; }
-  .lbl { font-weight: 600; padding: 0; }
-  .unit { font-weight: 400; color: var(--ink-soft); font-size: var(--fs-small); margin-left: 0.3em; }
+  .lbl { font-weight: var(--fw-bold); padding: 0; }
+  .unit { font-weight: var(--fw-text); color: var(--ink-soft); font-size: var(--fs-small); margin-left: 0.3em; }
   .hint { font-size: var(--fs-small); color: var(--ink-soft); }
-  input[type='number'] { font: inherit; font-size: 1.25rem; font-variant-numeric: tabular-nums; padding: 0.7rem 0.9rem; border: 1.5px solid var(--line); background: var(--paper); color: var(--ink); width: 100%; }
+  input[type='number'] { font: inherit; font-size: var(--fs-h3); font-variant-numeric: tabular-nums; padding: 0.7rem 0.9rem; border: 1.5px solid var(--line); background: var(--paper); color: var(--ink); width: 100%; }
   input[type='number']:focus { outline: none; border-color: var(--isl-blue); }
   .money { position: relative; display: block; }
-  .money > span { position: absolute; left: 0.9rem; top: 50%; transform: translateY(-50%); font-size: 1.25rem; color: var(--ink-soft); }
+  .money > span { position: absolute; left: 0.9rem; top: 50%; transform: translateY(-50%); font-size: var(--fs-h3); color: var(--ink-soft); }
   .money input { padding-left: 1.9rem; }
   .seg { display: grid; grid-template-columns: repeat(4, 1fr); border: 1.5px solid var(--line); }
   .seg label { position: relative; }
   .seg input { position: absolute; opacity: 0; inset: 0; cursor: pointer; }
-  .seg span { display: block; text-align: center; padding: 0.7rem 0; font-weight: 600; }
+  .seg span { display: block; text-align: center; padding: 0.7rem 0; font-weight: var(--fw-bold); }
   .seg label + label span { border-left: 1.5px solid var(--line); }
   .seg input:checked + span { background: var(--ink); color: #fff; }
   .seg input:focus-visible + span { outline: 2px solid var(--isl-blue); outline-offset: -2px; }
 
   /* Result */
   .result { border-top: 1.5px solid var(--ink); padding-top: var(--s5); }
-  .big { margin: 0; font-weight: 300; font-size: clamp(3.4rem, 2rem + 5vw, 6rem); letter-spacing: -0.04em; line-height: 1; font-variant-numeric: tabular-nums; }
-  .per { margin: var(--s2) 0 0; font-weight: 600; }
+  .big { margin: 0; font-weight: var(--fw-light); font-size: var(--fs-figure-lg); letter-spacing: -0.04em; line-height: 1; font-variant-numeric: tabular-nums; }
+  .per { margin: var(--s2) 0 0; font-weight: var(--fw-bold); }
   .sub { margin: var(--s2) 0 0; color: var(--ink-soft); }
   .bar { display: flex; gap: 2px; height: 14px; margin-top: var(--s6); }
   .bar span { display: block; min-width: 2px; transition: flex-grow 0.35s var(--ease); }
@@ -209,19 +209,19 @@ const rate = (v) => `${Number((v * 100).toFixed(3))}%`;
   .k--add::before { background: var(--isl-blue); }
 
   .lines { width: 100%; border-collapse: collapse; margin-top: var(--s6); font-variant-numeric: tabular-nums; }
-  .lines th, .lines td { padding: 0.65rem 0; border-bottom: 1px solid var(--line); text-align: right; font-weight: 400; }
+  .lines th, .lines td { padding: 0.65rem 0; border-bottom: 1px solid var(--line); text-align: right; font-weight: var(--fw-text); }
   .lines th[scope='row'], .lines thead th:first-child { text-align: left; }
   .lines td { padding-left: var(--s4); white-space: nowrap; }
-  .lines thead th { font-size: var(--fs-small); color: var(--ink-soft); font-weight: 500; }
-  .lines tbody tr:first-child th, .lines tbody tr:first-child td { font-weight: 600; }
-  .lines tfoot th, .lines tfoot td { font-weight: 700; border-bottom: 0; border-top: 1.5px solid var(--ink); }
+  .lines thead th { font-size: var(--fs-small); color: var(--ink-soft); font-weight: var(--fw-text); }
+  .lines tbody tr:first-child th, .lines tbody tr:first-child td { font-weight: var(--fw-bold); }
+  .lines tfoot th, .lines tfoot td { font-weight: var(--fw-bold); border-bottom: 0; border-top: 1.5px solid var(--ink); }
 
-  .copy { margin-top: var(--s4); font: inherit; font-size: var(--fs-small); font-weight: 600; color: var(--isl-blue); background: none; border: 0; padding: 0; cursor: pointer; text-decoration: underline; text-underline-offset: 0.2em; }
+  .copy { margin-top: var(--s4); font: inherit; font-size: var(--fs-small); font-weight: var(--fw-bold); color: var(--isl-blue); background: none; border: 0; padding: 0; cursor: pointer; text-decoration: underline; text-underline-offset: 0.2em; }
 
   /* Call to action */
   .cta { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: var(--s5) var(--s7); align-items: end; }
   .cta .lead { margin-top: var(--s4); max-width: 52ch; }
-  .go { font-weight: 600; background: var(--isl-blue); color: #fff; text-decoration: none; padding: 1rem 1.5rem; white-space: nowrap; }
+  .go { font-weight: var(--fw-bold); background: var(--isl-blue); color: #fff; text-decoration: none; padding: 1rem 1.5rem; white-space: nowrap; }
   .go:hover { background: var(--isl-blue-deep); color: #fff; }
 
   .how { max-width: 72ch; }

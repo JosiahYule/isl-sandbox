@@ -101,19 +101,19 @@ const services = [ind.contract && ['Contract staffing', '/contract/'], ind.direc
   .two { display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); gap: var(--s7) clamp(2.5rem, 6vw, 6rem); align-items: start; }
   .h { font-size: var(--fs-h3); margin-bottom: var(--s4); }
   .roles { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: 1fr 1fr; border-top: 1.5px solid var(--ink); }
-  .roles li { padding: var(--s3) var(--s3) var(--s3) 0; border-bottom: 1px solid var(--line); font-weight: 600; }
-  .svc-line { margin-top: var(--s5); font-weight: 600; color: var(--ink-soft); }
+  .roles li { padding: var(--s3) var(--s3) var(--s3) 0; border-bottom: 1px solid var(--line); font-weight: var(--fw-bold); }
+  .svc-line { margin-top: var(--s5); font-weight: var(--fw-bold); color: var(--ink-soft); }
   .pay { border-top: 1.5px solid var(--ink); padding-top: var(--s4); }
-  .big { margin: 0; font-weight: 300; font-size: clamp(2.6rem, 1.6rem + 3vw, 4rem); letter-spacing: -0.04em; line-height: 1; font-variant-numeric: tabular-nums; }
+  .big { margin: 0; font-weight: var(--fw-light); font-size: var(--fs-figure-lg); letter-spacing: -0.04em; line-height: 1; font-variant-numeric: tabular-nums; }
   .sub { margin: var(--s3) 0 0; color: var(--ink-soft); }
-  .more { display: inline-block; margin-top: var(--s4); font-weight: 600; }
-  .jh .lead { justify-self: end; font-weight: 600; font-size: var(--fs-body); }
+  .more { display: inline-block; margin-top: var(--s4); font-weight: var(--fw-bold); }
+  .jh .lead { justify-self: end; font-weight: var(--fw-bold); font-size: var(--fs-body); }
   .list { border-top: 1.5px solid var(--ink); background: var(--paper); }
   .local { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--s5); }
   .local li { border-top: 1.5px solid var(--ink); padding-top: var(--s3); display: grid; gap: 2px; }
   .l-prov { margin: 0; font-size: var(--fs-small); color: var(--ink-soft); }
-  .l-name { margin: 0; font-weight: 700; }
-  .l-tel { font-weight: 600; color: var(--ink); text-decoration: none; font-variant-numeric: tabular-nums; }
+  .l-name { margin: 0; font-weight: var(--fw-bold); }
+  .l-tel { font-weight: var(--fw-bold); color: var(--ink); text-decoration: none; font-variant-numeric: tabular-nums; }
   @media (max-width: 900px) {
     .two { grid-template-columns: 1fr; }
     .local { grid-template-columns: 1fr 1fr; }

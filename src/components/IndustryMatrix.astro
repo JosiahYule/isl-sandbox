@@ -75,14 +75,14 @@ const filters = [
 <style>
   .filters { display: flex; flex-wrap: wrap; gap: var(--s2); margin-bottom: var(--s5); }
   .chip {
-    font: inherit; font-size: var(--fs-small); font-weight: 500; cursor: pointer;
+    font: inherit; font-size: var(--fs-small); font-weight: var(--fw-bold); cursor: pointer;
     display: inline-flex; align-items: center; gap: var(--s2);
     padding: 0.5rem 0.95rem; border-radius: var(--radius);
     background: transparent; color: var(--ink); border: 1.5px solid var(--line);
     transition: background-color 150ms var(--ease), border-color 150ms var(--ease);
   }
   .chip:hover { border-color: var(--ink); }
-  .chip .n { font-variant-numeric: tabular-nums; color: var(--ink-soft); font-weight: 500; }
+  .chip .n { font-variant-numeric: tabular-nums; color: var(--ink-soft); font-weight: var(--fw-bold); }
   .chip[aria-pressed='true'] { background: var(--ink); border-color: var(--ink); color: #fff; }
   .chip[aria-pressed='true'] .n { color: rgb(255 255 255 / 0.7); }
   .chip--contract[aria-pressed='true'] { background: var(--ink); border-color: var(--ink); color: #fff; }
@@ -91,7 +91,7 @@ const filters = [
 
   table { width: 100%; border-collapse: collapse; }
   thead th {
-    text-align: left; font-size: var(--fs-tiny); font-weight: 500; color: var(--ink-soft);
+    text-align: left; font-size: var(--fs-tiny); font-weight: var(--fw-text); color: var(--ink-soft);
     padding: 0 0 var(--s2); border-bottom: 1.5px solid var(--ink);
   }
   .c { text-align: center; width: 7.5rem; }
@@ -103,10 +103,10 @@ const filters = [
   .name :global(a):hover, .name :global(a):focus-visible { background-size: 100% 1.5px; color: var(--isl-blue); }
   .name :global(a)::after { content: ' →'; color: var(--isl-blue); }
   .name {
-    display: block; font-weight: 700;
-    font-size: 1.12rem; letter-spacing: -0.01em; line-height: 1.25;
+    display: block; font-weight: var(--fw-bold);
+    font-size: var(--fs-lead); letter-spacing: -0.01em; line-height: 1.25;
   }
-  .note { display: block; font-weight: 400; font-size: var(--fs-small); color: var(--ink-soft); margin-top: var(--s1); max-width: 56ch; }
+  .note { display: block; font-weight: var(--fw-text); font-size: var(--fs-small); color: var(--ink-soft); margin-top: var(--s1); max-width: 56ch; }
 
   .mark { display: inline-block; width: 16px; height: 16px; margin-top: 4px; border-radius: 1px; }
   .mark--contract { background: var(--contract); }
@@ -126,13 +126,13 @@ const filters = [
   .list li { display: grid; grid-template-columns: minmax(0, 1fr) auto; column-gap: var(--s5); align-content: start; padding-block: var(--s4); border-top: 1px solid var(--line); }
   @media (max-width: 900px) { .list { grid-template-columns: 1fr; } }
   .list .note { grid-column: 1; }
-  .also { grid-column: 2; grid-row: 1; align-self: start; font-size: var(--fs-tiny); color: var(--ink-soft); font-weight: 500; white-space: nowrap; }
+  .also { grid-column: 2; grid-row: 1; align-self: start; font-size: var(--fs-tiny); color: var(--ink-soft); font-weight: var(--fw-text); white-space: nowrap; }
 
   @media (max-width: 640px) {
     .list li { grid-template-columns: 1fr; }
     .also { grid-column: 1; grid-row: auto; margin-top: var(--s2); }
     .c { width: 4.5rem; }
-    thead th.c { font-size: 0.7rem; }
+    thead th.c { font-size: var(--fs-tiny); }
     .note { display: none; }
   }
 </style>

@@ -113,18 +113,18 @@ const areaRows = areas.map((a) => ({ ...a, ticks: Array.from({ length: a.n }, ()
   /* The preview panel: same size for all three so the row lines up */
   .vis { background: var(--mist); height: 228px; padding: var(--s5); margin-bottom: var(--s5); display: flex; flex-direction: column; transition: background 0.2s; }
   :global(.section--tint) .vis { background: var(--paper); }
-  .vis-cap { font-size: var(--fs-tiny); font-weight: 600; color: var(--ink-soft); margin-bottom: var(--s4); }
+  .vis-cap { font-size: var(--fs-tiny); font-weight: var(--fw-bold); color: var(--ink-soft); margin-bottom: var(--s4); }
   .vis ul { list-style: none; margin: 0; padding: 0; display: grid; flex: 1; align-content: space-between; }
 
   /* Cost: a short receipt */
   .cost li { display: flex; justify-content: space-between; font-size: var(--fs-small); padding-bottom: 6px; border-bottom: 1px solid rgb(0 0 0 / 0.08); }
   .c-val { font-variant-numeric: tabular-nums; color: var(--ink-soft); }
-  .c-total { border-bottom: 0 !important; border-top: 1.5px solid var(--ink); padding-top: 6px; font-weight: 600; }
-  .c-total .c-val { color: var(--isl-blue); font-weight: 700; }
+  .c-total { border-bottom: 0 !important; border-top: 1.5px solid var(--ink); padding-top: 6px; font-weight: var(--fw-bold); }
+  .c-total .c-val { color: var(--isl-blue); font-weight: var(--fw-bold); }
 
   /* Pay: a dot per job on one scale */
   .pay li { display: grid; gap: 6px; }
-  .p-name { font-size: var(--fs-tiny); font-weight: 500; }
+  .p-name { font-size: var(--fs-tiny); font-weight: var(--fw-text); }
   .p-strip { position: relative; height: 10px; border-bottom: 1px solid rgb(0 0 0 / 0.12); }
   .p-dot { position: absolute; top: 0; width: 8px; height: 8px; margin-left: -4px; background: var(--contract); box-shadow: 0 0 0 1.5px var(--mist); }
   .p-dot--direct { background: var(--direct); border-radius: 50%; }
@@ -134,18 +134,18 @@ const areaRows = areas.map((a) => ({ ...a, ticks: Array.from({ length: a.n }, ()
   /* Job ad: pay rules by province */
   .law li { display: flex; justify-content: space-between; gap: var(--s3); font-size: var(--fs-small); padding-bottom: 6px; border-bottom: 1px solid rgb(0 0 0 / 0.08); }
   .l-st { color: var(--ink-soft); white-space: nowrap; }
-  .l-st--req { color: var(--isl-blue); font-weight: 600; }
+  .l-st--req { color: var(--isl-blue); font-weight: var(--fw-bold); }
 
   /* Resume: one short bar per check */
   .audit li { display: grid; grid-template-columns: 6.2rem 1fr; align-items: center; gap: var(--s3); }
-  .a-name { font-size: var(--fs-tiny); font-weight: 500; line-height: 1.2; }
+  .a-name { font-size: var(--fs-tiny); font-weight: var(--fw-text); line-height: 1.2; }
   .a-ticks { display: flex; gap: 4px; }
   .tick { width: 5px; height: 11px; background: var(--ink); }
 
-  .who { font-size: var(--fs-tiny); font-weight: 500; color: var(--ink-soft); margin-bottom: var(--s2); }
-  h3 { font-size: 1.25rem; margin-bottom: var(--s2); }
+  .who { font-size: var(--fs-tiny); font-weight: var(--fw-text); color: var(--ink-soft); margin-bottom: var(--s2); }
+  h3 { font-size: var(--fs-h3); margin-bottom: var(--s2); }
   .d { color: var(--ink-soft); }
-  .more { margin-top: auto; padding-top: var(--s3); font-weight: 600; color: var(--isl-blue); }
+  .more { margin-top: auto; padding-top: var(--s3); font-weight: var(--fw-bold); color: var(--isl-blue); }
 
   /* Motion: rows and dots settle in, the checks fill one by one */
   :global(.motion) .tools > li { opacity: 0; transform: translateY(18px); transition: opacity 0.7s var(--ease), transform 0.7s var(--ease); transition-delay: calc(var(--i) * 110ms); }

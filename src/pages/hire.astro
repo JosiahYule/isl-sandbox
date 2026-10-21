@@ -294,7 +294,7 @@ const afterSteps = [
 
   /* Form */
   fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
-  legend, .field { font-weight: 500; font-size: var(--fs-small); }
+  legend, .field { font-weight: var(--fw-text); font-size: var(--fs-small); }
   legend { margin-bottom: var(--s3); }
   .options { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--s2); }
   .opt {
@@ -308,8 +308,8 @@ const afterSteps = [
   .opt--direct::before { background: var(--direct); }
   .opt--unsure::before { background: var(--line); }
   .opt input { position: absolute; opacity: 0; pointer-events: none; }
-  .opt-name { font-weight: 700; font-size: 1.02rem; }
-  .opt-meta { font-weight: 400; color: var(--ink-soft); font-size: var(--fs-small); line-height: 1.4; }
+  .opt-name { font-weight: var(--fw-bold); font-size: var(--fs-body); }
+  .opt-meta { font-weight: var(--fw-text); color: var(--ink-soft); font-size: var(--fs-small); line-height: 1.4; }
   .opt:hover { border-color: var(--ink-soft); }
   .opt:has(input:checked) { border-color: var(--ink); background: var(--mist); }
   .opt--direct:has(input:checked) { border-color: var(--direct); background: var(--isl-blue-tint); }
@@ -321,48 +321,48 @@ const afterSteps = [
   .helper[hidden] { display: none; }
   .helper:not([hidden]) { animation: rise 0.35s var(--ease); }
   @keyframes rise { from { opacity: 0; transform: translateY(-6px); } }
-  .q-label { font-weight: 500; font-size: var(--fs-small); margin-bottom: var(--s2); }
+  .q-label { font-weight: var(--fw-text); font-size: var(--fs-small); margin-bottom: var(--s2); }
   .seg { display: grid; grid-template-columns: 1fr 1fr; gap: var(--s2); }
-  .seg button { font: inherit; font-size: var(--fs-small); font-weight: 500; cursor: pointer; padding: 0.6rem 0.5rem; border: 1.5px solid var(--line); background: var(--paper); color: var(--ink); }
+  .seg button { font: inherit; font-size: var(--fs-small); font-weight: var(--fw-bold); cursor: pointer; padding: 0.6rem 0.5rem; border: 1.5px solid var(--line); background: var(--paper); color: var(--ink); }
   .seg button:hover { border-color: var(--ink); }
   .seg button[aria-pressed='true'] { background: var(--ink); border-color: var(--ink); color: #fff; }
-  .result { font-weight: 600; margin: 0; }
+  .result { font-weight: var(--fw-bold); margin: 0; }
 
   .fields { display: grid; grid-template-columns: 1fr 1fr; gap: var(--s4) var(--s5); margin-top: var(--s6); }
   .field { display: grid; gap: var(--s1); align-content: start; }
   .field--wide { grid-column: 1 / -1; }
-  .opt-tag { font-weight: 400; color: var(--ink-soft); }
-  .hint { font-weight: 400; color: var(--ink-soft); }
+  .opt-tag { font-weight: var(--fw-text); color: var(--ink-soft); }
+  .hint { font-weight: var(--fw-text); color: var(--ink-soft); }
   input:not([type='radio']), select, textarea {
-    font: inherit; font-size: 1rem; font-weight: 400; color: var(--ink);
+    font: inherit; font-size: var(--fs-body); font-weight: var(--fw-text); color: var(--ink);
     padding: 0.75rem 0.85rem; border: 1.5px solid var(--line); background: var(--paper); width: 100%;
   }
   select:invalid { color: var(--ink-soft); }
   input:focus, select:focus, textarea:focus { outline: none; border-color: var(--ink); box-shadow: 0 0 0 3px var(--focus); }
   [aria-invalid] { border-color: #b3261e !important; }
-  .err { color: #b3261e; font-weight: 500; font-size: var(--fs-small); }
+  .err { color: #b3261e; font-weight: var(--fw-bold); font-size: var(--fs-small); }
 
-  .to-line { display: none; margin: var(--s5) 0 0; font-size: var(--fs-small); font-weight: 500; }
+  .to-line { display: none; margin: var(--s5) 0 0; font-size: var(--fs-small); font-weight: var(--fw-text); }
   .hp { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
-  .send-err { margin-top: var(--s3); color: #b42318; font-weight: 500; }
+  .send-err { margin-top: var(--s3); color: #b42318; font-weight: var(--fw-bold); }
   .submit { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s3) var(--s5); margin-top: var(--s6); }
-  .submit button { font: inherit; font-weight: 600; font-size: 1.0625rem; cursor: pointer; padding: 1rem 1.8rem; border: 0; background: var(--isl-blue); color: #fff; }
+  .submit button { font: inherit; font-weight: var(--fw-bold); font-size: var(--fs-body); cursor: pointer; padding: 1rem 1.8rem; border: 0; background: var(--isl-blue); color: #fff; }
   .submit button:hover { background: var(--isl-blue-deep); }
   .submit p { font-size: var(--fs-small); color: var(--ink-soft); margin: 0; }
   .sent { margin-top: var(--s6); padding-top: var(--s4); border-top: 3px solid var(--isl-blue); }
-  .sent-title { font-weight: 700; font-size: 1.3rem; margin-bottom: var(--s2); }
+  .sent-title { font-weight: var(--fw-bold); font-size: var(--fs-h3); margin-bottom: var(--s2); }
   .sent-note { color: var(--ink-soft); font-size: var(--fs-small); }
 
   /* Who'll reply */
   .reply { position: sticky; top: 100px; padding-top: var(--s4); border-top: 3px solid var(--ink); display: grid; gap: var(--s4); }
-  .r-label { margin: 0; font-size: var(--fs-small); font-weight: 600; color: var(--ink-soft); }
+  .r-label { margin: 0; font-size: var(--fs-small); font-weight: var(--fw-bold); color: var(--ink-soft); }
   .r-card { display: flex; gap: var(--s4); align-items: center; }
-  .r-face { position: relative; width: 72px; height: 72px; flex: none; display: grid; place-items: center; overflow: hidden; background: var(--mist); color: var(--ink-soft); font-weight: 300; font-size: 1.3rem; }
+  .r-face { position: relative; width: 72px; height: 72px; flex: none; display: grid; place-items: center; overflow: hidden; background: var(--mist); color: var(--ink-soft); font-weight: var(--fw-light); font-size: var(--fs-h3); }
   .r-face img[hidden] { display: none; }
   .r-face img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center 20%; }
-  .r-name { margin: 0; font-weight: 700; font-size: 1.2rem; letter-spacing: -0.01em; }
+  .r-name { margin: 0; font-weight: var(--fw-bold); font-size: var(--fs-h3); letter-spacing: -0.01em; }
   .r-role { margin: 2px 0 0; color: var(--ink-soft); font-size: var(--fs-small); }
-  .r-reach { display: grid; gap: 2px; margin: 0; font-weight: 600; }
+  .r-reach { display: grid; gap: 2px; margin: 0; font-weight: var(--fw-bold); }
   .r-reach a { color: var(--ink); text-decoration: none; width: fit-content; }
   .r-reach a:hover { text-decoration: underline; }
   .r-note { margin: 0; font-size: var(--fs-small); color: var(--ink-soft); }

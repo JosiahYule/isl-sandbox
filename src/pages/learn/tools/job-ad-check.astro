@@ -204,38 +204,38 @@ Send your resume to jobs@example.ca`;
 
   .inputs { display: grid; gap: var(--s5); border-top: 1.5px solid var(--ink); padding-top: var(--s5); }
   .field { display: grid; gap: var(--s2); margin: 0; padding: 0; border: 0; min-width: 0; }
-  .lbl { font-weight: 600; padding: 0; display: flex; justify-content: space-between; align-items: baseline; gap: var(--s3); }
-  .sample { font: inherit; font-size: var(--fs-small); font-weight: 600; color: var(--isl-blue); background: none; border: 0; padding: 0; cursor: pointer; text-decoration: underline; text-underline-offset: 0.2em; }
-  textarea { font: inherit; padding: 0.8rem 0.9rem; border: 1.5px solid var(--line); background: var(--paper); color: var(--ink); width: 100%; resize: vertical; min-height: 18rem; font-size: 0.95rem; line-height: 1.55; }
+  .lbl { font-weight: var(--fw-bold); padding: 0; display: flex; justify-content: space-between; align-items: baseline; gap: var(--s3); }
+  .sample { font: inherit; font-size: var(--fs-small); font-weight: var(--fw-bold); color: var(--isl-blue); background: none; border: 0; padding: 0; cursor: pointer; text-decoration: underline; text-underline-offset: 0.2em; }
+  textarea { font: inherit; padding: 0.8rem 0.9rem; border: 1.5px solid var(--line); background: var(--paper); color: var(--ink); width: 100%; resize: vertical; min-height: 18rem; font-size: var(--fs-body); line-height: 1.55; }
   textarea:focus { outline: none; border-color: var(--isl-blue); }
   .seg { display: grid; grid-template-columns: repeat(5, 1fr); border: 1.5px solid var(--line); }
   .seg label { position: relative; }
   .seg input { position: absolute; opacity: 0; inset: 0; cursor: pointer; }
-  .seg span { display: block; text-align: center; padding: 0.7rem 0.2rem; font-weight: 600; font-size: var(--fs-small); }
+  .seg span { display: block; text-align: center; padding: 0.7rem 0.2rem; font-weight: var(--fw-bold); font-size: var(--fs-small); }
   .seg label + label span { border-left: 1.5px solid var(--line); }
   .seg input:checked + span { background: var(--ink); color: #fff; }
   .seg input:focus-visible + span { outline: 2px solid var(--isl-blue); outline-offset: -2px; }
-  .go { justify-self: start; display: inline-block; font: inherit; font-weight: 600; background: var(--isl-blue); color: #fff; border: 0; cursor: pointer; text-decoration: none; padding: 0.9rem 1.4rem; white-space: nowrap; }
+  .go { justify-self: start; display: inline-block; font: inherit; font-weight: var(--fw-bold); background: var(--isl-blue); color: #fff; border: 0; cursor: pointer; text-decoration: none; padding: 0.9rem 1.4rem; white-space: nowrap; }
   .go:hover { background: var(--isl-blue-deep); color: #fff; }
   .private { margin: 0; font-size: var(--fs-small); color: var(--ink-soft); }
 
   .out { border-top: 1.5px solid var(--ink); padding-top: var(--s5); position: sticky; top: calc(72px + var(--s5)); }
-  .ph-title { font-weight: 600; margin: 0 0 var(--s3); }
+  .ph-title { font-weight: var(--fw-bold); margin: 0 0 var(--s3); }
   .law-list { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--line); }
   .law-list li { display: flex; justify-content: space-between; gap: var(--s4); padding: var(--s3) 0; border-bottom: 1px solid var(--line); }
   .st { color: var(--ink-soft); font-size: var(--fs-small); text-align: right; }
-  .st--req { color: var(--isl-blue); font-weight: 600; }
+  .st--req { color: var(--isl-blue); font-weight: var(--fw-bold); }
   .ph-sub { margin-top: var(--s4); color: var(--ink-soft); font-size: var(--fs-small); }
 
-  .score { margin: 0; font-weight: 300; font-size: clamp(3.4rem, 2rem + 5vw, 6rem); letter-spacing: -0.04em; line-height: 1; font-variant-numeric: tabular-nums; }
+  .score { margin: 0; font-weight: var(--fw-light); font-size: var(--fs-figure-lg); letter-spacing: -0.04em; line-height: 1; font-variant-numeric: tabular-nums; }
   .of { font-size: 0.35em; color: var(--ink-soft); letter-spacing: 0; margin-left: 0.15em; }
-  .verdict { margin: var(--s3) 0 0; font-weight: 600; }
+  .verdict { margin: var(--s3) 0 0; font-weight: var(--fw-bold); }
   .meter { height: 8px; background: rgb(0 0 0 / 0.07); margin-top: var(--s4); }
   .meter span { display: block; height: 100%; width: 0; background: var(--isl-blue); transition: width 0.6s var(--ease); }
-  .out h2 { font-size: 1.15rem; margin: var(--s6) 0 var(--s3); }
+  .out h2 { font-size: var(--fs-h3); margin: var(--s6) 0 var(--s3); }
 
   .law p { margin: 0 0 var(--s2); }
-  .law-st { font-weight: 600; }
+  .law-st { font-weight: var(--fw-bold); }
   .law-st.ok { color: var(--isl-blue); }
   .law-st.bad { color: #a3261b; }
   .law-st.bad::before { content: '! '; }
@@ -256,11 +256,11 @@ Send your resume to jobs@example.ca`;
 
   .fixes { margin: 0; padding: 0; list-style: none; counter-reset: fix; border-top: 1px solid var(--line); }
   .fixes :global(li) { counter-increment: fix; display: grid; grid-template-columns: 1.6rem 1fr; gap: 2px var(--s2); padding: var(--s3) 0; border-bottom: 1px solid var(--line); }
-  .fixes :global(li)::before { content: counter(fix); grid-row: span 2; font-weight: 600; color: var(--isl-blue); font-variant-numeric: tabular-nums; }
+  .fixes :global(li)::before { content: counter(fix); grid-row: span 2; font-weight: var(--fw-bold); color: var(--isl-blue); font-variant-numeric: tabular-nums; }
   .fixes :global(strong) { grid-column: 2; }
   .fixes :global(span) { grid-column: 2; color: var(--ink-soft); font-size: var(--fs-small); line-height: 1.5; }
   .passed { margin-top: var(--s5); }
-  .passed summary { cursor: pointer; font-weight: 600; }
+  .passed summary { cursor: pointer; font-weight: var(--fw-bold); }
   .passed ul { margin: var(--s3) 0 0; padding-left: 1.2em; color: var(--ink-soft); font-size: var(--fs-small); display: grid; gap: var(--s1); }
 
   .next { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: var(--s5) var(--s7); align-items: end; }

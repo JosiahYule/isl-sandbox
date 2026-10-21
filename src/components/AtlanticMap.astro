@@ -135,7 +135,7 @@ const tel = (n) => `tel:+1${n.replaceAll('-', '')}`;
   }
   .label {
     background: var(--label-bg); color: #fff; white-space: nowrap;
-    font-size: 0.8rem; font-weight: 500; line-height: 1; padding: 6px 8px; border-radius: var(--radius);
+    font-size: var(--fs-tiny); font-weight: var(--fw-bold); line-height: 1; padding: 6px 8px; border-radius: var(--radius);
   }
   .pin:hover .dot, .pin[aria-pressed='true'] .dot { transform: scale(1.25); background: var(--ink); border-color: #fff; }
   .pin[aria-pressed='true'] .label { background: #fff; color: var(--ink); outline: 1px solid var(--ink); }
@@ -146,11 +146,11 @@ const tel = (n) => `tel:+1${n.replaceAll('-', '')}`;
     border: 1px solid var(--ink); border-radius: var(--radius);
     padding: var(--s4) var(--s5);
   }
-  .office-city { font-weight: 700; font-size: 1.1rem; margin-bottom: var(--s1); }
-  .hq { display: block; font-weight: 500; font-size: var(--fs-tiny); color: var(--ink-soft); }
+  .office-city { font-weight: var(--fw-bold); font-size: var(--fs-h3); margin-bottom: var(--s1); }
+  .hq { display: block; font-weight: var(--fw-bold); font-size: var(--fs-tiny); color: var(--ink-soft); }
   .office-addr { font-size: var(--fs-small); color: var(--ink-soft); line-height: 1.45; margin-bottom: var(--s2); }
-  .office-more { display: block; margin-top: var(--s2); font-size: var(--fs-small); font-weight: 600; }
-  .office-tel { font-weight: 700; font-size: 1.05rem; color: var(--ink); font-variant-numeric: tabular-nums; }
+  .office-more { display: block; margin-top: var(--s2); font-size: var(--fs-small); font-weight: var(--fw-bold); }
+  .office-tel { font-weight: var(--fw-bold); font-size: var(--fs-body); color: var(--ink); font-variant-numeric: tabular-nums; }
 
   /* Motion: the pins drop onto the map one after another, then the office card appears */
   :global(.motion) .amap .pin { opacity: 0; margin-top: -14px; transition: opacity 0.4s var(--ease), margin-top 0.5s var(--ease); transition-delay: calc(0.2s + var(--o) * 120ms); }
@@ -160,7 +160,7 @@ const tel = (n) => `tel:+1${n.replaceAll('-', '')}`;
 
   @media (max-width: 900px) { .amap--bleed svg { overflow: hidden; } }
   @media (max-width: 640px) {
-    .label { font-size: 0.7rem; padding: 4px 6px; }
+    .label { font-size: var(--fs-tiny); padding: 4px 6px; }
     .dot { width: 14px; height: 14px; border-width: 3px; }
     .card { position: static; width: auto; margin-top: var(--s4); }
   }

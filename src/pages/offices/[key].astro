@@ -138,22 +138,22 @@ const people = team.filter((p) => p.province === office.province);
 
 <style>
   .local-guides { margin-top: var(--s5); padding-top: var(--s4); border-top: 1px solid var(--line); font-size: var(--fs-small); }
-  .local-guides span { font-weight: 600; margin-right: var(--s2); }
-  .call { font-weight: 700; font-size: 1.35rem; color: var(--ink); text-decoration: none; font-variant-numeric: tabular-nums; margin-right: var(--s3); }
+  .local-guides span { font-weight: var(--fw-bold); margin-right: var(--s2); }
+  .call { font-weight: var(--fw-bold); font-size: var(--fs-h3); color: var(--ink); text-decoration: none; font-variant-numeric: tabular-nums; margin-right: var(--s3); }
   .call:hover { text-decoration: underline; }
 
   .contacts { display: grid; grid-template-columns: 1fr 1fr; gap: var(--s7); }
 
   .team { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: var(--s5) var(--s4); }
   .list { border-top: 1.5px solid var(--ink); background: var(--paper); }
-  .more { display: inline-block; margin-top: var(--s5); font-weight: 600; }
+  .more { display: inline-block; margin-top: var(--s5); font-weight: var(--fw-bold); }
   .none { color: var(--ink-soft); }
 
   .guides { list-style: none; margin: 0; padding: 0; border-top: 1.5px solid var(--ink); }
   .guides a { display: flex; justify-content: space-between; gap: var(--s4); padding-block: var(--s5); border-bottom: 1px solid var(--line); color: var(--ink); text-decoration: none; }
-  .g-title { font-weight: 600; font-size: 1.25rem; letter-spacing: -0.01em; }
+  .g-title { font-weight: var(--fw-bold); font-size: var(--fs-h3); letter-spacing: -0.01em; }
   .guides a:hover .g-title { text-decoration: underline; }
-  .arrow { color: var(--isl-blue); font-weight: 600; transition: transform 0.3s var(--ease); }
+  .arrow { color: var(--isl-blue); font-weight: var(--fw-bold); transition: transform 0.3s var(--ease); }
   .guides a:hover .arrow { transform: translateX(4px); }
 
 

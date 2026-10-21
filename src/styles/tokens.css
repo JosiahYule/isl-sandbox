@@ -41,14 +41,25 @@
   /* Type: DM Sans throughout */
   --font: 'DM Sans Variable', 'DM Sans', system-ui, sans-serif;
 
-  --fs-hero: clamp(2.6rem, 1rem + 5.2vw, 5.6rem);
+  /* The type scale. Every font-size on the site uses one of these steps, so sizes differ
+     clearly or not at all. Display steps first, then text. */
+  --fs-hero: clamp(2.6rem, 1rem + 5.2vw, 5.6rem);   /* the homepage headline */
   --fs-h1: clamp(2.3rem, 1.2rem + 3.6vw, 4.4rem);
   --fs-h2: clamp(1.9rem, 1.2rem + 2.3vw, 3.2rem);
   --fs-h3: 1.25rem;
-  --fs-lead: clamp(1.15rem, 1rem + 0.45vw, 1.35rem);
+  --fs-lead: clamp(1.125rem, 1rem + 0.35vw, 1.25rem); /* tops out at the h3 size; the light weight tells them apart */
   --fs-body: 1.0625rem;     /* 17px, the brand body size */
   --fs-small: 0.9rem;
   --fs-tiny: 0.78rem;
+  /* Figures (numbers shown big, in the light weight) */
+  --fs-figure-lg: clamp(3.4rem, 2rem + 5vw, 6rem);  /* a tool's result, the one number a page is about */
+  --fs-figure: clamp(2.2rem, 1.4rem + 2.2vw, 3.4rem); /* figures in a row (47 days, 90 days) */
+
+  /* Three weights: light for big figures, regular for text, bold for headings and emphasis.
+     (Change --fw-bold to 700 to make every heading and label heavier at once.) */
+  --fw-light: 300;
+  --fw-text: 400;
+  --fw-bold: 600;
 
   /* Space */
   --s1: 0.25rem;

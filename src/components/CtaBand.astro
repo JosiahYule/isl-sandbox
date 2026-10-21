@@ -36,7 +36,7 @@ const tel = `tel:+1${brand.mainPhone.replaceAll('-', '')}`;
 <style>
   .cta { padding-block: clamp(4rem, 9vw, 7.5rem); border-bottom: 1px solid var(--line-dark); }
   .inner { display: grid; grid-template-columns: 1.3fr 1fr; gap: var(--s7); align-items: end; }
-  h2 { font-size: var(--fs-h1); max-width: 12ch; }
+  h2 { font-size: var(--fs-h2); max-width: 14ch; } /* the same size as every other section heading */
   .side p { color: var(--on-dark-soft); font-size: var(--fs-lead); max-width: 36ch; }
   .who { display: flex; align-items: center; gap: var(--s3); margin-top: var(--s4); }
   .faces { display: flex; flex: none; }
@@ -44,6 +44,6 @@ const tel = `tel:+1${brand.mainPhone.replaceAll('-', '')}`;
   .faces img + img { margin-left: -8px; }
   .names { font-size: var(--fs-small); color: var(--on-dark-soft); line-height: 1.4; }
   .actions { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s5); margin-top: var(--s5); }
-  .phone { font-weight: 500; }
+  .phone { font-weight: var(--fw-bold); }
   @media (max-width: 860px) { .inner { grid-template-columns: 1fr; } }
 </style>

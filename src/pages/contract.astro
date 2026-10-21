@@ -138,20 +138,20 @@ const covered = [
 </Base>
 
 <style>
-  .l-prov { font-size: var(--fs-small); font-weight: 600; color: var(--ink-soft) !important; margin-bottom: var(--s2); }
-  .l-tel { display: block; margin-top: var(--s3); font-weight: 700; color: var(--ink); text-decoration: none; font-variant-numeric: tabular-nums; }
+  .l-prov { font-size: var(--fs-small); font-weight: var(--fw-bold); color: var(--ink-soft) !important; margin-bottom: var(--s2); }
+  .l-tel { display: block; margin-top: var(--s3); font-weight: var(--fw-bold); color: var(--ink); text-decoration: none; font-variant-numeric: tabular-nums; }
   .local .more { display: inline-block; margin-top: var(--s2); }
   .cov-grid { display: grid; grid-template-columns: 5fr 6fr; gap: clamp(2rem, 6vw, 6rem); align-items: center; }
   .now { border-top: 1.5px solid var(--ink); padding-top: var(--s4); }
-  .now-label { font-size: var(--fs-small); font-weight: 600; color: var(--ink-soft); margin-bottom: var(--s3); }
+  .now-label { font-size: var(--fs-small); font-weight: var(--fw-bold); color: var(--ink-soft); margin-bottom: var(--s3); }
   .now-list { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: var(--s2); }
-  .now-list li { background: var(--paper); border: 1.5px solid var(--line); padding: 0.4rem 0.8rem; font-weight: 600; font-size: var(--fs-small); }
+  .now-list li { background: var(--paper); border: 1.5px solid var(--line); padding: 0.4rem 0.8rem; font-weight: var(--fw-bold); font-size: var(--fs-small); }
   .key { display: flex; flex-wrap: wrap; gap: var(--s2) var(--s5); margin-top: var(--s5); font-size: var(--fs-small); color: var(--ink-soft); }
   .key span { display: inline-flex; align-items: center; gap: var(--s2); }
   .key span::before { content: ''; width: 12px; height: 12px; border-radius: 50%; }
   .k-office::before { background: #fff; border: 3px solid var(--ink); }
   .k-town::before { background: var(--ink); border: 2px solid #fff; outline: 1px solid var(--ink); }
-  .coverage .more { display: inline-block; margin-top: var(--s5); font-weight: 600; }
+  .coverage .more { display: inline-block; margin-top: var(--s5); font-weight: var(--fw-bold); }
   @media (max-width: 900px) { .cov-grid { grid-template-columns: 1fr; } }
   .rate-grid { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(2rem, 6vw, 6rem); align-items: start; }
   .rate-copy .section-head { margin-bottom: var(--s6); }
@@ -161,15 +161,15 @@ const covered = [
   .stack-head {
     display: flex; justify-content: space-between; align-items: baseline; gap: var(--s4);
     margin: 0; padding: var(--s4) var(--s5); background: var(--ink); color: #fff;
-    font-weight: 700; font-size: 1.15rem;
+    font-weight: var(--fw-bold); font-size: var(--fs-h3);
   }
-  .stack-sub { font-weight: 400; font-size: var(--fs-small); color: rgb(255 255 255 / 0.7); }
+  .stack-sub { font-weight: var(--fw-text); font-size: var(--fs-small); color: rgb(255 255 255 / 0.7); }
   .stack ul { list-style: none; margin: 0; padding: 0 var(--s5); }
   .stack li { display: grid; grid-template-columns: 20px 1fr; column-gap: var(--s3); padding-block: var(--s4); }
   .stack li + li { border-top: 1px solid var(--line); }
   .check { width: 20px; height: 20px; grid-row: span 2; margin-top: 2px; }
   .check path { fill: none; stroke: var(--isl-blue); stroke-width: 2.4; stroke-linecap: square; }
-  .c-t { font-weight: 600; }
+  .c-t { font-weight: var(--fw-bold); }
   .c-d { grid-column: 2; color: var(--ink-soft); font-size: var(--fs-small); }
 
   /* Motion: the costs start spread apart as separate pieces, then close into the card */

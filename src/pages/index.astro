@@ -133,21 +133,21 @@ const ticker = jobs.slice(0, 14);
   .hero-inner { flex: 1; display: flex; align-items: center; padding-block: var(--s8) var(--s7); }
   .hero-copy { max-width: 660px; }
 
-  .hero-title { font-size: clamp(2.9rem, 1rem + 5.4vw, 6.2rem); font-weight: 600; letter-spacing: -0.03em; line-height: 1; color: #fff; }
+  .hero-title { font-size: var(--fs-hero); font-weight: var(--fw-bold); letter-spacing: -0.03em; line-height: 1; color: #fff; }
   @media (min-width: 901px) { .line { white-space: nowrap; } }
   .line { display: block; }
 
-  .hero-lead { margin-top: var(--s6); font-size: var(--fs-lead); font-weight: 300; line-height: 1.55; color: rgb(255 255 255 / 0.86); max-width: 38ch; }
+  .hero-lead { margin-top: var(--s6); font-size: var(--fs-lead); font-weight: var(--fw-light); line-height: 1.55; color: rgb(255 255 255 / 0.86); max-width: 38ch; }
 
   /* Job seekers: the search. Employers: one button. */
   .search { margin-top: var(--s7); max-width: 36rem; }
-  .search label { display: block; font-size: var(--fs-small); font-weight: 500; margin-bottom: var(--s2); color: rgb(255 255 255 / 0.86); }
+  .search label { display: block; font-size: var(--fs-small); font-weight: var(--fw-text); margin-bottom: var(--s2); color: rgb(255 255 255 / 0.86); }
   .search-bar { display: flex; background: #fff; }
-  .search-bar input { flex: 1; min-width: 0; width: 0; /* width 0: the box's built-in 20-character width otherwise sets a minimum */ font: inherit; font-size: 1.05rem; padding: 1rem 1.15rem; border: 0; background: transparent; color: var(--ink); }
+  .search-bar input { flex: 1; min-width: 0; width: 0; /* width 0: the box's built-in 20-character width otherwise sets a minimum */ font: inherit; font-size: var(--fs-body); padding: 1rem 1.15rem; border: 0; background: transparent; color: var(--ink); }
   .search-bar input:focus { outline: 2px solid var(--isl-blue); outline-offset: -2px; }
-  .search-bar button { font: inherit; font-weight: 600; cursor: pointer; padding: 0 1.6rem; border: 0; background: var(--isl-blue); color: #fff; }
+  .search-bar button { font: inherit; font-weight: var(--fw-bold); cursor: pointer; padding: 0 1.6rem; border: 0; background: var(--isl-blue); color: #fff; }
   .search-bar button:hover { background: var(--isl-blue-deep); }
-  .employer { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s3) var(--s4); margin-top: var(--s5); font-weight: 500; color: rgb(255 255 255 / 0.86); }
+  .employer { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s3) var(--s4); margin-top: var(--s5); font-weight: var(--fw-text); color: rgb(255 255 255 / 0.86); }
   .employer a[href^='tel'] { color: #fff; font-size: var(--fs-small); }
 
   /* The photo settles slowly from slightly enlarged */
@@ -157,7 +157,7 @@ const ticker = jobs.slice(0, 14);
   /* Now hiring: real postings scrolling along the bottom edge. Pauses on hover or focus. */
   .ticker { position: relative; display: flex; min-width: 0; max-width: 100%; align-items: stretch; border-top: 1px solid rgb(255 255 255 / 0.16); background: var(--dark); }
   /* Solid, not see-through: over a light patch of photo, translucent grey text failed contrast */
-  .ticker-label { flex: none; display: flex; align-items: center; gap: var(--s2); margin: 0; padding: 0 var(--s5) 0 var(--gutter); font-size: var(--fs-small); font-weight: 600; background: var(--isl-blue); color: #fff; white-space: nowrap; }
+  .ticker-label { flex: none; display: flex; align-items: center; gap: var(--s2); margin: 0; padding: 0 var(--s5) 0 var(--gutter); font-size: var(--fs-small); font-weight: var(--fw-bold); background: var(--isl-blue); color: #fff; white-space: nowrap; }
   .pulse { width: 8px; height: 8px; border-radius: 50%; background: #fff; }
   :global(.motion) .pulse { animation: pulse 2s ease-out infinite; }
   @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgb(255 255 255 / 0.7); } 70%, 100% { box-shadow: 0 0 0 8px rgb(255 255 255 / 0); } }
@@ -190,7 +190,7 @@ const ticker = jobs.slice(0, 14);
   /* ---------- 3. Local ---------- */
   .local-grid { display: grid; grid-template-columns: 7fr 4fr; gap: clamp(2rem, 5vw, 5rem); align-items: start; }
   .local-photo { display: grid; gap: var(--s4); }
-  .more { font-weight: 600; }
+  .more { font-weight: var(--fw-bold); }
   @media (max-width: 900px) { .local-grid { grid-template-columns: 1fr; } }
 
   /* ---------- 4. Proof: see Proof.astro ---------- */

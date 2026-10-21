@@ -66,7 +66,7 @@ const routes = [
 </script>
 
 <style>
-  .r-title { font-size: 1.4rem; letter-spacing: -0.02em; margin-bottom: var(--s2); }
+  .r-title { font-size: var(--fs-h3); letter-spacing: -0.02em; margin-bottom: var(--s2); }
   .email { margin-top: var(--s7); color: var(--ink-soft); }
 
   .off-grid { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(2rem, 5vw, 5rem); align-items: center; }
@@ -80,13 +80,13 @@ const routes = [
   .offices li::before { content: ''; position: absolute; left: 0; top: var(--s4); bottom: var(--s4); width: 3px; background: var(--ink); transform: scaleY(0); transition: transform 0.3s var(--ease); }
   .offices li[aria-current='true'] { background: var(--paper); }
   .offices li[aria-current='true']::before { transform: none; }
-  .o-city { font: inherit; font-weight: 700; font-size: 1.05rem; text-align: left; padding: 0; border: 0; background: none; color: var(--ink); cursor: pointer; }
+  .o-city { font: inherit; font-weight: var(--fw-bold); font-size: var(--fs-body); text-align: left; padding: 0; border: 0; background: none; color: var(--ink); cursor: pointer; }
   .o-city::after { content: ''; position: absolute; inset: 0; } /* the whole row is clickable */
-  .o-city span { margin-left: var(--s2); font-weight: 500; font-size: var(--fs-tiny); color: var(--ink-soft); }
+  .o-city span { margin-left: var(--s2); font-weight: var(--fw-text); font-size: var(--fs-tiny); color: var(--ink-soft); }
   .o-city:hover { text-decoration: underline; }
   .o-addr { grid-column: 1; font-size: var(--fs-small); color: var(--ink-soft); }
-  .o-page { position: relative; z-index: 1; display: block; width: fit-content; margin-top: 2px; font-weight: 600; }
-  .o-tel { position: relative; z-index: 1; grid-column: 2; grid-row: 1 / span 2; align-self: center; font-weight: 700; color: var(--ink); font-variant-numeric: tabular-nums; }
+  .o-page { position: relative; z-index: 1; display: block; width: fit-content; margin-top: 2px; font-weight: var(--fw-bold); }
+  .o-tel { position: relative; z-index: 1; grid-column: 2; grid-row: 1 / span 2; align-self: center; font-weight: var(--fw-bold); color: var(--ink); font-variant-numeric: tabular-nums; }
 
   @media (max-width: 900px) { .off-grid { grid-template-columns: 1fr; } }
   @media (max-width: 420px) { .offices li { grid-template-columns: 1fr; } .o-tel { grid-column: 1; grid-row: auto; margin-top: var(--s2); } }

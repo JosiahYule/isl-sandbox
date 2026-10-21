@@ -42,7 +42,7 @@ const { steps = [], tone = 'ink', dashedLast = false } = Astro.props;
     background: var(--c); box-shadow: 0 0 0 4px var(--paper);
   }
   :global(.section--tint) .dot { box-shadow: 0 0 0 4px var(--mist); }
-  .num { display: block; font-size: 2.4rem; color: var(--c); margin-bottom: var(--s3); }
+  .num { display: block; font-size: var(--fs-figure); color: var(--c); margin-bottom: var(--s3); }
   h3 { margin-bottom: var(--s2); }
   p { color: var(--ink-soft); max-width: 30ch; }
 
@@ -63,6 +63,6 @@ const { steps = [], tone = 'ink', dashedLast = false } = Astro.props;
     .steps--dashed li:last-child::after { background: repeating-linear-gradient(180deg, var(--c) 0 6px, transparent 6px 11px); }
     .dot { top: 0.35rem; transform: none; }
     :global(.motion) .steps li::after { transform: scaleY(0); }
-    .num { font-size: 1.6rem; margin-bottom: var(--s1); }
+    .num { font-size: var(--fs-figure); margin-bottom: var(--s1); }
   }
 </style>

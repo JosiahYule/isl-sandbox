@@ -36,16 +36,16 @@ const field = [job.category, job.subcategory].filter(Boolean).join(', ');
   .job--direct::before { background: var(--direct); }
   .job:hover { background: var(--mist); }
 
-  h3 { font-size: 1.15rem; }
+  h3 { font-size: var(--fs-h3); }
   h3 a { color: var(--ink); text-decoration: none; }
   h3 a:hover { text-decoration: underline; }
   .where { color: var(--ink-soft); font-size: var(--fs-small); margin-top: var(--s1); }
-  .pay { font-weight: 500; font-variant-numeric: tabular-nums; }
-  .pay--none { color: var(--ink-soft); font-weight: 400; }
+  .pay { font-weight: var(--fw-bold); font-variant-numeric: tabular-nums; }
+  .pay--none { color: var(--ink-soft); font-weight: var(--fw-text); }
   .end { display: flex; align-items: center; gap: var(--s5); justify-content: flex-end; padding-right: var(--s4); }
   .posted { font-size: var(--fs-small); color: var(--ink-soft); white-space: nowrap; }
   .apply {
-    font-weight: 600; font-size: var(--fs-small); text-decoration: none; white-space: nowrap;
+    font-weight: var(--fw-bold); font-size: var(--fs-small); text-decoration: none; white-space: nowrap;
     padding: 0.5rem 0.9rem; border: 1.5px solid var(--isl-blue); color: var(--isl-blue);
   }
   .apply:hover { background: var(--isl-blue); color: #fff; }

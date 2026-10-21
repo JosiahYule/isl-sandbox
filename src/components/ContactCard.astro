@@ -29,15 +29,15 @@ const tel = (n) => `tel:+1${String(n).replace(/\D/g, '')}`;
 
 <style>
   .cc { display: grid; gap: var(--s4); align-content: start; padding-top: var(--s4); background: linear-gradient(var(--ink), var(--ink)) no-repeat left top / 100% 1.5px; }
-  .cc-label { font-size: var(--fs-small); font-weight: 600; color: var(--ink-soft); margin: 0; }
+  .cc-label { font-size: var(--fs-small); font-weight: var(--fw-bold); color: var(--ink-soft); margin: 0; }
   .cc-who { display: flex; gap: var(--s4); align-items: center; }
-  .cc-face { position: relative; width: 72px; height: 72px; flex: none; background: var(--mist); overflow: hidden; display: grid; place-items: center; font-weight: 300; font-size: 1.4rem; color: var(--ink-soft); }
+  .cc-face { position: relative; width: 72px; height: 72px; flex: none; background: var(--mist); overflow: hidden; display: grid; place-items: center; font-weight: var(--fw-light); font-size: var(--fs-h3); color: var(--ink-soft); }
   .cc-face img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center 20%; z-index: 1; }
-  .cc-name { font-weight: 700; font-size: 1.2rem; margin: 0; letter-spacing: -0.01em; }
+  .cc-name { font-weight: var(--fw-bold); font-size: var(--fs-h3); margin: 0; letter-spacing: -0.01em; }
   .cc-handles { margin: 2px 0 0; color: var(--ink-soft); font-size: var(--fs-small); }
-  .cc-reach { display: grid; gap: 2px; margin: 0; font-weight: 600; }
+  .cc-reach { display: grid; gap: 2px; margin: 0; font-weight: var(--fw-bold); }
   .cc-reach a { color: var(--ink); text-decoration: none; width: fit-content; }
   .cc-reach a:hover { text-decoration: underline; }
-  .cc-go { justify-self: start; font-weight: 600; background: var(--isl-blue); color: #fff; text-decoration: none; padding: 0.75rem 1.2rem; }
+  .cc-go { justify-self: start; font-weight: var(--fw-bold); background: var(--isl-blue); color: #fff; text-decoration: none; padding: 0.75rem 1.2rem; }
   .cc-go:hover { background: var(--isl-blue-deep); color: #fff; }
 </style>

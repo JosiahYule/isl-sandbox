@@ -249,7 +249,7 @@ const payText = (j) => j.payInfo.unit === 'year' ? `${j.pay} (about ${perHour(j.
   .tool { padding-block: var(--s5) clamp(3rem, 6vw, 5rem); }
   .filters { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s3) var(--s5); margin-bottom: var(--s6); }
   .chips { display: flex; flex-wrap: wrap; gap: var(--s2); }
-  .chips button { font: inherit; font-size: var(--fs-small); font-weight: 500; cursor: pointer; padding: 0.45rem 0.85rem; background: transparent; color: var(--ink); border: 1.5px solid var(--line); }
+  .chips button { font: inherit; font-size: var(--fs-small); font-weight: var(--fw-bold); cursor: pointer; padding: 0.45rem 0.85rem; background: transparent; color: var(--ink); border: 1.5px solid var(--line); }
   .chips button[aria-pressed='true'] { background: var(--ink); border-color: var(--ink); color: #fff; }
   .legend { display: flex; gap: var(--s4); margin: 0 0 0 auto; font-size: var(--fs-small); color: var(--ink-soft); }
   .lg { display: inline-flex; align-items: center; gap: var(--s2); }
@@ -260,17 +260,17 @@ const payText = (j) => j.payInfo.unit === 'year' ? `${j.pay} (about ${perHour(j.
 
   /* Check an offer: one line of inputs, the readout beside them */
   .offer { display: grid; grid-template-columns: auto minmax(12rem, 16rem) minmax(9rem, 12rem) 1fr; align-items: end; gap: var(--s3) var(--s4); margin: 0 0 var(--s6); padding: var(--s4) var(--s5); background: var(--mist); }
-  .o-title { margin: 0 var(--s3) 0.7rem 0; font-weight: 700; }
-  .o-field { display: grid; gap: var(--s1); font-size: var(--fs-small); font-weight: 600; }
-  .o-field select, .o-field input { font: inherit; font-size: 1rem; font-weight: 400; padding: 0.55rem 0.7rem; border: 1.5px solid var(--line); background: var(--paper); color: var(--ink); width: 100%; }
+  .o-title { margin: 0 var(--s3) 0.7rem 0; font-weight: var(--fw-bold); }
+  .o-field { display: grid; gap: var(--s1); font-size: var(--fs-small); font-weight: var(--fw-bold); }
+  .o-field select, .o-field input { font: inherit; font-size: var(--fs-body); font-weight: var(--fw-text); padding: 0.55rem 0.7rem; border: 1.5px solid var(--line); background: var(--paper); color: var(--ink); width: 100%; }
   .o-field select:focus, .o-field input:focus { outline: none; border-color: var(--isl-blue); }
   .o-money { position: relative; display: block; }
-  .o-money > span { position: absolute; left: 0.7rem; top: 50%; transform: translateY(-50%); color: var(--ink-soft); font-weight: 400; }
+  .o-money > span { position: absolute; left: 0.7rem; top: 50%; transform: translateY(-50%); color: var(--ink-soft); font-weight: var(--fw-text); }
   .o-money input { padding-left: 1.5rem; }
-  .o-out { margin: 0 0 0.6rem; font-weight: 600; }
+  .o-out { margin: 0 0 0.6rem; font-weight: var(--fw-bold); }
   .offer-line { position: absolute; top: 4px; bottom: 4px; width: 2px; margin-left: -1px; background: var(--isl-blue); z-index: 3; pointer-events: none; }
   .offer-line[hidden] { display: none; }
-  .offer-line span { position: absolute; bottom: 100%; left: 50%; transform: translate(-50%, -2px); font-size: var(--fs-tiny); font-weight: 700; color: var(--isl-blue); white-space: nowrap; }
+  .offer-line span { position: absolute; bottom: 100%; left: 50%; transform: translate(-50%, -2px); font-size: var(--fs-tiny); font-weight: var(--fw-bold); color: var(--isl-blue); white-space: nowrap; }
 
   /* The chart: a label column, the strip, and the middle figure */
   .chart { position: relative; margin: 0; border-top: 1.5px solid var(--ink); }
@@ -280,14 +280,14 @@ const payText = (j) => j.payInfo.unit === 'year' ? `${j.pay} (about ${perHour(j.
   .row { display: grid; grid-template-columns: var(--label) minmax(0, 1fr) var(--range); align-items: center; border-bottom: 1px solid var(--line); min-height: 4.25rem; }
   .row[hidden] { display: none; }
   .fam { margin: 0; padding-right: var(--s4); display: grid; }
-  .fam-name { font-weight: 600; }
+  .fam-name { font-weight: var(--fw-bold); }
   .fam-n { font-size: var(--fs-small); color: var(--ink-soft); }
   .strip { position: relative; height: 4.25rem; }
   .dot:hover, .dot:focus-visible { z-index: 2; }
   .grid { position: absolute; top: 0; bottom: 0; width: 1px; background: var(--line); }
   .mid { position: absolute; top: 25%; bottom: 25%; width: 2px; margin-left: -1px; background: var(--ink); }
-  .range { margin: 0; text-align: right; font-weight: 600; font-variant-numeric: tabular-nums; }
-  .range span { display: block; font-weight: 400; font-size: var(--fs-small); color: var(--ink-soft); }
+  .range { margin: 0; text-align: right; font-weight: var(--fw-bold); font-variant-numeric: tabular-nums; }
+  .range span { display: block; font-weight: var(--fw-text); font-size: var(--fs-small); color: var(--ink-soft); }
 
   /* Dots: a 24px hit area around a 10px mark, with a 2px white ring so overlapping dots stay distinct */
   .dot { position: absolute; top: calc(50% + var(--lane, 0) * 13px); width: 24px; height: 24px; margin: -12px 0 0 -12px; display: grid; place-items: center; }
@@ -299,8 +299,8 @@ const payText = (j) => j.payInfo.unit === 'year' ? `${j.pay} (about ${perHour(j.
 
   .tip { position: absolute; z-index: 5; transform: translate(-50%, calc(-100% - 10px)); background: var(--ink); color: #fff; padding: 0.55rem 0.75rem; display: grid; gap: 1px; pointer-events: none; min-width: 12rem; max-width: 18rem; }
   .tip[hidden] { display: none; }
-  .tip strong { font-size: 1rem; font-variant-numeric: tabular-nums; }
-  .tip .t-title { font-size: var(--fs-small); font-weight: 500; }
+  .tip strong { font-size: var(--fs-body); font-variant-numeric: tabular-nums; }
+  .tip .t-title { font-size: var(--fs-small); font-weight: var(--fw-text); }
   .tip .t-where { font-size: var(--fs-tiny); color: rgb(255 255 255 / 0.75); }
 
   .empty { padding: var(--s6) 0; color: var(--ink-soft); }
@@ -308,16 +308,16 @@ const payText = (j) => j.payInfo.unit === 'year' ? `${j.pay} (about ${perHour(j.
   .table-scroll { overflow-x: auto; margin-top: clamp(2.5rem, 5vw, 4rem); }
   .table { width: 100%; min-width: 22rem; border-collapse: collapse; font-variant-numeric: tabular-nums; }
   .table[hidden], .table tr[hidden] { display: none; }
-  .table caption { text-align: left; font-weight: 700; font-size: var(--fs-h3); margin-bottom: var(--s4); }
-  .table th, .table td { text-align: right; padding: 0.65rem var(--s3); border-bottom: 1px solid var(--line); font-weight: 400; }
+  .table caption { text-align: left; font-weight: var(--fw-bold); font-size: var(--fs-h3); margin-bottom: var(--s4); }
+  .table th, .table td { text-align: right; padding: 0.65rem var(--s3); border-bottom: 1px solid var(--line); font-weight: var(--fw-text); }
   .table th[scope='row'], .table thead th:first-child { text-align: left; padding-left: 0; }
-  .table th[scope='row'] { font-weight: 600; }
-  .table thead th { font-size: var(--fs-small); color: var(--ink-soft); font-weight: 500; border-bottom: 1.5px solid var(--ink); }
+  .table th[scope='row'] { font-weight: var(--fw-bold); }
+  .table thead th { font-size: var(--fs-small); color: var(--ink-soft); font-weight: var(--fw-text); border-bottom: 1.5px solid var(--ink); }
   .note { margin-top: var(--s5); font-size: var(--fs-small); color: var(--ink-soft); max-width: 75ch; }
 
   .two { display: grid; grid-template-columns: 1fr 1fr; gap: var(--s7); }
   .two .lead { margin: var(--s3) 0 var(--s5); }
-  .go { display: inline-block; font-weight: 600; background: var(--isl-blue); color: #fff; text-decoration: none; padding: 0.85rem 1.3rem; }
+  .go { display: inline-block; font-weight: var(--fw-bold); background: var(--isl-blue); color: #fff; text-decoration: none; padding: 0.85rem 1.3rem; }
   .go:hover { background: var(--isl-blue-deep); color: #fff; }
   .go--ink { background: var(--ink); }
   .go--ink:hover { background: #000; }

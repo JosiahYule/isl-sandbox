@@ -91,17 +91,17 @@ const gallery = [
 <style>
   /* On phones a 21:9 strip makes 40 people tiny, so the frame gets taller */
   @media (max-width: 700px) { .team-photo :global(.frame) { aspect-ratio: 3 / 2 !important; } }
-  .gal-head .lead { justify-self: end; font-weight: 600; font-size: var(--fs-body); }
+  .gal-head .lead { justify-self: end; font-weight: var(--fw-bold); font-size: var(--fs-body); }
   @media (max-width: 860px) { .gal-head .lead { justify-self: start; } }
   .facts-gap { margin-top: clamp(3rem, 6vw, 5rem); }
   .facts-gap :global(.facts-band) { border-top: 1px solid var(--line); }
 
   .values { margin: 0; border-top: 1.5px solid var(--ink); }
-  .value { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); gap: var(--s6); align-items: baseline; padding-block: var(--s5); border-bottom: 1px solid var(--line); }
+  .value { display: grid; grid-template-columns: minmax(10rem, 1fr) minmax(0, 3fr); gap: var(--s6); align-items: baseline; padding-block: var(--s5); border-bottom: 1px solid var(--line); }
   .value dt { transition: color 0.25s, transform 0.4s var(--ease); }
   .value:hover dt { color: var(--isl-blue); transform: translateX(6px); }
-  dt { font-weight: 300; font-size: clamp(1.9rem, 1rem + 3vw, 3.4rem); letter-spacing: -0.035em; line-height: 1; }
-  dd { margin: 0; color: var(--ink-soft); font-size: var(--fs-lead); font-weight: 300; max-width: 40ch; }
+  dt { font-weight: var(--fw-bold); font-size: var(--fs-h3); letter-spacing: -0.01em; line-height: 1.25; } /* values sit below their section heading in size */
+  dd { margin: 0; color: var(--ink-soft); font-size: var(--fs-lead); font-weight: var(--fw-light); max-width: 40ch; }
 
   .gallery { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--s6) var(--s4); }
   .gallery :global(.frame) { overflow: hidden; }

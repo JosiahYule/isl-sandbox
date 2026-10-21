@@ -161,17 +161,17 @@ const count = { contract: jobs.filter((j) => j.type === 'contract').length, dire
     border: 1.5px solid var(--ink); border-radius: var(--radius);
   }
   .search input, .search select {
-    font: inherit; font-size: 1.05rem; padding: 0.85rem 1rem; border: 0; background: transparent; color: var(--ink); min-width: 0;
+    font: inherit; font-size: var(--fs-body); padding: 0.85rem 1rem; border: 0; background: transparent; color: var(--ink); min-width: 0;
   }
   .search select { border-left: 1px solid var(--line); cursor: pointer; }
   .search input:focus, .search select:focus { outline: 2px solid var(--isl-blue); outline-offset: -2px; }
   .types { display: flex; gap: 4px; padding: 4px; border-left: 1px solid var(--line); }
   .t {
-    font: inherit; font-size: var(--fs-small); font-weight: 600; cursor: pointer; white-space: nowrap;
+    font: inherit; font-size: var(--fs-small); font-weight: var(--fw-bold); cursor: pointer; white-space: nowrap;
     display: inline-flex; align-items: center; gap: var(--s2);
     padding: 0.55rem 0.9rem; border: 0; border-radius: 2px; background: transparent; color: var(--ink);
   }
-  .t span { font-weight: 500; color: var(--ink-soft); font-variant-numeric: tabular-nums; }
+  .t span { font-weight: var(--fw-text); color: var(--ink-soft); font-variant-numeric: tabular-nums; }
   .t[aria-pressed='true'] { background: var(--ink); color: #fff; }
   .t[aria-pressed='true'] span { color: rgb(255 255 255 / 0.7); }
   .t--contract[aria-pressed='true'] { background: var(--ink); color: #fff; }
@@ -183,24 +183,24 @@ const count = { contract: jobs.filter((j) => j.type === 'contract').length, dire
   .near { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s2) var(--s4); margin: calc(-1 * var(--s3)) 0 var(--s6); font-size: var(--fs-small); }
   .near > span { color: var(--ink-soft); }
   .near ul { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: var(--s2); }
-  .near a { display: inline-flex; gap: var(--s2); padding: 0.4rem 0.8rem; border: 1.5px solid var(--line); color: var(--ink); text-decoration: none; font-weight: 500; }
+  .near a { display: inline-flex; gap: var(--s2); padding: 0.4rem 0.8rem; border: 1.5px solid var(--line); color: var(--ink); text-decoration: none; font-weight: var(--fw-bold); }
   .near a:hover { border-color: var(--ink); }
   .near a[aria-current='true'] { background: var(--ink); border-color: var(--ink); color: #fff; }
   .near .n { color: var(--ink-soft); font-variant-numeric: tabular-nums; }
   .near a[aria-current='true'] .n { color: rgb(255 255 255 / 0.7); }
   .count { font-size: var(--fs-small); color: var(--ink-soft); margin-bottom: var(--s3); }
-  .count strong { font-weight: 700; font-size: 1.4rem; color: var(--ink); margin-right: 0.2em; }
+  .count strong { font-weight: var(--fw-bold); font-size: var(--fs-h3); color: var(--ink); margin-right: 0.2em; }
   .list { border-top: 1.5px solid var(--ink); }
   /* The rows are JobRow components, so the rule must reach outside this page's own styles */
   .list > :global([hidden]) { display: none; }
   .empty { padding: var(--s7) 0; border-top: 1.5px solid var(--ink); max-width: 46rem; }
-  .empty-title { font-weight: 700; font-size: 1.4rem; }
+  .empty-title { font-weight: var(--fw-bold); font-size: var(--fs-h3); }
   .empty button {
-    margin-top: var(--s4); font: inherit; font-weight: 600; cursor: pointer;
+    margin-top: var(--s4); font: inherit; font-weight: var(--fw-bold); cursor: pointer;
     padding: 0.7rem 1.1rem; border: 2px solid var(--ink); border-radius: var(--radius); background: transparent;
   }
   .more {
-    margin-top: var(--s5); font: inherit; font-weight: 600; cursor: pointer;
+    margin-top: var(--s5); font: inherit; font-weight: var(--fw-bold); cursor: pointer;
     padding: 0.8rem 1.35rem; border: 2px solid var(--ink); background: transparent; color: var(--ink);
   }
   .more:hover { background: var(--ink); color: #fff; }
@@ -208,7 +208,7 @@ const count = { contract: jobs.filter((j) => j.type === 'contract').length, dire
   .note { margin-top: var(--s5); font-size: var(--fs-tiny); color: var(--ink-soft); }
 
   .general-grid { display: grid; grid-template-columns: 1fr 1fr; gap: var(--s7); align-items: end; }
-  .apply { display: inline-block; margin-top: var(--s5); font-weight: 600; background: var(--isl-blue); color: #fff; text-decoration: none; padding: 0.9rem 1.4rem; }
+  .apply { display: inline-block; margin-top: var(--s5); font-weight: var(--fw-bold); background: var(--isl-blue); color: #fff; text-decoration: none; padding: 0.9rem 1.4rem; }
   .apply:hover { background: var(--isl-blue-deep); color: #fff; }
 
   /* Mid-size screens: search on its own row, the two filters side by side, job type below */
