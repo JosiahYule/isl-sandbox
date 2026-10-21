@@ -93,9 +93,9 @@ import { url } from '../lib/url.js';
   .sb--direct { border-top-color: var(--direct); }
   .sb:hover { background: #eeeeee; }
   .sb-name { font-weight: var(--fw-bold); font-size: var(--fs-h3); }
-  .sb-figs { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 10rem), 1fr)); gap: var(--s4); } /* two side by side, stacked when there isn't room */
+  .sb-figs { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 13rem), 1fr)); gap: var(--s4); } /* two side by side, stacked when there isn't room for "Temp to perm" */
   .sb-fig { display: grid; gap: var(--s1); }
-  .sb .figure { font-size: var(--fs-figure); white-space: nowrap; }
+  .sb .figure { font-size: var(--fs-figure); } /* may wrap rather than ever spill out of the card */
   .sb--direct .figure { color: var(--direct); }
   .fd { color: var(--ink-soft); font-size: var(--fs-small); }
   .sb-go { font-weight: var(--fw-bold); color: var(--isl-blue); }

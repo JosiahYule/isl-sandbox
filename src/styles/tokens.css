@@ -54,7 +54,7 @@
   --fs-tiny: 0.78rem;
   /* Figures (numbers shown big, in the light weight) */
   --fs-figure-lg: clamp(3.4rem, 2rem + 5vw, 6rem);  /* a tool's result, the one number a page is about */
-  --fs-figure: clamp(2.2rem, 1.4rem + 2.2vw, 3.4rem); /* figures in a row (47 days, 90 days) */
+  --fs-figure: clamp(1.9rem, 1.2rem + 1.6vw, 2.6rem); /* figures in a row or a card (47 days, 90 days, $23.52) */
 
   /* Three weights: light for big figures, regular for text, bold for headings and emphasis.
      (Change --fw-bold to 700 to make every heading and label heavier at once.) */

@@ -1,97 +1,64 @@
 ---
 // TOOL CARDS: ISL's recruitment intelligence tools (src/data/tools.js), each with a small
-// preview drawn from the tool's own output, so a visitor sees what they'll get before clicking.
-// Used on the homepage, the Learn page and /learn/tools/.
+// preview of the answer the tool gives. Used on the homepage, the Learn page and /learn/tools/.
 //
-// Every number is computed, never typed in:
+// Every preview has the same four parts, so the row reads as one set:
+//   a label, one figure, one line saying what it means, and one bar along the bottom.
+// Every number is computed from the tool's own data, never typed in:
 //   cost:   trueCost() for a $20/hour, 40-hour job in Nova Scotia (src/lib/payroll.js)
-//   pay:    the four busiest role families on our open jobs (src/lib/jobpay.js)
-//   ad:     whether each Atlantic province requires pay in job ads (src/lib/jobad.js)
-//   resume: the checks and areas the resume check runs (src/lib/resume.js)
+//   pay:    middle and range of pay in the busiest role family on our open jobs (src/lib/jobpay.js)
+//   ad:     how many Atlantic provinces require pay in job ads (src/lib/jobad.js)
+//   resume: how many checks the resume check runs, by area (src/lib/resume.js)
 import { tools } from '../data/tools.js';
 import { jobs } from '../data/jobs.js';
 import { trueCost, money } from '../lib/payroll.js';
-import { payByFamily } from '../lib/jobpay.js';
+import { payByFamily, perHour } from '../lib/jobpay.js';
 import { CHECKS } from '../lib/resume.js';
 import { PAY_LAW } from '../lib/jobad.js';
 
-const lawRows = [['PEI', 'PE'], ['New Brunswick', 'NB'], ['Nova Scotia', 'NS'], ['Newfoundland and Labrador', 'NL']]
-  .map(([name, code]) => ({ name, required: PAY_LAW[code].status === 'required', year: (PAY_LAW[code].since || '').slice(-4) }));
+const dollars = (v) => perHour(v).replace('/hour', '');
+const list = (xs) => (xs.length > 1 ? `${xs.slice(0, -1).join(', ')} and ${xs.at(-1)}` : xs[0]);
 
-// Cost: wage, then the added costs in three plain groups
+// Cost: the bar is the wage (ink) and everything added on top (blue), as on the tool itself
 const c = trueCost({ wage: 20, hours: 40, province: 'NS' });
-const h = (keys) => c.lines.filter((l) => keys.includes(l.key)).reduce((n, l) => n + l.hour, 0);
-const costRows = [
-  ['Wage', 20, false],
-  ['Holidays and vacation', h(['holidays', 'vacation']), true],
-  ['CPP and EI', h(['cpp', 'ei']), true],
-  ['Workers’ comp', h(['wcb']), true],
-];
 
-// Pay: dots on a shared $15 to $45 scale (anything higher sits at the right edge)
-const fam = payByFamily(jobs).filter((r) => r.family !== 'Other').slice(0, 4);
-const P0 = 15, P1 = 45;
-const px = (v) => ((Math.min(Math.max(v, P0), P1) - P0) / (P1 - P0)) * 100;
+// Pay: the busiest family's range on a shared scale, with a tick at the middle
+const top = payByFamily(jobs).filter((r) => r.family !== 'Other')[0];
+const scaleMax = Math.max(40, Math.ceil(top.high / 5) * 5);
+const pos = (v) => `${(Math.min(v, scaleMax) / scaleMax) * 100}%`;
 
-// Resume: one tick per check, grouped by area
+// Job ads: one segment per Atlantic province, filled where pay is required
+const law = [['PEI', 'PE'], ['New Brunswick', 'NB'], ['Nova Scotia', 'NS'], ['Newfoundland and Labrador', 'NL']]
+  .map(([name, code]) => ({ name, required: PAY_LAW[code].status === 'required' }));
+const required = law.filter((l) => l.required);
+
+// Resume: one segment per area, as wide as its number of checks
 const areas = [...new Set(CHECKS.map((k) => k.group))].map((g) => ({ g, n: CHECKS.filter((k) => k.group === g).length }));
-let tick = 0;
-const areaRows = areas.map((a) => ({ ...a, ticks: Array.from({ length: a.n }, () => tick++) }));
+
+const previews = {
+  cost: { label: 'A $20/hour job in Nova Scotia', figure: money(c.perHour), line: `per hour worked, ${Math.round(c.uplift * 100)}% on top of the wage`,
+    bar: [{ w: c.wage, k: 'ink' }, { w: c.perHour - c.wage, k: 'blue' }] },
+  pay: { label: top.family, figure: dollars(top.median), unit: '/hour', line: `the middle of ${top.jobs.length} open jobs, ${dollars(top.low)} to ${dollars(top.high)}`,
+    range: { lo: pos(top.low), hi: pos(top.high), mid: pos(top.median) } },
+  ad: { label: 'Pay in job ads', figure: `${required.length} of ${law.length}`, line: `Atlantic provinces require it: ${list(required.map((l) => l.name))}`,
+    bar: law.map((l) => ({ w: 1, k: l.required ? 'ink' : 'off' })) },
+  resume: { label: 'What it looks at', figure: String(CHECKS.length), line: `checks in ${areas.length} areas, from ${areas[0].g.toLowerCase()} to ${areas.at(-1).g.toLowerCase()}`,
+    bar: areas.map((a) => ({ w: a.n, k: 'ink' })) },
+};
 ---
 <ul class="tools">
   {tools.map((t, i) => (
     <li style={`--i:${i}`}>
       <a class="card" href={t.url}>
-        <div class:list={['vis', `vis--${t.preview}`]} data-animate aria-hidden="true">
-          {t.preview === 'cost' && (
-            <>
-              <p class="vis-cap">A $20/hour job in Nova Scotia</p>
-              <ul class="cost">
-                {costRows.map(([name, v, add], j) => (
-                  <li style={`--j:${j}`}><span>{name}</span><span class="c-val">{add ? '+' : ''}{money(v)}</span></li>
-                ))}
-                <li class="c-total"><span>Each hour worked</span><span class="c-val">{money(c.perHour)}</span></li>
-              </ul>
-            </>
-          )}
-          {t.preview === 'pay' && (
-            <>
-              <p class="vis-cap">Pay per hour, by role</p>
-              <ul class="pay">
-                {fam.map((r, j) => (
-                  <li style={`--j:${j}`}>
-                    <span class="p-name">{r.family}</span>
-                    <span class="p-strip">{r.jobs.map((jb) => <span class:list={['p-dot', `p-dot--${jb.type}`]} style={`left:${px(jb.payInfo.hourly)}%`}></span>)}</span>
-                  </li>
-                ))}
-              </ul>
-              <p class="p-axis"><span>$15</span><span>$30</span><span>$45+</span></p>
-            </>
-          )}
-          {t.preview === 'ad' && (
-            <>
-              <p class="vis-cap">Pay in job ads</p>
-              <ul class="law">
-                {lawRows.map((r, j) => (
-                  <li style={`--j:${j}`}><span>{r.name}</span><span class:list={['l-st', r.required && 'l-st--req']}>{r.required ? `Required since ${r.year}` : 'Not yet'}</span></li>
-                ))}
-              </ul>
-            </>
-          )}
-          {t.preview === 'resume' && (
-            <>
-              <p class="vis-cap">{CHECKS.length} checks in {areas.length} areas</p>
-              <ul class="audit">
-                {areaRows.map((r) => (
-                  <li>
-                    <span class="a-name">{r.g}</span>
-                    <span class="a-ticks">{r.ticks.map((k) => <span class="tick" style={`--k:${k}`}></span>)}</span>
-                  </li>
-                ))}
-              </ul>
-            </>
-          )}
-        </div>
+        {(() => { const v = previews[t.preview]; return (
+          <div class="vis" data-animate aria-hidden="true">
+            <p class="v-label">{v.label}</p>
+            <p class="v-fig">{v.figure}{v.unit && <span class="v-unit">{v.unit}</span>}</p>
+            <p class="v-line">{v.line}</p>
+            {v.bar && <span class="v-bar">{v.bar.map((seg, j) => <span class:list={['seg', `seg--${seg.k}`]} style={`flex-grow:${seg.w};--j:${j}`}></span>)}</span>}
+            {v.range && <span class="v-bar v-range"><span class="r-band" style={`left:${v.range.lo};right:calc(100% - ${v.range.hi})`}></span><span class="r-mid" style={`left:${v.range.mid}`}></span></span>}
+          </div>
+        ); })()}
         <p class="who">{t.who}</p>
         <h3>{t.title}</h3>
         <p class="d">{t.d}</p>
@@ -110,50 +77,34 @@ const areaRows = areas.map((a) => ({ ...a, ticks: Array.from({ length: a.n }, ()
   .card:hover .more { color: var(--isl-blue-deep); }
   .card:hover .vis { background: #eeeeee; }
 
-  /* The preview panel: same size for all three so the row lines up */
-  .vis { background: var(--mist); height: 228px; padding: var(--s5); margin-bottom: var(--s5); display: flex; flex-direction: column; transition: background 0.2s; }
+  /* The preview panel: the same height and the same four parts in every card */
+  .vis { background: var(--mist); height: 200px; padding: var(--s5); margin-bottom: var(--s5); display: flex; flex-direction: column; transition: background 0.2s; }
   :global(.section--tint) .vis { background: var(--paper); }
-  .vis-cap { font-size: var(--fs-tiny); font-weight: var(--fw-bold); color: var(--ink-soft); margin-bottom: var(--s4); }
-  .vis ul { list-style: none; margin: 0; padding: 0; display: grid; flex: 1; align-content: space-between; }
+  .v-label { margin: 0; font-size: var(--fs-tiny); font-weight: var(--fw-bold); color: var(--ink-soft); }
+  .v-fig { margin: var(--s3) 0 0; font-size: var(--fs-figure); font-weight: var(--fw-light); letter-spacing: -0.04em; line-height: 1; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .v-unit { font-size: var(--fs-small); font-weight: var(--fw-text); letter-spacing: 0; color: var(--ink-soft); margin-left: 0.15em; }
+  .v-line { margin: var(--s2) 0 0; font-size: var(--fs-small); color: var(--ink-soft); line-height: 1.4; }
 
-  /* Cost: a short receipt */
-  .cost li { display: flex; justify-content: space-between; font-size: var(--fs-small); padding-bottom: 6px; border-bottom: 1px solid rgb(0 0 0 / 0.08); }
-  .c-val { font-variant-numeric: tabular-nums; color: var(--ink-soft); }
-  .c-total { border-bottom: 0 !important; border-top: 1.5px solid var(--ink); padding-top: 6px; font-weight: var(--fw-bold); }
-  .c-total .c-val { color: var(--isl-blue); font-weight: var(--fw-bold); }
-
-  /* Pay: a dot per job on one scale */
-  .pay li { display: grid; gap: 6px; }
-  .p-name { font-size: var(--fs-tiny); font-weight: var(--fw-text); }
-  .p-strip { position: relative; height: 10px; border-bottom: 1px solid rgb(0 0 0 / 0.12); }
-  .p-dot { position: absolute; top: 0; width: 8px; height: 8px; margin-left: -4px; background: var(--contract); box-shadow: 0 0 0 1.5px var(--mist); }
-  .p-dot--direct { background: var(--direct); border-radius: 50%; }
-  :global(.section--tint) .p-dot { box-shadow: 0 0 0 1.5px var(--paper); }
-  .p-axis { display: flex; justify-content: space-between; margin: 6px 0 0; font-size: var(--fs-tiny); color: var(--ink-soft); font-variant-numeric: tabular-nums; }
-
-  /* Job ad: pay rules by province */
-  .law li { display: flex; justify-content: space-between; gap: var(--s3); font-size: var(--fs-small); padding-bottom: 6px; border-bottom: 1px solid rgb(0 0 0 / 0.08); }
-  .l-st { color: var(--ink-soft); white-space: nowrap; }
-  .l-st--req { color: var(--isl-blue); font-weight: var(--fw-bold); }
-
-  /* Resume: one short bar per check */
-  .audit li { display: grid; grid-template-columns: 6.2rem 1fr; align-items: center; gap: var(--s3); }
-  .a-name { font-size: var(--fs-tiny); font-weight: var(--fw-text); line-height: 1.2; }
-  .a-ticks { display: flex; gap: 4px; }
-  .tick { width: 5px; height: 11px; background: var(--ink); }
+  /* The bar: always at the bottom, always 8px */
+  .v-bar { position: relative; display: flex; gap: 3px; height: 8px; margin-top: auto; }
+  .seg { display: block; min-width: 2px; }
+  .seg--ink { background: var(--ink); }
+  .seg--blue { background: var(--isl-blue); }
+  .seg--off { background: rgb(0 0 0 / 0.1); }
+  .v-range { background: rgb(0 0 0 / 0.08); }
+  .r-band { position: absolute; top: 0; bottom: 0; background: var(--ink); opacity: 0.35; }
+  .r-mid { position: absolute; top: -4px; bottom: -4px; width: 3px; margin-left: -1.5px; background: var(--ink); }
 
   .who { font-size: var(--fs-tiny); font-weight: var(--fw-text); color: var(--ink-soft); margin-bottom: var(--s2); }
   h3 { font-size: var(--fs-h3); margin-bottom: var(--s2); }
   .d { color: var(--ink-soft); }
   .more { margin-top: auto; padding-top: var(--s3); font-weight: var(--fw-bold); color: var(--isl-blue); }
 
-  /* Motion: rows and dots settle in, the checks fill one by one */
-  :global(.motion) .tools > li { opacity: 0; transform: translateY(18px); transition: opacity 0.7s var(--ease), transform 0.7s var(--ease); transition-delay: calc(var(--i) * 110ms); }
+  /* Motion: cards rise in; each bar draws in from the left once */
+  :global(.motion) .tools > li { opacity: 0; transform: translateY(12px); transition: opacity 0.4s var(--ease), transform 0.4s var(--ease); transition-delay: calc(var(--i) * 40ms); }
   :global(.motion) .tools > li:has(.is-in) { opacity: 1; transform: none; }
-  :global(.motion) .cost li, :global(.motion) .pay li, :global(.motion) .law li { opacity: 0; transition: opacity 0.5s var(--ease); transition-delay: calc(0.25s + var(--j, 4) * 110ms); }
-  :global(.motion) .is-in .cost li, :global(.motion) .is-in .pay li, :global(.motion) .is-in .law li { opacity: 1; }
-  :global(.motion) .tick { background: rgb(0 0 0 / 0.1); transition: background 0.15s; transition-delay: calc(0.3s + var(--k) * 40ms); }
-  :global(.motion) .is-in .tick { background: var(--ink); }
+  :global(.motion) .v-bar { clip-path: inset(-6px 100% -6px 0); transition: clip-path 0.5s var(--ease) 0.15s; }
+  :global(.motion) .is-in .v-bar { clip-path: inset(-6px 0 -6px 0); }
 
-  @media (max-width: 700px) { .tools { grid-template-columns: 1fr; } }
+  @media (max-width: 700px) { .tools { grid-template-columns: 1fr; } .vis { height: auto; } .v-bar { margin-top: var(--s5); } } /* stacked: no row to line up with */
 </style>
