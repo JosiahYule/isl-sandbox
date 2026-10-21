@@ -1,0 +1,15 @@
+---
+// LEARN  →  /learn/   (Accountant Staffing and Administrative Staffing)
+// The tools the brand has (src/brands/specialist.js: tools.list), the same ones as on ISL's
+// site, in this brand's colours. ISL's Learn also lists its articles; these brands have none yet.
+import Base from '../../../layouts/Base.astro';
+import PageHero from '../../../components/PageHero.astro';
+import ToolCards from '../../../components/ToolCards.astro';
+import { field } from '../../../data/site.js';
+---
+<Base title="Learn" description={`Free tools for employers hiring and people looking for ${field.short} work in Atlantic Canada.`}>
+  <PageHero title="Tools for both sides of the hire." lead="Free, quick, and nothing you type leaves your browser." />
+  <section class="section section--rule">
+    <div class="wrap"><h2 class="visually-hidden">Tools</h2><ToolCards /></div>
+  </section>
+</Base>

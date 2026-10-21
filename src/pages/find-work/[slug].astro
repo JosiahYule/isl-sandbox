@@ -102,7 +102,7 @@ const schema = {
         <Button href={job.applyUrl} size="lg">Apply now</Button>
         <!-- Job seekers are the ones scammers target, and this is the page they read -->
         <p class="safe">Applying is free. We never ask for a fee or banking details.</p>
-        {!field && <a class="rc" href={url(`/learn/tools/resume-check/?job=${job.id}`)}>Check your resume against this job</a>}
+        {job.description && <a class="rc" href={url(`/learn/tools/resume-check/?job=${job.id}`)}>Check your resume against this job</a>}
         <button type="button" class="share" data-share>Share this job</button>
         <p class="ask">Questions? <a href={ask.href}>{ask.name}</a> <a class="tel" href={tel(ask.phone)}>{ask.phone}</a></p>
       </aside>

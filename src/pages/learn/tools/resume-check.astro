@@ -4,11 +4,12 @@
 // It also lists the open jobs the resume fits best (rankJobs), and, optionally, compares it with
 // one job to show which of that job's key terms the resume mentions.
 // Everything runs in the browser; the resume is never sent or saved.
-import Base from '../../../../layouts/Base.astro';
-import PageHero from '../../../../components/PageHero.astro';
-import { jobs } from '../../../../data/jobs.js';
-import { keywordsFor, CHECKS } from '../../../../lib/resume.js';
-import { url } from '../../../../lib/url.js';
+import Base from '../../../layouts/Base.astro';
+import PageHero from '../../../components/PageHero.astro';
+import { jobs } from '../../../data/jobs.js';
+import { keywordsFor, CHECKS } from '../../../lib/resume.js';
+import { url } from '../../../lib/url.js';
+import { links } from '../../../data/site.js';
 
 // Only the terms per job go to the page, not the full postings
 const jobTerms = jobs.map((j) => ({ id: j.id, title: j.title, place: [j.city, j.province].filter(Boolean).join(', '), label: `${j.title}, ${[j.city, j.province].filter(Boolean).join(' ')}`, url: j.url, pay: j.pay, type: j.type, terms: keywordsFor(j) }));
@@ -57,7 +58,7 @@ const groups = [...new Set(CHECKS.map((c) => c.group))];
           <div class="fit">
             <h2>Our open jobs that fit</h2>
             <ol class="fits" data-fits></ol>
-            <p class="hint" data-fits-none hidden>None of our open jobs is a close match yet. <a href="https://www.integratedstaffing.ca/careers/general-apply">Send your resume</a> and we’ll contact you when one is.</p>
+            <p class="hint" data-fits-none hidden>None of our open jobs is a close match yet. <a href={links.resume}>Send your resume</a> and we’ll contact you when one is.</p>
           </div>
 
           <div data-fixes-wrap>
@@ -81,7 +82,7 @@ const groups = [...new Set(CHECKS.map((c) => c.group))];
       </div>
       <div class="next-go">
         <a class="go" href={url('/find-work/')}>See open jobs</a>
-        <a class="textlink" href="https://www.integratedstaffing.ca/careers/general-apply">Send your resume</a>
+        <a class="textlink" href={links.resume}>Send your resume</a>
       </div>
     </div>
   </section>
@@ -90,7 +91,7 @@ const groups = [...new Set(CHECKS.map((c) => c.group))];
 </Base>
 
 <script>
-  import { checkResume, matchTerms, rankJobs } from '../../../../lib/resume.js';
+  import { checkResume, matchTerms, rankJobs } from '../../../lib/resume.js';
 
   const root = document.querySelector<HTMLElement>('[data-resume]')!;
   const form = root.querySelector('form')!;

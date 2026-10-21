@@ -74,3 +74,20 @@ export const social = []; // TODO: ADS's social profiles
 export const { offices, provinceOffice, nav, services, terms, sourcing, seekerSteps, seekerFaq, analytics, forms, stats, testimonials } = shared;
 export const hire = { ...shared.hire, lead: 'Office and administrative roles, temporary or permanent, junior to senior. No fee unless you hire.' };
 export const cta = shared.cta;
+export const tools = {
+  ...shared.toolsBase,
+  cost: { ...shared.toolsBase.cost, wage: 22 }, // the calculator's starting wage, and the tool card's example
+  ad: { ...shared.toolsBase.ad, sample: `OFFICE SUPERSTAR WANTED!!!
+
+Busy office looking for a young, energetic self-starter to be the face of our company. Competitive pay.
+
+Must have 3 years experience
+Must type 60 wpm
+Must know Microsoft Office
+Must have Canadian experience
+Must be bubbly and outgoing
+Must have own vehicle
+Other duties as assigned.
+
+Send your resume to jobs@example.ca` },
+};

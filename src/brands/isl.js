@@ -112,6 +112,36 @@ export const cta = {
   faces: true, // the faces of the people who answer requests
 };
 
+// The Learn tools: which this brand has, and the words around them
+export const tools = {
+  list: ['true-cost-of-an-employee', 'pay-on-open-jobs', 'job-ad-check', 'resume-check'],
+  cost: {
+    wage: 20, // the calculator's starting wage, and the tool card's example
+    title: 'One rate covers all of it.',
+    text: 'With contract staffing, the worker is on our payroll. Wages, CPP, EI, workers’ comp, vacation pay and recruiting are in one hourly rate.',
+    details: 'Contract worker', // pre-fills the request form: "Contract worker at about $20.00/hour, ..."
+  },
+  ad: {
+    text: 'We write the ad, post it, screen everyone who applies and send you the people worth meeting.',
+    label: 'Request workers',
+    // A weak example, so a visitor can see what the tool does before pasting their own
+    sample: `WAREHOUSE ROCKSTAR WANTED!!!
+
+We are a fast-paced environment looking for a young, energetic self-starter to join our family. Competitive pay.
+
+Must have 3 years experience
+Must have forklift ticket
+Must have WHMIS
+Must be able to lift 50 lbs
+Must have own vehicle
+Must have Canadian experience
+Must be available evenings
+Other duties as assigned.
+
+Send your resume to jobs@example.ca`,
+  },
+};
+
 // The job board's footnote
 export const jobsNote = (date) => `Sandbox preview: real postings from ISL's job feed as of ${date}. Some may have been filled since.`;
 

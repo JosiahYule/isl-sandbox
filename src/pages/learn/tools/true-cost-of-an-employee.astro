@@ -5,12 +5,13 @@
 // on the server with a $20 example, then the script redraws it as the inputs change.
 // The figures live in the address (?wage=22&hours=37.5&province=NB&wcb=1.4): the assistant
 // links here that way, and a visitor can copy the link to share their numbers.
-import Base from '../../../../layouts/Base.astro';
-import PageHero from '../../../../components/PageHero.astro';
-import { trueCost, money, RATES, SOURCES } from '../../../../lib/payroll.js';
-import { url } from '../../../../lib/url.js';
+import Base from '../../../layouts/Base.astro';
+import PageHero from '../../../components/PageHero.astro';
+import { trueCost, money, RATES, SOURCES } from '../../../lib/payroll.js';
+import { url } from '../../../lib/url.js';
+import { tools } from '../../../data/site.js';
 
-const start = { wage: 20, hours: 40, province: 'NS' };
+const start = { wage: tools.cost.wage, hours: 40, province: 'NS' };
 const r = trueCost(start);
 const provinces = Object.entries(RATES.provinces);
 const pct = (v) => `${(v * 100).toFixed(1)}%`;
@@ -75,10 +76,10 @@ const rate = (v) => `${Number((v * 100).toFixed(3))}%`;
   <section class="section section--tint">
     <div class="wrap cta">
       <div>
-        <h2>One rate covers all of it.</h2>
-        <p class="lead">With contract staffing, the worker is on our payroll. Wages, CPP, EI, workers’ comp, vacation pay and recruiting are in one hourly rate.</p>
+        <h2>{tools.cost.title}</h2>
+        <p class="lead">{tools.cost.text}</p>
       </div>
-      <a class="go" href={url('/hire/?service=contract')} data-hire>Get a rate for this role</a>
+      <a class="go" href={url('/hire/?service=contract')} data-hire data-details={tools.cost.details}>Get a rate for this role</a>
     </div>
   </section>
 
@@ -97,7 +98,7 @@ const rate = (v) => `${Number((v * 100).toFixed(3))}%`;
 </Base>
 
 <script>
-  import { trueCost, money, RATES } from '../../../../lib/payroll.js';
+  import { trueCost, money, RATES } from '../../../lib/payroll.js';
 
   const root = document.querySelector<HTMLElement>('[data-cost]')!;
   const form = root.querySelector('form')!;
@@ -155,7 +156,7 @@ const rate = (v) => `${Number((v * 100).toFixed(3))}%`;
     history.replaceState(null, '', `?${params}`);
 
     // The request form opens pre-filled with this role's details
-    const details = `Contract worker at about ${money(wage)}/hour, ${hours} hours a week.`;
+    const details = `${hire.dataset.details} at about ${money(wage)}/hour, ${hours} hours a week.`;
     hire.href = `${hireBase}&where=${encodeURIComponent(r.province.name)}&details=${encodeURIComponent(details)}`;
   }
 

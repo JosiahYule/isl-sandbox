@@ -5,36 +5,26 @@
 //   rules and pay law       src/lib/jobad.js
 //   pay on our open jobs    payFor() in assistant/.../insights.js (the same answer the assistant gives)
 // Everything runs in the browser; the ad is never sent or saved.
-import Base from '../../../../layouts/Base.astro';
-import PageHero from '../../../../components/PageHero.astro';
-import { jobs } from '../../../../data/jobs.js';
-import { CHECKS, PAY_LAW } from '../../../../lib/jobad.js';
-import { url } from '../../../../lib/url.js';
+import Base from '../../../layouts/Base.astro';
+import PageHero from '../../../components/PageHero.astro';
+import { jobs } from '../../../data/jobs.js';
+import { CHECKS, PAY_LAW } from '../../../lib/jobad.js';
+import { url } from '../../../lib/url.js';
+import { brand, tools } from '../../../data/site.js';
 
 // Only what the pay comparison needs goes to the page
 const payJobs = jobs.filter((j) => j.pay).map((j) => ({ id: j.id, title: j.title, province: j.province, city: j.city, pay: j.pay }));
+// The pay comparison needs open jobs with pay (ISL's feed has them; the AS and ADS samples don't yet)
+const compare = payJobs.length >= 5;
 const groups = [...new Set(CHECKS.map((c) => c.group))];
 const provinces = [['NS', 'NS'], ['NB', 'NB'], ['PE', 'PEI'], ['NL', 'NL'], ['OTHER', 'Elsewhere']];
 const fullName = { NS: 'Nova Scotia', NB: 'New Brunswick', PE: 'Prince Edward Island', NL: 'Newfoundland and Labrador' };
 
-// A weak example, so a visitor can see what the tool does before pasting their own
-const sample = `WAREHOUSE ROCKSTAR WANTED!!!
-
-We are a fast-paced environment looking for a young, energetic self-starter to join our family. Competitive pay.
-
-Must have 3 years experience
-Must have forklift ticket
-Must have WHMIS
-Must be able to lift 50 lbs
-Must have own vehicle
-Must have Canadian experience
-Must be available evenings
-Other duties as assigned.
-
-Send your resume to jobs@example.ca`;
+// A weak example, so a visitor can see what the tool does before pasting their own (from the brand's file)
+const sample = tools.ad.sample;
 ---
-<Base title="Job ad check" description="Paste a job ad for a score, the fixes that matter most, the pay rules in your province and how your pay compares with our open jobs." assistantMode="employer">
-  <PageHero compact title="Job ad check." lead="Paste a job ad for a score, the fixes that matter most and how your pay compares with our open jobs. It never leaves your browser." />
+<Base title="Job ad check" description={`Paste a job ad for a score, the fixes that matter most${compare ? ', the pay rules in your province and how your pay compares with our open jobs' : ' and the pay rules in your province'}.`} assistantMode="employer">
+  <PageHero compact title="Job ad check." lead={`Paste a job ad for a score, the fixes that matter most and ${compare ? 'how your pay compares with our open jobs' : 'the pay rules in your province'}. It never leaves your browser.`} />
 
   <section class="tool" data-ad>
     <div class="wrap grid">
@@ -111,19 +101,19 @@ Send your resume to jobs@example.ca`;
     <div class="wrap next">
       <div>
         <h2>Rather we found them?</h2>
-        <p class="lead">We write the ad, post it, screen everyone who applies and send you the people worth meeting.</p>
+        <p class="lead">{tools.ad.text}</p>
       </div>
-      <a class="go" href={url('/hire/')} data-hire>Request workers</a>
+      <a class="go" href={url('/hire/')} data-hire>{tools.ad.label}</a>
     </div>
   </section>
 
-  <script type="application/json" id="pay-jobs" set:html={JSON.stringify(payJobs)} />
+  <script type="application/json" id="pay-jobs" set:html={JSON.stringify(compare ? payJobs : [])} data-brand={brand.short} />
   <script type="application/json" id="ad-sample" set:html={JSON.stringify(sample)} />
 </Base>
 
 <script>
-  import { checkAd } from '../../../../lib/jobad.js';
-  import { payFor } from '../../../../../assistant/supabase/functions/_shared/insights.js';
+  import { checkAd } from '../../../lib/jobad.js';
+  import { payFor } from '../../../../assistant/supabase/functions/_shared/insights.js';
 
   const root = document.querySelector<HTMLElement>('[data-ad]')!;
   const form = root.querySelector('form')!;
@@ -175,7 +165,7 @@ Send your resume to jobs@example.ca`;
       $('[data-t-ad]').style.left = x(r.pay.mid);
       const region = market.province ? NAMES[market.province] : 'Atlantic Canada';
       $('[data-cmp-basis]').textContent = market.basis === 'role'
-        ? `From ${market.count} open ISL ${market.count === 1 ? 'job' : 'jobs'} with “${market.role.trim()}” in the title, in ${region}.`
+        ? `From ${market.count} open ${document.getElementById('pay-jobs')!.dataset.brand} ${market.count === 1 ? 'job' : 'jobs'} with “${market.role.trim()}” in the title, in ${region}.`
         : `We don’t have enough open jobs with that title, so this is our ${market.family.toLowerCase()} jobs in ${region} (${market.count}).`;
     }
 

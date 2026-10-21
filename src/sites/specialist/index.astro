@@ -10,6 +10,7 @@ import WeRecruit from '../../components/WeRecruit.astro';
 import RolesByLevel from '../../components/RolesByLevel.astro';
 import OfficesSection from '../../components/OfficesSection.astro';
 import CtaBand from '../../components/CtaBand.astro';
+import ToolCards from '../../components/ToolCards.astro';
 import { brand, offices, social, images, field, services, terms } from '../../data/site.js';
 import { jobs } from '../../data/jobs.js';
 
@@ -57,6 +58,17 @@ const svcs = [
 
   <!-- 4. WHERE WE ARE -->
   <OfficesSection lines={['Three offices.', 'All of Atlantic Canada.']} lead="We place people across the region, not just in our office cities. Select an office for its address and phone number." />
+
+  <!-- 5. FREE TOOLS: the same tools as ISL's Recruitment Intelligence -->
+  <section class="section section--rule">
+    <div class="wrap">
+      <div class="section-head">
+        <h2>Free tools</h2>
+        <p class="lead">For employers hiring and people job hunting. Nothing you type leaves your browser.</p>
+      </div>
+      <ToolCards />
+    </div>
+  </section>
 
   <CtaBand />
 </Base>

@@ -15,15 +15,16 @@ import { trueCost, money } from '../lib/payroll.js';
 import { payByFamily, perHour } from '../lib/jobpay.js';
 import { CHECKS } from '../lib/resume.js';
 import { PAY_LAW } from '../lib/jobad.js';
+import { tools as brandTools } from '../data/site.js';
 
 const dollars = (v) => perHour(v).replace('/hour', '');
 const list = (xs) => (xs.length > 1 ? `${xs.slice(0, -1).join(', ')} and ${xs.at(-1)}` : xs[0]);
 
 // Cost: the bar is the wage (ink) and everything added on top (blue), as on the tool itself
-const c = trueCost({ wage: 20, hours: 40, province: 'NS' });
+const c = trueCost({ wage: brandTools.cost.wage, hours: 40, province: 'NS' });
 
 // Pay: the busiest family's range on a shared scale, with a tick at the middle
-const top = payByFamily(jobs).filter((r) => r.family !== 'Other')[0];
+const top = payByFamily(jobs).filter((r) => r.family !== 'Other')[0] ?? { family: '', median: 0, low: 0, high: 0, jobs: [] }; // none on AS and ADS (no pay tool)
 const scaleMax = Math.max(40, Math.ceil(top.high / 5) * 5);
 const pos = (v) => `${(Math.min(v, scaleMax) / scaleMax) * 100}%`;
 
@@ -36,7 +37,7 @@ const required = law.filter((l) => l.required);
 const areas = [...new Set(CHECKS.map((k) => k.group))].map((g) => ({ g, n: CHECKS.filter((k) => k.group === g).length }));
 
 const previews = {
-  cost: { label: 'A $20/hour job in Nova Scotia', figure: money(c.perHour), line: `per hour worked, ${Math.round(c.uplift * 100)}% on top of the wage`,
+  cost: { label: `A $${brandTools.cost.wage}/hour job in Nova Scotia`, figure: money(c.perHour), line: `per hour worked, ${Math.round(c.uplift * 100)}% on top of the wage`,
     bar: [{ w: c.wage, k: 'ink' }, { w: c.perHour - c.wage, k: 'blue' }] },
   pay: { label: top.family, figure: dollars(top.median), unit: '/hour', line: `the middle of ${top.jobs.length} open jobs, ${dollars(top.low)} to ${dollars(top.high)}`,
     range: { lo: pos(top.low), hi: pos(top.high), mid: pos(top.median) } },
@@ -46,7 +47,7 @@ const previews = {
     bar: areas.map((a) => ({ w: a.n, k: 'ink' })) },
 };
 ---
-<ul class="tools">
+<ul class:list={['tools', tools.length === 3 && 'tools--3']} style={`--n:${tools.length}`}>
   {tools.map((t, i) => (
     <li style={`--i:${i}`}>
       <a class="card" href={t.url}>
@@ -70,8 +71,10 @@ const previews = {
 
 <style>
   /* Four tools: one row on wide screens, two by two on tablets, so no card sits alone */
-  .tools { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--s6) var(--s5); }
-  @media (max-width: 1180px) { .tools { grid-template-columns: repeat(2, 1fr); gap: var(--s7) var(--s6); } }
+  /* Three tools (AS, ADS): one row until there isn't room, then one column */
+  .tools { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(var(--n), 1fr); gap: var(--s6) var(--s5); }
+  @media (max-width: 1180px) { .tools { grid-template-columns: repeat(2, 1fr); gap: var(--s7) var(--s6); } .tools--3 { grid-template-columns: repeat(3, 1fr); } }
+  @media (max-width: 900px) { .tools--3 { grid-template-columns: 1fr; } .tools--3 .vis { height: auto; } .tools--3 .v-bar { margin-top: var(--s5); } }
   .card { display: flex; flex-direction: column; height: 100%; color: var(--ink); text-decoration: none; }
   .card:hover h3 { text-decoration: underline; text-underline-offset: 0.15em; text-decoration-thickness: 1.5px; }
   .card:hover .more { color: var(--accent-deep); }

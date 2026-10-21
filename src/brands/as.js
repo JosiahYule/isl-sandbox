@@ -76,3 +76,20 @@ export const social = [
 export const { offices, provinceOffice, nav, services, terms, sourcing, seekerSteps, seekerFaq, analytics, forms, stats, testimonials } = shared;
 export const hire = { ...shared.hire, lead: 'Accounting and finance roles, temporary or permanent, junior to senior. No fee unless you hire.' };
 export const cta = shared.cta;
+export const tools = {
+  ...shared.toolsBase,
+  cost: { ...shared.toolsBase.cost, wage: 30 }, // the calculator's starting wage, and the tool card's example
+  ad: { ...shared.toolsBase.ad, sample: `ACCOUNTING ROCKSTAR WANTED!!!
+
+We are a fast-paced, work hard play hard team looking for a young, energetic number cruncher to join our family. Competitive salary.
+
+Must have CPA
+Must have 5 years experience
+Must have Canadian experience
+Must be a team player
+Must be detail oriented
+Must be available for overtime at year end
+Other duties as assigned.
+
+Send your resume to jobs@example.ca` },
+};

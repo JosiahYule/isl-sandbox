@@ -18,6 +18,7 @@ export const forms = current.forms;
 export const hire = current.hire;
 export const cta = current.cta;
 export const jobsNote = current.jobsNote;
+export const tools = current.tools;
 // Specialist brands only (AS, ADS); null for ISL
 export const field = current.field ?? null;
 export const terms = current.terms ?? null;

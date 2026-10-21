@@ -24,6 +24,7 @@ export const nav = [
   { label: 'Find work', href: '/find-work/' },
   { label: 'About', href: '/about/' },
   { label: 'Team', href: '/team/' },
+  { label: 'Learn', href: '/learn/' },
   { label: 'Contact', href: '/contact/' },
 ];
 
@@ -69,6 +70,20 @@ export const hire = {
 export const cta = {
   text: 'Permanent or temporary, junior to senior. You pay nothing unless you hire.',
   faces: false,
+};
+
+// The Learn tools both brands have (no pay tool: the sample jobs carry no pay yet)
+export const toolsBase = {
+  list: ['true-cost-of-an-employee', 'job-ad-check', 'resume-check'],
+  cost: {
+    title: 'One rate covers it.',
+    text: 'With temporary staffing, the contractor is on our payroll. Their pay, employer EI and CPP, payroll and our fee are in one hourly rate.',
+    details: 'Temporary contractor',
+  },
+  ad: {
+    text: 'We run the search, test and interview the candidates, and send you a short list worth meeting.',
+    label: 'Start a search',
+  },
 };
 
 // The Tracker RMS candidate portal both brands share

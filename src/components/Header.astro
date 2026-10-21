@@ -24,11 +24,12 @@ const menus = {
     ...areas.map((a) => ({ label: `Near ${a.label}`, href: url(`/find-work/?area=${a.key}`), meta: String(jobs.filter((j) => j.area === a.key).length) })),
     { label: 'Send your resume', href: links.resume, rule: true },
   ],
-  ...(isl && { '/learn/': [
+  '/learn/': [
     ...tools.map((t) => ({ label: t.title, href: t.url, meta: 'Tool' })),
     ...guides.map((g) => ({ label: g.title, href: g.url, meta: 'Guide' })),
-    { label: 'All tools and articles', href: url('/learn/'), meta: String(posts.length + tools.length), rule: true },
-  ] }),
+    isl ? { label: 'All tools and articles', href: url('/learn/'), meta: String(posts.length + tools.length), rule: true }
+      : { label: 'All tools', href: url('/learn/'), meta: String(tools.length), rule: true },
+  ],
   ...(brand.officePages && { '/contact/': [
     ...areas.map((a) => ({ label: a.label, href: url(`/offices/${a.key}/`), meta: offices.find((o) => o.city === a.label)?.phone })),
     { label: 'All ways to reach us', href: url('/contact/'), rule: true },
