@@ -9,6 +9,10 @@ on:
   schedule:
     - cron: '0 13 * * 1-5' # 9 am Atlantic (UTC), weekdays
   workflow_dispatch:
+  # Also whenever the fetch script itself changes, so a fix is tested straight away
+  push:
+    branches: [main]
+    paths: [scripts/fetch-lfs.mjs, .github/workflows/update-lfs.yml]
 
 permissions:
   contents: write
