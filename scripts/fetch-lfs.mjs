@@ -26,6 +26,7 @@ const OUT = new URL('../src/data/lfs/latest.json', import.meta.url);
 const GEOS = { Canada: 'CA', 'Nova Scotia': 'NS', 'New Brunswick': 'NB', 'Prince Edward Island': 'PE', 'Newfoundland and Labrador': 'NL' };
 const MONTHS = 25; // two years and a month: enough for year-over-year changes and a trend line
 const UA = { 'User-Agent': 'isl-sandbox jobs report (github.com/JosiahYule/isl-sandbox)' };
+const BROWSER = { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0 Safari/537.36', Accept: '*/*', 'Accept-Language': 'en-CA,en;q=0.9' };
 
 // One CSV line into fields (Statistics Canada quotes every field; quotes inside are doubled)
 function fields(line) {
@@ -45,15 +46,17 @@ const strip = (s) => s.replace(/\s*\[[^\]]*\]\s*$/, '').trim(); // "Construction
 
 // Download a table's zip, then stream its CSV, keeping the rows `keep` accepts
 // Statistics Canada's site goes down at times (it answers with an "unavailable" page), so each
-// download gets three tries, a minute apart
+// download gets three tries, 20 seconds apart
 async function download(url, file) {
   for (let i = 1; ; i++) {
-    const res = await fetch(url, { headers: UA });
+    // The second try looks like an ordinary browser, in case the site turns away scripts
+    const res = await fetch(url, { headers: i === 2 ? BROWSER : UA, redirect: 'follow' });
     if (res.ok && /zip|octet/.test(res.headers.get('content-type') || '')) return pipeline(Readable.fromWeb(res.body), createWriteStream(file));
-    const why = `${url}: HTTP ${res.status} ${res.headers.get('content-type')}`;
+    const page = (await res.text()).replace(/<script[\s\S]*?<\/script>|<style[\s\S]*?<\/style>/g, '').replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 160);
+    const why = `${url}: HTTP ${res.status} ${res.headers.get('content-type')} (final ${res.url}) "${page}"`;
     if (i === 3) throw Object.assign(new Error(why), { unavailable: true });
     console.log(`${why}; trying again in a minute`);
-    await new Promise((r) => setTimeout(r, 60000));
+    await new Promise((r) => setTimeout(r, 20000));
   }
 }
 
