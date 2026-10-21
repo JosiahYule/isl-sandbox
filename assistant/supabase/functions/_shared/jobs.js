@@ -22,6 +22,8 @@ export const SITE = {
   // The employer request form. The assistant pre-fills it with ?service=, ?details= and ?where=.
   // TODO: point this at the live site's request form once it exists there.
   hirePath: "/hire/",
+  // The Recruitment Intelligence tools (/learn/tools/). TODO: same as hirePath, once they're on the live site.
+  toolsPath: "/learn/tools/",
 };
 
 const PROVINCES = {
@@ -152,7 +154,7 @@ export function normalizeFeed(feed) {
 
 // ---- Searching -------------------------------------------------------
 
-function provinceCode(input) {
+export function provinceCode(input) {
   const s = String(input || "").trim().toLowerCase();
   if (!s) return "";
   for (const [code, names] of Object.entries(PROVINCES)) if (names.includes(s)) return code;
@@ -181,7 +183,7 @@ function stem(w) {
 }
 
 // Text -> " stem stem stem " (padded so whole-word checks are a simple includes()).
-function stemText(text) {
+export function stemText(text) {
   const parts = norm(text).split(/\s+/).filter(Boolean).map(stem);
   return parts.length ? " " + parts.join(" ") + " " : "";
 }

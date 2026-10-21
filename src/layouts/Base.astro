@@ -11,15 +11,16 @@ import { url } from '../lib/url.js';
 
 // assistant: false hides the assistant entirely
 // assistantMode: "employer" (hiring pages) or "seeker" (job pages) opens it ready for that visitor; leave out to let it ask
+// assistantJob: on a job page, that job's ID, so the assistant answers questions about the posting
 // footerOffices: false hides the footer's office row (the contact page already lists the offices)
 // schema: optional structured data (an object or a list) that search engines read, e.g. an office's address
-const { title, description = brand.scope, assistant = true, assistantMode, footerOffices = true, schema } = Astro.props;
+const { title, description = brand.scope, assistant = true, assistantMode, assistantJob, footerOffices = true, schema } = Astro.props;
 const canonical = new URL(Astro.url.pathname, Astro.site).href;
 const shareImage = images.hero.replace(/format=\d+w/, 'format=1500w');
 const fullTitle = title ? `${title} | ${brand.name}` : `${brand.name} | Contract and permanent staffing in Atlantic Canada`;
 ---
 <!doctype html>
-<html lang="en-CA" data-assistant-mode={assistantMode}>
+<html lang="en-CA" data-assistant-mode={assistantMode} data-assistant-job={assistantJob}>
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />

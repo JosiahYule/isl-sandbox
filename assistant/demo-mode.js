@@ -8,7 +8,8 @@
 //
 // The page can say which kind of visitor to expect with
 //   <html data-assistant-mode="employer">   (hiring pages)
-//   <html data-assistant-mode="seeker">     (job pages)
+//   <html data-assistant-mode="seeker">     (the job board)
+//   <html data-assistant-job="<job id>">    (one job's page: questions are about that posting)
 // Any button with data-open-assistant opens the window; data-open-assistant="employer"
 // opens it ready for an employer.
 // =====================================================================
@@ -18,18 +19,19 @@ const site = new URL('..', base);                // the site root (handles the /
 // The engine (and the job snapshot it searches) only load when someone sends a first message,
 // so pages where nobody opens the chat don't download them.
 let jobsPromise, enginePromise;
-const respond = async (messages) => {
+const respond = async (messages, context) => {
   enginePromise ||= import('./demo-engine.js').then(({ createEngine }) => createEngine({
     loadJobs: () => (jobsPromise ||= fetch(new URL('jobs-snapshot.json', base)).then((r) => r.json())),
     siteUrl: (path) => { const u = new URL(path.replace(/^\//, ''), site); return u.pathname + u.search; },
   }));
-  return (await enginePromise)(messages);
+  return (await enginePromise)(messages, context);
 };
 
 function start() {
   const chat = window.ISLJobChat.mount({
     send: respond,
     mode: document.documentElement.dataset.assistantMode,
+    job: document.documentElement.dataset.assistantJob,
     note: 'Demo mode: real job search and contact routing, with scripted replies until the AI is connected.',
   });
   document.addEventListener('click', (e) => {

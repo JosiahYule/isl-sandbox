@@ -8,7 +8,10 @@
 //   4. If Claude asks to use a tool, we run it here and send the result back.
 //      This repeats until Claude writes a normal reply (usually 2 or 3 rounds).
 //   5. We send back the reply text, plus anything the tools produced: job cards,
-//      a contact card, a request summary, and quick-reply buttons.
+//      a contact card, a request summary, a pay or cost card, and quick-reply buttons.
+//
+// On a job page the widget also sends { context: { job: "<job id>" } }, so questions
+// like "what are the hours?" are answered from that posting.
 //
 // Secrets (set in Supabase, never in this file):
 //   ANTHROPIC_API_KEY   your Claude API key
@@ -30,6 +33,19 @@ const ALLOWED = (Deno.env.get("ALLOWED_ORIGINS") ??
 const MAX_TURNS_KEPT = 16;     // older messages are dropped to keep calls fast
 const MAX_MESSAGE_CHARS = 2000; // one visitor message
 const MAX_TOOL_ROUNDS = 5;      // safety stop for the tool loop
+
+// ---- Rate limit: each message costs a Claude call, so one visitor can't run up the bill ----
+// 30 messages per 10 minutes per IP address, counted in memory (resets when the function restarts).
+const RATE = { max: 30, windowMs: 10 * 60 * 1000 };
+const seen = new Map<string, number[]>();
+function limited(ip: string) {
+  const now = Date.now();
+  const recent = (seen.get(ip) || []).filter((t) => now - t < RATE.windowMs);
+  recent.push(now);
+  seen.set(ip, recent);
+  if (seen.size > 5000) seen.clear(); // keep memory bounded
+  return recent.length > RATE.max;
+}
 
 // ---- CORS: the browser rule that decides which websites may call us ----
 function corsHeaders(origin: string | null) {
@@ -54,7 +70,12 @@ async function loadJobs() {
 }
 
 // ---- One call to the Claude API ----
-async function callClaude(messages: any[], pageMode: string | null) {
+// The tools and the fixed part of the instructions are marked for caching ("cache_control"):
+// the API keeps them ready for a few minutes, so later messages are cheaper and quicker.
+const CACHED_TOOLS = TOOLS.map((t, i) => (i === TOOLS.length - 1 ? { ...t, cache_control: { type: "ephemeral" } } : t));
+
+async function callClaude(messages: any[], pageMode: string | null, job: any) {
+  const [fixed, page] = systemPrompt(undefined, pageMode, job);
   const res = await fetch("https://api.anthropic.com/v1/messages", {
     method: "POST",
     headers: {
@@ -65,8 +86,8 @@ async function callClaude(messages: any[], pageMode: string | null) {
     body: JSON.stringify({
       model: MODEL,
       max_tokens: 1024,
-      system: systemPrompt(undefined, pageMode),
-      tools: TOOLS,
+      system: [{ type: "text", text: fixed, cache_control: { type: "ephemeral" } }, { type: "text", text: page }],
+      tools: CACHED_TOOLS,
       messages,
     }),
   });
@@ -91,6 +112,11 @@ Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers });
   if (req.method !== "POST") return new Response(JSON.stringify({ error: "POST only" }), { status: 405, headers });
 
+  const ip = (req.headers.get("x-forwarded-for") || "").split(",")[0].trim() || "unknown";
+  if (limited(ip)) {
+    return new Response(JSON.stringify({ error: "That's a lot of messages in a short time. Please wait a few minutes, or call your nearest ISL office." }), { status: 429, headers });
+  }
+
   try {
     const body = await req.json().catch(() => ({}));
     const conversation = cleanConversation(body.messages);
@@ -101,13 +127,16 @@ Deno.serve(async (req) => {
     const pageMode = first?.role === "assistant" && ["employer", "seeker"].includes(first?.meta?.mode) ? first.meta.mode : null;
 
     const jobs = await loadJobs();
-    const state: { cards?: any[]; contact?: any; summary?: any[]; choices?: string[] } = {};
+    // The posting the visitor is reading, if any (only an id is accepted, and it must be a real open job)
+    const jobId = typeof body.context?.job === "string" ? body.context.job.slice(0, 40) : "";
+    const job = jobId ? jobs.find((j: any) => j.id === jobId) || null : null;
+    const state: { cards?: any[]; contact?: any; summary?: any[]; choices?: any[]; insight?: any } = {};
     const messages: any[] = [...conversation];
     let reply = "";
 
     // The tool loop. Each pass is one round-trip to Claude.
     for (let round = 0; round <= MAX_TOOL_ROUNDS; round++) {
-      const result = await callClaude(messages, pageMode);
+      const result = await callClaude(messages, pageMode, job);
       const text = result.content.filter((b: any) => b.type === "text").map((b: any) => b.text).join("\n").trim();
 
       if (result.stop_reason !== "tool_use") { reply = text; break; }
@@ -132,6 +161,7 @@ Deno.serve(async (req) => {
       jobs: state.cards ?? [],
       contact: state.contact ?? null,
       summary: state.summary ?? null,
+      insight: state.insight ?? null,
       choices: state.choices ?? [],
       meta: { mode: state.contact && state.summary ? "employer" : state.cards ? "seeker" : pageMode },
     }), { headers });

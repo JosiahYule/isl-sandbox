@@ -15,10 +15,15 @@
 //      answer like "Not sure" can be read in context.
 //
 // The job matching is real (jobs.js), and so is the contact routing
-// (routing.js). Only the wording is rule-based.
+// (routing.js). So are the figures: pay on open jobs and the true cost of an
+// employee come from insights.js, the same code the website's tools use.
+// On a job page it answers questions about that posting from the posting itself.
+// Only the wording is rule-based.
 // =====================================================================
 import { searchJobs, toCard, SITE } from './jobs.js';
 import { placeFrom, route, toContact, provinceName } from './routing.js';
+import { payFor, payInsight, costFor, costInsight, jobAnswer } from './insights.js';
+import { familyOf } from './pay.js';
 
 // ---------- Small helpers ----------
 const lower = (s) => String(s || '').toLowerCase().replace(/[’]/g, "'");
@@ -143,6 +148,8 @@ const FAQ = [
   ['pay', /\b(pay|wage|wages|salary|how much (does|do|will) (it|they|i))\b/],
   ['permit', /\bwork permit|visa|\blmia\b|\bpermanent resident|\bpr card|\binternational student/],
   ['about', /\bwhat (is|does) (isl|integrated staffing)|\bwho are you\b|\bwhat do you do\b|\bhow does (this|it|isl) work\b/],
+  ['resumecheck', /\b(check|review|improve|fix|look at|rate|score|feedback on|help with) (my |a )?(resume|cv)\b|\b(resume|cv) (check|review|tips|help|feedback)\b/],
+  ['jobad', /\b(check|review|improve|write|fix|feedback on|help with) (my |our |a |this )?(job )?(ad|advert|posting|job description)\b|\bjob (ad|posting) (check|review|help|feedback)\b/],
   ['resume', /\bsend (my|a) resume\b|\bgeneral appli|\bresume\b/],
   ['thanks', /^(thanks|thank you|thx|cheers|great,? thanks|perfect|awesome|that'?s (great|perfect|all)|ok thanks|bye|goodbye)\b/],
   ['hello', /^(hi|hello|hey|hiya|good (morning|afternoon|evening)|bonjour)( there)?[!. ]*$/],
@@ -154,20 +161,68 @@ const FAQ = [
 ];
 const faqOf = (text) => (FAQ.find(([, re]) => re.test(lower(text).trim())) || [])[0] || null;
 
+// ---------- Questions the data can answer ----------
+// "What do forklift operators make?", "What would one cost me?", and on a job page,
+// "What are the hours?". These are answered from data, not by searching.
+const PAY_Q = /\b(what|how much)\b.*\b(pay|pays|paid|make|makes|earn|earns|wages?|salary|salaries|rate)\b|\b(pay|wages?|salary|salaries) (for|of|on)\b|\bwhat (do|does|would|should) (i|we) (offer|pay)\b/;
+const COST_Q = /\btrue cost\b|\bcost to (employ|have|keep)\b|\bwhat (would|does|will) (one|they|a worker|an employee|each one|someone|a hire)( really)? cost\b|\bemployer (costs?|contributions?|share)\b|\bpayroll (costs?|burden)\b|\bcpp\b|\bei premium|\bworkers'? comp\b/;
+const WAGE_RE = /\$\s?(\d{1,3}(?:\.\d{1,2})?)|\b(\d{1,3}(?:\.\d{1,2})?)\s*(?:dollars?\s*)?(?:an|a|per|\/)\s*(?:hour|hr)\b/i;
+function readWage(text) {
+  const m = String(text).match(WAGE_RE);
+  const v = m && Number(m[1] || m[2]);
+  return v >= 10 && v <= 200 ? v : null;
+}
+const JOB_TOPICS = [
+  ['apply', /\bhow (do|can) i apply\b|\bapply\b/],
+  ['similar', /\bsimilar\b|\bother jobs\b|\blike this\b|\bmore like\b|\balternatives?\b/],
+  ['pay', /\b(pay|pays|paid|wage|wages|salary|rate|how much)\b/],
+  ['hours', /\b(hours|schedule|shifts?|days|nights|weekends?|overtime|full[- ]time|part[- ]time|what time)\b/],
+  ['needs', /\b(need|needs|require|requirements?|qualif\w*|experience|licen[cs]e|ticket|certif\w*|skills?|what does it take|eligible)\b/],
+  ['benefits', /\b(benefits?|perks|insurance|dental|pension|rrsp)\b/],
+  ['start', /\b(start|starting|how long|duration|last)\b/],
+  ['type', /\b(is it|is this|is the job) (a )?(permanent|contract|temporary|temp|full[- ]time)\b/],
+  ['location', /\b(where is|location|address|located|how far|bus|transit|parking)\b/],
+  ['duties', /\b(duties|responsibilit\w*|what (will|would) i (be )?do(ing)?|day to day|involve|tasks|what('|’)?s the job( like)?|tell me (more )?about)\b/],
+];
+const jobTopicOf = (text) => (JOB_TOPICS.find(([, re]) => re.test(lower(text))) || [])[0] || null;
+const PAYQ_STOP = new Set('pay pays paid paying make makes making earn earns earning wage wages salary salaries rate rates usually typically typical normally average per hour hourly yearly offer offering much they them their people someone does did would should will cost costs'.split(' '));
+
+// What kind of question is this message, if it's one the data answers?
+//   { kind: 'job', topic } | { kind: 'cost' } | { kind: 'pay' } | null
+function dataQuestion(text, asked, context) {
+  const t = lower(text);
+  if (/^(start over|restart|reset)\b/.test(t)) return null;
+  if (asked === 'cost-wage' && readWage(text)) return { kind: 'cost' };
+  if (asked === 'pay-role' && !faqOf(text)) return { kind: 'pay' };
+  if (COST_Q.test(t) || (readWage(text) && /\b(cost|employ|hire|hiring|pay(ing)? (someone|them|a worker|staff))\b/.test(t))) return { kind: 'cost' };
+  const faq = faqOf(text);
+  if (faq === 'fees' || faq === 'status' || faq === 'permit') return null;
+  if (context?.job) {
+    const role = readRole(text);
+    const topic = jobTopicOf(text);
+    // "What do forklift operators make?" on a job page is about the role, not this posting
+    if (topic && !(topic === 'pay' && role && !role.generic && PAY_Q.test(t))) return { kind: 'job', topic };
+  }
+  // "How much do drivers make?" is about pay; "how much do you charge?" is about ISL's prices
+  if (PAY_Q.test(t) && !(faq === 'price' && /\byour (rates?|fees?|prices?)\b|\b(cost|costs|charge|fee|fees|markup|pricing|price)\b/.test(t))) return { kind: 'pay' };
+  return null;
+}
+
 // ---------- Reading the conversation ----------
 // Walks every visitor message in order and builds up what we know.
-function readConversation(messages) {
+function readConversation(messages, context) {
   const st = {
     mode: null,
     seek: { keywords: [], words: [], place: null, employment: 'any', page: 0 },
     hire: { role: null, place: null, service: null, start: null },
     lastFaq: null,
     lastText: '',
+    lastMeta: null,
   };
   let asked = null; // what the assistant asked just before this message
 
   for (const m of messages) {
-    if (m.role === 'assistant') { asked = m.meta?.ask || null; st.prevKnown = m.meta?.known || ''; if (m.meta?.mode && !st.mode) st.mode = m.meta.mode; continue; }
+    if (m.role === 'assistant') { asked = m.meta?.ask || null; st.lastMeta = m.meta || null; if (m.meta?.known) st.prevKnown = m.meta.known; if (m.meta?.mode && !st.mode) st.mode = m.meta.mode; continue; }
     if (m.role !== 'user') continue;
     const text = String(m.content || '');
     const t = lower(text);
@@ -175,6 +230,8 @@ function readConversation(messages) {
     st.lastFaq = faq;
     st.lastText = text;
 
+    st.dataQ = dataQuestion(text, asked, context);
+    if (st.dataQ) { st.dataPlace = placeFrom(text); continue; } // answered from data: doesn't change the search or the request
     if (faq === 'restart') { st.mode = null; st.seek = { keywords: [], words: [], place: null, employment: 'any', page: 0 }; st.hire = { role: null, place: null, service: null, start: null }; continue; }
 
     // Mode: the newest clear signal wins, so "actually I'm looking for work" switches.
@@ -230,10 +287,13 @@ export function createEngine({ loadJobs, siteUrl = (path) => SITE.base + path })
     contract: siteUrl('/contract/'),
     direct: siteUrl('/direct-hire/'),
     findWork: siteUrl('/find-work/'),
+    payTool: siteUrl('/learn/tools/pay-on-open-jobs/'),
+    resumeCheck: siteUrl('/learn/tools/resume-check/'),
+    jobAdCheck: siteUrl('/learn/tools/job-ad-check/'),
   };
 
-  return async function respond(messages) {
-    const { st, asked } = readConversation(messages);
+  return async function respond(messages, context = {}) {
+    const { st, asked } = readConversation(messages, context);
     const seed = messages.filter((m) => m.role === 'user').length;
     const faq = st.lastFaq;
 
@@ -252,6 +312,11 @@ export function createEngine({ loadJobs, siteUrl = (path) => SITE.base + path })
     if (faq === 'bot') {
       return { reply: 'I’m ISL’s virtual assistant. I can find open jobs for you, or connect you with the right recruiter if you’re hiring. What brings you here today?', choices: ["I'm looking for work", "I'm hiring"], meta: { mode: st.mode, ask: 'mode' } };
     }
+    if (st.dataQ?.kind === 'job') { const jobs = await loadJobs(); const job = jobs.find((j) => j.id === context.job); if (job) return jobTurn(job, st.dataQ.topic, st, jobs, seed); }
+    if (st.dataQ?.kind === 'cost') return costTurn(st, asked, context);
+    if (st.dataQ?.kind === 'pay') return payTurn(st, context, seed);
+    if (faq === 'resumecheck') return { reply: 'Our Resume check scores your resume, shows the fixes that matter most and lists the open jobs it fits. It runs in your browser, so your resume never leaves your device.', choices: [{ label: 'Check my resume', href: links.resumeCheck }, 'Show me jobs'], meta: { mode: 'seeker' } };
+    if (faq === 'jobad') return { reply: 'Paste it into our Job ad check. It scores the ad, compares the pay with our open jobs and flags the provinces where pay has to be in the ad.', choices: [{ label: 'Check my job ad', href: links.jobAdCheck }], meta: { mode: 'employer', ask: asked } };
     if (st.mode === 'employer') return employerTurn(st, asked, seed);
     if (faq && faq !== 'more' && faq !== 'elsewhere') return seekerFaq(faq, st);
     if (!st.mode && !st.seek.keywords.length && !st.seek.place) {
@@ -340,6 +405,102 @@ export function createEngine({ loadJobs, siteUrl = (path) => SITE.base + path })
       reply = `Good news! ${cap(numberWord(strictTotal))} ${typeWord}${what}${strictTotal === 1 ? 'role is' : 'roles are'} open${where} right now.`;
     }
     return { reply: reply.replace(/\s+/g, ' '), jobs: cards, choices: choices.slice(0, 4), meta: { ...meta, ask: 'seek-results' } };
+  }
+
+  // ---------------- Answers from data ----------------
+  // A question about the posting on this page
+  async function jobTurn(job, topic, st, jobs, seed) {
+    const meta = { mode: 'seeker', ask: 'job-' + topic };
+    const prov = provinceName(job.province);
+    const MENU = [['hours', 'What are the hours?'], ['pay', 'What’s the pay?'], ['needs', 'What do I need?'], ['duties', 'What’s the job like?'], ['similar', 'Similar jobs']];
+    const next = MENU.filter(([k]) => k !== topic).slice(0, 3).map(([, label]) => label);
+    const choices = [...next, { label: 'Apply', href: job.applyUrl }];
+
+    if (topic === 'apply') return { reply: 'Tap Apply on this page. It opens the application for this job, and it’s always free.', choices: [{ label: 'Apply now', href: job.applyUrl }, 'What do I need?', 'Similar jobs'], meta };
+    if (topic === 'type') return { reply: `It’s a ${job.employment === 'Permanent' ? 'permanent' : job.employment === 'Temp to perm' ? 'temp-to-perm' : 'contract'} job, in ${job.city}.`, choices, meta };
+    if (topic === 'location') return { reply: `It’s in ${job.city}, ${prov}. The recruiter shares the exact site when you’re placed.`, choices, meta };
+    if (topic === 'similar') {
+      // The same kind of work (pay.js families: drivers, warehouse, trades...), this province first
+      const fam = familyOf(job.title);
+      const alike = fam === 'Other' ? [] : jobs.filter((j) => j.id !== job.id && familyOf(j.title) === fam)
+        .sort((a, b) => (b.province === job.province) - (a.province === job.province) || String(b.posted).localeCompare(String(a.posted)));
+      const cards = alike.slice(0, 3).map((j) => toCard(j, ''));
+      if (!cards.length) return { reply: 'Nothing quite like it is open right now.', choices: [{ label: 'All open jobs', href: links.findWork }], meta };
+      const local = alike.slice(0, 3).every((j) => j.province === job.province);
+      return { reply: local ? pick(['Here are a few like it.', 'These are the closest to it.'], seed) : `Here are the closest, ${alike[0].province === job.province ? 'in ' + prov + ' and nearby' : 'across Atlantic Canada'}.`, jobs: cards, choices: [{ label: 'All open jobs', href: links.findWork }], meta };
+    }
+    const { lines } = jobAnswer(job, topic);
+    if (topic === 'pay' && job.pay && !lines.length) lines.push(job.pay);
+    if (!lines.length) {
+      const r = route({ audience: 'seeker', service: job.employment === 'Permanent' ? 'direct' : 'contract', place: placeFrom(`${job.city} ${prov}`) });
+      const who = r.person ? r.person.first : `Our ${r.office.city} office`;
+      return { reply: `The posting doesn’t say. ${who} can tell you:`, contact: toContact(r), choices: next, meta };
+    }
+    const intro = { pay: 'Here’s what the posting says about pay:', hours: 'Here’s what the posting says about the hours:', needs: 'Here’s what they’re looking for:', duties: 'Here’s what the job involves:', benefits: 'Here’s what it offers:', start: 'Here’s what the posting says:' }[topic];
+    const body = lines.length === 1 && topic === 'pay' ? `It pays ${lines[0].replace(/^[^:]+:\s*/, '')}.`.replace(/\.\.$/, '.') : `${intro}\n${lines.map((l) => '• ' + l).join('\n')}`;
+    return { reply: body, choices, meta };
+  }
+
+  // "What do forklift operators make in New Brunswick?"
+  async function payTurn(st, context, seed) {
+    const jobs = await loadJobs();
+    const t = lower(st.lastText);
+    const place = st.dataPlace;
+    // The role: named in this message, or the one already being talked about
+    const named = readRole(st.lastText);
+    const placeWords = new Set(lower(place?.city || '').split(/\s+/).concat(['nova', 'scotia', 'brunswick', 'prince', 'edward', 'island', 'newfoundland', 'labrador', 'pei', 'atlantic', 'canada']));
+    const words = t.replace(/[^a-z0-9' ]+/g, ' ').split(/\s+/).filter((w) => w.length > 2 && !STOP.has(w) && !PAYQ_STOP.has(w) && !placeWords.has(w));
+    const job = context?.job ? jobs.find((j) => j.id === context.job) : null;
+    const role = named && !named.generic ? named.many
+      : words.length ? words.join(' ')
+      : st.mode === 'employer' && st.hire.role && !st.hire.role.generic ? st.hire.role.many
+      : st.lastMeta?.role || (st.seek.words.length ? st.seek.words.slice(0, 2).join(' ') : '') || (job ? job.title : '');
+    const mode = st.mode || st.lastMeta?.mode || null;
+    if (!role) {
+      return { reply: 'Which role? Tell me and I’ll show you what our open jobs pay.', choices: ['Forklift operators', 'Drivers', 'General labourers', 'Office and admin'], meta: { mode, ask: 'pay-role' } };
+    }
+    const province = place?.province || (st.mode === 'employer' ? st.hire.place?.province : st.seek.place?.province) || st.lastMeta?.province || job?.province || '';
+    const r = payFor(jobs, { role, province });
+    if (!r) {
+      return { reply: `I couldn’t find enough open jobs like that to go on, sorry. Our pay tool shows every role we’re hiring for.`, choices: [{ label: 'Pay on our open jobs', href: links.payTool }], meta: { mode } };
+    }
+    const asked = province ? provinceName(province) : '';
+    const caveat = r.basis === 'family'
+      ? ` There aren’t enough open ${role} jobs to go on, so this is the wider ${r.family.toLowerCase()} group${r.widened && asked ? ' across Atlantic Canada' : ''}.`
+      : r.widened && asked ? ` We don’t have enough open ones in ${asked} right now, so this is across Atlantic Canada.` : '';
+    const reply = pick(['Here’s what our open jobs pay.', 'Here’s what we’re offering on our open jobs right now.'], seed) + caveat;
+    const choices = mode === 'employer'
+      ? ['What would one cost me?', ...(st.hire.role ? ['Back to my request'] : ["I'm hiring"])]
+      : [`Show me ${role.split(' ').map((w) => w.replace(/([a-z]{3})s$/, '$1')).join(' ')} jobs`, 'What would one cost me?'];
+    return {
+      reply, insight: payInsight(r, siteUrl), choices,
+      meta: { mode, ask: 'pay', role, province: r.province || province, wage: r.unit === 'hour' ? Math.round(r.hourly * 4) / 4 : null },
+    };
+  }
+
+  // "What would a $20/hour worker really cost me?"
+  function costTurn(st, asked, context) {
+    const text = st.lastText;
+    const wage = readWage(text) || (st.lastMeta?.wage ?? null);
+    const fromPay = !readWage(text) && st.lastMeta?.wage;
+    const mode = st.mode || st.lastMeta?.mode || 'employer';
+    if (!wage) {
+      return { reply: 'Sure! What hourly wage should I work it out for?', choices: ['$18/hour', '$20/hour', '$25/hour'], meta: { mode, ask: 'cost-wage', province: st.lastMeta?.province } };
+    }
+    const place = st.dataPlace;
+    const asked2 = place?.province || st.hire.place?.province || st.lastMeta?.province || '';
+    const atlantic = ['NS', 'NB', 'PE', 'NL'].includes(asked2);
+    const province = atlantic ? asked2 : 'NS';
+    const hoursM = lower(text).match(/\b(\d{1,2})\s*hours? (a|per) week\b/);
+    const r = costFor({ wage, hours: hoursM ? Number(hoursM[1]) : 40, province });
+    const used = fromPay ? ` I used $${wage.toFixed(2).replace(/\.00$/, '')}/hour, the middle pay on our open jobs.` : '';
+    const where = !atlantic && asked2 ? ' Our calculator covers the Atlantic provinces, so this uses Nova Scotia’s rates.' : '';
+    return {
+      reply: `Here’s what each hour worked really costs, once vacation, paid holidays, CPP, EI and workers’ comp are added.${used}${where}`,
+      insight: costInsight(r, siteUrl),
+      choices: mode === 'employer' && st.hire.role ? ['Back to my request'] : ["I'm hiring", 'Start over'],
+      meta: { mode, ask: 'cost', province, wage },
+    };
   }
 
   // ---------------- Employers ----------------

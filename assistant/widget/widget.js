@@ -7,8 +7,10 @@
 //           data-endpoint="https://YOUR-PROJECT.supabase.co/functions/v1/isl-job-chat"
 //           data-anon-key="YOUR_SUPABASE_PUBLISHABLE_KEY" defer></script>
 //
-// Add data-mode="employer" (hiring pages) or data-mode="seeker" (job pages)
+// Add data-mode="employer" (hiring pages) or data-mode="seeker" (job board)
 // to open it ready for that kind of visitor. Without it, it asks.
+// On a single job's page, add data-job="<the job's ID>": it opens ready for questions
+// about that posting ("What are the hours?") and tells the backend which job it is.
 //
 // How it works:
 //  - It draws itself inside a "shadow root": a private bubble of HTML/CSS
@@ -21,6 +23,7 @@
 //      jobs      job cards (title, pay, View and Apply)
 //      contact   the right person to talk to (photo, phone, email, button)
 //      summary   what the visitor asked for, as label/value rows
+//      insight   a figure worked out from ISL's data (pay on open jobs, true cost): kicker, figure, sub, rows, link
 //      choices   quick replies: strings are sent as messages, {label, href} are links
 //      meta      a memo the backend wants back next time (what it just asked)
 // =====================================================================
@@ -32,8 +35,10 @@
     ask: { text: "Hi there! I can help you find a job, or find the right people to hire. Which brings you here today?", choices: ["I'm looking for work", "I'm hiring"], placeholder: "Type a message" },
     seeker: { text: "Hi there! Tell me what kind of work you're looking for and where, and I'll show you what's open.", choices: ["Warehouse work", "Office and admin", "Driving", "Trades"], placeholder: "e.g. Forklift work in Moncton" },
     employer: { text: "Hi there! Tell me who you need and where, and I'll connect you with the right person on our team.", choices: ["3 labourers in rural Nova Scotia", "A permanent controller in Moncton", "Warehouse staff in Halifax next week"], placeholder: "e.g. 3 labourers in rural Nova Scotia" },
+    job: { text: "Hi there! Questions about this job? Ask me about the pay, the hours or what you need to apply.", choices: ["What are the hours?", "What do I need?", "Similar jobs"], placeholder: "Ask about this job" },
   };
-  const LAUNCHER = { ask: "Ask ISL", seeker: "Find a job", employer: "Hiring? Ask us" };
+  const LAUNCHER = { ask: "Ask ISL", seeker: "Find a job", employer: "Hiring? Ask us", job: "Ask about this job" };
+  const SUBTITLE = { ask: "Jobs and hiring", seeker: "Job search", employer: "Hiring help", job: "About this job" };
 
   const CSS = `
     :host { all: initial; }
@@ -58,7 +63,9 @@
     /* Window */
     .panel { position: fixed; right: calc(20px + env(safe-area-inset-right, 0px)); bottom: calc(20px + env(safe-area-inset-bottom, 0px)); z-index: 2147483001;
       width: min(408px, calc(100vw - 24px)); height: min(660px, calc(100vh - 40px)); display: flex; flex-direction: column;
-      background: var(--white); overflow: hidden; border: 1.5px solid var(--dark); animation: open .28s cubic-bezier(.2,.7,.1,1); }
+      background: var(--white); overflow: hidden; border: 1.5px solid var(--dark); }
+    /* Only when it opens: the window is rebuilt on every message, and replaying this each time made it flash */
+    .panel.opening { animation: open .28s cubic-bezier(.2,.7,.1,1); }
     @keyframes open { from { opacity: 0; transform: translateY(12px); } }
     @media (max-width: 480px) { .panel { right: 0; bottom: 0; width: 100vw; height: 100%; border: 0; } }
     .head { display: flex; align-items: center; gap: 12px; padding: 12px 10px 12px 16px; background: var(--dark); color: var(--white); border-bottom: 3px solid var(--blue); }
@@ -104,6 +111,17 @@
     .summary dt { color: var(--muted); }
     .summary dd { margin: 0; font-weight: 600; }
 
+    /* A figure from ISL's data: pay on open jobs, or what an employee really costs */
+    .insight { align-self: stretch; background: var(--white); border: 1px solid var(--line); border-top: 3px solid var(--blue); padding: 12px 14px 13px; display: grid; gap: 2px; }
+    .insight .k { margin: 0; font-size: 11.5px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; color: var(--muted); }
+    .insight .fig { margin: 2px 0 0; font-size: 30px; font-weight: 300; letter-spacing: -.035em; line-height: 1.1; font-variant-numeric: tabular-nums; }
+    .insight .sub { margin: 0; font-size: 13px; color: var(--muted); }
+    .insight dl { margin: 8px 0 0; display: grid; grid-template-columns: 1fr auto; font-size: 13px; border-top: 1px solid var(--line); }
+    .insight dt, .insight dd { margin: 0; padding: 5px 0; border-bottom: 1px solid var(--line); }
+    .insight dt { color: var(--muted); }
+    .insight dd { font-weight: 600; text-align: right; font-variant-numeric: tabular-nums; }
+    .insight a { justify-self: start; margin-top: 8px; font-size: 13px; font-weight: 600; color: var(--blue); }
+
     /* The right person to talk to */
     .contact { align-self: stretch; background: var(--white); border: 1.5px solid var(--dark); padding: 14px; display: grid; gap: 12px; }
     .who { display: flex; gap: 12px; align-items: center; }
@@ -135,7 +153,7 @@
     .fine { margin: 0; padding: 7px 14px; font-size: 11.5px; color: var(--muted); background: var(--white); border-top: 1px solid var(--line); }
     .fine.demo { color: var(--ink); background: var(--blue-tint); }
 
-    @media (prefers-reduced-motion: reduce) { .panel, .new, .typing i { animation: none; } .log { scroll-behavior: auto; } }
+    @media (prefers-reduced-motion: reduce) { .panel.opening, .new, .typing i { animation: none; } .log { scroll-behavior: auto; } }
   `;
 
   const ICON = {
@@ -149,10 +167,10 @@
 
   // Turns the backend URL into a "send" function: conversation in, reply out.
   function httpTransport(endpoint, anonKey) {
-    return async function (messages) {
+    return async function (messages, context) {
       const headers = { "content-type": "application/json" };
       if (anonKey) { headers.apikey = anonKey; headers.authorization = "Bearer " + anonKey; }
-      const res = await fetch(endpoint, { method: "POST", headers, body: JSON.stringify({ messages }) });
+      const res = await fetch(endpoint, { method: "POST", headers, body: JSON.stringify({ messages, context }) });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(data.error || "Something went wrong. Please try again.");
       return data;
@@ -167,13 +185,16 @@
     const shadow = host.attachShadow({ mode: "open" });
     shadow.innerHTML = `<style>${CSS}</style><div class="root"></div>`;
     const root = shadow.querySelector(".root");
-    const pageMode = GREETINGS[opts.mode] ? opts.mode : "ask";
+    // What the page tells the backend: on a job page, which job it is
+    const context = opts.job ? { job: String(opts.job) } : {};
+    const pageMode = context.job ? "job" : GREETINGS[opts.mode] ? opts.mode : "ask";
 
     // ---- State: the conversation. turns: [{role, content, jobs?, contact?, summary?, choices?, meta?}] ----
     let state = { open: !!opts.startOpen, turns: [], mode: pageMode };
     try { const saved = JSON.parse(sessionStorage.getItem(STORE_KEY) || "null"); if (saved && Array.isArray(saved.turns)) state = { ...state, ...saved, mode: saved.turns.length ? saved.mode : pageMode }; } catch {}
     const save = () => { try { sessionStorage.setItem(STORE_KEY, JSON.stringify(state)); } catch {} };
     let busy = false;
+    let opening = !!state.open; // animate the window in only on the render right after it opens
     let fresh = -1; // index of the newest turn, so only it animates in
 
     const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
@@ -203,6 +224,16 @@
       rows.forEach(([k, v]) => dl.append(el("dt", null, k), el("dd", null, v)));
       s.append(dl);
       return s;
+    }
+
+    function insightCard(x) {
+      const c = el("div", "insight");
+      if (x.kicker) c.append(el("p", "k", x.kicker));
+      c.append(el("p", "fig", x.figure));
+      if (x.sub) c.append(el("p", "sub", x.sub));
+      if (x.rows?.length) { const dl = el("dl"); x.rows.forEach(([k, v]) => dl.append(el("dt", null, k), el("dd", null, v))); c.append(dl); }
+      if (x.link?.href) { const a = el("a", null, x.link.label); a.href = x.link.href; c.append(a); }
+      return c;
     }
 
     function contactCard(p) {
@@ -239,13 +270,14 @@
         b.type = "button";
         b.innerHTML = ICON.chat + `<span>${LAUNCHER[state.mode] || LAUNCHER.ask}</span>`;
         b.setAttribute("aria-label", "Open the ISL assistant");
-        b.onclick = () => { state.open = true; save(); render(); };
+        b.onclick = () => { state.open = true; opening = true; save(); render(); };
         root.append(b);
         return;
       }
 
       const g = GREETINGS[state.greet || state.mode] || GREETINGS.ask;
-      const panel = el("div", "panel");
+      const panel = el("div", "panel" + (opening ? " opening" : ""));
+      opening = false;
       panel.setAttribute("role", "dialog");
       panel.setAttribute("aria-label", "ISL assistant");
       panel.onkeydown = (e) => { if (e.key === "Escape") { state.open = false; save(); render(); } };
@@ -253,7 +285,7 @@
       const head = el("div", "head");
       head.append(el("div", "mark", "ISL"));
       const t = el("div", "t");
-      t.append(el("strong", null, "Integrated Staffing"), el("span", null, state.mode === "employer" ? "Hiring help" : state.mode === "seeker" ? "Job search" : "Jobs and hiring"));
+      t.append(el("strong", null, "Integrated Staffing"), el("span", null, SUBTITLE[state.mode] || SUBTITLE.ask));
       const reset = el("button", "icon-btn"); reset.type = "button"; reset.innerHTML = ICON.reset; reset.title = "Start over"; reset.setAttribute("aria-label", "Start a new conversation");
       reset.onclick = () => { if (busy) return; state.turns = []; state.mode = pageMode; state.greet = null; save(); render(); };
       const close = el("button", "icon-btn"); close.type = "button"; close.innerHTML = ICON.close; close.setAttribute("aria-label", "Close");
@@ -271,6 +303,7 @@
         if (turn.role === "error") { log.append(el("div", "msg err" + anim, turn.content)); return; }
         log.append(el("div", "msg " + (turn.role === "user" ? "me" : "bot") + anim, turn.content));
         if (turn.summary?.length) log.append(summaryCard(turn.summary));
+        if (turn.insight?.figure) log.append(insightCard(turn.insight));
         if (turn.contact) log.append(contactCard(turn.contact));
         if (turn.jobs?.length) { const s = el("div", "stack"); turn.jobs.forEach((j) => s.append(jobCard(j))); log.append(s); }
         if (i === lastBot && i === state.turns.length - 1 && turn.choices?.length && !busy) log.append(choiceRow(turn.choices));
@@ -301,14 +334,14 @@
       // Send the words (and the memo from each reply). The greeting goes first so the
       // backend knows which kind of visitor this page expects.
       const g = GREETINGS[state.greet] || GREETINGS.ask;
-      const messages = [{ role: "assistant", content: g.text, meta: { mode: state.greet === "ask" ? null : state.greet } }]
+      const messages = [{ role: "assistant", content: g.text, meta: { mode: state.greet === "ask" ? null : state.greet === "job" ? "seeker" : state.greet } }]
         .concat(state.turns.filter((x) => x.role === "user" || x.role === "assistant").map((x) => (x.role === "assistant" ? { role: x.role, content: x.content, meta: x.meta } : { role: x.role, content: x.content })));
       try {
-        const r = await send(messages);
+        const r = await send(messages, context);
         // A short "typing" pause that grows with the reply, so it reads like someone answering, not a machine
         await new Promise((ok) => setTimeout(ok, Math.min(400 + (r.reply || "").length * 6, 1200)));
-        if (r.meta?.mode && GREETINGS[r.meta.mode]) state.mode = r.meta.mode; // header follows the conversation
-        state.turns.push({ role: "assistant", content: r.reply || "Here's what I found.", jobs: r.jobs || [], contact: r.contact || null, summary: r.summary || null, choices: r.choices || [], meta: r.meta || null });
+        if (r.meta?.mode && GREETINGS[r.meta.mode] && !(state.mode === "job" && r.meta.mode === "seeker")) state.mode = r.meta.mode; // header follows the conversation
+        state.turns.push({ role: "assistant", content: r.reply || "Here's what I found.", jobs: r.jobs || [], contact: r.contact || null, summary: r.summary || null, insight: r.insight || null, choices: r.choices || [], meta: r.meta || null });
       } catch (e) {
         state.turns.push({ role: "error", content: e?.message || "Something went wrong. Please try again." });
       }
@@ -319,7 +352,7 @@
     render();
     return {
       // open("employer") opens ready for an employer, if no conversation has started yet
-      open(mode) { if (mode && GREETINGS[mode] && !state.turns.length) state.mode = mode; state.open = true; save(); render(); },
+      open(mode) { if (mode && GREETINGS[mode] && !state.turns.length) state.mode = mode; if (!state.open) opening = true; state.open = true; save(); render(); },
       ask: submit,
     };
   }
@@ -329,7 +362,7 @@
   // Auto-start when loaded with data-endpoint (the normal website setup).
   const me = document.currentScript;
   if (me && me.dataset.endpoint) {
-    const go = () => mount({ endpoint: me.dataset.endpoint, anonKey: me.dataset.anonKey, mode: me.dataset.mode });
+    const go = () => mount({ endpoint: me.dataset.endpoint, anonKey: me.dataset.anonKey, mode: me.dataset.mode, job: me.dataset.job });
     document.readyState === "loading" ? document.addEventListener("DOMContentLoaded", go) : go();
   }
 })();

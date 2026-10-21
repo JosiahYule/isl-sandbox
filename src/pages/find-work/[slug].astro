@@ -74,7 +74,7 @@ const schema = {
   directApply: false,
 };
 ---
-<Base title={`${job.title}, ${where}`} description={job.snippet} assistantMode="seeker" schema={schema}>
+<Base title={`${job.title}, ${where}`} description={job.snippet} assistantMode="seeker" assistantJob={job.id} schema={schema}>
   <article class="jp">
     <header class="wrap jp-head">
       <a class="back" href={url('/find-work/')}>← All jobs</a>
