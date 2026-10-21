@@ -1,13 +1,13 @@
-# UPDATE THE ATLANTIC JOB MARKET DATA
+# UPDATE THE ATLANTIC JOBS REPORT DATA
 # Statistics Canada releases the Labour Force Survey once a month, usually the first Friday at
-# 8:30 am Eastern. This checks every weekday morning, saves the latest figures to
+# 8:30 am Eastern. This checks three times every weekday, saves the latest figures to
 # src/data/lfs/latest.json (scripts/fetch-lfs.mjs) and, when a new month has arrived, commits it
-# and starts a deploy so the Atlantic job market tool shows it right away.
-name: Update job market data
+# and starts a deploy so the Atlantic jobs report shows it right away.
+name: Update jobs report data
 
 on:
   schedule:
-    - cron: '0 13 * * 1-5' # 9 am Atlantic (UTC), weekdays
+    - cron: '7 13,17,21 * * 1-5' # about 10 am, 2 pm and 6 pm Atlantic, weekdays (times are UTC)
   workflow_dispatch:
   # Also whenever the fetch script itself changes, so a fix is tested straight away
   push:

@@ -1,8 +1,8 @@
 // FETCH THE LABOUR FORCE SURVEY  (node scripts/fetch-lfs.mjs)
 // Statistics Canada publishes the Labour Force Survey every month (usually the first Friday,
 // 8:30 am Eastern). This reads the latest two years for Canada and the four Atlantic provinces
-// and saves them to src/data/lfs/latest.json, which the Atlantic job market tool
-// (/learn/tools/job-market/) is drawn from.
+// and saves them to src/data/lfs/latest.json, which the Atlantic jobs report
+// (/learn/tools/jobs-report/) is drawn from.
 //
 // It runs on GitHub (.github/workflows/update-lfs.yml), because this sandbox's own network
 // can't reach Statistics Canada. It downloads each table's full CSV (a zip of every series
@@ -25,7 +25,7 @@ import { join } from 'node:path';
 const OUT = new URL('../src/data/lfs/latest.json', import.meta.url);
 const GEOS = { Canada: 'CA', 'Nova Scotia': 'NS', 'New Brunswick': 'NB', 'Prince Edward Island': 'PE', 'Newfoundland and Labrador': 'NL' };
 const MONTHS = 25; // two years and a month: enough for year-over-year changes and a trend line
-const UA = { 'User-Agent': 'isl-sandbox job market tool (github.com/JosiahYule/isl-sandbox)' };
+const UA = { 'User-Agent': 'isl-sandbox jobs report (github.com/JosiahYule/isl-sandbox)' };
 
 // One CSV line into fields (Statistics Canada quotes every field; quotes inside are doubled)
 function fields(line) {
@@ -44,12 +44,37 @@ const clean = (s) => s.replace(/^﻿/, '').trim();
 const strip = (s) => s.replace(/\s*\[[^\]]*\]\s*$/, '').trim(); // "Construction [23]" -> "Construction"
 
 // Download a table's zip, then stream its CSV, keeping the rows `keep` accepts
+// Statistics Canada's site goes down at times (it answers with an "unavailable" page), so each
+// download gets three tries, a minute apart
+async function download(url, file) {
+  for (let i = 1; ; i++) {
+    const res = await fetch(url, { headers: UA });
+    if (res.ok && /zip|octet/.test(res.headers.get('content-type') || '')) return pipeline(Readable.fromWeb(res.body), createWriteStream(file));
+    const why = `${url}: HTTP ${res.status} ${res.headers.get('content-type')}`;
+    if (i === 3) throw Object.assign(new Error(why), { unavailable: true });
+    console.log(`${why}; trying again in a minute`);
+    await new Promise((r) => setTimeout(r, 60000));
+  }
+}
+
+// The release date, from the metadata file that comes in the same zip
+async function releaseTime(pid) {
+  const unzip = spawn('unzip', ['-p', join(tmpdir(), `${pid}.zip`), `${pid}_MetaData.csv`]);
+  const lines = createInterface({ input: unzip.stdout, crlfDelay: Infinity });
+  let head = null, out = null;
+  for await (const line of lines) {
+    if (out) continue;
+    if (!head) { head = fields(line).map(clean); continue; }
+    const f = fields(line); const i = head.findIndex((h) => /release time/i.test(h));
+    out = i >= 0 ? f[i] : '';
+  }
+  return out || null;
+}
+
 async function readTable(pid, keep) {
   const url = `https://www150.statcan.gc.ca/n1/tbl/csv/${pid}-eng.zip`;
-  const res = await fetch(url, { headers: UA });
-  if (!res.ok || !/zip|octet/.test(res.headers.get('content-type') || '')) throw new Error(`${url}: HTTP ${res.status} ${res.headers.get('content-type')}`);
   const zip = join(tmpdir(), `${pid}.zip`);
-  await pipeline(Readable.fromWeb(res.body), createWriteStream(zip));
+  await download(url, zip);
   const unzip = spawn('unzip', ['-p', zip, `${pid}.csv`]);
   const lines = createInterface({ input: unzip.stdout, crlfDelay: Infinity });
   let head = null; const rows = [];
@@ -93,6 +118,7 @@ async function main() {
     const s = toSeries(rows, (r) => `${GEOS[r.GEO]}|${r[C.age] === '15 to 24 years' ? 'youthUnemploymentRate' : WANT[r[C.chr]]}`);
     for (const k in s) { const [g, key] = k.split('|'); (data.provinces[g] ??= {})[key] = s[k]; }
     console.log(`14-10-0287: ${rows.length} rows, ${Object.keys(s).length} series`);
+    data.released = await releaseTime('14100287').catch(() => null);
   }
 
   // 2. Employment by industry, seasonally adjusted (thousands of people)
@@ -136,4 +162,9 @@ async function main() {
 // On GitHub, ::error:: and ::notice:: lines show up as annotations on the run
 const gh = !!process.env.GITHUB_ACTIONS;
 const note = (kind, msg) => console.log(gh ? `::${kind}::${String(msg).replace(/\n/g, ' ').slice(0, 3000)}` : msg);
-main().then((m) => note('notice', m)).catch((e) => { note('error', e.message); process.exit(1); });
+// If Statistics Canada is down and we already have figures, keep them and try again next time
+// (a warning, not a failed run). With no figures yet, it fails so someone notices.
+main().then((m) => note('notice', m)).catch((e) => {
+  if (e.unavailable && existsSync(OUT)) { note('warning', `${e.message}. Kept the figures we have; the next run will try again.`); return; }
+  note('error', e.message); process.exit(1);
+});
