@@ -127,7 +127,10 @@ async function main() {
   const before = existsSync(OUT) ? JSON.parse(readFileSync(OUT, 'utf8')) : null;
   mkdirSync(new URL('.', OUT), { recursive: true });
   writeFileSync(OUT, JSON.stringify(data, null, 1) + '\n');
-  console.log(`Saved ${data.month} (released ${data.released})${before && before.month === data.month ? ', same month as before' : ', new month'}`);
+  console.log(`::notice::Saved ${data.month} (released ${data.released})${before && before.month === data.month ? ', same month as before' : ', new month'}`);
 }
 
-main().catch((e) => { console.error(e.message); process.exit(1); });
+// On GitHub, ::error:: and ::notice:: lines show up as annotations on the run
+const gh = !!process.env.GITHUB_ACTIONS;
+const note = (kind, msg) => console.log(gh ? `::${kind}::${String(msg).replace(/\n/g, ' ').slice(0, 3000)}` : msg);
+main().then(() => note('notice', 'Labour Force Survey saved')).catch((e) => { note('error', e.message); process.exit(1); });
