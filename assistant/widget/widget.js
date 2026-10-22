@@ -207,6 +207,9 @@
     const schedulePlacement = () => { if (!positionFrame) positionFrame = requestAnimationFrame(placeLauncher); };
     window.addEventListener('scroll', schedulePlacement, { passive: true });
     window.addEventListener('resize', schedulePlacement, { passive: true });
+    // Search/filter scripts and loaded images can move an Apply button without scrolling.
+    // Recheck after those layout changes as well as after direct user input.
+    if (typeof ResizeObserver !== 'undefined') new ResizeObserver(schedulePlacement).observe(document.body);
     document.addEventListener('focusin', schedulePlacement);
     document.addEventListener('focusout', schedulePlacement);
     document.addEventListener('isl:menu', (event) => {
