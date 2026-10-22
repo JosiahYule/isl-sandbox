@@ -24,6 +24,7 @@ import { url } from '../lib/url.js';
 import { jobSummary } from '../lib/jobtext.js';
 import { industryOf } from './industries.js';
 import { BRAND, services } from './site.js';
+import { resolveCompensation } from '../../assistant/supabase/functions/_shared/compensation.js';
 
 const source = { isl: { jobs: islSnapshot, saved: islMeta.fetched }, as: { jobs: asSample.jobs, saved: asSample.saved }, ads: { jobs: adsSample.jobs, saved: adsSample.saved } }[BRAND];
 const snapshot = source.jobs;
@@ -52,6 +53,7 @@ const slugify = (s) => String(s).toLowerCase().normalize('NFD').replace(/[\u0300
   .replace(/['’]/g, '').replace(/&/g, ' and ').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
 
 export const jobs = snapshot
+  .map(resolveCompensation)
   .map((j) => {
     // Leave the city out when the title already names it ("Garbage Collector Saint John")
     const city = slugify(j.title).includes(slugify(j.city)) ? '' : slugify(j.city);
@@ -61,7 +63,7 @@ export const jobs = snapshot
       title: tidyTitle(j.title, j.city),
       pay: tidyPay(j.pay),
       slug,
-      payLabel: j.description ? '' : 'Pay on the posting', // the AS and ADS samples carry no pay yet
+      payLabel: j.payLabel || (j.description ? '' : 'Pay on the posting'),
       url: url(`/find-work/${slug}/`),
       area: areaFor(j.city),
       industry: BRAND === 'isl' ? industryOf(j.title) : '', // '' when it's none of ISL's six industry pages

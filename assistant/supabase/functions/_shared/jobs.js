@@ -1,4 +1,6 @@
 // =====================================================================
+
+import { resolveCompensation } from './compensation.js';
 // jobs.js — turns the raw Avionte feed into clean jobs, and searches them.
 //
 // This file has NO AI in it. It's ordinary code that the AI is allowed
@@ -148,8 +150,9 @@ export function extractRawJobs(feed) {
   return [];
 }
 
-export function normalizeFeed(feed) {
-  return extractRawJobs(feed).map(normalizeJob).filter((j) => j.id);
+export function normalizeFeed(feed, { resolvePay = true } = {}) {
+  const jobs = extractRawJobs(feed).map(normalizeJob).filter((j) => j.id);
+  return resolvePay ? jobs.map(resolveCompensation) : jobs;
 }
 
 // ---- Searching -------------------------------------------------------
@@ -207,7 +210,7 @@ function brief(job, extra = {}) {
     employment: job.employment,
     location: [job.city, job.province].filter(Boolean).join(", "),
     category: [job.category, job.subcategory].filter(Boolean).join(": "),
-    pay: job.pay || "not listed",
+    pay: job.pay || job.payLabel || "not listed",
     posted: job.posted,
     snippet: job.description.replace(/\n/g, " ").slice(0, 220),
     ...extra,
@@ -283,7 +286,7 @@ export function toCard(job, reason) {
   return {
     id: job.id, title: job.title, employment: job.employment,
     location: [job.city, job.province].filter(Boolean).join(", "),
-    pay: job.pay, reason: String(reason || "").slice(0, 200),
+    pay: job.pay || job.payLabel, reason: String(reason || "").slice(0, 200),
     viewUrl: job.viewUrl, applyUrl: job.applyUrl,
   };
 }

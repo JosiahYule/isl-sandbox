@@ -84,76 +84,88 @@ const count = { contract: jobs.filter((j) => j.type === 'contract').length, dire
 </Base>
 
 <script>
-  const form = document.querySelector('[data-search]');
-  const q = form.querySelector('#q');
-  const prov = form.querySelector('#prov');
-  const ind = form.querySelector('#ind') ?? { value: '', options: [], addEventListener() {} }; // no industry filter on AS and ADS
-  const typeButtons = form.querySelectorAll('.t');
-  const rows = [...document.querySelectorAll('[data-list] > *')];
-  const countEl = document.querySelector('[data-count]');
-  const labelEl = document.querySelector('[data-count-label]');
-  const empty = document.querySelector('[data-empty]');
-  const more = document.querySelector('[data-more]');
-  const areaLinks = document.querySelectorAll('.near a');
-  let area = new URLSearchParams(location.search).get('area') ?? '';
-  const PAGE = 15;
-  let type = '';
-  let expanded = false;
+  import { matchesJobQuery } from '../../lib/jobsearch.js';
 
-  function apply() {
-    const term = q.value.trim().toLowerCase();
-    const filtering = !!(term || prov.value || ind.value || type || area);
+  const form = document.querySelector<HTMLFormElement>('[data-search]')!;
+  const q = form.querySelector<HTMLInputElement>('#q')!;
+  const prov = form.querySelector<HTMLSelectElement>('#prov')!;
+  const ind = form.querySelector<HTMLSelectElement>('#ind');
+  const typeButtons = [...form.querySelectorAll<HTMLButtonElement>('.t')];
+  const rows = [...document.querySelectorAll<HTMLElement>('[data-list] > *')];
+  const countEl = document.querySelector('[data-count]')!;
+  const labelEl = document.querySelector('[data-count-label]')!;
+  const empty = document.querySelector<HTMLElement>('[data-empty]')!;
+  const more = document.querySelector<HTMLButtonElement>('[data-more]')!;
+  const areaLinks = [...document.querySelectorAll<HTMLAnchorElement>('.near a')];
+  const PAGE = 15;
+  const KEYS = ['q', 'province', 'industry', 'type', 'area'];
+  let area = '', type = '', expanded = false;
+  let trackingTimer: ReturnType<typeof setTimeout>;
+
+  function syncUrl() {
+    const u = new URL(location.href);
+    const values = [q.value.trim(), prov.value, ind?.value || '', type, area];
+    KEYS.forEach((key, i) => values[i] ? u.searchParams.set(key, values[i]) : u.searchParams.delete(key));
+    history.replaceState(null, '', u);
+  }
+
+  function apply(sync = true, track = true) {
+    const term = q.value.trim();
+    const filtering = !!(term || prov.value || ind?.value || type || area);
     let shown = 0;
     rows.forEach((r) => {
-      const ok = (!term || r.dataset.search.includes(term))
+      const ok = matchesJobQuery(r.dataset.search, term)
         && (!prov.value || r.dataset.province === prov.value)
-        && (!ind.value || r.dataset.industry === ind.value)
+        && (!ind?.value || r.dataset.industry === ind.value)
         && (!type || r.dataset.type === type)
         && (!area || r.dataset.area === area);
       if (ok) shown++;
-      // Without a search or filter, show the newest PAGE roles until "Show all" is pressed
       r.hidden = !ok || (!filtering && !expanded && shown > PAGE);
     });
     more.hidden = filtering || expanded || shown <= PAGE;
-    areaLinks.forEach((a) => a.setAttribute('aria-current', String(a.dataset.area === area)));
-    countEl.textContent = shown;
+    areaLinks.forEach((a) => a.dataset.area === area ? a.setAttribute('aria-current', 'true') : a.removeAttribute('aria-current'));
+    typeButtons.forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.type === type)));
+    countEl.textContent = String(shown);
     labelEl.textContent = shown === 1 ? 'open role' : 'open roles';
     empty.hidden = shown > 0;
+    if (sync) syncUrl();
+    if (track) {
+      clearTimeout(trackingTimer);
+      trackingTimer = setTimeout(() => document.dispatchEvent(new CustomEvent('isl:track', {
+        detail: { name: 'job_search', params: { audience: 'candidate', results_count: shown,
+          has_keywords: !!term, province: prov.value || 'all', service: type || 'all' } },
+      })), 500); // counts only; never send the visitor's free-text search to analytics
+    }
   }
 
-  q.value = new URLSearchParams(location.search).get('q') ?? '';
-  // ?province=NL (from a job page's "See all") opens the board filtered to that province
-  const startProv = new URLSearchParams(location.search).get('province');
-  if (startProv && [...prov.options].some((o) => o.value === startProv)) prov.value = startProv;
-  // ?industry=warehousing-and-logistics (from an industry page) opens the board filtered to it
-  const startInd = new URLSearchParams(location.search).get('industry');
-  if (startInd && [...ind.options].some((o) => o.value === startInd)) ind.value = startInd;
+  function readUrl() {
+    const params = new URLSearchParams(location.search);
+    q.value = params.get('q') || '';
+    const validOption = (select: HTMLSelectElement | null, value: string) =>
+      select && [...select.options].some((o) => o.value === value) ? value : '';
+    prov.value = validOption(prov, params.get('province') || '');
+    if (ind) ind.value = validOption(ind, params.get('industry') || '');
+    type = ['contract', 'direct'].includes(params.get('type') || '') ? params.get('type')! : '';
+    area = areaLinks.some((a) => a.dataset.area === params.get('area')) ? params.get('area')! : '';
+    expanded = false;
+    apply(false, false);
+  }
+
   form.addEventListener('submit', (e) => { e.preventDefault(); apply(); });
-  q.addEventListener('input', apply);
-  prov.addEventListener('change', apply);
-  ind.addEventListener('change', apply);
-  typeButtons.forEach((b) => b.addEventListener('click', () => {
-    type = b.dataset.type;
-    typeButtons.forEach((x) => x.setAttribute('aria-pressed', String(x === b)));
-    apply();
-  }));
-  // Area links filter in place (no page reload) and keep the address shareable
+  q.addEventListener('input', () => apply());
+  prov.addEventListener('change', () => apply());
+  ind?.addEventListener('change', () => apply());
+  typeButtons.forEach((b) => b.addEventListener('click', () => { type = b.dataset.type || ''; apply(); }));
   areaLinks.forEach((a) => a.addEventListener('click', (e) => {
-    e.preventDefault();
-    area = area === a.dataset.area ? '' : a.dataset.area;
-    const u = new URL(location.href);
-    area ? u.searchParams.set('area', area) : u.searchParams.delete('area');
-    history.replaceState(null, '', u);
-    apply();
+    e.preventDefault(); area = area === a.dataset.area ? '' : a.dataset.area!; apply();
   }));
   more.addEventListener('click', () => { expanded = true; apply(); rows[PAGE]?.querySelector('a')?.focus(); });
-  document.querySelector('[data-reset]').addEventListener('click', () => {
-    q.value = ''; prov.value = ''; ind.value = ''; type = ''; area = '';
-    const u = new URL(location.href); u.searchParams.delete('area'); history.replaceState(null, '', u);
-    typeButtons.forEach((x, i) => x.setAttribute('aria-pressed', String(i === 0)));
+  document.querySelector('[data-reset]')!.addEventListener('click', () => {
+    q.value = ''; prov.value = ''; if (ind) ind.value = ''; type = ''; area = ''; expanded = false;
     apply(); q.focus();
   });
-  apply();
+  window.addEventListener('popstate', readUrl);
+  readUrl();
 </script>
 
 <style>

@@ -24,6 +24,7 @@ import { searchJobs, toCard, SITE } from './jobs.js';
 import { placeFrom, route, toContact, provinceName } from './routing.js';
 import { payFor, payInsight, costFor, costInsight, jobAnswer } from './insights.js';
 import { familyOf } from './pay.js';
+import { resolveCompensation } from './compensation.js';
 
 // ---------- Small helpers ----------
 const lower = (s) => String(s || '').toLowerCase().replace(/[’]/g, "'");
@@ -281,6 +282,8 @@ function readConversation(messages, context) {
 // choices: quick replies (strings are sent as messages; {label, href} are links)
 // =====================================================================
 export function createEngine({ loadJobs, siteUrl = (path) => SITE.base + path }) {
+  const readJobs = loadJobs;
+  loadJobs = async () => (await readJobs()).map(resolveCompensation);
   const links = {
     generalApply: SITE.base + SITE.generalApplyPath,
     wageGuide: siteUrl('/learn/'),

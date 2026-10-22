@@ -25,7 +25,8 @@ if (!FEED) {
 try {
   const res = await fetch(FEED, { signal: AbortSignal.timeout(30000) });
   if (!res.ok) throw new Error(`feed answered ${res.status}`);
-  const jobs = normalizeFeed(await res.json());
+  // Preserve both original pay sources so the build's review report can flag discrepancies.
+  const jobs = normalizeFeed(await res.json(), { resolvePay: false });
   if (!jobs.length) throw new Error('feed returned no jobs');
   writeFileSync(OUT, JSON.stringify(jobs, null, 1));
   writeFileSync(META, JSON.stringify({ fetched: new Date().toISOString() }, null, 1));

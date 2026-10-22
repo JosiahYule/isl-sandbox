@@ -73,31 +73,37 @@ const isCurrent = (href) => current.startsWith(url(href));
 
     <div class="tools">
       {brand.loginUrl && <a class="login" href={brand.loginUrl}>Log in</a>}
-      <Button href="/hire/" size="sm">Request talent</Button>
+      <Button href="/hire/" size="sm" data-cta-placement="header">Request talent</Button>
     </div>
+
+    <a class="hire-m" href={url('/hire/')} data-cta-placement="mobile_header">Hire staff</a>
 
     <!-- Phones: one tap to call the head office, beside the menu -->
     <a class="call-m" href={`tel:+1${brand.mainPhone.replaceAll('-', '')}`} aria-label={`Call ${brand.mainPhone}`}>
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.4 1.8.7 2.7a2 2 0 0 1-.5 2.1L8 9.8a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.7.7a2 2 0 0 1 1.7 2z"/></svg>
       <span>Call</span>
     </a>
-    <details class="mobile">
+    <details class="mobile" data-mobile-menu>
       <summary><span>Menu</span></summary>
       <div class="sheet">
+        <div class="sheet-actions">
+          <Button href="/hire/" size="lg" data-cta-placement="mobile_menu">Hire staff</Button>
+          <a class="menu-call" href={`tel:+1${brand.mainPhone.replaceAll('-', '')}`}>Call {brand.mainPhone}</a>
+        </div>
         <nav aria-label="Mobile">
-          {nav.map((item) => (
-            <>
-              <a href={url(item.href)} aria-current={isCurrent(item.href) ? 'page' : undefined}>{item.label}</a>
-              {menus[item.href] && (
-                <div class="sub">{menus[item.href].filter((m) => !m.rule).map((m) => <a href={m.href}>{m.label}{m.meta && <span>{m.meta}</span>}</a>)}</div>
-              )}
-            </>
+          {nav.map((item, i) => (
+            <div class="mobile-group">
+              <div class="mobile-row">
+                <a href={url(item.href)} aria-current={isCurrent(item.href) ? 'page' : undefined}>{item.label}</a>
+                {menus[item.href] && <button class="sub-toggle" type="button" aria-expanded="false" aria-controls={`mobile-drop-${i}`} aria-label={`More in ${item.label}`}>
+                  <svg viewBox="0 0 16 16" aria-hidden="true"><path d="m4 6 4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.8" /></svg>
+                </button>}
+              </div>
+              {menus[item.href] && <div class="sub" id={`mobile-drop-${i}`} hidden>{menus[item.href].map((m) => <a href={m.href}>{m.label}{m.meta && <span>{m.meta}</span>}</a>)}</div>}
+            </div>
           ))}
         </nav>
-        <div class="sheet-tools">
-          <Button href="/hire/" size="lg">Request talent</Button>
-          {brand.loginUrl && <a class="login" href={brand.loginUrl}>Log in to your account</a>}
-        </div>
+        {brand.loginUrl && <a class="login menu-login" href={brand.loginUrl}>Log in to your account</a>}
       </div>
     </details>
   </div>
@@ -118,6 +124,38 @@ const isCurrent = (href) => current.startsWith(url(href));
     d.addEventListener('focusout', (e) => { if (!d.contains(e.relatedTarget)) { btn.setAttribute('aria-expanded', 'false'); d.classList.remove('shut'); } });
   });
   document.addEventListener('click', (e) => { if (!e.target.closest('.has-drop')) document.querySelectorAll('.drop-btn').forEach((b) => b.setAttribute('aria-expanded', 'false')); });
+
+  const mobileMenu = document.querySelector<HTMLDetailsElement>('[data-mobile-menu]')!;
+  const menuSummary = mobileMenu.querySelector('summary')!;
+  const toggles = [...mobileMenu.querySelectorAll<HTMLButtonElement>('.sub-toggle')];
+  const closeGroups = () => toggles.forEach((b) => {
+    b.setAttribute('aria-expanded', 'false');
+    document.getElementById(b.getAttribute('aria-controls')!)!.hidden = true;
+  });
+  toggles.forEach((b) => b.addEventListener('click', () => {
+    const open = b.getAttribute('aria-expanded') !== 'true';
+    closeGroups();
+    b.setAttribute('aria-expanded', String(open));
+    document.getElementById(b.getAttribute('aria-controls')!)!.hidden = !open;
+  }));
+  mobileMenu.addEventListener('toggle', () => {
+    document.documentElement.toggleAttribute('data-menu-open', mobileMenu.open);
+    document.dispatchEvent(new CustomEvent('isl:menu', { detail: { open: mobileMenu.open } }));
+    if (!mobileMenu.open) closeGroups();
+  });
+  mobileMenu.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') { mobileMenu.open = false; menuSummary.focus(); }
+  });
+  // Keep Tab inside the open sheet; the page behind it is not a second menu.
+  document.addEventListener('keydown', (e) => {
+    if (!mobileMenu.open || e.key !== 'Tab') return;
+    const focusable = [...mobileMenu.querySelectorAll<HTMLElement>('summary,a,button')].filter((el) => el.getClientRects().length);
+    const first = focusable[0], last = focusable.at(-1);
+    if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last?.focus(); }
+    else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first?.focus(); }
+  });
+  mobileMenu.querySelectorAll('a').forEach((a) => a.addEventListener('click', () => { mobileMenu.open = false; }));
+  matchMedia('(min-width: 1261px)').addEventListener('change', (e) => { if (e.matches) mobileMenu.open = false; });
 </script>
 
 <style>
@@ -185,8 +223,10 @@ const isCurrent = (href) => current.startsWith(url(href));
   .login { white-space: nowrap; color: var(--ink-soft); font-size: var(--fs-small); font-weight: var(--fw-text); text-decoration: none; }
   .login:hover { color: var(--ink); text-decoration: underline; }
 
-  .mobile { display: none; }
-  .call-m { display: none; flex-shrink: 0; align-items: center; gap: var(--s2); margin-left: auto; padding: var(--s2) var(--s3); font-weight: var(--fw-bold); color: var(--ink); text-decoration: none; }
+  .mobile, .hire-m { display: none; }
+  .hire-m { align-items: center; justify-content: center; min-height: 44px; padding: 0.65rem 0.85rem; margin-left: auto; background: var(--accent); color: #fff; font-size: var(--fs-small); font-weight: var(--fw-bold); white-space: nowrap; text-decoration: none; }
+  .hire-m:hover { background: var(--accent-deep); color: #fff; }
+  .call-m { display: none; flex-shrink: 0; align-items: center; gap: var(--s2); padding: var(--s2) var(--s3); font-weight: var(--fw-bold); color: var(--ink); text-decoration: none; }
   .call-m svg { width: 18px; height: 18px; color: var(--accent); }
   .mobile summary {
     list-style: none; cursor: pointer; font-weight: var(--fw-bold);
@@ -198,12 +238,21 @@ const isCurrent = (href) => current.startsWith(url(href));
     position: absolute; left: 0; right: 0; top: 100%;
     height: calc(100dvh - 72px); overflow-y: auto;
     background: var(--paper); padding: var(--s6) var(--gutter);
-    display: flex; flex-direction: column; justify-content: space-between; gap: var(--s6);
+    display: flex; flex-direction: column; gap: var(--s5);
   }
   .sheet nav { display: grid; }
+  .sheet-actions { display: grid; gap: var(--s3); }
+  .menu-call { text-align: center; font-weight: var(--fw-bold); padding: var(--s2); }
+  .mobile-row { display: flex; align-items: center; border-bottom: 1px solid var(--line); }
+  .mobile-row > a { flex: 1; min-width: 0; }
+  .sub-toggle { display: grid; place-items: center; flex: none; width: 48px; height: 48px; border: 0; background: transparent; color: var(--ink); cursor: pointer; }
+  .sub-toggle svg { width: 18px; height: 18px; }
+  .sub-toggle[aria-expanded='true'] svg { transform: rotate(180deg); }
+  .sheet .sub[hidden] { display: none; }
+  .menu-login { margin-top: var(--s3); padding-block: var(--s3); }
   .sheet nav a { font-weight: var(--fw-bold);
     font-size: var(--fs-h2); letter-spacing: -0.02em; color: var(--ink); text-decoration: none;
-    padding-block: var(--s3); border-bottom: 1px solid var(--line);
+    padding-block: var(--s3);
   }
   .sheet nav a[aria-current='page'] { color: var(--accent); }
   .sheet-tools { display: grid; gap: var(--s4); padding-bottom: var(--s6); }
@@ -212,7 +261,14 @@ const isCurrent = (href) => current.startsWith(url(href));
   @media (max-width: 1260px) {
     .primary, .tools { display: none; }
     .mobile { display: block; }
+    .hire-m { display: inline-flex; }
     .call-m { display: inline-flex; }
     .bar { gap: var(--s3); }
+  }
+  @media (max-width: 600px) {
+    .call-m { display: none; }
+    .mobile summary { padding-inline: var(--s3); min-height: 44px; }
+    .sheet nav .mobile-row > a { font-size: 1.5rem; }
+    .sheet { padding-top: var(--s5); }
   }
 </style>

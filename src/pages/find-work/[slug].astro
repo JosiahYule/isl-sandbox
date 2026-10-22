@@ -84,7 +84,7 @@ const schema = {
 };
 ---
 <Base title={`${job.title}, ${where}`} description={job.snippet} assistantMode="seeker" assistantJob={job.id} schema={job.description ? schema : undefined}>
-  <article class="jp">
+  <article class="jp" data-job-id={job.id}>
     <header class="wrap jp-head">
       <a class="back" href={url('/find-work/')}>← All jobs</a>
       <p class:list={['svc', `svc--${job.type}`]}>{job.typeLabel}</p>

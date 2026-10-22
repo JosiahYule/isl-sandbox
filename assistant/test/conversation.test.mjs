@@ -4,7 +4,7 @@
 import { readFileSync } from 'node:fs';
 import { createEngine } from '../../public/assistant/demo-engine.js';
 
-const jobs = JSON.parse(readFileSync(new URL('../data/jobs-snapshot.json', import.meta.url)));
+const jobs = JSON.parse(readFileSync(process.argv[2] || new URL('../data/jobs-snapshot.json', import.meta.url)));
 const respond = createEngine({ loadJobs: async () => jobs, siteUrl: (p) => '/isl-sandbox' + p });
 
 let failures = 0;

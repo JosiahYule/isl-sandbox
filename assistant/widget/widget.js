@@ -185,6 +185,34 @@
     const shadow = host.attachShadow({ mode: "open" });
     shadow.innerHTML = `<style>${CSS}</style><div class="root"></div>`;
     const root = shadow.querySelector(".root");
+    // Temporarily move the launcher out of the way of a form or application action.
+    // The chat remains available from inline links; an open conversation is never hidden.
+    let positionFrame = 0;
+    function placeLauncher() {
+      positionFrame = 0;
+      const launcher = root.querySelector('.launcher');
+      if (!launcher) return;
+      const box = launcher.getBoundingClientRect();
+      const editing = document.activeElement?.matches('input,textarea,select');
+      const blocked = [...document.querySelectorAll('a.apply,a.btn,button[type="submit"],.submit button')].some((action) => {
+        if (!action.getClientRects().length) return false;
+        const rect = action.getBoundingClientRect();
+        return rect.right > box.left - 8 && rect.left < box.right + 8 && rect.bottom > box.top - 8 && rect.top < box.bottom + 8;
+      });
+      const hidden = editing || blocked;
+      launcher.style.visibility = hidden ? 'hidden' : '';
+      launcher.tabIndex = hidden ? -1 : 0;
+      launcher.setAttribute('aria-hidden', String(hidden));
+    }
+    const schedulePlacement = () => { if (!positionFrame) positionFrame = requestAnimationFrame(placeLauncher); };
+    window.addEventListener('scroll', schedulePlacement, { passive: true });
+    window.addEventListener('resize', schedulePlacement, { passive: true });
+    document.addEventListener('focusin', schedulePlacement);
+    document.addEventListener('focusout', schedulePlacement);
+    document.addEventListener('isl:menu', (event) => {
+      host.style.display = event.detail?.open ? 'none' : '';
+      schedulePlacement();
+    });
     // What the page tells the backend: on a job page, which job it is
     const context = opts.job ? { job: String(opts.job) } : {};
     const pageMode = context.job ? "job" : GREETINGS[opts.mode] ? opts.mode : "ask";
@@ -203,6 +231,7 @@
     function jobCard(job) {
       const perm = job.employment === "Permanent";
       const c = el("div", "card" + (perm ? " perm" : ""));
+      c.dataset.jobId = job.id;
       c.append(el("h4", null, job.title));
       const m = el("div", "meta");
       m.append(el("span", "kind", job.employment === "Temporary / contract" ? "Contract" : job.employment));
@@ -272,6 +301,7 @@
         b.setAttribute("aria-label", "Open the ISL assistant");
         b.onclick = () => { state.open = true; opening = true; save(); render(); };
         root.append(b);
+        schedulePlacement();
         return;
       }
 

@@ -3,13 +3,13 @@
 // Written from what this site actually does (checked October 20, 2026). If the site starts
 // collecting something new (analytics, job alerts, a newsletter), add it here first.
 import LegalPage from '../components/LegalPage.astro';
-import { brand } from '../data/site.js';
+import { brand, analytics } from '../data/site.js';
 import { url } from '../lib/url.js';
 ---
-<LegalPage title="Privacy" lead="What we collect on this site, why, and what you can ask us to do with it." updated="2026-10-20">
+<LegalPage title="Privacy" lead="What we collect on this site, why, and what you can ask us to do with it." updated="2026-10-22">
   <h2>What we collect</h2>
   <ul>
-    <li><strong>When you request talent:</strong> your name, work email, company and phone if you give them, where the work is and what you need. We use it to reply to your request and to keep in touch about it.</li>
+    <li><strong>When you request talent:</strong> your name, work email, company and phone if you give them, where the work is and what you need. We use it to reply to your request and to keep in touch about it. We also record a request reference, campaign tags, the landing page and referring website so we can understand how enquiries reach us. If you accept analytics, a Google Analytics identifier can accompany the enquiry to connect it to later hiring outcomes.</li>
     <li><strong>When you apply for a job:</strong> applications are completed on our job board, which collects your resume and contact details so our recruiters can consider you for work.</li>
     {brand.assistant && <li><strong>When you use the job assistant:</strong> what you type is used to answer you and to pass your request to the right recruiter.</li>}
     <li><strong>When you call or email us:</strong> what you tell us, so we can help.</li>
@@ -19,7 +19,9 @@ import { url } from '../lib/url.js';
   <p>The <a href={url('/learn/tools/resume-check/')}>resume check</a> and the <a href={url('/learn/tools/true-cost-of-an-employee/')}>cost calculator</a> run in your browser. What you paste or type into them is never sent to us or stored.</p>
 
   <h2>Cookies</h2>
-  <p>This site does not set advertising or tracking cookies. If we add analytics, we’ll ask first, and only count visits once you agree.</p>
+  <p>We do not use advertising cookies. When analytics is enabled, Google Analytics loads only after you accept. We count employer enquiries separately from job application clicks, and do not send your name, email, company, phone number or form answers to analytics. Anonymous campaign and landing-page information may be kept for the current browser tab to accompany an enquiry. Choosing “No thanks” stops that storage; campaign tags may instead stay in internal links.</p>
+
+  {analytics?.ga4 && <p><button type="button" class="textlink" data-open-consent>Change analytics choice</button></p>}
 
   <h2>Who sees it</h2>
   <p>Our recruiters and the staff who support them. We use service providers to run the job board, the website and email, and they handle your information only for us. We don’t sell personal information.</p>

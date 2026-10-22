@@ -8,6 +8,7 @@ mkdirSync(out, { recursive: true });
 const files = [
   ['assistant/widget/widget.js', 'widget.js'],
   ['assistant/supabase/functions/_shared/jobs.js', 'jobs.js'],
+  ['assistant/supabase/functions/_shared/compensation.js', 'compensation.js'],
   ['assistant/supabase/functions/_shared/routing.js', 'routing.js'],
   ['assistant/supabase/functions/_shared/insights.js', 'insights.js'],
   ['assistant/supabase/functions/_shared/pay.js', 'pay.js'],

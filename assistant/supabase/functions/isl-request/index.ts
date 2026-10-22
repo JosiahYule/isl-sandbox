@@ -23,6 +23,7 @@
 // =====================================================================
 
 import { route, placeFrom, provinceName } from "../_shared/routing.js";
+import { isLeadId, sanitizeAttribution, attributionRows, pagePath, sanitizeMeasurement } from "../_shared/lead-context.js";
 
 const RESEND_KEY = Deno.env.get("RESEND_API_KEY") ?? "";
 const FROM = Deno.env.get("REQUEST_FROM") ?? "";
@@ -66,7 +67,8 @@ Deno.serve(async (req) => {
   try { body = await req.json(); } catch { return new Response(JSON.stringify({ ok: false, error: "json" }), { status: 400, headers }); }
 
   // Bots fill every field, including the hidden "website" one people never see
-  if (clean(body.website, 10)) return new Response(JSON.stringify({ ok: true }), { headers });
+  if (!body || typeof body !== 'object' || Array.isArray(body)) return new Response(JSON.stringify({ ok: false, error: 'json' }), { status: 400, headers });
+  if (clean(body.website, 10)) return new Response(JSON.stringify({ ok: true, accepted: false }), { headers });
   const ip = req.headers.get("x-forwarded-for")?.split(",")[0].trim() ?? "unknown";
   if (tooMany(ip)) return new Response(JSON.stringify({ ok: false, error: "rate" }), { status: 429, headers });
 
@@ -78,8 +80,11 @@ Deno.serve(async (req) => {
     email: clean(body.email, LIMITS.short),
     company: clean(body.company, LIMITS.short),
     phone: clean(body.phone, LIMITS.short),
-    page: clean(body.page, LIMITS.short),
+    page: pagePath(body.page) || '/hire/',
   };
+  const leadId = isLeadId(body.lead_id) ? String(body.lead_id) : 'lead_' + crypto.randomUUID();
+  const attribution = sanitizeAttribution(body.attribution);
+  const measurement = sanitizeMeasurement(body.measurement);
   const missing = ["role", "location", "name", "email"].filter((k) => !f[k as keyof typeof f]);
   if (missing.length || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(f.email)) {
     return new Response(JSON.stringify({ ok: false, error: "invalid", missing }), { status: 400, headers });
@@ -95,6 +100,7 @@ Deno.serve(async (req) => {
   const who = r.person?.name || (r.office ? `${r.office.city} office` : "ISL");
 
   const rows: [string, string][] = [
+    ["Lead reference", leadId],
     ["Needs", SERVICES[f.service]],
     ["Where", f.location],
     ["Name", f.name],
@@ -103,6 +109,9 @@ Deno.serve(async (req) => {
     ["Phone", f.phone || "Not given"],
     ["Routed to", who],
     ["Sent from", f.page || "/hire/"],
+    ...attributionRows(attribution) as [string, string][],
+    ...(measurement ? [['Analytics consent', 'Granted'], ['Analytics client ID', measurement.client_id],
+      ...(measurement.session_id ? [['Analytics session ID', measurement.session_id]] : [])] as [string, string][] : []),
   ];
   const html = `<p><strong>New request from the website</strong></p>
 <p style="white-space:pre-wrap">${esc(f.role)}</p>
@@ -111,9 +120,10 @@ Deno.serve(async (req) => {
   const text = `New request from the website\n\n${f.role}\n\n${rows.map(([k, v]) => `${k}: ${v}`).join("\n")}`;
 
   if (!RESEND_KEY || !FROM) return new Response(JSON.stringify({ ok: false, error: "not_configured" }), { status: 500, headers });
-  const res = await fetch("https://api.resend.com/emails", {
+  let res: Response;
+  try { res = await fetch("https://api.resend.com/emails", {
     method: "POST",
-    headers: { Authorization: `Bearer ${RESEND_KEY}`, "Content-Type": "application/json" },
+    headers: { Authorization: `Bearer ${RESEND_KEY}`, "Content-Type": "application/json", "Idempotency-Key": 'isl-request/' + leadId },
     body: JSON.stringify({
       from: FROM,
       to: [to],
@@ -123,7 +133,9 @@ Deno.serve(async (req) => {
       html,
       text,
     }),
-  });
+  }); } catch {
+    return new Response(JSON.stringify({ ok: false, error: 'send' }), { status: 502, headers });
+  }
   if (!res.ok) return new Response(JSON.stringify({ ok: false, error: "send" }), { status: 502, headers });
-  return new Response(JSON.stringify({ ok: true, routedTo: who, province: place?.province ? provinceName(place.province) : null }), { headers });
+  return new Response(JSON.stringify({ ok: true, accepted: true, lead_id: leadId, routedTo: who, province: place?.province ? provinceName(place.province) : null }), { headers });
 });

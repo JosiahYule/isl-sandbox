@@ -222,3 +222,16 @@ npm run dev      # starts a local preview at http://localhost:4321
 ```
 
 Leave `npm run dev` running. Every time you save a file, the browser updates.
+
+
+## Search, pay review and enquiry measurement
+
+Job-board searches match individual words across the role, skills and location. Keywords and all filters stay in the URL, including job type, and Clear search removes all of them without deleting campaign tags.
+
+The pay resolver compares the feed with the complete set of advertised base-pay tiers. Consistent ranges stay visible. Conflicting numerical rates are withheld across listings, job pages, pay tools and the assistant; candidates see **Confirm pay with recruiter**. Correct the original fields or ad in Avionte and the next refresh restores the rate. The saved snapshot is not rewritten to guess the answer. Every build produces `.astro/pay-review.json`, the GitHub Actions summary lists the affected job IDs, and the `job-pay-review` workflow artifact is available for download.
+
+The homepage has an employer action beside the job search. The mobile header keeps Hire staff visible, the menu opens with hiring/call actions and collapsed secondary groups, and the assistant launcher yields to form and application controls.
+
+Enquiry attribution and separate employer/candidate events are implemented in the shared analytics script. Sandbox confirmations do not generate leads. See [measurement setup and recruiter outcomes](docs/measurement.md) for the event definitions, per-brand build variables, consent handling and the trusted-side outcome import tool. Live GA4 collection and delivery still require the actual measurement ID and delivery endpoint; the sandbox defaults stay off.
+
+Run `npm test` to build all three brands, test job/search/pay behaviour, execute the built pages' scripts against their HTML, simulate form delivery with a fake email transport, and run the assistant conversations. These checks run before every GitHub Pages deployment.

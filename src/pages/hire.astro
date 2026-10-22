@@ -132,6 +132,7 @@ const afterSteps = [
         <div class="sent" hidden tabindex="-1">
           <p class="sent-title">Request sent.</p>
           <p class="sent-who"></p>
+          <p class="sent-reference" hidden></p>
           <p class="sent-note">Sandbox preview: nothing was actually sent.</p>
         </div>
       </form>
@@ -163,6 +164,7 @@ const afterSteps = [
 
 <script>
   import { route, provinceName } from '../../assistant/supabase/functions/_shared/routing.js';
+  import { getAttribution, getMeasurementContext, track } from '../scripts/analytics.js';
 
   const form = document.getElementById('request') as HTMLFormElement;
   const said = JSON.parse(form.dataset.said!); // the brand's words and routing (set in the page's frontmatter)
@@ -278,35 +280,64 @@ const afterSteps = [
   const endpoint = form.dataset.endpoint;
   const errBox = form.querySelector<HTMLElement>('.send-err')!;
   const button = form.querySelector<HTMLButtonElement>('button[type="submit"]')!;
+  let started = false, sending = false, completed = false;
+  let leadId = '', lastPayload = '';
+  let pendingPayload: Record<string, unknown> | null = null;
+  const eventContext = () => ({ audience: 'employer', form_id: 'talent_request', service: service(),
+    province: CODES[loc.value] || (loc.value.startsWith('Elsewhere') ? 'outside' : undefined) });
+  const startForm = (e: Event) => {
+    if (started || (e.target as HTMLElement).closest('.hp')) return;
+    started = true; track('form_start', eventContext());
+  };
+  form.addEventListener('focusin', startForm);
+  form.addEventListener('input', startForm);
+  form.addEventListener('change', startForm);
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
+    if (sending || completed) return;
     const bad = required.filter((f) => !f.checkValidity());
     required.forEach((f) => { const ok = !bad.includes(f); if (ok) f.removeAttribute('aria-invalid'); else f.setAttribute('aria-invalid', 'true'); const e = errFor(f); if (!e) return; e.hidden = ok;
-      // An email that's there but mistyped gets its own message, not "enter an email"
       if (e.dataset.bad) e.textContent = (f as HTMLInputElement).value.trim() ? e.dataset.bad : e.dataset.empty!; });
-    if (bad.length) { bad[0].focus(); return; }
+    if (bad.length) { track('form_error', { ...eventContext(), error_type: 'validation' }); bad[0].focus(); return; }
     errBox.hidden = true;
+    let receivedLeadId = '';
     if (endpoint) {
-      // Send it for real: the function emails the recruiter the card names
+      sending = true;
       button.disabled = true; button.textContent = 'Sending…';
+      const data = Object.fromEntries(new FormData(form).entries());
+      const signature = JSON.stringify(data);
+      if (!leadId || signature !== lastPayload) { leadId = 'lead_' + crypto.randomUUID(); lastPayload = signature; pendingPayload = null; }
+      track('form_submit', eventContext());
       try {
-        const data = Object.fromEntries(new FormData(form).entries());
-        const res = await fetch(endpoint, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ...data, page: location.pathname }) });
-        if (!res.ok) throw new Error(String(res.status));
+        // A retry uses the exact same payload as well as the same idempotency key.
+        pendingPayload ||= { ...data, page: location.pathname, lead_id: leadId, attribution: getAttribution(), measurement: await getMeasurementContext() };
+        const res = await fetch(endpoint, { method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(pendingPayload) });
+        const result = await res.json();
+        if (!res.ok || result.ok !== true || result.accepted === false) throw new Error('Request was not accepted');
+        receivedLeadId = result.lead_id || leadId;
       } catch {
-        button.disabled = false; button.textContent = 'Send request';
-        errBox.hidden = false;
+        sending = false; button.disabled = false; button.textContent = 'Send request';
+        errBox.hidden = false; track('form_error', { ...eventContext(), error_type: 'delivery' });
         return;
       }
       form.querySelector<HTMLElement>('.sent-note')!.hidden = true;
+      // A real lead exists only after the delivery endpoint acknowledges it.
+      track('generate_lead', { ...eventContext(), lead_id: receivedLeadId });
+    } else {
+      track('form_preview', eventContext());
     }
-    document.dispatchEvent(new CustomEvent('isl:track', { detail: { name: 'generate_lead', params: { service: service() } } }));
+    completed = true; sending = false;
     form.querySelector<HTMLElement>('.submit')!.hidden = true;
     toLine.hidden = true;
     const sent = form.querySelector<HTMLElement>('.sent')!;
-    form.querySelector('.sent-who')!.textContent = said.routing === 'office' ? `${replier} will be in touch.` : `${replier} will reply within one business day.`;
-    sent.hidden = false;
-    sent.focus();
+    form.querySelector('.sent-title')!.textContent = endpoint ? 'Request sent.' : 'Preview complete.';
+    form.querySelector('.sent-who')!.textContent = endpoint
+      ? said.routing === 'office' ? `${replier} will be in touch.` : `${replier} will reply within one business day.`
+      : 'Your request is ready for ' + replier + '.';
+    const reference = form.querySelector<HTMLElement>('.sent-reference')!;
+    if (receivedLeadId) { reference.textContent = 'Reference: ' + receivedLeadId; reference.hidden = false; }
+    sent.hidden = false; sent.focus();
   });
 </script>
 

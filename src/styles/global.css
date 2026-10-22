@@ -19,6 +19,7 @@
 
 
 *, *::before, *::after { box-sizing: border-box; }
+html[data-menu-open] { overflow: hidden; }
 html { -webkit-text-size-adjust: 100%; scroll-padding-top: 88px; }
 
 body {

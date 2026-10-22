@@ -154,6 +154,7 @@ const TOPICS = {
 export function jobAnswer(job, topic) {
   const t = TOPICS[topic];
   if (!job || !t) return { topic, lines: [] };
+  if (topic === 'pay' && job.payStatus === 'conflict') return { topic, lines: ['Pay is being confirmed. Contact the recruiter for the current rate.'] };
   const blocks = jobBlocks(job.description || "", job.title || "");
   const out = [];
   const add = (s) => { const v = String(s).trim(); if (v && !out.includes(v) && out.length < 5) out.push(v); };

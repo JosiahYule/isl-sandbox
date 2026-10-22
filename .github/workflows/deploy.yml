@@ -37,9 +37,19 @@ jobs:
           node-version-file: .node-version
           cache: npm
       - run: npm ci
-      - run: npm run build:all
+      - run: npm test
         env:
           AVIONTE_FEED_URL: ${{ secrets.AVIONTE_FEED_URL }}
+          PUBLIC_ISL_GA4_ID: ${{ vars.ISL_GA4_ID }}
+          PUBLIC_AS_GA4_ID: ${{ vars.AS_GA4_ID }}
+          PUBLIC_ADS_GA4_ID: ${{ vars.ADS_GA4_ID }}
+          PUBLIC_ISL_REQUEST_ENDPOINT: ${{ vars.ISL_REQUEST_ENDPOINT }}
+          PUBLIC_AS_REQUEST_ENDPOINT: ${{ vars.AS_REQUEST_ENDPOINT }}
+          PUBLIC_ADS_REQUEST_ENDPOINT: ${{ vars.ADS_REQUEST_ENDPOINT }}
+      - uses: actions/upload-artifact@v4
+        with:
+          name: job-pay-review
+          path: .astro/pay-review.json
       - uses: actions/upload-pages-artifact@v3
         with:
           path: dist
