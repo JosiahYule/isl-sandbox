@@ -31,7 +31,8 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          if git diff --quiet -- src/data/lfs; then echo "No change."; exit 0; fi
+          # status, not diff: diff ignores a file git hasn't seen before (the very first one)
+          if [ -z "$(git status --porcelain -- src/data/lfs)" ]; then echo "No change."; exit 0; fi
           month=$(node -p "require('./src/data/lfs/latest.json').month")
           if git show HEAD:src/data/lfs/latest.json >/dev/null 2>&1 && [ "$(git show HEAD:src/data/lfs/latest.json | node -p "JSON.parse(require('fs').readFileSync(0)).month")" = "$month" ]; then
             echo "Same month ($month); figures unchanged apart from the fetch time."; exit 0
