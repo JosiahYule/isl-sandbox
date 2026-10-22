@@ -10,6 +10,8 @@ import Footer from '../components/Footer.astro';
 import Analytics from '../components/Analytics.astro';
 import { brand, images } from '../data/site.js';
 import { url } from '../lib/url.js';
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
 
 // assistant: false hides the assistant entirely
 // assistantMode: "employer" (hiring pages) or "seeker" (job pages) opens it ready for that visitor; leave out to let it ask
@@ -18,6 +20,10 @@ import { url } from '../lib/url.js';
 // schema: optional structured data (an object or a list) that search engines read, e.g. an office's address
 const { title, description = brand.scope, assistantMode, assistantJob, footerOffices = true, schema } = Astro.props;
 const assistant = (Astro.props.assistant ?? true) && brand.assistant; // AS and ADS: off for now
+// All assistant imports and its data share a content-versioned folder. This avoids mixing
+// newly published pages with an older cached widget or demo engine on GitHub Pages.
+const assistantVersion = assistant ? JSON.parse(readFileSync(resolve('public/assistant/version.json'), 'utf8')).version : '';
+const assistantRoot = url(`/assistant/${assistantVersion}/`);
 const canonical = new URL(Astro.url.pathname, Astro.site).href;
 const heroSrc = typeof images.hero === 'string' ? images.hero : images.hero.src;
 const shareImage = heroSrc.includes('format=') ? heroSrc.replace(/format=\d+w/, 'format=1500w') : `${heroSrc}?format=1500w`;
@@ -64,8 +70,8 @@ const colorVars = brand.colors ? Object.entries(brand.colors).map(([k, v]) => `-
     <Analytics part="body" />
     <script>import '../scripts/motion.js';</script>
     <!-- Job assistant: the chat widget, running in demo mode (see assistant/README.md and assistant/demo-mode.js) -->
-    {assistant && <script is:inline defer src={url('/assistant/widget.js')}></script>}
-    {assistant && <script is:inline type="module" src={url('/assistant/demo-mode.js')}></script>}
+    {assistant && <script is:inline defer src={`${assistantRoot}widget.js`}></script>}
+    {assistant && <script is:inline type="module" src={`${assistantRoot}demo-mode.js`}></script>}
   </body>
 </html>
 
