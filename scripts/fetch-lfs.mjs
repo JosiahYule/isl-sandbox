@@ -74,6 +74,13 @@ async function releaseTime(pid) {
   return out || null;
 }
 
+// If the zip's metadata doesn't carry it, ask the data API for the table's release time
+async function wdsRelease(pid) {
+  const res = await fetch('https://www150.statcan.gc.ca/t1/wds/rest/getCubeMetadata', { method: 'POST', headers: { ...UA, 'Content-Type': 'application/json' }, body: JSON.stringify([{ productId: Number(pid) }]) });
+  const j = await res.json();
+  return j?.[0]?.object?.releaseTime ?? null;
+}
+
 async function readTable(pid, keep) {
   const url = `https://www150.statcan.gc.ca/n1/tbl/csv/${pid}-eng.zip`;
   const zip = join(tmpdir(), `${pid}.zip`);
@@ -121,7 +128,7 @@ async function main() {
     const s = toSeries(rows, (r) => `${GEOS[r.GEO]}|${r[C.age] === '15 to 24 years' ? 'youthUnemploymentRate' : WANT[r[C.chr]]}`);
     for (const k in s) { const [g, key] = k.split('|'); (data.provinces[g] ??= {})[key] = s[k]; }
     console.log(`14-10-0287: ${rows.length} rows, ${Object.keys(s).length} series`);
-    data.released = await releaseTime('14100287').catch(() => null);
+    data.released = await releaseTime('14100287').catch(() => null) || await wdsRelease('14100287').catch(() => null);
   }
 
   // 2. Employment by industry, seasonally adjusted (thousands of people)
@@ -157,6 +164,7 @@ async function main() {
   data.month = ca.at(-1).month;
 
   const before = existsSync(OUT) ? JSON.parse(readFileSync(OUT, 'utf8')) : null;
+  if (!data.released && before?.month === data.month) data.released = before.released ?? null; // keep a date we already had
   mkdirSync(new URL('.', OUT), { recursive: true });
   writeFileSync(OUT, JSON.stringify(data) + '\n');
   return `Saved ${data.month}${before && before.month === data.month ? ' (same month as before)' : ' (new month)'}`;
