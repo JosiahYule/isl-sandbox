@@ -41,7 +41,7 @@ export const brand = {
     mist: '#fcf5ee', 'mist-deep': '#f8e8d8',
   },
   ctaTone: 'bright', // the closing band in the site's orange
-  logoHeight: 46, // the wordmark is small inside this logo, so it's shown a little taller than ISL's
+  logoHeight: 55, // the wordmark is small inside this logo, so it's shown a little taller than ISL's
   assistant: false,
   officePages: false,
 };
