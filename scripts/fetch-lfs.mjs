@@ -165,9 +165,10 @@ async function main() {
 // On GitHub, ::error:: and ::notice:: lines show up as annotations on the run
 const gh = !!process.env.GITHUB_ACTIONS;
 const note = (kind, msg) => console.log(gh ? `::${kind}::${String(msg).replace(/\n/g, ' ').slice(0, 3000)}` : msg);
-// If Statistics Canada is down and we already have figures, keep them and try again next time
-// (a warning, not a failed run). With no figures yet, it fails so someone notices.
+// If Statistics Canada is down, keep whatever figures we have and try again at the next run
+// (a warning, not a failed run, so an outage doesn't send failure emails every hour).
+// Anything else going wrong (a renamed column, say) fails the run so someone notices.
 main().then((m) => note('notice', m)).catch((e) => {
-  if (e.unavailable && existsSync(OUT)) { note('warning', `${e.message}. Kept the figures we have; the next run will try again.`); return; }
+  if (e.unavailable) { note('warning', `${e.message}. ${existsSync(OUT) ? 'Kept the figures we have' : 'No figures yet'}; the next run will try again.`); return; }
   note('error', e.message); process.exit(1);
 });

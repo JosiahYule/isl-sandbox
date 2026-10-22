@@ -140,7 +140,7 @@ The map shapes are generated data in `src/data/maps.js` (Natural Earth boundarie
 
 How the monthly update works:
 
-1. `.github/workflows/update-lfs.yml` runs on GitHub three times every weekday (about 10 am, 2 pm and 6 pm Atlantic). It has to run there: this sandbox can't reach Statistics Canada.
+1. `.github/workflows/update-lfs.yml` runs on GitHub every hour. It has to run there: this sandbox can't reach Statistics Canada.
 2. It runs `scripts/fetch-lfs.mjs`, which downloads three tables as CSV files (14-10-0287, 14-10-0355, 14-10-0063), keeps Canada and the Atlantic provinces, and writes `src/data/lfs/latest.json`.
 3. If the month in that file is new, the workflow commits it and starts a deploy. Otherwise it does nothing. If Statistics Canada's site is down, it keeps the figures it has and tries again at the next run.
 4. `src/lib/lfs.js` reads the file for the page and its tool card. Until the first file arrives, the page says the report is on its way.
