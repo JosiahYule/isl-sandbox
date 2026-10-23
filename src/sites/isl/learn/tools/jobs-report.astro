@@ -20,9 +20,12 @@ import PageHero from '../../../../components/PageHero.astro';
 import { atlanticMap as map } from '../../../../data/maps.js';
 import { MIN_WAGE } from '../../../../lib/minwage.js';
 import { url } from '../../../../lib/url.js';
+import { industryTakeaway } from '../../../../lib/lfs-report.js';
 import { lfs, GEOS, NAME, SHORT, monthName, read, at, back, rate, pts, people, num, signed, money } from '../../../../lib/lfs.js';
 
 const M = lfs?.month;
+const yearAgo = M ? monthName(back(M, 12)) : '';
+const percentagePoints = (v) => pts(v).replace(/\bpoints?\b/, (word) => `percentage ${word}`);
 const ALL = [...GEOS, 'CA'];
 const P = (g, k) => lfs.provinces[g]?.[k];
 const R = (g, k) => read(P(g, k), M);
@@ -67,7 +70,9 @@ const allV = trend.flatMap((t) => [...t.a, ...t.b]).filter((v) => v != null);
 const tLo = Math.floor(Math.min(...allV) - 0.5), tHi = Math.ceil(Math.max(...allV) + 0.5);
 const tx = (i, n) => PADL + (i / (n - 1)) * (W - PADL - 4);
 const ty = (v) => PADT + (1 - (v - tLo) / (tHi - tLo)) * (H - PADT - PADB);
-const line = (vals) => vals.map((v, i) => (v == null ? null : `${tx(i, vals.length).toFixed(1)},${ty(v).toFixed(1)}`)).filter(Boolean).join(' ');
+// Keep missing months as gaps, so dates and markers always refer to the same observation.
+const line = (vals) => vals.map((v, i) => v == null ? '' : `${i === 0 || vals[i - 1] == null ? 'M' : 'L'}${tx(i, vals.length).toFixed(1)},${ty(v).toFixed(1)}`).join(' ');
+const trendMonths = [...new Set(trend.flatMap((t) => t.months))].sort();
 const tStep = tHi - tLo > 6 ? 2 : 1;
 const tTicks = []; for (let t = Math.ceil(tLo / tStep) * tStep; t <= tHi; t += tStep) tTicks.push(t);
 
@@ -116,7 +121,7 @@ const indViews = lfs ? [...GEOS, 'CA'].map((g) => {
     return r.now == null || r.y == null ? null : { name: SHORTER[k] ?? k, now: people(r.now), y: people(r.y), pct: r.year ? (r.y / r.year) * 100 : 0 };
   }).filter(Boolean).sort((a, b) => b.y - a.y);
   const max = Math.max(...rows.map((r) => Math.abs(r.y)), 1);
-  return { g, rows, max };
+  return { g, rows, max, summary: industryTakeaway(rows, NAME[g], yearAgo) };
 }).filter((v) => v.rows.length) : [];
 
 // ---- Wages: the average hourly wage, against a year ago and against the minimum wage
@@ -132,7 +137,6 @@ const wTicks = []; for (let t = wLo; t <= wHi; t += 5) wTicks.push(t);
 const released = lfs?.released ? new Date(lfs.released) : null;
 const releasedText = released ? released.toLocaleDateString('en-CA', { month: 'long', day: 'numeric', year: 'numeric', timeZone: 'America/Halifax' }) : null;
 const prevName = M ? monthName(back(M, 1)).split(' ')[0] : '';
-const yearAgo = M ? monthName(back(M, 12)) : '';
 const dir = (v) => (v > 0 ? 'up' : v < 0 ? 'down' : 'flat');
 const pct1 = (v) => `${v > 0 ? '+' : v < 0 ? '−' : ''}${Math.abs(v).toFixed(1)}%`;
 const TABLES = [
@@ -161,11 +165,11 @@ const TABLES = [
       <ul class="short" data-stagger>
         <li>
           <p class="figure">{signed(region.jobsM)}</p>
-          <p>jobs in Atlantic Canada in {monthName(M).split(' ')[0]}, {region.jobsY >= 0 ? `${num(region.jobsY)} more` : `${num(-region.jobsY)} fewer`} than a year ago</p>
+          <p>change in employment across Atlantic Canada in {monthName(M).split(' ')[0]}, {region.jobsY >= 0 ? `${num(region.jobsY)} more people working` : `${num(-region.jobsY)} fewer people working`} than a year ago</p>
         </li>
         <li>
           <p class="figure">{rate(region.ur)}</p>
-          <p>unemployment across the region, {pts(region.ur - region.urPrev)} from {prevName}{caUR && `. Canada: ${rate(caUR.now)}`}</p>
+          <p>unemployment across the region, {percentagePoints(region.ur - region.urPrev)} from {prevName}{caUR && `. Canada: ${rate(caUR.now)}`}</p>
         </li>
         {wageRows.find((r) => r.g === 'CA')?.yPct != null && (() => { const c = wageRows.find((r) => r.g === 'CA'); return (
           <li>
@@ -182,7 +186,7 @@ const TABLES = [
     <div class="wrap">
       <div class="section-head section-head--split">
         <h2>Unemployment</h2>
-        <p class="lead">The share of people in the labour force who are looking for work. Darker means higher.</p>
+        <p class="lead">The share of the labour force looking for work. A rise from 6% to 7% is one percentage point. Darker means higher.</p>
       </div>
       <div class="ur">
         <figure class="ur-map" aria-hidden="true" data-animate>
@@ -202,10 +206,10 @@ const TABLES = [
             <li>
               <span class="u-name">{NAME[r.g]}</span>
               <span class="u-v">{rate(r.now)}</span>
-              <span class:list={['u-ch', r.m != null && `u-ch--${dir(Math.round(r.m * 10))}`]}>{r.m != null ? `${pts(r.m)} from ${prevName}` : ''}</span>
+              <span class:list={['u-ch', r.m != null && `u-ch--${dir(Math.round(r.m * 10))}`]}>{r.m != null ? `${percentagePoints(r.m)} from ${prevName}` : ''}</span>
             </li>
           ))}
-          {caUR && <li class="u-ca"><span class="u-name">Canada</span><span class="u-v">{rate(caUR.now)}</span><span class="u-ch">{caUR.m != null ? `${pts(caUR.m)} from ${prevName}` : ''}</span></li>}
+          {caUR && <li class="u-ca"><span class="u-name">Canada</span><span class="u-v">{rate(caUR.now)}</span><span class="u-ch">{caUR.m != null ? `${percentagePoints(caUR.m)} from ${prevName}` : ''}</span></li>}
         </ol>
       </div>
     </div>
@@ -215,8 +219,8 @@ const TABLES = [
   <section class="section section--tint">
     <div class="wrap">
       <div class="section-head section-head--split">
-        <h2>Jobs</h2>
-        <p class="lead">How many people are working, and the change since {yearAgo}.</p>
+        <h2>Employment</h2>
+        <p class="lead">People working in each province, and the change since {yearAgo}.</p>
       </div>
       <div class="jobs" data-animate>
         {jobRows.map((r) => (
@@ -241,11 +245,12 @@ const TABLES = [
     <div class="wrap">
       <div class="section-head section-head--split">
         <h2>Two years of unemployment</h2>
-        <p class="lead">Each province’s rate month by month, with Canada’s in grey. Point at a chart to read a month.</p>
+        <p class="lead">Each province’s rate month by month, with Canada’s in grey. Tap or point at a chart to read a month. Tap elsewhere to dismiss.</p>
       </div>
+      <p id="trend-help" class="visually-hidden">Use the left and right arrow keys to read each month, Home and End for the first and latest months, and Escape to dismiss the readout. Monthly values are available in All the numbers below.</p>
       <div class="multiples">
         {trend.map((t) => (
-          <figure class="sm" data-sm={JSON.stringify({ m: t.months.map((m) => monthName(m, true)), a: t.a, b: t.b, n: SHORT[t.g] })} data-animate tabindex="0" aria-label={`${NAME[t.g]}: unemployment ${rate(t.a.at(-1))} in ${monthName(M)}, ${rate(t.a[0])} in ${monthName(t.months[0])}. Canada ${rate(t.b.at(-1))}. Use the arrow keys to read each month.`}>
+          <figure class="sm" data-sm={JSON.stringify({ m: t.months.map((m) => monthName(m)), short: t.months.map((m) => monthName(m, true)), a: t.a, b: t.b, n: NAME[t.g], scale: { width: W, height: H, left: PADL, bottom: PADB, top: PADT, min: tLo, max: tHi } })} data-animate tabindex="0" aria-describedby="trend-help" aria-details="unemployment-history" aria-label={`${NAME[t.g]} unemployment, ${monthName(t.months[0])} to ${monthName(t.months.at(-1))}.`}>
             <figcaption><strong>{NAME[t.g]}</strong><span>{rate(t.a.at(-1))}</span></figcaption>
             <div class="sm-plot">
               <svg viewBox={`0 0 ${W} ${H}`} aria-hidden="true">
@@ -254,13 +259,14 @@ const TABLES = [
                   <text x={tx(0, t.a.length)} y={H - 4} text-anchor="start">{monthName(t.months[0], true)}</text>
                   <text x={tx(t.a.length - 1, t.a.length)} y={H - 4} text-anchor="end">{monthName(t.months.at(-1), true)}</text>
                 </g>
-                <polyline class="l-ca" points={line(t.b)} pathLength="1" />
-                <polyline class="l-p" points={line(t.a)} pathLength="1" />
-                <circle class="end" cx={tx(t.a.length - 1, t.a.length)} cy={ty(t.a.at(-1))} r="4.5" />
+                <path class="l-ca" d={line(t.b)} pathLength="1" />
+                <path class="l-p" d={line(t.a)} pathLength="1" />
+                {t.a.at(-1) != null && <circle class="end" cx={tx(t.a.length - 1, t.a.length)} cy={ty(t.a.at(-1))} r="4.5" />}
                 <g class="hair" data-hair hidden><line y1={PADT} y2={H - PADB} /><circle class="h-a" r="4.5" /><circle class="h-b" r="4" /></g>
               </svg>
-              <div class="tip" data-tip hidden></div>
+              <div class="tip" data-tip aria-hidden="true" hidden></div>
             </div>
+            <p class="visually-hidden" data-chart-status role="status" aria-live="polite" aria-atomic="true"></p>
           </figure>
         ))}
       </div>
@@ -288,7 +294,7 @@ const TABLES = [
               <div><dt><span class="sw sw--look"></span>Looking for work</dt><dd>{r.look}</dd></div>
               <div><dt><span class="sw sw--out"></span>Neither</dt><dd>{r.out}</dd></div>
             </dl>
-            <p class="h-note">{rate(r.pr)} in the labour force{r.prY != null && `, ${pts(r.prY)} from a year ago`}</p>
+            <p class="h-note">{rate(r.pr)} in the labour force{r.prY != null && `, ${percentagePoints(r.prY)} from a year ago`}</p>
           </li>
         ))}
       </ul>
@@ -301,7 +307,7 @@ const TABLES = [
     <div class="wrap">
       <div class="section-head section-head--split">
         <h2>Young people</h2>
-        <p class="lead">Unemployment at 15 to 24, next to the rate for everyone. The gap is how much harder it is to land a first job.</p>
+        <p class="lead">Unemployment among people aged 15 to 24, compared with everyone aged 15 and over.</p>
       </div>
       <div class="youth" data-animate>
         <div class="y-axis" aria-hidden="true">{yTicks.map((t) => <span style={`left:${yx(t)}`}>{t}%</span>)}</div>
@@ -328,13 +334,13 @@ const TABLES = [
     <div class="wrap">
       <div class="section-head section-head--split">
         <h2>Industries</h2>
-        <p class="lead">The change in people working in each industry since {yearAgo}, biggest gains first.</p>
+        <p class="lead" data-ind-summary aria-live="polite" aria-atomic="true">{indViews[0].summary}</p>
       </div>
       <div class="pick" role="group" aria-label="Show industries in">
         {indViews.map((v, i) => <button type="button" data-pick={v.g} aria-pressed={String(i === 0)}>{SHORT[v.g]}</button>)}
       </div>
       {indViews.map((v, i) => (
-        <div class="ind" data-view={v.g} hidden={i !== 0}>
+        <div class="ind" data-view={v.g} data-summary={v.summary} hidden={i !== 0}>
           <h3 class="visually-hidden">{NAME[v.g]}</h3>
           <ul class="i-list">
             {v.rows.map((r) => (
@@ -391,7 +397,7 @@ const TABLES = [
             <tbody>
               {[
                 ['Unemployment rate', (g) => R(g, 'unemploymentRate').now, rate],
-                ['Change from last month (points)', (g) => R(g, 'unemploymentRate').m, (v) => (v > 0 ? '+' : '') + v.toFixed(1)],
+                ['Change from last month (percentage points)', (g) => R(g, 'unemploymentRate').m, (v) => (v > 0 ? '+' : '') + v.toFixed(1)],
                 ['People working', (g) => R(g, 'employment').now, (v) => num(people(v))],
                 ['Change from last month', (g) => R(g, 'employment').m, (v) => signed(people(v))],
                 ['Change over the year', (g) => R(g, 'employment').y, (v) => signed(people(v))],
@@ -405,6 +411,18 @@ const TABLES = [
             </tbody>
           </table>
         </div>
+        {trend.length > 0 && (<>
+          <h3 class="history-heading">Monthly unemployment rates</h3>
+          <div class="t-scroll">
+            <table id="unemployment-history">
+              <caption class="visually-hidden">Monthly unemployment rates, percentages, seasonally adjusted</caption>
+              <thead><tr><th scope="col">Month</th>{ALL.map((g) => <th scope="col">{SHORT[g]}</th>)}</tr></thead>
+              <tbody>
+                {trendMonths.map((month) => <tr><th scope="row">{monthName(month)}</th>{ALL.map((g) => { const v = at(P(g, 'unemploymentRate'), month); return <td>{v == null ? 'Not available' : rate(v)}</td>; })}</tr>)}
+              </tbody>
+            </table>
+          </div>
+        </>)}
       </details>
       <p class="note">Source: Statistics Canada, Labour Force Survey, {monthName(M)}: {TABLES.map(([id, name, href], i) => <>{i > 0 && '; '}<a href={href}>{name}</a> (table {id})</>)}. Rates and jobs are seasonally adjusted, which takes out the usual swings of the year (summer jobs, the holidays) so one month can be compared with the next. Updated automatically the morning each new survey comes out, usually the first Friday of the month.</p>
     </div>
@@ -432,9 +450,13 @@ const TABLES = [
   const ind = document.querySelector<HTMLElement>('[data-ind]');
   if (ind) {
     const buttons = [...ind.querySelectorAll<HTMLButtonElement>('[data-pick]')];
+    const summary = ind.querySelector<HTMLElement>('[data-ind-summary]')!;
     const show = (key: string, push = true) => {
       buttons.forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.pick === key)));
-      ind.querySelectorAll<HTMLElement>('[data-view]').forEach((el) => (el.hidden = el.dataset.view !== key));
+      ind.querySelectorAll<HTMLElement>('[data-view]').forEach((el) => {
+        el.hidden = el.dataset.view !== key;
+        if (!el.hidden) summary.textContent = el.dataset.summary!;
+      });
       if (push) { const u = new URL(location.href); u.searchParams.set('province', key); history.replaceState(null, '', u); }
     };
     buttons.forEach((b) => b.addEventListener('click', () => show(b.dataset.pick!)));
@@ -442,31 +464,39 @@ const TABLES = [
     if (start && buttons.some((b) => b.dataset.pick === start)) show(start, false);
   }
 
-  // 2. The line charts: point at one (or focus it and use the arrow keys) to read a month.
-  //    A hairline snaps to the nearest month and the readout lists the province and Canada.
+  // 2. Hover previews a month; a tap/click keeps it open until focus or a tap moves elsewhere.
+  //    Only deliberate selections are announced, so pointer movement stays quiet.
   document.querySelectorAll<HTMLElement>('[data-sm]').forEach((fig) => {
-    const d = JSON.parse(fig.dataset.sm!) as { m: string[]; a: (number | null)[]; b: (number | null)[]; n: string };
+    const d = JSON.parse(fig.dataset.sm!) as {
+      m: string[]; short: string[]; a: (number | null)[]; b: (number | null)[]; n: string;
+      scale: { width: number; height: number; left: number; bottom: number; top: number; min: number; max: number };
+    };
     const svg = fig.querySelector('svg')!;
     const hair = fig.querySelector<SVGGElement>('[data-hair]')!;
     const tip = fig.querySelector<HTMLElement>('[data-tip]')!;
-    const pl = fig.querySelector<SVGPolylineElement>('.l-p')!.points;
-    const pb = fig.querySelector<SVGPolylineElement>('.l-ca')!.points;
+    const status = fig.querySelector<HTMLElement>('[data-chart-status]')!;
     const n = d.a.length;
+    const s = d.scale;
+    const x = (i: number) => s.left + (i / (n - 1)) * (s.width - s.left - 4);
+    const y = (v: number) => s.top + (1 - (v - s.min) / (s.max - s.min)) * (s.height - s.top - s.bottom);
     let at = n - 1;
+    let pinned = false;
     const fmt = (v: number | null) => (v == null ? '–' : `${v.toFixed(1)}%`);
-    const draw = (i: number) => {
+    const spoken = (v: number | null) => (v == null ? 'not available' : `${v.toFixed(1)}%`);
+    const draw = (i: number, announce = false) => {
       at = Math.max(0, Math.min(n - 1, i));
-      const p = pl.getItem(Math.min(at, pl.numberOfItems - 1));
-      const q = pb.numberOfItems ? pb.getItem(Math.min(at, pb.numberOfItems - 1)) : null;
+      const px = x(at);
       hair.removeAttribute('hidden');
-      hair.querySelector('line')!.setAttribute('x1', String(p.x));
-      hair.querySelector('line')!.setAttribute('x2', String(p.x));
-      const ca = hair.querySelector<SVGCircleElement>('.h-a')!; ca.setAttribute('cx', String(p.x)); ca.setAttribute('cy', String(p.y));
-      const cb = hair.querySelector<SVGCircleElement>('.h-b')!;
-      if (q) { cb.setAttribute('cx', String(q.x)); cb.setAttribute('cy', String(q.y)); }
+      hair.querySelector('line')!.setAttribute('x1', String(px));
+      hair.querySelector('line')!.setAttribute('x2', String(px));
+      for (const [selector, value] of [['.h-a', d.a[at]], ['.h-b', d.b[at]]] as const) {
+        const marker = hair.querySelector<SVGCircleElement>(selector)!;
+        marker.toggleAttribute('hidden', value == null);
+        if (value != null) { marker.setAttribute('cx', String(px)); marker.setAttribute('cy', String(y(value))); }
+      }
       // The readout: values lead, names follow; built with textContent
       tip.replaceChildren();
-      const head = document.createElement('p'); head.className = 'tip-m'; head.textContent = d.m[at]; tip.append(head);
+      const head = document.createElement('p'); head.className = 'tip-m'; head.textContent = d.short[at]; tip.append(head);
       for (const [cls, name, v] of [['a', d.n, d.a[at]], ['b', 'Canada', d.b[at]]] as const) {
         const row = document.createElement('p'); row.className = `tip-r tip-r--${cls}`;
         const s = document.createElement('strong'); s.textContent = fmt(v);
@@ -474,25 +504,32 @@ const TABLES = [
       }
       tip.hidden = false;
       const box = svg.getBoundingClientRect();
-      const left = (p.x / svg.viewBox.baseVal.width) * box.width;
-      tip.style.left = `${left}px`;
-      tip.classList.toggle('tip--left', left > box.width * 0.6);
+      const left = (px / s.width) * box.width;
+      const target = left > box.width * 0.6 ? left - tip.offsetWidth - 12 : left + 12;
+      tip.style.left = `${Math.max(0, Math.min(target, box.width - tip.offsetWidth))}px`;
+      if (announce) status.textContent = `${d.m[at]}. ${d.n}: ${spoken(d.a[at])} unemployment. Canada: ${spoken(d.b[at])}.`;
     };
-    const hide = () => { hair.setAttribute('hidden', ''); tip.hidden = true; };
-    svg.addEventListener('pointermove', (e) => {
+    const hide = () => { pinned = false; hair.setAttribute('hidden', ''); tip.hidden = true; status.textContent = ''; };
+    const nearest = (clientX: number) => {
       const box = svg.getBoundingClientRect();
-      const x = ((e.clientX - box.left) / box.width) * svg.viewBox.baseVal.width;
-      // nearest month
-      let best = 0;
-      for (let i = 0; i < pl.numberOfItems; i++) if (Math.abs(pl.getItem(i).x - x) < Math.abs(pl.getItem(best).x - x)) best = i;
-      draw(best);
+      if (!box.width) return at;
+      const position = ((clientX - box.left) / box.width) * s.width;
+      return Math.max(0, Math.min(n - 1, Math.round(((position - s.left) / (s.width - s.left - 4)) * (n - 1))));
+    };
+    svg.addEventListener('pointermove', (e) => {
+      if (!pinned && e.pointerType !== 'touch' && e.pointerType !== 'pen') draw(nearest(e.clientX));
     });
-    svg.addEventListener('pointerleave', hide);
-    fig.addEventListener('focus', () => draw(at));
+    svg.addEventListener('click', (e) => { pinned = true; draw(nearest(e.clientX), true); });
+    svg.addEventListener('pointerleave', () => { if (!pinned && document.activeElement !== fig) hide(); });
+    fig.addEventListener('focus', () => draw(at, true));
     fig.addEventListener('blur', hide);
     fig.addEventListener('keydown', (e) => {
-      if (e.key === 'ArrowLeft') { draw(at - 1); e.preventDefault(); }
-      if (e.key === 'ArrowRight') { draw(at + 1); e.preventDefault(); }
+      const next = { ArrowLeft: at - 1, ArrowRight: at + 1, Home: 0, End: n - 1 }[e.key];
+      if (next != null) { pinned = true; draw(next, true); e.preventDefault(); }
+    });
+    document.addEventListener('pointerdown', (e) => { if (!fig.contains(e.target as Node)) hide(); });
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') hide();
     });
   });
 </script>
@@ -556,7 +593,7 @@ const TABLES = [
   .grid line { stroke: var(--line); stroke-width: 1; }
   .grid text, .months text { font: 13px var(--font); fill: var(--ink-soft); }
   @media (max-width: 600px) { .grid text, .months text { font-size: 19px; } }
-  .hair[hidden] { display: none; }
+  .hair[hidden], .hair circle[hidden] { display: none; }
   .grid text { text-anchor: end; }
   .l-p, .l-ca { fill: none; stroke-linejoin: round; stroke-linecap: round; }
   .l-p { stroke: var(--direct); stroke-width: 2.5; }
@@ -569,8 +606,7 @@ const TABLES = [
   .hair line { stroke: var(--ink); stroke-width: 1; }
   .h-a { fill: var(--direct); stroke: var(--paper); stroke-width: 2; }
   .h-b { fill: #a8a8a8; stroke: var(--paper); stroke-width: 2; }
-  .tip { position: absolute; top: 0; transform: translateX(12px); background: var(--ink); color: #fff; padding: var(--s2) var(--s3); font-size: var(--fs-tiny); white-space: nowrap; pointer-events: none; z-index: 2; }
-  .tip--left { transform: translateX(calc(-100% - 12px)); }
+  .tip { position: absolute; top: 0; background: var(--ink); color: #fff; padding: var(--s2) var(--s3); font-size: var(--fs-tiny); white-space: nowrap; pointer-events: none; z-index: 2; }
   .tip :global(p) { margin: 0; }
   .tip :global(.tip-m) { color: #cfcfcf; margin-bottom: 2px; }
   .tip :global(.tip-r) { display: flex; align-items: center; gap: 0.4em; }
@@ -664,6 +700,7 @@ const TABLES = [
   /* The numbers */
   .numbers summary { cursor: pointer; font-weight: var(--fw-bold); font-size: var(--fs-h3); }
   .t-scroll { overflow-x: auto; margin-top: var(--s5); }
+  .history-heading { margin-top: var(--s6); }
   table { border-collapse: collapse; width: 100%; min-width: 36rem; font-size: var(--fs-small); }
   th, td { padding: var(--s2) var(--s3); border-bottom: 1px solid var(--line); text-align: right; font-variant-numeric: tabular-nums; }
   thead th { border-bottom: 1.5px solid var(--ink); }
