@@ -136,13 +136,18 @@ The map shapes are generated data in `src/data/maps.js` (Natural Earth boundarie
 
 ## The Atlantic jobs report (updates itself)
 
-`/learn/tools/jobs-report/` turns Statistics Canada's monthly Labour Force Survey into charts for the four Atlantic provinces: unemployment on a map, jobs gained or lost over the year, two years of unemployment against Canada, out of every 100 adults (working, looking, neither), young people, industries and wages (with each province's minimum wage from `src/lib/minwage.js`).
+`/learn/tools/jobs-report/` is an interactive Labour Force Survey explorer. A shared province and report-month selection updates the whole page: key figures, comparisons, explanations, population composition and industries. Visitors can compare five measures against Canada or another province, switch between levels and growth, move through historical months, search and drill into the 16 broad industries, copy a view link and download the chart’s underlying observations as CSV. The latest Nova Scotia view and all-province table also render without JavaScript.
+
+- `src/lib/jobs-report.js` owns calculations, validated URL state, chart geometry, industry sorting, explanations and CSV output. `src/lib/lfs-math.js` holds the shared date and number helpers.
+- `src/scripts/jobs-report.js` updates the page locally without requesting an API or model. Wages always compare year over year; rate changes are percentage points, while employment changes are percentages. Employment means people working, not job vacancies.
+- `src/styles/jobs-report.css` contains the responsive report layout. The timeline and selects work with touch and keyboards; chart values are also available in a table. Missing observations break chart lines rather than becoming zero.
+- `test/jobs-report.test.mjs` covers arithmetic, missing data, URL restoration, exports and the actual page script across linked controls.
 
 How the monthly update works:
 
 1. `.github/workflows/update-lfs.yml` runs on GitHub every hour. It has to run there: this sandbox can't reach Statistics Canada.
 2. It runs `scripts/fetch-lfs.mjs`, which downloads three tables as CSV files (14-10-0287, 14-10-0355, 14-10-0063), keeps Canada and the Atlantic provinces, and writes `src/data/lfs/latest.json`.
-3. If the month in that file is new, the workflow commits it and starts a deploy. Otherwise it does nothing. If Statistics Canada's site is down, it keeps the figures it has and tries again at the next run.
+3. If figures or release metadata change, including revisions to the same month, the workflow commits the snapshot and starts a deploy. An unchanged fetch does not create a commit. If Statistics Canada's site is down, it keeps the figures it has and tries again at the next run.
 4. `src/lib/lfs.js` reads the file for the page and its tool card. Until the first file arrives, the page says the report is on its way.
 
 The survey comes out once a month (usually the first Friday, 8:30 am Eastern), so the page changes within a few hours of each release.

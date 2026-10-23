@@ -12,8 +12,8 @@ export const tools = [
     key: 'jobs-report', preview: 'jobs',
     title: 'Atlantic jobs report',
     who: 'For employers and job seekers',
-    d: 'Statistics Canada’s monthly jobs numbers for the four Atlantic provinces, in charts. Updated each month.',
-    cta: 'See this month',
+    d: 'Compare provinces, explore earlier months and follow the shifts in employment, pay and industries. Statistics Canada data, updated automatically.',
+    cta: 'Explore the report',
   },
   {
     key: 'true-cost-of-an-employee', preview: 'cost',
