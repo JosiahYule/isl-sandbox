@@ -26,6 +26,8 @@ import { sameReport, validateReport } from './lib/lfs-report.mjs';
 const OUT = new URL('../src/data/lfs/latest.json', import.meta.url);
 const GEOS = { Canada: 'CA', 'Nova Scotia': 'NS', 'New Brunswick': 'NB', 'Prince Edward Island': 'PE', 'Newfoundland and Labrador': 'NL' };
 const MONTHS = 25; // two years and a month: enough for year-over-year changes and a trend line
+const since = new Date(); since.setMonth(since.getMonth() - MONTHS - 3);
+const SINCE_MONTH = since.toISOString().slice(0, 7);
 const UA = { 'User-Agent': 'isl-sandbox jobs report (github.com/JosiahYule/isl-sandbox)' };
 const work = mkdtempSync(join(tmpdir(), 'isl-lfs-'));
 
@@ -68,7 +70,8 @@ async function download(url, file) {
 }
 
 async function* unzipLines(zip, member) {
-  const child = spawn('unzip', ['-p', zip, member], { timeout: 60000 });
+  // The wages CSV contains decades of observations and can take several minutes to stream.
+  const child = spawn('unzip', ['-p', zip, member], { timeout: 300000 });
   child.stderr.resume();
   const finished = new Promise((resolve) => {
     child.once('error', () => resolve(-1));
@@ -110,6 +113,12 @@ async function readTable(pid, keep) {
   let head = null; const rows = [];
   for await (const line of lines) {
     if (!head) { head = fields(line).map(clean); continue; }
+    // REF_DATE is the first column in these tables. Skip decades we cannot use before
+    // allocating every field and object; a large wages table otherwise dominates the run.
+    if (head[0] === 'REF_DATE') {
+      const month = line.match(/^"?(\d{4}-\d{2})/)?.[1];
+      if (month && month < SINCE_MONTH) continue;
+    }
     const f = fields(line);
     const row = Object.fromEntries(head.map((h, i) => [h, f[i]]));
     if (keep(row)) rows.push(row);
@@ -132,8 +141,7 @@ function toSeries(rows, keyOf) {
 const col = (head, re) => { const c = head.find((h) => re.test(h)); if (!c) throw new Error(`No column like ${re} in: ${head.join(', ')}`); return c; };
 
 async function main() {
-  const since = new Date(); since.setMonth(since.getMonth() - MONTHS - 3);
-  const recent = (r) => r.REF_DATE >= since.toISOString().slice(0, 7);
+  const recent = (r) => r.REF_DATE >= SINCE_MONTH;
   const data = { source: 'Statistics Canada, Labour Force Survey (tables 14-10-0287-01, 14-10-0355-02, 14-10-0063-01)', fetched: new Date().toISOString(), provinces: {}, industries: {}, wages: {} };
 
   // 1. Labour force characteristics, seasonally adjusted

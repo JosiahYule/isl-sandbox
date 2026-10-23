@@ -46,7 +46,7 @@ const { photo, lines, lead, ticker = [], long = false, findJob } = Astro.props;
         {[0, 1].map((copy) => (
           <ul class="ticker-list" aria-hidden={copy === 1 ? 'true' : undefined}>
             {ticker.map((j) => (
-              <li><a href={j.url} tabindex={copy === 1 ? -1 : undefined}><strong>{j.title.replace(/\s*\/\s*/g, ' / ')}</strong><span>{j.city}, {j.province}</span><span>{j.pay || (j.payStatus === 'conflict' ? j.payLabel : '')}</span></a></li>
+              <li><a href={j.url} tabindex={copy === 1 ? -1 : undefined}><strong>{j.title.replace(/\s*\/\s*/g, ' / ')}</strong><span>{[j.city, j.province].filter(Boolean).join(', ')}</span><span>{j.pay || (j.payStatus === 'conflict' ? j.payLabel : '')}</span></a></li>
             ))}
           </ul>
         ))}
