@@ -9,7 +9,7 @@ function endpoint(response = () => new Response('{"id":"email-test"}', { status:
   let handler; const sends = [];
   const env = { RESEND_API_KEY: 'test-key', REQUEST_FROM: 'website@example.test' };
   vm.runInNewContext(bundle.outputFiles[0].text, { Deno: { env: { get: (key) => env[key] }, serve: (fn) => { handler = fn; } },
-    crypto: webcrypto, Request, Response, console, fetch: async (url, options) => { sends.push({ url, options }); return response(); } });
+    crypto: webcrypto, Request, Response, TextDecoder, AbortSignal, console, fetch: async (url, options) => { sends.push({ url, options }); return response(options); } });
   return { handler, sends };
 }
 const body = { service: 'contract', role: 'Two warehouse workers', location: 'Nova Scotia', name: 'Test Employer', email: 'employer@example.test', lead_id: leadId,
@@ -26,6 +26,21 @@ test('acknowledged delivery includes source and reference in the recruiter email
   assert(email.text.includes('First source: linkedin'));
   assert(!email.text.includes('must-not-persist'));
   assert.equal(sends[0].options.headers['Idempotency-Key'], 'isl-request/' + leadId);
+  assert(sends[0].options.signal instanceof AbortSignal);
+});
+
+test('rejects cross-site, oversized and structurally invalid submissions before sending', async () => {
+  const { handler, sends } = endpoint();
+  const foreign = req(body); foreign.headers.set('origin', 'https://unrelated.test');
+  assert.equal((await handler(foreign)).status, 403);
+  assert.equal((await handler(req({ ...body, role: 'x'.repeat(17000) }))).status, 413);
+  assert.equal((await handler(req({ ...body, role: {} }))).status, 400);
+  assert.equal((await handler(new Request('https://example.test', { method: 'POST', body: '{' }))).status, 400);
+  assert.equal(sends.length, 0);
+  const malformed = endpoint(() => new Response('{}', { status: 200 }));
+  assert.equal((await malformed.handler(req(body))).status, 502);
+  for (let i = 0; i < 7; i++) await handler(req(body));
+  assert.equal((await handler(req(body))).status, 429);
 });
 
 test('bots, invalid requests and email-provider failures cannot become accepted leads', async () => {

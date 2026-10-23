@@ -311,10 +311,10 @@ const afterSteps = [
       try {
         // A retry uses the exact same payload as well as the same idempotency key.
         pendingPayload ||= { ...data, page: location.pathname, lead_id: leadId, attribution: getAttribution(), measurement: await getMeasurementContext() };
-        const res = await fetch(endpoint, { method: 'POST', headers: { 'Content-Type': 'application/json' },
+        const res = await fetch(endpoint, { method: 'POST', signal: AbortSignal.timeout(15000), headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(pendingPayload) });
         const result = await res.json();
-        if (!res.ok || result.ok !== true || result.accepted === false) throw new Error('Request was not accepted');
+        if (!res.ok || result.ok !== true || result.accepted !== true || result.lead_id !== leadId) throw new Error('Request was not accepted');
         receivedLeadId = result.lead_id || leadId;
       } catch {
         sending = false; button.disabled = false; button.textContent = 'Send request';

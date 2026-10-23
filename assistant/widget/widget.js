@@ -170,7 +170,7 @@
     return async function (messages, context) {
       const headers = { "content-type": "application/json" };
       if (anonKey) { headers.apikey = anonKey; headers.authorization = "Bearer " + anonKey; }
-      const res = await fetch(endpoint, { method: "POST", headers, body: JSON.stringify({ messages, context }) });
+      const res = await fetch(endpoint, { method: "POST", signal: AbortSignal.timeout(45000), headers, body: JSON.stringify({ messages, context }) });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(data.error || "Something went wrong. Please try again.");
       return data;
@@ -194,7 +194,7 @@
       if (!launcher) return;
       const box = launcher.getBoundingClientRect();
       const editing = document.activeElement?.matches('input,textarea,select');
-      const blocked = [...document.querySelectorAll('a.apply,a.btn,button[type="submit"],.submit button')].some((action) => {
+        const blocked = [...document.querySelectorAll('a.apply,a.btn,a[href^="tel:"],a[href^="mailto:"],button[type="submit"],.submit button')].some((action) => {
         if (!action.getClientRects().length) return false;
         const rect = action.getBoundingClientRect();
         return rect.right > box.left - 8 && rect.left < box.right + 8 && rect.bottom > box.top - 8 && rect.top < box.bottom + 8;

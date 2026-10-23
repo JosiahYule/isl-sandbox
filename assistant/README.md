@@ -64,14 +64,18 @@ The API key lives only in Supabase. The browser never sees it, which is why the 
 
 ## Setup
 
-You've done every one of these steps before on the onboarding portal.
+The sandbox currently uses the scripted demo engine. These functions must be deployed and
+configured before live chat or recruiter-email delivery is enabled.
 
 1. **Get a Claude API key** from console.anthropic.com. Set a monthly spend limit there while testing.
-2. **Create the function** in a Supabase project (the client portal project is fine, or a new one):
+2. **Create the function** in the Supabase project chosen for this website:
    ```
    supabase functions deploy isl-job-chat --no-verify-jwt
    ```
-   `--no-verify-jwt` lets anonymous website visitors call it. The CORS allow-list in `index.ts` is what limits it to your site.
+   `--no-verify-jwt` lets anonymous website visitors call it. Requests carrying a foreign browser
+   Origin are rejected. CORS is a browser control, not authentication: a non-browser client can
+   omit or spoof Origin. The bounded per-instance rate limiter is a basic brake, not a global
+   quota. Configure gateway abuse controls and provider spending limits before enabling paid chat.
 3. **Add the secrets** (Supabase dashboard > Edge Functions > Secrets, or the CLI):
    ```
    supabase secrets set ANTHROPIC_API_KEY=sk-ant-...
@@ -94,6 +98,10 @@ You've done every one of these steps before on the onboarding portal.
 
 ## Running the tests
 
+From the repository root, `npm test` builds all three brands, runs the DOM, feed, request and
+chat endpoint regression tests with mocked providers, then checks the scripted conversations.
+No test sends a recruiter email or calls a paid model.
+
 ```
 node test/search.test.mjs data/feed.json     # search quality on real postings
 node test/edge.sim.mjs <bundled edge.js> data/feed.json   # full backend loop with a fake Claude
@@ -114,5 +122,12 @@ recruiter the page names (the same routing.js the chatbot uses), by email throug
    supabase secrets set REQUEST_CC=info@integratedstaffing.ca     # optional
    ```
 3. Deploy: `supabase functions deploy isl-request --no-verify-jwt`
-4. Paste the function's URL into `src/data/site.js` (`forms.requestEndpoint`) and push.
+4. Set the GitHub Actions variable `ISL_REQUEST_ENDPOINT` to the function URL (or the brand's
+   `forms.requestEndpoint` in `src/brands/isl.js`) and push.
    Until then the form shows its confirmation and says nothing was sent.
+
+The request handler limits payload size, rejects invalid input, uses the lead reference as the
+Resend idempotency key and waits for a provider receipt before acknowledging acceptance. A send
+has a 10-second deadline; the browser restores the form for retry after 15 seconds. Repeating an
+unchanged request keeps the same reference and payload. Provider acceptance does not prove inbox
+delivery: verify Resend delivery events and an actual recruiter inbox during launch checks.

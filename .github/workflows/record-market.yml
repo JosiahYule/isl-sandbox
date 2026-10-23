@@ -16,9 +16,14 @@ on:
 permissions:
   contents: write
 
+concurrency:
+  group: job-market-history
+  cancel-in-progress: false
+
 jobs:
   record:
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -34,5 +39,6 @@ jobs:
             git config user.email "41898699+github-actions[bot]@users.noreply.github.com"
             git add src/data/market
             git commit -m "Record job market $(date -u +%F)"
+            git pull --rebase origin main
             git push
           fi

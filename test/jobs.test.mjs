@@ -49,3 +49,13 @@ test('annual ranges are checked, but mixed hourly and yearly figures are not gue
   assert.equal(checkCompensation({ pay: '$62,400 to $83,200/year', description: '$30-$40 per hour' }).conflict, false);
   assert.equal(checkCompensation({ pay: '$20/hour', description: 'Employee referral bonus: $100 per year' }).conflict, false);
 });
+
+test('a range with units at both ends becomes one clear confirmation, keeping vacation pay', () => {
+  const job = { pay: '$25/hour', description: 'PAY\n• $20.00/hour to $35.00/hour+ 4% vacation pay depending on experience\nSCHEDULE\nMonday to Friday' };
+  const result = resolveCompensation(job);
+  assert.equal(result.payStatus, 'conflict');
+  assert.equal((result.description.match(/Pay to be confirmed with recruiter/g) || []).length, 1);
+  assert(result.description.includes('; plus 4% vacation pay'));
+  assert(result.description.includes('Monday to Friday'));
+  assert(!result.description.includes('$20') && !result.description.includes('$35'));
+});

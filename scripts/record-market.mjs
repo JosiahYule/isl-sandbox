@@ -8,7 +8,7 @@
 //
 // Runs from .github/workflows/record-market.yml with the AVIONTE_FEED_URL secret.
 // Without the secret it does nothing. Running twice on one day replaces that day's line.
-import { readFileSync, writeFileSync, mkdirSync, existsSync } from 'node:fs';
+import { readFileSync, writeFileSync, mkdirSync, existsSync, renameSync } from 'node:fs';
 import { normalizeFeed } from '../assistant/supabase/functions/_shared/jobs.js';
 import { familyOf, readPay } from '../src/lib/jobpay.js';
 
@@ -52,5 +52,6 @@ const entry = {
 mkdirSync('src/data/market', { recursive: true });
 const lines = existsSync(FILE) ? readFileSync(FILE, 'utf8').split('\n').filter(Boolean) : [];
 const kept = lines.filter((l) => JSON.parse(l).date !== date);
-writeFileSync(FILE, [...kept, JSON.stringify(entry)].join('\n') + '\n');
+writeFileSync(FILE + '.tmp', [...kept, JSON.stringify(entry)].join('\n') + '\n');
+renameSync(FILE + '.tmp', FILE);
 console.log(`record-market: ${date}, ${jobs.length} jobs recorded (${kept.length + 1} days on file).`);

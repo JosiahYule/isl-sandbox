@@ -8,29 +8,36 @@
 // It uses the same cleaning code as the job assistant (assistant/.../_shared/jobs.js), so the
 // website and the chatbot always see identical jobs.
 //
-// Safety: if the feed can't be reached, or comes back empty, the saved snapshot is kept.
-// A hiccup at Avionte should never publish an empty job board.
-import { writeFileSync } from 'node:fs';
+// A configured feed failure stops publication, leaving the last working Pages site intact.
+// Local builds without the secret deliberately use the saved snapshot.
+import { writeFileSync, renameSync, rmSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
+import { resolve } from 'node:path';
 import { normalizeFeed } from '../assistant/supabase/functions/_shared/jobs.js';
 
-const FEED = process.env.AVIONTE_FEED_URL;
-const OUT = 'assistant/data/jobs-snapshot.json';
-const META = 'assistant/data/jobs-meta.json';
-
-if (!FEED) {
-  console.log('fetch-jobs: no AVIONTE_FEED_URL set, using the saved job snapshot.');
-  process.exit(0);
-}
-
-try {
-  const res = await fetch(FEED, { signal: AbortSignal.timeout(30000) });
+export async function refreshJobs({ url, out = 'assistant/data/jobs-snapshot.json', meta = 'assistant/data/jobs-meta.json', fetchFeed = fetch }) {
+  const res = await fetchFeed(url, { signal: AbortSignal.timeout(30000) });
   if (!res.ok) throw new Error(`feed answered ${res.status}`);
   // Preserve both original pay sources so the build's review report can flag discrepancies.
   const jobs = normalizeFeed(await res.json(), { resolvePay: false });
   if (!jobs.length) throw new Error('feed returned no jobs');
-  writeFileSync(OUT, JSON.stringify(jobs, null, 1));
-  writeFileSync(META, JSON.stringify({ fetched: new Date().toISOString() }, null, 1));
-  console.log(`fetch-jobs: ${jobs.length} jobs from the live feed.`);
-} catch (err) {
-  console.warn(`fetch-jobs: couldn't refresh (${err.message}); keeping the saved snapshot.`);
+  if (new Set(jobs.map((job) => job.id)).size !== jobs.length) throw new Error('feed contains duplicate job IDs');
+  const files = [[out, JSON.stringify(jobs, null, 1)], [meta, JSON.stringify({ fetched: new Date().toISOString() }, null, 1)]];
+  try {
+    for (const [path, text] of files) writeFileSync(path + '.tmp', text);
+    for (const [path] of files) renameSync(path + '.tmp', path);
+  } finally { for (const [path] of files) rmSync(path + '.tmp', { force: true }); }
+  return jobs.length;
+}
+
+if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
+  const url = process.env.AVIONTE_FEED_URL;
+  if (!url) console.log('fetch-jobs: no AVIONTE_FEED_URL set, using the saved job snapshot.');
+  else try {
+    console.log(`fetch-jobs: ${await refreshJobs({ url })} jobs from the live feed.`);
+  } catch {
+    // Feed URLs can contain credentials. Do not echo URLs or network exception messages.
+    console.error('fetch-jobs: refresh failed. Publication stopped; the last published site is unchanged.');
+    process.exitCode = 1;
+  }
 }

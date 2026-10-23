@@ -15,6 +15,12 @@ const words = (t) => t.match(/[A-Za-z][A-Za-z'’-]*/g) || [];
 const lines = (t) => t.split(/\n/).map((l) => l.trim()).filter(Boolean);
 const count = (t, re) => (t.match(re) || []).length;
 const BULLET = /^[•▪●◦\-–*·]\s*/;
+// Count examples, not physical lines: pasted documents often join bullets into a paragraph.
+function quantifiedExamples(text) {
+  return text.split(/\n|[.!?;]+(?=\s|$)/).filter((part) =>
+    /(?:\$\s*\d[\d,.]*|\b\d[\d,.]*\s*(?:%|\+?\s*(?:people|staff|employees|clients|customers|units|orders|pallets|trucks|loads|hours|days|weeks|per|team|sites|projects|accounts)\b))/i.test(part),
+  ).length;
+}
 
 const VERBS = 'achieved assembled assisted built coached completed coordinated created cut delivered designed developed directed drove ensured established expanded handled improved increased installed introduced launched led loaded maintained managed monitored negotiated operated organized oversaw packed picked planned prepared processed produced provided reduced repaired resolved restored ran scheduled served set shipped solved sorted streamlined supervised supported trained unloaded updated wrote welded inspected cleaned cooked prepped answered booked billed reconciled audited calculated recruited hired onboarded drafted'.split(' ');
 
@@ -52,9 +58,11 @@ export const CHECKS = [
       return hits.length / ls.length >= 0.4;
     },
     fix: 'Start each bullet with a verb: "Operated", "Trained", "Reduced". It reads as doing, not describing.' },
-  { id: 'numbers', group: 'Achievements', weight: 3, label: 'Results with numbers',
-    test: (t) => lines(t).filter((l) => /\d/.test(l) && !/\b(19|20)\d{2}\b/.test(l) && /(%|\$|\b\d+\s*(\+|people|staff|employees|clients|customers|units|orders|pallets|trucks|loads|hours|days|weeks|per|a day|an hour|team|sites|projects|accounts)\b)/i.test(l)).length >= 2,
-    fix: 'Add numbers: how many, how much, how often. "Picked 120 orders an hour" says more than "picked orders".' },
+  { id: 'numbers', group: 'Achievements', weight: 3, label: 'At least two quantified examples',
+    test: (t) => quantifiedExamples(t) >= 2,
+    fix: (t) => quantifiedExamples(t) === 1
+      ? 'You have one quantified example. Add another result showing how many, how much or how often.'
+      : 'Add numbers: how many, how much, how often. "Picked 120 orders an hour" says more than "picked orders".' },
   { id: 'weak', group: 'Achievements', weight: 2, label: 'No "responsible for" lists',
     test: (t) => count(t, /\b(responsible for|duties included|tasks included|helped with|worked on)\b/gi) <= 1,
     fix: 'Replace "responsible for" and "duties included" with what you actually did or achieved.' },

@@ -14,19 +14,20 @@
 //   14-10-0287-01  Labour force characteristics by province, seasonally adjusted
 //   14-10-0355-02  Employment by industry, seasonally adjusted
 //   14-10-0063-01  Employee wages by industry, unadjusted
-import { writeFileSync, readFileSync, existsSync, mkdirSync, createWriteStream } from 'node:fs';
+import { writeFileSync, readFileSync, existsSync, mkdirSync, createWriteStream, mkdtempSync, rmSync, renameSync } from 'node:fs';
 import { spawn } from 'node:child_process';
 import { createInterface } from 'node:readline';
 import { Readable } from 'node:stream';
 import { pipeline } from 'node:stream/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
+import { sameReport, validateReport } from './lib/lfs-report.mjs';
 
 const OUT = new URL('../src/data/lfs/latest.json', import.meta.url);
 const GEOS = { Canada: 'CA', 'Nova Scotia': 'NS', 'New Brunswick': 'NB', 'Prince Edward Island': 'PE', 'Newfoundland and Labrador': 'NL' };
 const MONTHS = 25; // two years and a month: enough for year-over-year changes and a trend line
 const UA = { 'User-Agent': 'isl-sandbox jobs report (github.com/JosiahYule/isl-sandbox)' };
-const BROWSER = { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0 Safari/537.36', Accept: '*/*', 'Accept-Language': 'en-CA,en;q=0.9' };
+const work = mkdtempSync(join(tmpdir(), 'isl-lfs-'));
 
 // One CSV line into fields (Statistics Canada quotes every field; quotes inside are doubled)
 function fields(line) {
@@ -48,22 +49,41 @@ const strip = (s) => s.replace(/\s*\[[^\]]*\]\s*$/, '').trim(); // "Construction
 // Statistics Canada's site goes down at times (it answers with an "unavailable" page), so each
 // download gets three tries, 20 seconds apart
 async function download(url, file) {
-  for (let i = 1; ; i++) {
-    // The second try looks like an ordinary browser, in case the site turns away scripts
-    const res = await fetch(url, { headers: i === 2 ? BROWSER : UA, redirect: 'follow' });
-    if (res.ok && /zip|octet/.test(res.headers.get('content-type') || '')) return pipeline(Readable.fromWeb(res.body), createWriteStream(file));
-    const page = (await res.text()).replace(/<script[\s\S]*?<\/script>|<style[\s\S]*?<\/style>/g, '').replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 160);
-    const why = `${url}: HTTP ${res.status} ${res.headers.get('content-type')} (final ${res.url}) "${page}"`;
-    if (i === 3) throw Object.assign(new Error(why), { unavailable: true });
-    console.log(`${why}; trying again in a minute`);
+  for (let i = 1; i <= 3; i++) {
+    let res;
+    try {
+      res = await fetch(url, { headers: UA, redirect: 'follow', signal: AbortSignal.timeout(90000) });
+      if (res.ok && /zip|octet/.test(res.headers.get('content-type') || '')) {
+        await pipeline(Readable.fromWeb(res.body), createWriteStream(file));
+        return;
+      }
+    } catch { /* bounded retries for transient network or transfer failures */ }
+    await res?.body?.cancel().catch(() => {});
+    // Authentication/access denials are not transient failures; do not change identity to retry.
+    const denied = res && [401, 403, 404].includes(res.status);
+    if (denied || i === 3) throw Object.assign(new Error(`Statistics Canada table unavailable${res ? ` (HTTP ${res.status})` : ''}`), { unavailable: true });
+    console.log('Statistics Canada table unavailable; retrying in 20 seconds.');
     await new Promise((r) => setTimeout(r, 20000));
   }
 }
 
+async function* unzipLines(zip, member) {
+  const child = spawn('unzip', ['-p', zip, member], { timeout: 60000 });
+  child.stderr.resume();
+  const finished = new Promise((resolve) => {
+    child.once('error', () => resolve(-1));
+    child.once('close', (code) => resolve(code));
+  });
+  const lines = createInterface({ input: child.stdout, crlfDelay: Infinity });
+  try {
+    for await (const line of lines) yield line;
+    if (await finished !== 0) throw new Error(`Could not read ${member} from the downloaded table`);
+  } finally { lines.close(); if (child.exitCode === null) child.kill(); }
+}
+
 // The release date, from the metadata file that comes in the same zip
 async function releaseTime(pid) {
-  const unzip = spawn('unzip', ['-p', join(tmpdir(), `${pid}.zip`), `${pid}_MetaData.csv`]);
-  const lines = createInterface({ input: unzip.stdout, crlfDelay: Infinity });
+  const lines = unzipLines(join(work, `${pid}.zip`), `${pid}_MetaData.csv`);
   let head = null, out = null;
   for await (const line of lines) {
     if (out) continue;
@@ -76,17 +96,17 @@ async function releaseTime(pid) {
 
 // If the zip's metadata doesn't carry it, ask the data API for the table's release time
 async function wdsRelease(pid) {
-  const res = await fetch('https://www150.statcan.gc.ca/t1/wds/rest/getCubeMetadata', { method: 'POST', headers: { ...UA, 'Content-Type': 'application/json' }, body: JSON.stringify([{ productId: Number(pid) }]) });
+  const res = await fetch('https://www150.statcan.gc.ca/t1/wds/rest/getCubeMetadata', { method: 'POST', signal: AbortSignal.timeout(15000), headers: { ...UA, 'Content-Type': 'application/json' }, body: JSON.stringify([{ productId: Number(pid) }]) });
+  if (!res.ok) return null;
   const j = await res.json();
   return j?.[0]?.object?.releaseTime ?? null;
 }
 
 async function readTable(pid, keep) {
   const url = `https://www150.statcan.gc.ca/n1/tbl/csv/${pid}-eng.zip`;
-  const zip = join(tmpdir(), `${pid}.zip`);
+  const zip = join(work, `${pid}.zip`);
   await download(url, zip);
-  const unzip = spawn('unzip', ['-p', zip, `${pid}.csv`]);
-  const lines = createInterface({ input: unzip.stdout, crlfDelay: Infinity });
+  const lines = unzipLines(zip, `${pid}.csv`);
   let head = null; const rows = [];
   for await (const line of lines) {
     if (!head) { head = fields(line).map(clean); continue; }
@@ -103,6 +123,7 @@ function toSeries(rows, keyOf) {
   const out = {};
   for (const r of rows) {
     const v = r.VALUE === '' ? null : Number(r.VALUE);
+    if (v !== null && !Number.isFinite(v)) throw new Error('Invalid numerical value in Statistics Canada table');
     (out[keyOf(r)] ??= []).push({ month: r.REF_DATE.slice(0, 7), value: v });
   }
   for (const k in out) out[k] = out[k].sort((a, b) => a.month.localeCompare(b.month)).slice(-MONTHS);
@@ -162,11 +183,15 @@ async function main() {
   const ca = data.provinces.CA?.unemploymentRate;
   if (!ca?.length) throw new Error('No unemployment rate for Canada; nothing saved.');
   data.month = ca.at(-1).month;
+  validateReport(data);
 
   const before = existsSync(OUT) ? JSON.parse(readFileSync(OUT, 'utf8')) : null;
   if (!data.released && before?.month === data.month) data.released = before.released ?? null; // keep a date we already had
+  if (sameReport(before, data)) return `No changes to ${data.month}; kept the existing snapshot.`;
   mkdirSync(new URL('.', OUT), { recursive: true });
-  writeFileSync(OUT, JSON.stringify(data) + '\n');
+  const temporary = new URL('./latest.json.tmp', OUT);
+  writeFileSync(temporary, JSON.stringify(data) + '\n');
+  renameSync(temporary, OUT);
   return `Saved ${data.month}${before && before.month === data.month ? ' (same month as before)' : ' (new month)'}`;
 }
 
@@ -177,6 +202,6 @@ const note = (kind, msg) => console.log(gh ? `::${kind}::${String(msg).replace(/
 // (a warning, not a failed run, so an outage doesn't send failure emails every hour).
 // Anything else going wrong (a renamed column, say) fails the run so someone notices.
 main().then((m) => note('notice', m)).catch((e) => {
-  if (e.unavailable) { note('warning', `${e.message}. ${existsSync(OUT) ? 'Kept the figures we have' : 'No figures yet'}; the next run will try again.`); return; }
-  note('error', e.message); process.exit(1);
-});
+  if (e.unavailable && existsSync(OUT)) { note('warning', `${e.message}. Kept the figures we have; the next run will try again.`); return; }
+  note('error', e.message); process.exitCode = 1;
+}).finally(() => rmSync(work, { recursive: true, force: true }));

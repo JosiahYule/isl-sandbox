@@ -84,7 +84,7 @@ const rate = (v) => `${Number((v * 100).toFixed(3))}%`;
           </tbody>
           <tfoot>
             <tr><th scope="row">Total</th><td data-out="perHour2">{money(r.perHour)}</td><td data-out="total">{money(r.total, false)}</td></tr>
-            <tr class="team" data-team hidden><th scope="row" colspan="2">For <span data-out="people">1</span> people in this role</th><td data-out="teamTotal">{money(r.total, false)}</td></tr>
+            <tr class="team" data-team hidden><th scope="row" colspan="2">For <span data-out="people">1</span> <span data-out="peopleLabel">person</span> in this role</th><td data-out="teamTotal">{money(r.total, false)}</td></tr>
           </tfoot>
         </table>
         <button type="button" class="copy" data-copy>Copy a link to these figures</button>
@@ -219,6 +219,7 @@ const rate = (v) => `${Number((v * 100).toFixed(3))}%`;
     const team = root.querySelector<HTMLElement>('[data-team]')!;
     team.hidden = people < 2;
     set('people', String(people));
+    set('peopleLabel', people === 1 ? 'person' : 'people');
     set('teamTotal', money(r.total * people, false));
 
     // Where the paid hours go

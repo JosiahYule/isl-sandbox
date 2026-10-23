@@ -9,6 +9,7 @@ import PageHero from '../../../components/PageHero.astro';
 import { jobs } from '../../../data/jobs.js';
 import { keywordsFor, CHECKS } from '../../../lib/resume.js';
 import { url } from '../../../lib/url.js';
+import { htmlJson } from '../../../lib/html-json.js';
 import { links } from '../../../data/site.js';
 
 // Only the terms per job go to the page, not the full postings
@@ -45,6 +46,7 @@ const groups = [...new Set(CHECKS.map((c) => c.group))];
 
         <div class="results" data-results hidden>
           <p class="score"><span data-score>0</span><span class="of">/100</span></p>
+          <p class="hint">Checklist score. This is a writing aid, not a hiring prediction.</p>
           <p class="verdict" data-verdict></p>
           <div class="meter" aria-hidden="true"><span data-meter></span></div>
 
@@ -90,7 +92,7 @@ const groups = [...new Set(CHECKS.map((c) => c.group))];
     </div>
   </section>
 
-  <script type="application/json" id="job-terms" set:html={JSON.stringify(jobTerms)} />
+  <script type="application/json" id="job-terms" set:html={htmlJson(jobTerms)} />
 </Base>
 
 <script>
@@ -121,7 +123,7 @@ const groups = [...new Set(CHECKS.map((c) => c.group))];
     $('[data-meter]').style.width = `${r.score}%`;
     $('[data-verdict]').textContent = r.score >= 85 ? 'Strong. A few small fixes and it’s ready.'
       : r.score >= 60 ? 'Good start. The fixes below will make the biggest difference.'
-      : 'Worth an hour of work. Start at the top of the list.';
+      : 'Several checklist items need attention. Start with the suggestions below.';
 
     // By area: one square per check, filled where it passed, wider for the checks worth more
     $('[data-areas]').replaceChildren(...r.areas.map((a) => {

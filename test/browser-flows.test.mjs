@@ -42,12 +42,43 @@ test('job-board role+city matching, shareable filters, reload and clear all', as
     assert.equal(doc.querySelector('#q').value, term);
     assert(Number(doc.querySelector('[data-count]').textContent) >= 1);
     assert.equal(target.hidden, false);
+    assert.equal(doc.querySelector('[data-reset]').hidden, false, 'clear is available with matching results');
+    const posting = new URL(target.querySelector('h3 a').href);
+    assert.equal(posting.searchParams.get('q'), term);
+    assert.equal(posting.searchParams.get('utm_source'), null, 'only result context is copied');
     const q = doc.querySelector('#q'); q.value = 'nonexistentrole'; q.dispatchEvent(new w.Event('input'));
     assert.equal(new URL(w.location.href).searchParams.get('q'), 'nonexistentrole');
     doc.querySelector('[data-reset]').click();
     for (const key of ['q', 'province', 'industry', 'type', 'area']) assert.equal(new URL(w.location.href).searchParams.has(key), false);
     assert.equal(new URL(w.location.href).searchParams.get('utm_source'), 'linkedin');
     assert.equal(doc.querySelector('[data-count]').textContent, String(rows.length));
+    assert.equal(doc.querySelector('[data-reset]').hidden, true);
+    assert.equal(rows.filter((row) => !row.hidden).length, Math.min(15, rows.length));
+    assert(doc.querySelector('[data-result-summary]').textContent.startsWith(`Showing ${Math.min(15, rows.length)} of ${rows.length}`));
+    if (rows.length > 15) {
+      doc.querySelector('[data-more]').click();
+      assert.equal(rows.filter((row) => !row.hidden).length, rows.length);
+      assert.equal(new URL(w.location.href).searchParams.get('view'), 'all');
+      assert.equal(new URL(rows[15].querySelector('h3 a').href).searchParams.get('view'), 'all');
+    }
+  } finally { dom.window.close(); }
+});
+
+test('a posting returns to the same filtered results without accepting an external return URL', async () => {
+  const board = new JSDOM(await fs.readFile('dist/find-work/index.html', 'utf8'));
+  const postingPath = board.window.document.querySelector('[data-list] h3 a').getAttribute('href').replace('/isl-sandbox/', '');
+  board.window.close();
+  const { dom, w, run } = await setup(postingPath, 'src/pages/find-work/[slug].astro', { query: '?q=warehouse&province=NS&type=contract&view=all&return=https://unrelated.test' });
+  try {
+    run();
+    const back = w.document.querySelector('a.back');
+    assert.equal(back.textContent, '← Back to results');
+    const destination = new URL(back.href);
+    assert.equal(destination.pathname, '/isl-sandbox/find-work/');
+    assert.equal(destination.searchParams.get('q'), 'warehouse');
+    assert.equal(destination.searchParams.get('province'), 'NS');
+    assert.equal(destination.searchParams.get('view'), 'all');
+    assert.equal(destination.searchParams.has('return'), false);
   } finally { dom.window.close(); }
 });
 
@@ -131,6 +162,23 @@ test('failed delivery is retryable, reuses the reference and never records a lea
     assert.equal(ids.length, 2); assert.equal(ids[0], ids[1]);
     assert.equal(events(w, 'generate_lead').length, 0);
     assert.equal(events(w, 'form_error').length, 2);
+    assert.equal(w.document.querySelector('.send-err').hidden, false);
+    assert.equal(form.querySelector('button[type="submit"]').disabled, false);
+  } finally { dom.window.close(); }
+});
+
+test('an incomplete or mismatched acknowledgement never becomes a sent request', async () => {
+  const { dom, w, run } = await setup('hire/', 'src/pages/hire.astro', { analytics: true, consent: 'granted' });
+  try {
+    const form = w.document.querySelector('#request'); form.dataset.endpoint = 'https://request.test';
+    let response = { ok: true };
+    w.fetch = async () => ({ ok: true, json: async () => response });
+    run(); fakeMeasurement(w); fillRequest(w);
+    form.dispatchEvent(new w.Event('submit', { bubbles: true, cancelable: true })); await pause();
+    assert.equal(events(w, 'generate_lead').length, 0);
+    response = { ok: true, accepted: true, lead_id: 'a-different-request' };
+    form.dispatchEvent(new w.Event('submit', { bubbles: true, cancelable: true })); await pause();
+    assert.equal(events(w, 'generate_lead').length, 0);
     assert.equal(w.document.querySelector('.send-err').hidden, false);
     assert.equal(form.querySelector('button[type="submit"]').disabled, false);
   } finally { dom.window.close(); }

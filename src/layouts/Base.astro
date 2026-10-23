@@ -10,6 +10,7 @@ import Footer from '../components/Footer.astro';
 import Analytics from '../components/Analytics.astro';
 import { brand, images } from '../data/site.js';
 import { url } from '../lib/url.js';
+import { htmlJson } from '../lib/html-json.js';
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 
@@ -51,14 +52,9 @@ const colorVars = brand.colors ? Object.entries(brand.colors).map(([k, v]) => `-
     <meta property="og:url" content={canonical} />
     <meta property="og:image" content={shareImage} />
     <meta name="twitter:card" content="summary_large_image" />
-    {schema && <script type="application/ld+json" set:html={JSON.stringify(schema)} />}
+    {schema && <script type="application/ld+json" set:html={htmlJson(schema)} />}
     <Analytics part="head" />
     <meta name="robots" content="noindex" /><!-- sandbox: keep search engines out -->
-    <!-- Turn on the entrance animations only when the visitor's device allows motion.
-         This runs before the page paints, so nothing flashes. (See src/scripts/motion.js) -->
-    <script is:inline>
-      if (!matchMedia('(prefers-reduced-motion: reduce)').matches) document.documentElement.classList.add('motion');
-    </script>
   </head>
   <body>
     <a class="skip" href="#main">Skip to content</a>

@@ -4,8 +4,9 @@ import fs from 'node:fs/promises';
 import { JSDOM } from 'jsdom';
 const tick = () => new Promise((resolve) => setTimeout(resolve, 35));
 
-test('chat yields when filtering moves an Apply button underneath it without a scroll event', async () => {
-  const dom = new JSDOM('<a class="apply" href="/apply">Apply</a>', { url: 'https://example.test/', runScripts: 'outside-only', pretendToBeVisual: true });
+for (const action of ['<a class="apply" href="/apply">Apply</a>', '<a href="tel:+19025555555">Call the recruiter</a>', '<a href="mailto:recruiter@example.test">Email the recruiter</a>']) {
+test('chat yields when a primary or contact link moves underneath it: ' + action, async () => {
+  const dom = new JSDOM(action, { url: 'https://example.test/', runScripts: 'outside-only', pretendToBeVisual: true });
   const w = dom.window; let actionTop = 1500, resized;
   const box = (left, top, width, height) => ({ left, top, right: left + width, bottom: top + height, width, height, x: left, y: top });
   w.HTMLElement.prototype.getBoundingClientRect = function () { return this.classList.contains('launcher') ? box(1198, 865, 130, 51) : box(1178, actionTop, 72, 42); };
@@ -28,3 +29,4 @@ test('chat yields when filtering moves an Apply button underneath it without a s
     assert.equal(host.style.display, '');
   } finally { w.close(); }
 });
+}

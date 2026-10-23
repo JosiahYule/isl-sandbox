@@ -6,12 +6,11 @@
 // 2. When one does, we add the class "is-in". The CSS transitions do the actual animating.
 // 3. Each element only animates once.
 //
-// Nothing runs unless <html> has the "motion" class, which Base.astro adds only when the
-// visitor's device allows motion. Without it, every element is already in its final state.
+// Add motion only once this script and the observer are available. Pending content stays visible.
 
 const root = document.documentElement;
 
-if (root.classList.contains('motion')) {
+if (!matchMedia('(prefers-reduced-motion: reduce)').matches && 'IntersectionObserver' in window) {
   // Number children so CSS can delay each one a little more than the last (--i)
   document.querySelectorAll('.items, [data-stagger]').forEach((list) => {
     [...list.children].forEach((child, i) => child.style.setProperty('--i', i));
@@ -53,4 +52,5 @@ if (root.classList.contains('motion')) {
     });
   }, { rootMargin: '0px 0px -8% 0px' });
   watched.forEach((el) => io.observe(el));
+  root.classList.add('motion');
 }

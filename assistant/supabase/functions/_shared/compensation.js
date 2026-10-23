@@ -49,7 +49,10 @@ export function resolveCompensation(job) {
     return {
       ...job, pay: '', payLabel: 'Confirm pay with recruiter', payStatus: 'conflict',
       // Keep the raw snapshot unchanged, but never publish either unconfirmed rate.
-      description: String(job.description || '').replace(new RegExp(RATE, 'gi'), 'Pay to be confirmed with recruiter'),
+      description: String(job.description || '').replace(
+        new RegExp(`${RATE}(?:\\s*(?:-|–|—|to)\\s*${RATE})?\\+?`, 'gi'),
+        (rate) => 'Pay to be confirmed with recruiter' + (rate.endsWith('+') ? '; plus' : ''),
+      ),
     };
   }
   const rate = check.feed || check.envelope;

@@ -7,6 +7,7 @@
 //   pay on our open jobs    payFor() in assistant/.../insights.js (the same answer the assistant gives)
 // Everything runs in the browser; the ad is never sent or saved.
 import Base from '../../../../layouts/Base.astro';
+import { htmlJson } from '../../../../lib/html-json.js';
 import PageHero from '../../../../components/PageHero.astro';
 import { jobs } from '../../../../data/jobs.js';
 import { CHECKS, PAY_LAW } from '../../../../lib/jobad.js';
@@ -62,6 +63,7 @@ const sample = tools.ad.sample;
 
         <div class="results" data-results hidden>
           <p class="score"><span data-score>0</span><span class="of">/100</span></p>
+          <p class="hint">Checklist score. It does not predict how many applicants you will receive.</p>
           <p class="verdict" data-verdict></p>
           <div class="meter" aria-hidden="true"><span data-meter></span></div>
 
@@ -108,8 +110,8 @@ const sample = tools.ad.sample;
     </div>
   </section>
 
-  <script type="application/json" id="pay-jobs" set:html={JSON.stringify(compare ? payJobs : [])} data-brand={brand.short} />
-  <script type="application/json" id="ad-sample" set:html={JSON.stringify(sample)} />
+  <script type="application/json" id="pay-jobs" set:html={htmlJson(compare ? payJobs : [])} data-brand={brand.short} />
+  <script type="application/json" id="ad-sample" set:html={htmlJson(sample)} />
 </Base>
 
 <script>
@@ -136,8 +138,8 @@ const sample = tools.ad.sample;
     $('[data-score]').textContent = String(r.score);
     $('[data-meter]').style.width = `${r.score}%`;
     $('[data-verdict]').textContent = r.score === 100 ? 'Ready to post.' : r.score >= 85 ? 'Strong. Ready to post after a small fix or two.'
-      : r.score >= 60 ? 'Decent. The fixes below will bring in more of the right people.'
-      : 'Likely to underperform. Start at the top of the list.';
+      : r.score >= 60 ? 'Several checks passed. Work through the suggestions below.'
+      : 'Several checklist items need attention. Start at the top of the list.';
 
     // Pay law in this province, and whether this ad meets it
     const required = r.law.status === 'required';

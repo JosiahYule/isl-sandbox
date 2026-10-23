@@ -27,7 +27,7 @@ else {
   const url = new URL('https://www.google-analytics.com/' + (validate ? 'debug/mp/collect' : 'mp/collect'));
   url.searchParams.set('measurement_id', id); url.searchParams.set('api_secret', secret);
   for (const payload of payloads) {
-    const response = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+    const response = await fetch(url, { method: 'POST', signal: AbortSignal.timeout(15000), headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
     if (!response.ok) throw new Error('Analytics returned HTTP ' + response.status + '. Check the request before trying again.');
     if (validate) {
       const result = await response.json();

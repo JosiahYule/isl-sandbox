@@ -24,6 +24,7 @@
 
 import { route, placeFrom, provinceName } from "../_shared/routing.js";
 import { isLeadId, sanitizeAttribution, attributionRows, pagePath, sanitizeMeasurement } from "../_shared/lead-context.js";
+import { readJson, rateLimiter, BodyError } from "../_shared/http.js";
 
 const RESEND_KEY = Deno.env.get("RESEND_API_KEY") ?? "";
 const FROM = Deno.env.get("REQUEST_FROM") ?? "";
@@ -46,25 +47,20 @@ function corsHeaders(origin: string | null) {
 }
 
 // A light brake on repeat sends from one address (resets when the function restarts)
-const recent = new Map<string, number[]>();
-function tooMany(ip: string) {
-  const now = Date.now();
-  const hits = (recent.get(ip) ?? []).filter((t) => now - t < 10 * 60 * 1000);
-  hits.push(now);
-  recent.set(ip, hits);
-  return hits.length > 5;
-}
+const tooMany = rateLimiter(5, 10 * 60 * 1000);
 
-const clean = (v: unknown, max: number) => String(v ?? "").replace(/[\u0000-\u001f\u007f]/g, " ").trim().slice(0, max);
+const clean = (v: unknown, max: number) => (typeof v === 'string' ? v : '').replace(/[\u0000-\u001f\u007f]/g, " ").trim().slice(0, max);
 const esc = (s: string) => s.replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]!));
 
 Deno.serve(async (req) => {
-  const headers = { ...corsHeaders(req.headers.get("origin")), "Content-Type": "application/json" };
+  const origin = req.headers.get('origin');
+  const headers = { ...corsHeaders(origin), "Content-Type": "application/json", 'Cache-Control': 'no-store' };
+  if (origin && !ALLOWED.includes(origin)) return new Response(JSON.stringify({ ok: false, error: 'origin' }), { status: 403, headers });
   if (req.method === "OPTIONS") return new Response(null, { headers });
   if (req.method !== "POST") return new Response(JSON.stringify({ ok: false, error: "method" }), { status: 405, headers });
 
   let body: Record<string, unknown>;
-  try { body = await req.json(); } catch { return new Response(JSON.stringify({ ok: false, error: "json" }), { status: 400, headers }); }
+  try { body = await readJson(req, 16384); } catch (e) { return new Response(JSON.stringify({ ok: false, error: e instanceof BodyError ? e.message : 'json' }), { status: e instanceof BodyError ? e.status : 400, headers }); }
 
   // Bots fill every field, including the hidden "website" one people never see
   if (!body || typeof body !== 'object' || Array.isArray(body)) return new Response(JSON.stringify({ ok: false, error: 'json' }), { status: 400, headers });
@@ -123,6 +119,7 @@ Deno.serve(async (req) => {
   let res: Response;
   try { res = await fetch("https://api.resend.com/emails", {
     method: "POST",
+    signal: AbortSignal.timeout(10000),
     headers: { Authorization: `Bearer ${RESEND_KEY}`, "Content-Type": "application/json", "Idempotency-Key": 'isl-request/' + leadId },
     body: JSON.stringify({
       from: FROM,
@@ -137,5 +134,7 @@ Deno.serve(async (req) => {
     return new Response(JSON.stringify({ ok: false, error: 'send' }), { status: 502, headers });
   }
   if (!res.ok) return new Response(JSON.stringify({ ok: false, error: "send" }), { status: 502, headers });
+  const receipt = await res.json().catch(() => null);
+  if (!receipt || typeof receipt.id !== 'string' || !receipt.id) return new Response(JSON.stringify({ ok: false, error: 'send' }), { status: 502, headers });
   return new Response(JSON.stringify({ ok: true, accepted: true, lead_id: leadId, routedTo: who, province: place?.province ? provinceName(place.province) : null }), { headers });
 });

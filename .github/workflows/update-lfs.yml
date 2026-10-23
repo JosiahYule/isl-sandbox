@@ -2,7 +2,7 @@
 # Statistics Canada releases the Labour Force Survey once a month, usually the first Friday at
 # 8:30 am Eastern. This checks every hour, saves the latest figures to
 # src/data/lfs/latest.json (scripts/fetch-lfs.mjs) and, when a new month has arrived, commits it
-# and starts a deploy so the Atlantic jobs report shows it right away.
+# and starts a deploy for new figures, revisions or release-date corrections.
 name: Update jobs report data
 
 on:
@@ -12,34 +12,37 @@ on:
   # Also whenever the fetch script itself changes, so a fix is tested straight away
   push:
     branches: [main]
-    paths: [scripts/fetch-lfs.mjs, .github/workflows/update-lfs.yml]
+    paths: [scripts/fetch-lfs.mjs, scripts/lib/lfs-report.mjs, .github/workflows/update-lfs.yml]
 
 permissions:
   contents: write
   actions: write
 
+concurrency:
+  group: jobs-report-data
+  cancel-in-progress: false
+
 jobs:
   update:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version-file: .node-version
       - run: node scripts/fetch-lfs.mjs
-      - name: Commit and deploy when the month changes
+      - name: Commit and deploy new or revised figures
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           # status, not diff: diff ignores a file git hasn't seen before (the very first one)
           if [ -z "$(git status --porcelain -- src/data/lfs)" ]; then echo "No change."; exit 0; fi
           month=$(node -p "require('./src/data/lfs/latest.json').month")
-          if git show HEAD:src/data/lfs/latest.json >/dev/null 2>&1 && [ "$(git show HEAD:src/data/lfs/latest.json | node -p "JSON.parse(require('fs').readFileSync(0)).month")" = "$month" ]; then
-            echo "Same month ($month); figures unchanged apart from the fetch time."; exit 0
-          fi
           git config user.name "github-actions[bot]"
           git config user.email "41898699+github-actions[bot]@users.noreply.github.com"
           git add src/data/lfs
-          git commit -m "Labour Force Survey: $month"
+          git commit -m "Labour Force Survey: $month figures and revisions"
+          git pull --rebase origin main
           git push
           gh workflow run "Deploy to GitHub Pages"

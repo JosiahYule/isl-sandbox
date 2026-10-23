@@ -152,22 +152,15 @@ h1 .line, h2 .line { display: block; }
    - .items and [data-stagger] lists bring their children in one after another,
      and each item's rule draws itself in from the left
    - [data-countup] numbers count up from zero (src/scripts/motion.js)
-   They only run when html has the "motion" class. Base.astro adds it only when the visitor's
-   device allows motion, so with reduced motion or no JavaScript everything is simply visible. */
-.motion .section-head, .motion [data-reveal] {
-  opacity: 0; transform: translateY(18px);
-  transition: opacity 0.4s var(--ease), transform 0.4s var(--ease);
-  transition-delay: calc(min(var(--i, 0), 4) * 40ms);
+   Content is visible before the script runs and while the observer waits. A failed or blocked
+   script must never leave headings, job rows or calls to action transparent. */
+.motion .section-head.is-in, .motion [data-reveal].is-in,
+.motion .items.is-in > *, .motion [data-stagger].is-in > * {
+  animation: content-enter 0.4s var(--ease) both;
+  animation-delay: calc(min(var(--i, 0), 4) * 40ms);
 }
-.motion .section-head.is-in, .motion [data-reveal].is-in { opacity: 1; transform: none; }
-
-.motion .items > *, .motion [data-stagger] > * {
-  opacity: 0; transform: translateY(18px);
-  transition: opacity 0.4s var(--ease), transform 0.4s var(--ease), background-size 0.5s var(--ease);
-  transition-delay: calc(min(var(--i, 0), 4) * 40ms); /* the 5th item on waits no longer than the 4th */
-}
+@keyframes content-enter { from { opacity: 0.3; transform: translateY(12px); } to { opacity: 1; transform: none; } }
 .motion .items > .item, .motion [data-stagger] > .item { background-size: 0% 1.5px; }
-.motion .items.is-in > *, .motion [data-stagger].is-in > * { opacity: 1; transform: none; }
 .motion .items.is-in > .item, .motion [data-stagger].is-in > .item { background-size: 100% 1.5px; }
 
 @media (prefers-reduced-motion: reduce) {

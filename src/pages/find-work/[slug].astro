@@ -143,6 +143,13 @@ const schema = {
 </Base>
 
 <script>
+  import { resultsContext } from '../../lib/job-navigation.js';
+  const context = resultsContext(location.search);
+  const back = document.querySelector<HTMLAnchorElement>('a.back');
+  if (back && context) {
+    back.search = context;
+    back.textContent = '← Back to results';
+  }
   // Share: the phone's share sheet where there is one, otherwise copy the link
   const b = document.querySelector<HTMLButtonElement>('[data-share]');
   b?.addEventListener('click', async () => {

@@ -57,15 +57,20 @@ const count = { contract: jobs.filter((j) => j.type === 'contract').length, dire
         </ul>
       </nav>
       <h2 class="visually-hidden">Open roles</h2>
-      <p class="count" aria-live="polite"><strong data-count>{jobs.length}</strong> <span data-count-label>open roles</span></p>
+      <div class="results-heading">
+        <div aria-live="polite" aria-atomic="true">
+          <p class="count"><strong data-count>{jobs.length}</strong> <span data-count-label>open roles</span></p>
+          <p class="result-summary" data-result-summary>{jobs.length} roles available</p>
+        </div>
+        <button class="reset" type="button" data-reset hidden>Clear search and filters</button>
+      </div>
       <div class="list" data-list>
         {jobs.map((job) => <JobRow job={job} />)}
       </div>
-      <button type="button" class="more" data-more>Show all {jobs.length} roles</button>
+      <button type="button" class="more" data-more hidden>Show all {jobs.length} roles</button>
       <div class="empty" data-empty hidden>
         <p class="empty-title">No roles match that search.</p>
         <p>Try a broader term or another province. Or <a href={links.resume}>send us your resume</a> and we'll contact you when something fits.</p>
-        <button type="button" data-reset>Clear search and filters</button>
       </div>
       <p class="note">{jobsNote(snapshotDate)}</p>
     </div>
@@ -85,6 +90,7 @@ const count = { contract: jobs.filter((j) => j.type === 'contract').length, dire
 
 <script>
   import { matchesJobQuery } from '../../lib/jobsearch.js';
+  import { RESULT_KEYS, resultsContext } from '../../lib/job-navigation.js';
 
   const form = document.querySelector<HTMLFormElement>('[data-search]')!;
   const q = form.querySelector<HTMLInputElement>('#q')!;
@@ -96,15 +102,17 @@ const count = { contract: jobs.filter((j) => j.type === 'contract').length, dire
   const labelEl = document.querySelector('[data-count-label]')!;
   const empty = document.querySelector<HTMLElement>('[data-empty]')!;
   const more = document.querySelector<HTMLButtonElement>('[data-more]')!;
+  const reset = document.querySelector<HTMLButtonElement>('[data-reset]')!;
+  const summary = document.querySelector<HTMLElement>('[data-result-summary]')!;
   const areaLinks = [...document.querySelectorAll<HTMLAnchorElement>('.near a')];
   const PAGE = 15;
-  const KEYS = ['q', 'province', 'industry', 'type', 'area'];
+  const KEYS = RESULT_KEYS;
   let area = '', type = '', expanded = false;
   let trackingTimer: ReturnType<typeof setTimeout>;
 
   function syncUrl() {
     const u = new URL(location.href);
-    const values = [q.value.trim(), prov.value, ind?.value || '', type, area];
+    const values = [q.value.trim(), prov.value, ind?.value || '', type, area, expanded ? 'all' : ''];
     KEYS.forEach((key, i) => values[i] ? u.searchParams.set(key, values[i]) : u.searchParams.delete(key));
     history.replaceState(null, '', u);
   }
@@ -128,7 +136,21 @@ const count = { contract: jobs.filter((j) => j.type === 'contract').length, dire
     countEl.textContent = String(shown);
     labelEl.textContent = shown === 1 ? 'open role' : 'open roles';
     empty.hidden = shown > 0;
+    reset.hidden = !filtering;
+    const visible = filtering || expanded ? shown : Math.min(PAGE, shown);
+    const filters = [term ? `“${term}”` : '', prov.value ? prov.selectedOptions[0].textContent : '',
+      ind?.value ? ind.selectedOptions[0].textContent : '', type ? typeButtons.find((b) => b.dataset.type === type)?.firstChild?.textContent?.trim() : '',
+      area ? `near ${areaLinks.find((a) => a.dataset.area === area)?.firstChild?.textContent?.trim()}` : ''].filter(Boolean);
+    summary.textContent = `Showing ${visible} of ${shown} ${shown === 1 ? 'role' : 'roles'}${filters.length ? ' · ' + filters.join(' · ') : ''}`;
     if (sync) syncUrl();
+    const context = resultsContext(location.search);
+    rows.forEach((row) => {
+      const link = row.querySelector<HTMLAnchorElement>('h3 a');
+      if (!link) return;
+      const destination = new URL(link.href);
+      destination.search = context;
+      link.href = destination.href;
+    });
     if (track) {
       clearTimeout(trackingTimer);
       trackingTimer = setTimeout(() => document.dispatchEvent(new CustomEvent('isl:track', {
@@ -147,7 +169,7 @@ const count = { contract: jobs.filter((j) => j.type === 'contract').length, dire
     if (ind) ind.value = validOption(ind, params.get('industry') || '');
     type = ['contract', 'direct'].includes(params.get('type') || '') ? params.get('type')! : '';
     area = areaLinks.some((a) => a.dataset.area === params.get('area')) ? params.get('area')! : '';
-    expanded = false;
+    expanded = params.get('view') === 'all';
     apply(false, false);
   }
 
@@ -160,7 +182,7 @@ const count = { contract: jobs.filter((j) => j.type === 'contract').length, dire
     e.preventDefault(); area = area === a.dataset.area ? '' : a.dataset.area!; apply();
   }));
   more.addEventListener('click', () => { expanded = true; apply(); rows[PAGE]?.querySelector('a')?.focus(); });
-  document.querySelector('[data-reset]')!.addEventListener('click', () => {
+  reset.addEventListener('click', () => {
     q.value = ''; prov.value = ''; if (ind) ind.value = ''; type = ''; area = ''; expanded = false;
     apply(); q.focus();
   });
@@ -203,17 +225,18 @@ const count = { contract: jobs.filter((j) => j.type === 'contract').length, dire
   .near a[aria-current='true'] { background: var(--ink); border-color: var(--ink); color: #fff; }
   .near .n { color: var(--ink-soft); font-variant-numeric: tabular-nums; }
   .near a[aria-current='true'] .n { color: rgb(255 255 255 / 0.7); }
-  .count { font-size: var(--fs-small); color: var(--ink-soft); margin-bottom: var(--s3); }
+  .results-heading { display: flex; flex-wrap: wrap; gap: var(--s3) var(--s5); justify-content: space-between; align-items: center; margin-bottom: var(--s4); }
+  .count { font-size: var(--fs-small); color: var(--ink-soft); }
+  .result-summary { font-size: var(--fs-small); color: var(--ink-soft); margin-top: var(--s2); overflow-wrap: anywhere; }
   .count strong { font-weight: var(--fw-bold); font-size: var(--fs-h3); color: var(--ink); margin-right: 0.2em; }
   .list { border-top: 1.5px solid var(--ink); }
   /* The rows are JobRow components, so the rule must reach outside this page's own styles */
   .list > :global([hidden]) { display: none; }
   .empty { padding: var(--s7) 0; border-top: 1.5px solid var(--ink); max-width: 46rem; }
   .empty-title { font-weight: var(--fw-bold); font-size: var(--fs-h3); }
-  .empty button {
-    margin-top: var(--s4); font: inherit; font-weight: var(--fw-bold); cursor: pointer;
-    padding: 0.7rem 1.1rem; border: 2px solid var(--ink); border-radius: var(--radius); background: transparent;
-  }
+  .reset { font: inherit; font-size: var(--fs-small); font-weight: var(--fw-bold); cursor: pointer;
+    padding: 0.7rem 1rem; border: 1.5px solid var(--ink); border-radius: var(--radius); background: transparent; color: var(--ink); }
+  .reset:hover { background: var(--ink); color: #fff; }
   .more {
     margin-top: var(--s5); font: inherit; font-weight: var(--fw-bold); cursor: pointer;
     padding: 0.8rem 1.35rem; border: 2px solid var(--ink); background: transparent; color: var(--ink);

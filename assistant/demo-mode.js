@@ -19,11 +19,16 @@ const site = new URL('..', base);                // the site root (handles the /
 // The engine (and the job snapshot it searches) only load when someone sends a first message,
 // so pages where nobody opens the chat don't download them.
 let jobsPromise, enginePromise;
+function loadJobs() {
+  return (jobsPromise ||= fetch(new URL('jobs-snapshot.json', base), { signal: AbortSignal.timeout(10000) })
+    .then((r) => { if (!r.ok) throw new Error('Jobs unavailable'); return r.json(); })
+    .catch((error) => { jobsPromise = null; throw error; }));
+}
 const respond = async (messages, context) => {
   enginePromise ||= import('./demo-engine.js').then(({ createEngine }) => createEngine({
-    loadJobs: () => (jobsPromise ||= fetch(new URL('jobs-snapshot.json', base)).then((r) => r.json())),
+    loadJobs,
     siteUrl: (path) => { const u = new URL(path.replace(/^\//, ''), site); return u.pathname + u.search; },
-  }));
+  })).catch((error) => { enginePromise = null; throw error; });
   return (await enginePromise)(messages, context);
 };
 

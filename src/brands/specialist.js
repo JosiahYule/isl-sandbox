@@ -61,6 +61,7 @@ export const cta = {
   title: 'We’d love to hear from you.', // the live sites' closing line
   text: 'Looking for your next opportunity or need staff support?',
   faces: false,
+  candidateLink: true,
 };
 
 // The Learn tools both brands have (no pay tool: the sample jobs carry no pay yet)
