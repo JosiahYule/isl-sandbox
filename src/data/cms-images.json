@@ -1,1 +1,461 @@
-{}
+{
+ "0ef24270-c545-4732-a37c-05b7a7b05030/Isl-home-banner": {
+  "name": "isl-home-banner-0ef24270",
+  "ext": "webp",
+  "widths": [
+   500,
+   750,
+   1000,
+   1500,
+   2500
+  ]
+ },
+ "b4aaffd0-9d0e-4194-8851-2293b7d65d88/Integrated+Staffing+Full+Logo+-+Vector+File.png": {
+  "name": "integrated-staffing-full-logo-vector-file-b4aaffd0",
+  "ext": "webp",
+  "widths": [
+   750
+  ]
+ },
+ "35d4c867-0e4b-4e07-867d-d9fd4027d1b2/best-work-48.png": {
+  "name": "best-work-48-35d4c867",
+  "ext": "webp",
+  "widths": [
+   500
+  ]
+ },
+ "a402f9b4-6815-4761-8089-00eb38a68d74/cor-logo-54-2.png": {
+  "name": "cor-logo-54-2-a402f9b4",
+  "ext": "webp",
+  "widths": [
+   500
+  ]
+ },
+ "9e5f5557-c374-4987-a652-b66cf60b8046/f69863e9-db78-4c2f-9a23-6aa42798d9b2.jpg": {
+  "name": "f69863e9-db78-4c2f-9a23-6aa42798d9b2-9e5f5557",
+  "ext": "webp",
+  "widths": [
+   500,
+   750,
+   1000,
+   1500,
+   2500
+  ]
+ },
+ "9a251d7d-94cd-40f3-819a-70ed26b0c428/381fda9a-3a01-416b-a169-ba90a4c90a41.jpg": {
+  "name": "381fda9a-3a01-416b-a169-ba90a4c90a41-9a251d7d",
+  "ext": "webp",
+  "widths": [
+   500,
+   750,
+   1000,
+   1500,
+   2500
+  ]
+ },
+ "030b303f-7cda-4655-887b-592b5accda3e/IMG_0288.jpg": {
+  "name": "img-0288-030b303f",
+  "ext": "webp",
+  "widths": [
+   500,
+   750,
+   1000,
+   1500,
+   2500
+  ]
+ },
+ "ff44a3f4-fe47-49ca-be62-8fb535ac88e0/IMG_7571.jpg": {
+  "name": "img-7571-ff44a3f4",
+  "ext": "webp",
+  "widths": [
+   500,
+   750,
+   1000,
+   1500,
+   2500
+  ]
+ },
+ "8c0873ec-85b1-46d0-8f74-5014738a70b7/1764090027761.jpg": {
+  "name": "1764090027761-8c0873ec",
+  "ext": "webp",
+  "widths": [
+   500,
+   750,
+   1000,
+   1500,
+   2500
+  ]
+ },
+ "4e7c3d35-6b01-479e-9d84-df0e8c9c690c/IMG_5011.jpeg": {
+  "name": "img-5011-4e7c3d35",
+  "ext": "webp",
+  "widths": [
+   500,
+   750,
+   1000,
+   1500,
+   2500
+  ]
+ },
+ "08195d05-31a1-41ef-aa76-946ecfb272d5/Headshot+-+M.+Antonick.jpg": {
+  "name": "headshot-m-antonick-08195d05",
+  "ext": "webp",
+  "widths": [
+   300,
+   500,
+   750,
+   1000,
+   1500
+  ]
+ },
+ "0a6f5757-c713-4324-bedc-83e05e8973d5/Kelli-Wetmore.jpg": {
+  "name": "kelli-wetmore-0a6f5757",
+  "ext": "webp",
+  "widths": [
+   300,
+   500,
+   750,
+   1000,
+   1500
+  ]
+ },
+ "ed563cb9-3419-44a3-a7e5-59589393f3c7/Headshot+-+Chance+Skauge.jpg": {
+  "name": "headshot-chance-skauge-ed563cb9",
+  "ext": "webp",
+  "widths": [
+   300,
+   500,
+   750,
+   1000,
+   1500
+  ]
+ },
+ "e921f8f3-efa2-46ca-908d-7c0466f5cb6e/3.png": {
+  "name": "3-e921f8f3",
+  "ext": "webp",
+  "widths": [
+   300,
+   500,
+   750,
+   1000,
+   1500
+  ]
+ },
+ "471bd9d6-a42f-4bdd-84bc-47ae0b3f7e5d/Integrated+Staffing+Zowie+Tucker_1+%281%29.jpg": {
+  "name": "integrated-staffing-zowie-tucker-1-1-471bd9d6",
+  "ext": "webp",
+  "widths": [
+   300,
+   500,
+   750,
+   1000,
+   1500
+  ]
+ },
+ "1773340555499-TN5WELTYLU7VA9UB347K/unsplash-image-zL7C-G2U7sw.jpg": {
+  "name": "unsplash-image-zl7c-g2u7sw-17733405",
+  "ext": "webp",
+  "widths": [
+   500,
+   750,
+   1000,
+   1500,
+   2500
+  ]
+ },
+ "0bd6add1-06f1-4a63-ace6-538e53b49a0c/Integrated+Staffing+Skylar+Hardwick.jpg": {
+  "name": "integrated-staffing-skylar-hardwick-0bd6add1",
+  "ext": "webp",
+  "widths": [
+   300,
+   500,
+   750,
+   1000,
+   1500
+  ]
+ },
+ "1782998628646-3QZ3AIYS6470XB12D9UQ/vitaly-gariev-2AOIg7Qvu8w-unsplash.jpg": {
+  "name": "vitaly-gariev-2aoig7qvu8w-unsplash-17829986",
+  "ext": "webp",
+  "widths": [
+   500,
+   750,
+   1000,
+   1500,
+   2500
+  ]
+ },
+ "1781525441968-BZM3S0N9FX12QYLAE7WO/unsplash-image-9Q_pLLP_jmA.jpg": {
+  "name": "unsplash-image-9q-pllp-jma-17815254",
+  "ext": "webp",
+  "widths": [
+   500,
+   750,
+   1000,
+   1500,
+   2500
+  ]
+ },
+ "1777913999462-G2VCNH8RY14H1E66HV9J/unsplash-image-X1P1_EDNnok.jpg": {
+  "name": "unsplash-image-x1p1-ednnok-17779139",
+  "ext": "webp",
+  "widths": [
+   500,
+   750,
+   1000,
+   1500,
+   2500
+  ]
+ },
+ "854d545a-6cd8-41ec-aea2-db95d41993cf/Integrated+Staffing+Shane+Ico.jpg": {
+  "name": "integrated-staffing-shane-ico-854d545a",
+  "ext": "webp",
+  "widths": [
+   500,
+   750,
+   1000,
+   1500
+  ]
+ },
+ "967f478a-b4c1-4236-8703-48d355f1cce2/d247e9aa-54c1-4a72-b108-ab50880696c2.jpg": {
+  "name": "d247e9aa-54c1-4a72-b108-ab50880696c2-967f478a",
+  "ext": "webp",
+  "widths": [
+   500,
+   750,
+   1000,
+   1500
+  ]
+ },
+ "75e91452-b766-4e60-ac55-0c75bb6c2616/Kayla+Jamieson.png": {
+  "name": "kayla-jamieson-75e91452",
+  "ext": "webp",
+  "widths": [
+   500,
+   750,
+   1000,
+   1500
+  ]
+ },
+ "e09b703e-98d4-4fcd-81ee-784e873d0f3e/Headshot+-+Megan+Ferguson.jpg": {
+  "name": "headshot-megan-ferguson-e09b703e",
+  "ext": "webp",
+  "widths": [
+   500,
+   750,
+   1000,
+   1500
+  ]
+ },
+ "bc129d0d-4d81-47c9-8810-c693e282707d/Ashton-murray.jpg": {
+  "name": "ashton-murray-bc129d0d",
+  "ext": "webp",
+  "widths": [
+   500,
+   750,
+   1000,
+   1500
+  ]
+ },
+ "78143d58-953c-4d76-871c-919ca8a10037/Brady+W+Headshot.png": {
+  "name": "brady-w-headshot-78143d58",
+  "ext": "webp",
+  "widths": [
+   500,
+   750,
+   1000,
+   1500
+  ]
+ },
+ "347a41ba-e729-495e-ad94-39b2a85f1118/Headshot+-+G.+White.png": {
+  "name": "headshot-g-white-347a41ba",
+  "ext": "webp",
+  "widths": [
+   500,
+   750,
+   1000,
+   1500
+  ]
+ },
+ "4bb0b36f-5c7d-46b8-a60d-367f177563c9/integrated_2024_1723web+%281%29.jpg": {
+  "name": "integrated-2024-1723web-1-4bb0b36f",
+  "ext": "webp",
+  "widths": [
+   500,
+   750,
+   1000,
+   1500
+  ]
+ },
+ "768d3e2a-b0eb-44af-a48c-2fa25c843713/IMG_0975.png": {
+  "name": "img-0975-768d3e2a",
+  "ext": "webp",
+  "widths": [
+   500,
+   750,
+   1000,
+   1500
+  ]
+ },
+ "70f9ceb8-76bf-4415-b32f-cdbba19bd9e9/Laura+C+Headshot.png": {
+  "name": "laura-c-headshot-70f9ceb8",
+  "ext": "webp",
+  "widths": [
+   500,
+   750,
+   1000,
+   1500
+  ]
+ },
+ "96afec44-c1c5-4278-8497-ea049977aa7a/024A1684.jpg": {
+  "name": "024a1684-96afec44",
+  "ext": "webp",
+  "widths": [
+   500,
+   750,
+   1000,
+   1500
+  ]
+ },
+ "ef4581bc-24d6-4baf-9720-e7633a7936d1/websized-mdwed_2022_0128_1.jpg": {
+  "name": "websized-mdwed-2022-0128-1-ef4581bc",
+  "ext": "webp",
+  "widths": [
+   500,
+   750,
+   1000,
+   1500
+  ]
+ },
+ "89e129a9-cf97-4f47-b10a-665fb96c2d83/Screenshot+2025-08-05+111222_0.png": {
+  "name": "screenshot-2025-08-05-111222-0-89e129a9",
+  "ext": "webp",
+  "widths": [
+   500,
+   750,
+   1000,
+   1500
+  ]
+ },
+ "2dfb87e4-d375-4b85-8268-aa46002c892e/Marine-migliore.jpg": {
+  "name": "marine-migliore-2dfb87e4",
+  "ext": "webp",
+  "widths": [
+   500,
+   750,
+   1000,
+   1500
+  ]
+ },
+ "41de8177-1ebe-4ead-b6e4-a4c7fb109e82/Headshot+-+Nicole+Robertson+copy_0.jpg": {
+  "name": "headshot-nicole-robertson-copy-0-41de8177",
+  "ext": "webp",
+  "widths": [
+   500,
+   750,
+   1000,
+   1500
+  ]
+ },
+ "eb9a76cf-de9a-49f7-b06a-a60776fbf71b/2.png": {
+  "name": "2-eb9a76cf",
+  "ext": "webp",
+  "widths": [
+   500,
+   750,
+   1000,
+   1500
+  ]
+ },
+ "12ae6951-323c-462a-a24f-68becebbed01/Sonja+Headshot_1.jpg": {
+  "name": "sonja-headshot-1-12ae6951",
+  "ext": "webp",
+  "widths": [
+   500,
+   750,
+   1000,
+   1500
+  ]
+ },
+ "0f317710-5e34-4396-8ea2-b3f16f46e21f/Untitled+%28Instagram+Post+%2845%29%29+%284%29+%281%29.png": {
+  "name": "untitled-instagram-post-45-4-1-0f317710",
+  "ext": "webp",
+  "widths": [
+   500,
+   750,
+   1000,
+   1500
+  ]
+ },
+ "e18bddfe-5d64-407c-bbee-4b34381d37c6/Headshot+-+N.+Bailey.png": {
+  "name": "headshot-n-bailey-e18bddfe",
+  "ext": "webp",
+  "widths": [
+   500,
+   750,
+   1000,
+   1500
+  ]
+ },
+ "d54271f1-1eb7-4dfa-8743-5e586e637316/Carrie+F.+Headshot": {
+  "name": "carrie-f-headshot-d54271f1",
+  "ext": "webp",
+  "widths": [
+   500,
+   750,
+   1000,
+   1500
+  ]
+ },
+ "27e2cd83-1b6e-44f9-8a78-cc9a28b9b6e7/Screenshot+2025-08-05+110436.png": {
+  "name": "screenshot-2025-08-05-110436-27e2cd83",
+  "ext": "webp",
+  "widths": [
+   500,
+   750,
+   1000,
+   1500
+  ]
+ },
+ "9f67fad0-959f-486b-84f1-76073eed3d9f/Julia+P+Headshot.png": {
+  "name": "julia-p-headshot-9f67fad0",
+  "ext": "webp",
+  "widths": [
+   500,
+   750,
+   1000,
+   1500
+  ]
+ },
+ "86c7d1c3-26f6-4198-b2e0-c5cf8839221f/Group+Photo+-+Team+NL+-+Dec+2025.jpg": {
+  "name": "group-photo-team-nl-dec-2025-86c7d1c3",
+  "ext": "webp",
+  "widths": [
+   500,
+   750,
+   1000,
+   1500,
+   2500
+  ]
+ },
+ "a4eaa1f0-9a60-49d6-b2d2-d6693431e772/2.png": {
+  "name": "2-a4eaa1f0",
+  "ext": "webp",
+  "widths": [
+   500,
+   750,
+   1000,
+   1500
+  ]
+ },
+ "e87ae312-c01f-4440-b72c-e83ed212cecc/1.png": {
+  "name": "1-e87ae312",
+  "ext": "webp",
+  "widths": [
+   500,
+   750,
+   1000,
+   1500
+  ]
+ }
+}
