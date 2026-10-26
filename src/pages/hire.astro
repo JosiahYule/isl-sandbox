@@ -20,6 +20,7 @@ const locations = hire.locations;
 // What the script needs from the brand: how it names things, and (AS, ADS) which office answers each province
 const said = {
   short: brand.short,
+  brand: brand.key, // AS and ADS share one sending function, which needs to know whose form this is
   routing: hire.routing,
   temp: services.contract.ask,
   guarantee: brand.key === 'isl' ? '90-day' : 'six-month',
@@ -314,7 +315,7 @@ const afterSteps = [
       track('form_submit', eventContext());
       try {
         // A retry uses the exact same payload as well as the same idempotency key.
-        pendingPayload ||= { ...data, page: location.pathname, lead_id: leadId, attribution: getAttribution(), measurement: await getMeasurementContext() };
+        pendingPayload ||= { ...data, brand: said.brand, page: location.pathname, lead_id: leadId, attribution: getAttribution(), measurement: await getMeasurementContext() };
         const res = await fetch(endpoint, { method: 'POST', signal: AbortSignal.timeout(15000), headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(pendingPayload) });
         const result = await res.json();

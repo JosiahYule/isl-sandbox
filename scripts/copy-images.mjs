@@ -15,6 +15,8 @@ const OUT = 'public/images/cms';
 const MANIFEST = 'src/data/cms-images.json';
 const EXT = { 'image/jpeg': 'jpg', 'image/png': 'png', 'image/webp': 'webp', 'image/gif': 'gif', 'image/svg+xml': 'svg' };
 
+process.on('uncaughtException', (e) => { console.log(`::error::${e.stack || e.message}`.replace(/\n/g, ' ')); process.exit(1); });
+
 // 1. Every Squarespace image URL in the built pages and scripts, with the widths asked for
 const walk = (d) => readdirSync(d).flatMap((f) => { const p = join(d, f); return statSync(p).isDirectory() ? walk(p) : [p]; });
 const found = new Map(); // path -> Set of widths
@@ -40,6 +42,7 @@ const nameFor = (path) => {
 const manifest = existsSync(MANIFEST) ? JSON.parse(readFileSync(MANIFEST, 'utf8')) : {};
 mkdirSync(OUT, { recursive: true });
 let fetched = 0, failed = 0;
+const reasons = [];
 for (const [path, widthSet] of found) {
   const entry = manifest[path] ?? { name: nameFor(path), ext: '', widths: [] };
   const widths = [...widthSet].sort((a, b) => a - b);
@@ -53,12 +56,12 @@ for (const [path, widthSet] of found) {
       writeFileSync(join(OUT, `${entry.name}-${w}w.${entry.ext}`), Buffer.from(await res.arrayBuffer()));
       entry.widths.push(w); fetched++;
     } catch (e) {
-      failed++; console.log(`::warning::${path} at ${w}w: ${e.message}`);
+      failed++; if (reasons.length < 3) reasons.push(`${path} at ${w}w: ${e.message}${e.cause ? ` (${e.cause.code || e.cause.message})` : ''}`);
     }
   }
   entry.widths.sort((a, b) => a - b);
   if (entry.widths.length) manifest[path] = entry;
 }
 writeFileSync(MANIFEST, JSON.stringify(manifest, null, 1) + '\n');
-console.log(`::notice::Copied ${fetched} image files (${Object.keys(manifest).length} images listed, ${failed} failed)`);
+console.log(`::notice::Copied ${fetched} image files (${Object.keys(manifest).length} images listed, ${failed} failed)${reasons.length ? `. First failures: ${reasons.join('; ')}` : ''}`);
 if (failed && !fetched) process.exit(1);

@@ -33,7 +33,7 @@ Set these repository **Actions variables**, then rebuild. Empty values retain th
 
 The GA4 value is the actual `G-...` Web stream measurement ID. Use a separate test property if measuring the sandbox. Do not send preview traffic to the production property. The corresponding local build variables are `PUBLIC_ISL_GA4_ID`, `PUBLIC_ISL_REQUEST_ENDPOINT`, and equivalent AS/ADS names. Existing values in the brand configuration still work as a fallback.
 
-Deploy the updated `assistant/supabase/functions/isl-request/index.ts` before enabling its ISL endpoint. Its Resend credentials and sender remain server-side secrets, configured as described in `assistant/README.md`. This change does not provision or deploy an external service. AS and ADS need their own correctly routed delivery endpoint; do not point them at the ISL-only recruiter handler.
+Deploy the updated `assistant/supabase/functions/isl-request/index.ts` before enabling its ISL endpoint. Its Resend credentials and sender remain server-side secrets, configured as described in `assistant/README.md`. This change does not provision or deploy an external service. AS and ADS use `assistant/supabase/functions/specialist-request` (office routing, per-brand sender), not the ISL-only recruiter handler. Its secrets are listed at the top of that file.
 
 In GA4:
 
