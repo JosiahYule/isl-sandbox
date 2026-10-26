@@ -173,7 +173,6 @@ const isCurrent = (href) => current.startsWith(url(href));
   /* On a phone the logo shares the bar with Call and Menu, so it steps down a little */
   @media (max-width: 480px) { .logo img { height: calc(var(--logo-h, 46px) * 0.85); } }
   /* The narrowest phones: Call becomes just its icon (the link still says "Call" to screen readers) */
-  @media (max-width: 374px) { .call-m span { display: none; } .bar { gap: var(--s2); } .logo img { height: calc(var(--logo-h, 46px) * 0.72); } }
   .wordmark {
     display: none; align-items: center; font-weight: var(--fw-bold);
     font-size: var(--fs-body); line-height: 1; letter-spacing: -0.01em; min-height: 46px;
@@ -270,5 +269,12 @@ const isCurrent = (href) => current.startsWith(url(href));
     .mobile summary { padding-inline: var(--s3); min-height: 44px; }
     .sheet nav .mobile-row > a { font-size: 1.5rem; }
     .sheet { padding-top: var(--s5); }
+  }
+  /* The narrowest phones (320 to 374px): logo, Hire staff and Menu only just fit, so all three tighten */
+  @media (max-width: 374px) {
+    .bar { gap: var(--s2); }
+    .logo img { height: calc(var(--logo-h, 46px) * 0.62); }
+    .hire-m { padding-inline: 0.6rem; }
+    .mobile summary { padding-inline: var(--s2); }
   }
 </style>
