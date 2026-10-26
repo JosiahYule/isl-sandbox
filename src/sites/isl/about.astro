@@ -7,6 +7,7 @@ import Facts from '../../components/Facts.astro';
 import CtaBand from '../../components/CtaBand.astro';
 import Photo from '../../components/Photo.astro';
 import { url } from '../../lib/url.js';
+import { asset } from '../../lib/img.js';
 import { photos } from '../../data/photos.js';
 import { brand, images, offices, stats } from '../../data/site.js';
 import { team } from '../../data/team.js';
@@ -74,11 +75,11 @@ const gallery = [
     <div class="wrap">
       <ul class="items recognition">
         <li class="item rec">
-          <img src={images.badgeBestPlaces} alt="" width="56" height="56" loading="lazy" onerror="this.remove()" />
+          <img src={asset(images.badgeBestPlaces)} alt="" width="56" height="56" loading="lazy" onerror="this.remove()" />
           <div><h3>Best Places to Work</h3></div>
         </li>
         <li class="item rec">
-          <img src={images.badgeCor} alt="" width="56" height="56" loading="lazy" onerror="this.remove()" />
+          <img src={asset(images.badgeCor)} alt="" width="56" height="56" loading="lazy" onerror="this.remove()" />
           <div><h3>COR certified</h3><p>Certificate of Recognition for occupational health and safety.</p></div>
         </li>
       </ul>

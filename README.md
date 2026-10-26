@@ -226,7 +226,9 @@ A live build (`SITE_MODE=live` in `astro.config.mjs`) drops the noindex tag and 
 
 Each build also writes `_redirects` (old Squarespace addresses, including old job links, to the new pages) and `_headers` (basic security headers, long caching for `/_astro/`). Netlify reads both, including the old job links' `?id=` and `?jobcode=`; Cloudflare Pages reads both but can't match on `?id=`.
 
-Images: `.github/workflows/copy-images.yml` copies every Squarespace-hosted image into `public/images/cms/` and lists it in `src/data/cms-images.json`; `src/lib/img.js` then serves the copies. Run it again (Actions tab) after adding Squarespace images, and before cancelling Squarespace.
+Request forms: ISL's form sends through `assistant/supabase/functions/isl-request` (to the named recruiter); AS and ADS share `assistant/supabase/functions/specialist-request` (to the office covering the province). Neither is deployed yet; each lists its secrets at the top of the file.
+
+Images: `.github/workflows/copy-images.yml` copies every Squarespace-hosted image into `public/images/cms/` and lists it in `src/data/cms-images.json`; `src/lib/img.js` then serves the copies (189 files, 45 images, copied October 26). The chat assistant's recruiter headshots still load from Squarespace; they move to the live domain's copies at launch. Run it again (Actions tab) after adding Squarespace images, and before cancelling Squarespace.
 
 ## Running it on your own computer (optional)
 

@@ -34,8 +34,8 @@ const sandboxSites = [{ key: 'isl', name: 'Integrated Staffing', href: '/isl-san
         </a>
         <p>{brand.footerAbout ?? `${brand.name} has connected employers and job seekers since ${brand.since}. Locally owned and operated.`}</p>
         {images.badgeBestPlaces && <div class="badges">
-          <img src={images.badgeBestPlaces} alt="Best Places to Work" width="64" height="64" loading="lazy" onerror="this.remove()" />
-          <img src={images.badgeCor} alt="COR certified" width="64" height="64" loading="lazy" onerror="this.remove()" />
+          <img src={asset(images.badgeBestPlaces)} alt="Best Places to Work" width="64" height="64" loading="lazy" onerror="this.remove()" />
+          <img src={asset(images.badgeCor)} alt="COR certified" width="64" height="64" loading="lazy" onerror="this.remove()" />
         </div>}
         {links.sister && <p class="sister">Hiring for {links.sister.what}? <a href={links.sister.href}>{links.sister.name}</a></p>}
       </div>
