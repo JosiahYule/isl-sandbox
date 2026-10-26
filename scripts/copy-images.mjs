@@ -24,6 +24,7 @@ const re = /https:\/\/images\.squarespace-cdn\.com\/content\/v1\/691490c94119776
 for (const file of walk('dist').filter((f) => /\.(html|js|json|xml)$/.test(f))) {
   for (const m of readFileSync(file, 'utf8').matchAll(re)) {
     const path = m[1];
+    if (!/^[^/]+\/[^/]+/.test(path)) continue; // a URL still being put together in a script (folder only), not an image
     if (!found.has(path)) found.set(path, new Set());
     found.get(path).add(Number(m[2]) || 1500);
   }
