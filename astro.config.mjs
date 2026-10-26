@@ -1,6 +1,5 @@
 // Astro's settings file.
-// `site` + `base` tell Astro where the sandbox is hosted: https://josiahyule.github.io/isl-sandbox/
-// If you ever host it at the root of a domain, delete `base` and update `site`.
+// `site` + `base` tell Astro where the site is hosted: the sandbox preview, or (SITE_MODE=live) each brand's own domain.
 import { defineConfig } from 'astro/config';
 import { writeFileSync, renameSync, existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
 import { join, relative } from 'node:path';
@@ -16,9 +15,20 @@ import { fileURLToPath } from 'node:url';
 // brand gets its own domain and `base` goes.
 const BRAND = process.env.BRAND || 'isl';
 if (!['isl', 'as', 'ads'].includes(BRAND)) throw new Error(`Unknown BRAND "${BRAND}". Use isl, as or ads.`);
-const site = 'https://josiahyule.github.io';
-const base = BRAND === 'isl' ? '/isl-sandbox' : `/isl-sandbox/${BRAND}`;
-const outDir = BRAND === 'isl' ? './dist' : `./dist/${BRAND}`;
+
+// SANDBOX OR LIVE
+// The sandbox (the default) is one preview at josiahyule.github.io/isl-sandbox/, kept out of search engines.
+// SITE_MODE=live builds a brand for the root of its own domain, ready for the real host:
+//   npm run build:live -- isl   ->  dist-live/isl/   for https://www.integratedstaffing.ca
+//   npm run build:live -- as    ->  dist-live/as/    for https://www.accountantstaffing.ca
+//   npm run build:live -- ads   ->  dist-live/ads/   for https://www.administrativestaffing.ca
+// A live build drops the noindex tag and the sandbox footer links, and writes the real domain into
+// the sitemap, canonical links and share links. Nothing else changes between the two.
+const LIVE = process.env.SITE_MODE === 'live';
+const DOMAINS = { isl: 'https://www.integratedstaffing.ca', as: 'https://www.accountantstaffing.ca', ads: 'https://www.administrativestaffing.ca' };
+const site = LIVE ? DOMAINS[BRAND] : 'https://josiahyule.github.io';
+const base = LIVE ? '/' : BRAND === 'isl' ? '/isl-sandbox' : `/isl-sandbox/${BRAND}`;
+const outDir = LIVE ? `./dist-live/${BRAND}` : BRAND === 'isl' ? './dist' : `./dist/${BRAND}`;
 
 // PAGES: src/pages/ holds the pages every brand has (jobs, team, contact, the request form,
 // the legal pages), each reading the brand's facts from src/data/site.js. Pages that differ
@@ -51,7 +61,7 @@ const sitemap = {
       const urls = pages
         .map((p) => p.pathname)
         .filter((p) => !/^(404|robots\.txt|redirects\.txt)\/?$/.test(p))
-        .map((p) => `${site}${base}/${p}`.replace(/\/+$/, '/'))
+        .map((p) => `${site}${base.replace(/\/$/, '')}/${p}`.replace(/\/+$/, '/'))
         .sort();
       const xml = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls.map((u) => `  <url><loc>${u}</loc></url>`).join('\n')}\n</urlset>\n`;
       writeFileSync(fileURLToPath(new URL('sitemap.xml', dir)), xml);
@@ -91,5 +101,6 @@ export default defineConfig({
   site, base, outDir,
   integrations: [brandPages, sitemap, typography],
   // __BRAND__ ('isl', 'as' or 'ads') can be read in any page, component or script
-  vite: { define: { __BRAND__: JSON.stringify(BRAND) } },
+  // __LIVE__ is true in a live build (see SANDBOX OR LIVE above)
+  vite: { define: { __BRAND__: JSON.stringify(BRAND), __LIVE__: JSON.stringify(LIVE) } },
 });

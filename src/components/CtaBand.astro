@@ -4,6 +4,7 @@ import Button from './Button.astro';
 import { brand, cta } from '../data/site.js';
 import { PEOPLE } from '../../assistant/supabase/functions/_shared/routing.js';
 import { url } from '../lib/url.js';
+import { asset } from '../lib/img.js';
 // The people who answer requests, so the promise has faces: each province's contact and Zowie for permanent hires
 // (ISL only for now: AS and ADS show the promise without faces until their team is in the site)
 const repliers = cta.faces ? ['meg', 'kelli', 'chance', 'crystal', 'zowie'].map((k) => PEOPLE[k]).filter(Boolean) : [];
@@ -24,7 +25,7 @@ const tel = `tel:+1${brand.mainPhone.replaceAll('-', '')}`;
     <div class="side">
       <p>{text}</p>
       {repliers.length > 0 && <div class="who">
-        <span class="faces" aria-hidden="true">{repliers.map((p) => <span class="face"><span class="ini">{p.name.split(' ').map((w) => w[0]).join('')}</span><img src={p.photo} alt="" width="40" height="40" loading="lazy" onerror="this.remove()" /></span>)}</span>
+        <span class="faces" aria-hidden="true">{repliers.map((p) => <span class="face"><span class="ini">{p.name.split(' ').map((w) => w[0]).join('')}</span><img src={asset(p.photo)} alt="" width="40" height="40" loading="lazy" onerror="this.remove()" /></span>)}</span>
         <span class="names">{nameList} answer every request.</span>
       </div>}
       <div class="actions">

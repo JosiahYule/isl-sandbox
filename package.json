@@ -14,6 +14,7 @@
     "fetch-jobs": "node scripts/fetch-jobs.mjs",
     "check-jobs": "node scripts/check-jobs.mjs",
     "build:all": "npm run build && BRAND=as astro build && BRAND=ads astro build",
+    "build:live": "node scripts/build-live.mjs",
     "dev:as": "BRAND=as astro dev",
     "dev:ads": "BRAND=ads astro dev",
     "test": "npm run build:all && node --test test/*.test.mjs && node assistant/test/conversation.test.mjs test/fixtures/jobs.json",

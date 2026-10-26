@@ -10,6 +10,7 @@ import Footer from '../components/Footer.astro';
 import Analytics from '../components/Analytics.astro';
 import { brand, images } from '../data/site.js';
 import { url } from '../lib/url.js';
+import { sized } from '../lib/img.js';
 import { htmlJson } from '../lib/html-json.js';
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
@@ -27,7 +28,7 @@ const assistantVersion = assistant ? JSON.parse(readFileSync(resolve('public/ass
 const assistantRoot = url(`/assistant/${assistantVersion}/`);
 const canonical = new URL(Astro.url.pathname, Astro.site).href;
 const heroSrc = typeof images.hero === 'string' ? images.hero : images.hero.src;
-const shareImage = heroSrc.includes('format=') ? heroSrc.replace(/format=\d+w/, 'format=1500w') : `${heroSrc}?format=1500w`;
+const shareImage = new URL(sized(heroSrc, 1500), Astro.site).href; // the saved copy once there is one (src/lib/img.js)
 const fullTitle = title ? `${title} | ${brand.name}` : `${brand.name} | ${brand.titleTail}`;
 // The brand's colours (src/brands/): any design token from tokens.css, by name.
 // ISL's are the defaults in tokens.css, so it sets none.
@@ -54,7 +55,7 @@ const colorVars = brand.colors ? Object.entries(brand.colors).map(([k, v]) => `-
     <meta name="twitter:card" content="summary_large_image" />
     {schema && <script type="application/ld+json" set:html={htmlJson(schema)} />}
     <Analytics part="head" />
-    <meta name="robots" content="noindex" /><!-- sandbox: keep search engines out -->
+    {!__LIVE__ && <meta name="robots" content="noindex" />}<!-- the sandbox stays out of search engines; a live build (astro.config.mjs) leaves this out -->
   </head>
   <body>
     <a class="skip" href="#main">Skip to content</a>

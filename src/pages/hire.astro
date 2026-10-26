@@ -13,6 +13,8 @@ import PageHero from '../components/PageHero.astro';
 import Steps from '../components/Steps.astro';
 import { brand, forms, hire, services, offices, provinceOffice } from '../data/site.js';
 import { url } from '../lib/url.js';
+import { asset } from '../lib/img.js';
+import { PEOPLE } from '../../assistant/supabase/functions/_shared/routing.js';
 
 const locations = hire.locations;
 // What the script needs from the brand: how it names things, and (AS, ADS) which office answers each province
@@ -21,6 +23,8 @@ const said = {
   routing: hire.routing,
   temp: services.contract.ask,
   guarantee: brand.key === 'isl' ? '90-day' : 'six-month',
+  // Recruiters' headshots: the copies saved in this repo, once there are some (src/lib/img.js)
+  photos: Object.fromEntries(Object.values(PEOPLE).filter((p) => p.photo).map((p) => [p.photo, asset(p.photo)])),
   offices: provinceOffice ? Object.fromEntries(Object.entries(provinceOffice).map(([code, city]) => [code, offices.find((o) => o.city === city)])) : null,
 };
 const tel = `tel:+1${brand.mainPhone.replaceAll('-', '')}`;
@@ -224,7 +228,7 @@ const afterSteps = [
     $('.r-ini').textContent = name.split(/\s+/).map((w) => w[0]).join('').slice(0, 2);
     const img = card.querySelector('.r-face img') as HTMLImageElement;
     img.hidden = true; // shown only once the photo has loaded, so a missing one leaves the initials
-    if (p?.photo) { img.onload = () => (img.hidden = false); img.onerror = () => (img.hidden = true); img.src = p.photo; }
+    if (p?.photo) { img.onload = () => (img.hidden = false); img.onerror = () => (img.hidden = true); img.src = said.photos[p.photo] || p.photo; }
     const phone = p?.phone || r.office.phone;
     const telA = $('.r-tel') as HTMLAnchorElement; telA.textContent = phone; telA.href = 'tel:+1' + phone.replace(/\D/g, '');
     const mail = $('.r-mail') as HTMLAnchorElement;

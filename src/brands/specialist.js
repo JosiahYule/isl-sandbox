@@ -20,7 +20,7 @@ export const provinceOffice = { NS: 'Halifax', PE: 'Halifax', NB: 'Moncton', NL:
 // The menu, as the live sites label it. Employers opens the two FAQ pages (Header.astro).
 // The live pages' addresses are kept where the page exists here (/employers/, /job-seekers/,
 // /permanent-recruitment/, /temporary-recruitment/), so old links keep working at launch.
-// TODO at launch: redirect /job-opportunities, /our-team, /about-us and /contact-us to their pages here.
+// Old addresses (/job-opportunities, /our-team, /about-us, /contact-us) redirect to these: src/sites/specialist/redirects.txt.js
 export const nav = [
   { label: 'Employers', href: '/employers/' },
   { label: 'Job Seekers', href: '/job-seekers/' },

@@ -5,6 +5,7 @@
 import { brand, nav, offices, links, BRAND } from '../data/site.js';
 import Button from './Button.astro';
 import { url } from '../lib/url.js';
+import { asset } from '../lib/img.js';
 import { jobs } from '../data/jobs.js';
 import { areas } from '../data/areas.js';
 import { posts } from '../data/posts.js';
@@ -49,7 +50,7 @@ const isCurrent = (href) => current.startsWith(url(href));
 <header class="header">
   <div class="wrap bar">
     <a class="logo" href={url('/')} aria-label={`${brand.name} home`}>
-      <img src={brand.logo} alt="" width={logoW} height={logoH} style={brand.logoHeight ? `--logo-h:${brand.logoHeight}px` : undefined} onerror="this.parentElement.classList.add('no-img'); this.remove();" />
+      <img src={asset(brand.logo)} alt="" width={logoW} height={logoH} style={brand.logoHeight ? `--logo-h:${brand.logoHeight}px` : undefined} onerror="this.parentElement.classList.add('no-img'); this.remove();" />
       <span class="wordmark" aria-hidden="true">{brand.wordmark[0]}<br />{brand.wordmark[1]}</span>
     </a>
 

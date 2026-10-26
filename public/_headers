@@ -1,0 +1,10 @@
+# Response headers for Netlify and Cloudflare Pages (GitHub Pages ignores this file).
+# Basic protections for every page, and long caching for Astro's files, whose names change when they do.
+/*
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+  X-Frame-Options: SAMEORIGIN
+  Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=()
+
+/_astro/*
+  Cache-Control: public, max-age=31536000, immutable

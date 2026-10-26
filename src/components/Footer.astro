@@ -3,6 +3,7 @@
 // The offices row is the most useful thing in a staffing footer: a direct line to each office.
 import { brand, nav, offices, social, images, links } from '../data/site.js';
 import { url } from '../lib/url.js';
+import { asset } from '../lib/img.js';
 import { areas } from '../data/areas.js';
 const { offices: showOffices = true } = Astro.props;
 const year = new Date().getFullYear(); // never goes stale
@@ -28,7 +29,7 @@ const sandboxSites = [{ key: 'isl', name: 'Integrated Staffing', href: '/isl-san
     <div class:list={['lower', !showOffices && 'lower--top']}>
       <div class="about">
         <a class="flogo" href={url('/')} aria-label={`${brand.name} home`}>
-          <img class:list={[!brand.logoWhite && 'invert']} src={brand.logoWhite ?? brand.logo} alt="" width={logoW} height={logoH} loading="lazy" onerror="this.parentElement.classList.add('no-img'); this.remove();" />
+          <img class:list={[!brand.logoWhite && 'invert']} src={asset(brand.logoWhite ?? brand.logo)} alt="" width={logoW} height={logoH} loading="lazy" onerror="this.parentElement.classList.add('no-img'); this.remove();" />
           <span class="fword" aria-hidden="true">{brand.wordmark[0]}<br />{brand.wordmark[1]}</span>
         </a>
         <p>{brand.footerAbout ?? `${brand.name} has connected employers and job seekers since ${brand.since}. Locally owned and operated.`}</p>
@@ -47,8 +48,8 @@ const sandboxSites = [{ key: 'isl', name: 'Integrated Staffing', href: '/isl-san
     <!-- TODO: confirm this wording with ISL before going live -->
     <p class="scam"><strong>Recruitment scam alert.</strong> {brand.name} never charges job seekers a fee and never asks for banking details to apply. If someone claiming to be us does, call your nearest office.</p>
     <p class="legal">© {year} {brand.name}. All rights reserved. <a href={url('/privacy/')}>Privacy</a> <a href={url('/terms/')}>Terms</a> <a href={url('/accessibility/')}>Accessibility</a></p>
-    <!-- Sandbox only: jump between the three brands' previews. Remove at launch. -->
-    <p class="legal sandbox">Sandbox previews: {sandboxSites.map((b) => b.key === brand.key ? <span aria-current="page">{b.name}</span> : <a href={b.href}>{b.name}</a>)}</p>
+    <!-- Sandbox only: jump between the three brands' previews. A live build leaves this out. -->
+    {!__LIVE__ && <p class="legal sandbox">Sandbox previews: {sandboxSites.map((b) => b.key === brand.key ? <span aria-current="page">{b.name}</span> : <a href={b.href}>{b.name}</a>)}</p>}
   </div>
 </footer>
 

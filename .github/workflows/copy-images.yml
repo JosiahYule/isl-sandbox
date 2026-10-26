@@ -1,0 +1,45 @@
+# COPY SQUARESPACE IMAGES INTO THE REPO
+# Saves every Squarespace-hosted image the sites use into public/images/cms/ (scripts/copy-images.mjs),
+# commits them, and redeploys, so the sites stop depending on Squarespace's image server.
+# Runs when the script or this file changes, or by hand from the Actions tab. Re-run after adding
+# new Squarespace images; images already saved are skipped.
+name: Copy images from Squarespace
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: [scripts/copy-images.mjs, .github/workflows/copy-images.yml]
+
+permissions:
+  contents: write
+  actions: write
+
+concurrency:
+  group: copy-images
+  cancel-in-progress: false
+
+jobs:
+  copy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .node-version
+          cache: npm
+      - run: npm ci
+      - run: npm run build:all
+      - run: node scripts/copy-images.mjs
+      - name: Commit the copies and redeploy
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if [ -z "$(git status --porcelain -- public/images/cms src/data/cms-images.json)" ]; then echo "Nothing new."; exit 0; fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898699+github-actions[bot]@users.noreply.github.com"
+          git add public/images/cms src/data/cms-images.json
+          git commit -m "Copy Squarespace images into the site"
+          git pull --rebase origin main
+          git push
+          gh workflow run "Deploy to GitHub Pages"

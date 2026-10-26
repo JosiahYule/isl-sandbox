@@ -3,6 +3,7 @@ node_modules/
 
 # Build output (recreated by `npm run build`)
 dist/
+dist-live/
 .astro/
 
 # Local and OS files

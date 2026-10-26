@@ -212,6 +212,22 @@ Every push to the `main` branch rebuilds the preview, usually within a minute or
 
 The preview link is public: anyone with the address can open it. Every page includes `<meta name="robots" content="noindex">`, so search engines won't index the sandbox.
 
+## Going live
+
+The sandbox build stays as it is. A second build makes each brand ready for its own domain:
+
+| Command | Builds | For |
+| --- | --- | --- |
+| `npm run build:live -- isl` | `dist-live/isl/` | www.integratedstaffing.ca |
+| `npm run build:live -- as` | `dist-live/as/` | www.accountantstaffing.ca |
+| `npm run build:live -- ads` | `dist-live/ads/` | www.administrativestaffing.ca |
+
+A live build (`SITE_MODE=live` in `astro.config.mjs`) drops the noindex tag and the sandbox footer links, and uses the real domain in the sitemap, robots.txt, canonical and share links. On the host, each domain is its own site: build command `npm run build:live -- isl`, publish directory `dist-live/isl` (and the same for `as` and `ads`).
+
+Each build also writes `_redirects` (old Squarespace addresses, including old job links, to the new pages) and `_headers` (basic security headers, long caching for `/_astro/`). Netlify reads both, including the old job links' `?id=` and `?jobcode=`; Cloudflare Pages reads both but can't match on `?id=`.
+
+Images: `.github/workflows/copy-images.yml` copies every Squarespace-hosted image into `public/images/cms/` and lists it in `src/data/cms-images.json`; `src/lib/img.js` then serves the copies. Run it again (Actions tab) after adding Squarespace images, and before cancelling Squarespace.
+
 ## Running it on your own computer (optional)
 
 You don't need this to use the sandbox, but it gives instant previews while you edit. You'll need [Node.js](https://nodejs.org) (the LTS version) installed. Then, in a terminal inside this folder:

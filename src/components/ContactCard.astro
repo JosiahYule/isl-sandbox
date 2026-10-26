@@ -5,6 +5,7 @@
 //
 // <ContactCard label="Contract staffing" person={PEOPLE.meg} office={OFFICES.halifax} href="/hire/?service=contract" cta="Request workers" />
 import { url } from '../lib/url.js';
+import { asset } from '../lib/img.js';
 const { label, person, office, href, cta = 'Request talent' } = Astro.props;
 const name = person?.name ?? `${office.city} office`;
 const phone = person?.phone || office?.phone;
@@ -14,7 +15,7 @@ const tel = (n) => `tel:+1${String(n).replace(/\D/g, '')}`;
 <div class="cc">
   {label && <p class="cc-label">{label}</p>}
   <div class="cc-who">
-    <span class="cc-face">{person?.photo ? <img src={person.photo} alt="" loading="lazy" onerror="this.remove()" /> : null}<span aria-hidden="true">{initials}</span></span>
+    <span class="cc-face">{person?.photo ? <img src={asset(person.photo)} alt="" loading="lazy" onerror="this.remove()" /> : null}<span aria-hidden="true">{initials}</span></span>
     <div>
       <p class="cc-name">{name}</p>
       <p class="cc-handles">{person?.handles ?? office?.address}</p>
