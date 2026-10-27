@@ -13,7 +13,6 @@ import PageHero from '../../../components/PageHero.astro';
 import AtlanticMap from '../../../components/AtlanticMap.astro';
 import ContactCard from '../../../components/ContactCard.astro';
 import JobRow from '../../../components/JobRow.astro';
-import CtaBand from '../../../components/CtaBand.astro';
 import Photo from '../../../components/Photo.astro';
 import PersonCard from '../../../components/PersonCard.astro';
 import { team } from '../../../data/team.js';
@@ -132,8 +131,8 @@ const people = team.filter((p) => p.province === office.province);
     </section>
   )}
 
-
-  <CtaBand />
+  <!-- No closing request band: "Hiring in ..." above already names this office's contacts,
+       and the band's faces belong to all five provinces -->
 </Base>
 
 <style>

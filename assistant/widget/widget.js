@@ -194,7 +194,8 @@
       if (!launcher) return;
       const box = launcher.getBoundingClientRect();
       const editing = document.activeElement?.matches('input,textarea,select');
-        const blocked = [...document.querySelectorAll('a.apply,a.btn,a[href^="tel:"],a[href^="mailto:"],button[type="submit"],.submit button')].some((action) => {
+      // Form fields, their labels and hints count too, so the button never sits on what someone is reading or filling in
+      const blocked = [...document.querySelectorAll('a.apply,a.btn,a[href^="tel:"],a[href^="mailto:"],button[type="submit"],.submit button,form label,form p,form input:not([type="hidden"]),form textarea,form select')].some((action) => {
         if (!action.getClientRects().length) return false;
         const rect = action.getBoundingClientRect();
         return rect.right > box.left - 8 && rect.left < box.right + 8 && rect.bottom > box.top - 8 && rect.top < box.bottom + 8;

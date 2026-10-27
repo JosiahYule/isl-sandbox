@@ -36,6 +36,7 @@ body {
 
 img, svg { display: block; max-width: 100%; }
 img { height: auto; }
+legend { padding: 0; } /* browsers indent legends 2px, which knocks them off the line every other label sits on */
 
 /* Bold text uses the site's one bold weight (browsers default to 700) */
 b, strong, th { font-weight: var(--fw-bold); }
@@ -133,7 +134,7 @@ h1 .line, h2 .line { display: block; }
 .on-dark .item p { color: var(--on-dark-soft); }
 
 /* Plain text link that is really a button (opens the job assistant, etc.) */
-.textlink { font: inherit; font-weight: var(--fw-bold); cursor: pointer; padding: 0; background: none; border: 0; color: var(--accent); text-decoration: underline; text-underline-offset: 0.2em; }
+.textlink { font: inherit; font-weight: var(--fw-bold); cursor: pointer; padding: 0; background: none; border: 0; color: var(--accent); text-decoration: underline; text-underline-offset: 0.2em; text-align: start; /* buttons centre their text by default, which looked off when the link wraps */ }
 .textlink:hover { color: var(--accent-deep); text-decoration-thickness: 2px; }
 
 /* Service markers: the colour key used everywhere */
@@ -162,6 +163,17 @@ h1 .line, h2 .line { display: block; }
 @keyframes content-enter { from { opacity: 0.3; transform: translateY(12px); } to { opacity: 1; transform: none; } }
 .motion .items > .item, .motion [data-stagger] > .item { background-size: 0% 1.5px; }
 .motion .items.is-in > .item, .motion [data-stagger].is-in > .item { background-size: 100% 1.5px; }
+
+/* Moving between pages: the old page fades out and the new one fades in, while the header holds
+   still, so the site feels like one place rather than a series of reloads (Chrome, Edge, Safari 18) */
+@media (prefers-reduced-motion: no-preference) {
+  @view-transition { navigation: auto; }
+  ::view-transition-old(root) { animation: 90ms ease-in both vt-out; }
+  ::view-transition-new(root) { animation: 180ms var(--ease) 40ms both vt-in; }
+  ::view-transition-group(site-header) { animation: none; }
+}
+@keyframes vt-out { to { opacity: 0; } }
+@keyframes vt-in { from { opacity: 0; } }
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }

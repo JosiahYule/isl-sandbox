@@ -19,7 +19,7 @@ const provinceOptions = [...new Set(jobs.map((j) => j.province))]
   .map((code) => ({ code, name: provinces[code] ?? code }))
   .sort((a, b) => a.name.localeCompare(b.name));
 const PAGE = 15; // rows shown before "Show all"; search and filters always show every match
-const areaLinks = areas.map((a) => ({ ...a, n: jobs.filter((j) => j.area === a.key).length }));
+const areaLinks = areas.map((a) => ({ ...a, n: jobs.filter((j) => j.area === a.key).length }))
 const count = { contract: jobs.filter((j) => j.type === 'contract').length, direct: jobs.filter((j) => j.type === 'direct').length };
 ---
 <Base assistantMode="seeker" title="Find work" description={field ? `Temporary and permanent ${field.short} jobs across Atlantic Canada.` : 'Contract and permanent jobs across Atlantic Canada and beyond.'}>
@@ -51,8 +51,9 @@ const count = { contract: jobs.filter((j) => j.type === 'contract').length, dire
       <nav class="near" aria-label="Jobs near an office">
         <span>Jobs near</span>
         <ul>
+          {/* An office with nothing open is left out of view (a dead end), but kept so its footer link still filters */}
           {areaLinks.map((a) => (
-            <li><a href={url(`/find-work/?area=${a.key}`)} data-area={a.key}>{a.label} <span class="n">{a.n}</span></a></li>
+            <li hidden={a.n === 0 || undefined}><a href={url(`/find-work/?area=${a.key}`)} data-area={a.key}>{a.label} <span class="n">{a.n}</span></a></li>
           ))}
         </ul>
       </nav>
@@ -254,9 +255,16 @@ const count = { contract: jobs.filter((j) => j.type === 'contract').length, dire
     .search { grid-template-columns: 1fr 1fr; }
     .search input, .search .types, .search--3 select { grid-column: 1 / -1; }
   }
+  /* Phones: the two filters stay side by side and the office links run in one swipeable line,
+     so the first jobs start on the first screen instead of below a stack of controls */
   @media (max-width: 860px) {
-    .search { grid-template-columns: 1fr; }
-    .search select { border-left: 0; border-top: 1px solid var(--line); }
+    .search select { border-left: 0; border-top: 1px solid var(--line); padding-inline: 0.75rem; }
+    .search select + label + select, .search select + select { border-left: 1px solid var(--line); }
+    .near { flex-wrap: nowrap; margin-right: calc(-1 * var(--gutter, 1.25rem)); }
+    .near > span { flex-shrink: 0; }
+    .near ul { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; padding-right: var(--gutter, 1.25rem); }
+    .near ul::-webkit-scrollbar { display: none; }
+    .near li { flex-shrink: 0; }
     .types { overflow-x: auto; border-left: 0; border-top: 1px solid var(--line); }
     .general-grid { grid-template-columns: 1fr; }
   }

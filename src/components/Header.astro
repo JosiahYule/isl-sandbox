@@ -163,6 +163,7 @@ const onHire = isCurrent('/hire/'); // on the request form itself, the phone hea
 <style>
   .header {
     position: sticky; top: 0; z-index: 60;
+    view-transition-name: site-header; /* stays put while pages change (global.css) */
     background: rgb(255 255 255 / 0.92);
     backdrop-filter: saturate(1.4) blur(10px);
     border-bottom: 1px solid var(--line);

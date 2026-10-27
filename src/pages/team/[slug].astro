@@ -86,7 +86,8 @@ const hireHref = isDirect || slug === 'zowie-tucker'
     </section>
   )}
 
-  <CtaBand />
+  <!-- People with their own hiring panel above already carry the call to action -->
+  {!(contact || isDirect) && <CtaBand />}
 </Base>
 
 <style>
