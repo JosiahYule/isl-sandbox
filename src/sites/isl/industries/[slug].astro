@@ -31,7 +31,9 @@ const shortName = ind.name.split(',')[0].toLowerCase();
 const service = ind.contract ? 'contract' : 'direct';
 const hireHref = `/hire/?service=${service}&details=${encodeURIComponent(`${ind.name}: `)}`;
 const local = [['NS', 'Halifax', 'halifax'], ['NB', 'Moncton', 'moncton'], ['PE', 'Charlottetown', 'charlottetown'], ['NL', "St. John's", 'st-johns']]
-  .map(([province, city, key]) => ({ province, key, ...route({ audience: 'employer', service: 'contract', place: { province, city } }) }));
+  .map(([province, city, key]) => ({ province, key, label: provinceName(province), ...route({ audience: 'employer', service: 'contract', place: { province, city } }) }));
+// Industries we also fill permanently: Zowie's team takes those searches, anywhere in Canada
+if (ind.direct) local.push({ key: 'direct', label: 'Permanent, all of Canada', ...route({ audience: 'employer', service: 'direct', place: null }) });
 const tel = (n) => `tel:+1${n.replace(/\D/g, '')}`;
 const services = [ind.contract && ['Contract staffing', '/contract/'], ind.direct && ['Direct hire', '/direct-hire/']].filter(Boolean);
 ---
@@ -81,10 +83,10 @@ const services = [ind.contract && ['Contract staffing', '/contract/'], ind.direc
     <section class="section">
       <div class="wrap">
         <div class="section-head"><h2>Who you’ll talk to</h2></div>
-        <ul class="local">
+        <ul class="local" style={`--n:${local.length}`}>
           {local.map((l) => (
             <li>
-              <p class="l-prov">{provinceName(l.province)}</p>
+              <p class="l-prov">{l.label}</p>
               <p class="l-name">{l.person?.name ?? `${l.office.city} office`}</p>
               <a class="l-tel" href={tel(l.person?.phone || l.office.phone)}>{l.person?.phone || l.office.phone}</a>
             </li>
@@ -109,7 +111,7 @@ const services = [ind.contract && ['Contract staffing', '/contract/'], ind.direc
   .more { display: inline-block; margin-top: var(--s4); font-weight: var(--fw-bold); }
   .jh .lead { justify-self: end; font-weight: var(--fw-bold); font-size: var(--fs-body); }
   .list { border-top: 1.5px solid var(--ink); background: var(--paper); }
-  .local { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--s5); }
+  .local { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(var(--n, 4), minmax(0, 1fr)); gap: var(--s5); }
   .local li { border-top: 1.5px solid var(--ink); padding-top: var(--s3); display: grid; gap: 2px; }
   .l-prov { margin: 0; font-size: var(--fs-small); color: var(--ink-soft); }
   .l-name { margin: 0; font-weight: var(--fw-bold); }

@@ -4,19 +4,28 @@ import Button from './Button.astro';
 import { brand, cta } from '../data/site.js';
 import { PEOPLE } from '../../assistant/supabase/functions/_shared/routing.js';
 import { url } from '../lib/url.js';
-import { asset } from '../lib/img.js';
-// The people who answer requests, so the promise has faces: each province's contact and Zowie for permanent hires
-// (ISL only for now: AS and ADS show the promise without faces until their team is in the site)
-const repliers = cta.faces ? ['meg', 'kelli', 'chance', 'crystal', 'zowie'].map((k) => PEOPLE[k]).filter(Boolean) : [];
-const names = repliers.map((p) => p.first);
-const nameList = names.slice(0, -1).join(', ') + ' and ' + names.at(-1);
-
+import { asset, sized } from '../lib/img.js';
+import { team } from '../data/team.js';
+// The people who answer requests, so the promise has faces (ISL only for now: AS and ADS show the
+// promise without faces until their team is in the site). service="contract" shows the four provincial
+// contacts, service="direct" the direct hire team, and no service everyone who takes new requests.
 const {
   title = cta.title ?? 'Tell us who you need.',
   text = cta.text,
   href = '/hire/',
   label = 'Request talent',
+  service,
 } = Astro.props;
+const provincial = ['meg', 'kelli', 'chance', 'crystal'].map((k) => PEOPLE[k]).filter(Boolean)
+  .map((p) => ({ name: p.name, first: p.first, photo: asset(p.photo) }));
+const directTeam = team.filter((p) => p.team === 'Direct Hire').map((p) => ({ name: p.name, first: p.name.split(' ')[0], photo: p.photo && sized(p.photo, 500) }));
+const repliers = !cta.faces ? []
+  : service === 'contract' ? provincial
+  : service === 'direct' ? directTeam
+  : [...provincial, { name: PEOPLE.zowie.name, first: PEOPLE.zowie.first, photo: asset(PEOPLE.zowie.photo) }];
+const names = repliers.map((p) => p.first);
+const nameList = names.slice(0, -1).join(', ') + ' and ' + names.at(-1);
+const promise = service === 'direct' ? `${nameList} run every search.` : service === 'contract' ? `${nameList} answer every contract request.` : `${nameList} answer every request.`;
 const tel = `tel:+1${brand.mainPhone.replaceAll('-', '')}`;
 ---
 <section class:list={['cta', brand.ctaTone === 'bright' ? 'cta--bright' : 'on-dark']}>
@@ -25,8 +34,8 @@ const tel = `tel:+1${brand.mainPhone.replaceAll('-', '')}`;
     <div class="side">
       <p>{text}</p>
       {repliers.length > 0 && <div class="who">
-        <span class="faces" aria-hidden="true">{repliers.map((p) => <span class="face"><span class="ini">{p.name.split(' ').map((w) => w[0]).join('')}</span><img src={asset(p.photo)} alt="" width="40" height="40" loading="lazy" onerror="this.remove()" /></span>)}</span>
-        <span class="names">{nameList} answer every request.</span>
+        <span class="faces" aria-hidden="true">{repliers.map((p) => <span class="face"><span class="ini">{p.name.split(' ').map((w) => w[0]).join('')}</span>{p.photo && <img src={p.photo} alt="" width="40" height="40" loading="lazy" onerror="this.remove()" />}</span>)}</span>
+        <span class="names">{promise}</span>
       </div>}
       <div class="actions">
         <Button href={href} variant="light" size="lg">{label}</Button>

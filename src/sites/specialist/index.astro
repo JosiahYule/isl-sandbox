@@ -49,7 +49,7 @@ const svcs = [
   <!-- 3. WHAT OUR CLIENTS ARE LOOKING FOR: the roles at each level -->
   <section class="section section--rule">
     <div class="wrap">
-      <div class="section-head section-head--split">
+      <div class="section-head section-head--split roles-head">
         <h2>{c.rolesTitle}</h2>
         <div class="roles-text">{c.rolesText.map((p) => <p>{p}</p>)}</div>
       </div>
@@ -77,6 +77,8 @@ const svcs = [
 <style>
   /* Five reasons: three across, then two */
   .why { grid-template-columns: repeat(auto-fit, minmax(min(100%, 18rem), 1fr)); }
+  /* Two paragraphs beside the heading: line them up with its top, not its bottom */
+  .roles-head { align-items: start; }
   .roles-text p { color: var(--ink-soft); max-width: 60ch; }
   .roles-text p + p { margin-top: var(--s3); }
 </style>

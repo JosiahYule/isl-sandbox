@@ -57,6 +57,14 @@ const { photo, lines, lead, ticker = [], long = false, findJob } = Astro.props;
 <script>
   // The ticker's pause button: pressed = paused
   const tk = document.querySelector<HTMLElement>('[data-ticker]');
+  // While the ticker runs along the bottom of the screen, the chat button sits just above it
+  // instead of covering the last posting (--isl-chat-lift is read by the assistant widget)
+  if (tk && 'IntersectionObserver' in window) {
+    new IntersectionObserver(([e]) => {
+      const covering = e.isIntersecting && e.boundingClientRect.bottom > innerHeight - 90;
+      document.documentElement.style.setProperty('--isl-chat-lift', covering ? `${Math.ceil(innerHeight - e.boundingClientRect.top)}px` : '0px');
+    }, { threshold: [0, 0.25, 0.5, 0.75, 1] }).observe(tk);
+  }
   const tb = tk?.querySelector<HTMLButtonElement>('[data-ticker-toggle]');
   tb?.addEventListener('click', () => {
     const paused = tk!.classList.toggle('is-paused');

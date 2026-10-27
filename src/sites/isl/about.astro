@@ -110,7 +110,8 @@ const gallery = [
   .gallery :global(.photo:hover img) { transform: scale(1.04); }
 
   .rec { display: flex; gap: var(--s4); align-items: flex-start; }
-  .rec img { width: 56px; height: 56px; object-fit: contain; flex: none; }
+  /* The badges are white artwork made for dark backgrounds (as in the footer), so they're inverted to show on white */
+  .rec img { width: 56px; height: 56px; object-fit: contain; flex: none; filter: invert(1); }
 
   @media (max-width: 900px) {
     .value { grid-template-columns: 1fr; gap: var(--s2); }

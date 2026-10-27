@@ -101,8 +101,15 @@ const sandboxSites = [{ key: 'isl', name: 'Integrated Staffing', href: '/isl-san
   .sandbox span { margin-left: var(--s4); color: #fff; }
 
   @media (max-width: 900px) {
-    .offices { grid-template-columns: repeat(auto-fill, minmax(min(100%, 8.5rem), 1fr)); } /* two across, one when there isn't room */
-    .office, .office + .office { padding: var(--s4) var(--s3) var(--s4) 0; border-left: 0; border-bottom: 1px solid var(--line-dark); }
+    /* Phones: one row per office, city and phone on one line, the address and jobs link under them,
+       so the offices take about half the height of a two-column grid and every row lines up */
+    .offices { grid-template-columns: 1fr; }
+    .office, .office + .office { display: grid; grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: 'city phone' 'addr near'; column-gap: var(--s4);
+      padding: var(--s4) 0; border-left: 0; border-bottom: 1px solid var(--line-dark); }
+    .city { grid-area: city; margin-bottom: 0; }
+    .phone { grid-area: phone; align-self: baseline; }
+    .addr { grid-area: addr; margin-top: var(--s1); }
+    .near { grid-area: near; justify-self: end; align-self: end; margin-top: 0; padding-top: 0; white-space: nowrap; }
     .lower { grid-template-columns: 1fr; gap: var(--s6); }
   }
 </style>

@@ -36,6 +36,7 @@ const field = [job.category, job.subcategory].filter(Boolean).join(', ');
   .job--direct::before { background: var(--direct); }
   .job:hover { background: var(--mist); }
 
+  .job p { margin: 0; } /* the site's paragraph spacing doesn't belong inside a row */
   h3 { font-size: var(--fs-h3); }
   h3 a { color: var(--ink); text-decoration: none; }
   h3 a:hover { text-decoration: underline; }
@@ -50,10 +51,15 @@ const field = [job.category, job.subcategory].filter(Boolean).join(', ');
   }
   .apply:hover { background: var(--accent); color: #fff; }
 
+  /* Phones: title and type on top, then pay with the date under it and Apply beside them,
+     so each job takes about a third less height and more of the list fits on screen */
   @media (max-width: 860px) {
-    .job { grid-template-columns: 1fr auto; row-gap: var(--s2); padding-left: var(--s4); }
-    .svc { grid-column: 2; grid-row: 1; align-self: start; }
-    .pay { grid-column: 1; }
-    .end { grid-column: 1 / -1; justify-content: space-between; padding-right: 0; }
+    .job { grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: 'main svc' 'pay apply' 'posted apply'; gap: 2px var(--s4); padding: var(--s4) 0 var(--s4) var(--s4); }
+    .main { grid-area: main; margin-bottom: var(--s3); }
+    .svc { grid-area: svc; align-self: start; }
+    .pay { grid-area: pay; }
+    .end { display: contents; }
+    .posted { grid-area: posted; }
+    .apply { grid-area: apply; align-self: center; padding: 0.6rem 1rem; }
   }
 </style>

@@ -50,7 +50,7 @@
     button { font-family: inherit; }
 
     /* Launcher */
-    .launcher { position: fixed; right: calc(20px + env(safe-area-inset-right, 0px)); bottom: calc(20px + env(safe-area-inset-bottom, 0px)); z-index: 2147483000;
+    .launcher { position: fixed; right: calc(20px + env(safe-area-inset-right, 0px)); bottom: calc(20px + var(--isl-chat-lift, 0px) + env(safe-area-inset-bottom, 0px)); transition: bottom 0.25s ease; z-index: 2147483000;
       display: flex; align-items: center; gap: 10px; border: 0; cursor: pointer; padding: 14px 18px 14px 15px;
       background: var(--dark); color: var(--white); font-weight: 600; font-size: 14.5px; line-height: 1; border-bottom: 3px solid var(--blue); }
     .launcher:hover { background: #000; }

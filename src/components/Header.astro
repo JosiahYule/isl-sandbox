@@ -46,9 +46,10 @@ const menus = {
 const [logoW, logoH] = brand.logoSize ?? [190, 46];
 const current = Astro.url.pathname;
 const isCurrent = (href) => current.startsWith(url(href));
+const onHire = isCurrent('/hire/'); // on the request form itself, the phone header's Hire staff button would only point back here
 ---
 <header class="header">
-  <div class="wrap bar">
+  <div class:list={['wrap bar', onHire && 'bar--hire']}>
     <a class="logo" href={url('/')} aria-label={`${brand.name} home`}>
       <img src={asset(brand.logo)} alt="" width={logoW} height={logoH} style={brand.logoHeight ? `--logo-h:${brand.logoHeight}px` : undefined} onerror="this.parentElement.classList.add('no-img'); this.remove();" />
       <span class="wordmark" aria-hidden="true">{brand.wordmark[0]}<br />{brand.wordmark[1]}</span>
@@ -77,7 +78,7 @@ const isCurrent = (href) => current.startsWith(url(href));
       <Button href="/hire/" size="sm" data-cta-placement="header">Request talent</Button>
     </div>
 
-    <a class="hire-m" href={url('/hire/')} data-cta-placement="mobile_header">Hire staff</a>
+    {!onHire && <a class="hire-m" href={url('/hire/')} data-cta-placement="mobile_header">Hire staff</a>}
 
     <!-- Phones: one tap to call the head office, beside the menu -->
     <a class="call-m" href={`tel:+1${brand.mainPhone.replaceAll('-', '')}`} aria-label={`Call ${brand.mainPhone}`}>
@@ -267,6 +268,7 @@ const isCurrent = (href) => current.startsWith(url(href));
   }
   @media (max-width: 600px) {
     .call-m { display: none; }
+    .bar--hire .call-m { display: inline-flex; margin-left: auto; } /* on the request form, Call takes Hire staff's place */
     .mobile summary { padding-inline: var(--s3); min-height: 44px; }
     .sheet nav .mobile-row > a { font-size: 1.5rem; }
     .sheet { padding-top: var(--s5); }
