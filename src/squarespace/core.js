@@ -24,6 +24,7 @@ const path = location.pathname.replace(/\/+$/, '') || '/';
 // 1. Header first in the page
 if (header && document.body.firstElementChild !== header) document.body.prepend(header);
 html.classList.add('isl-site');
+html.dataset.siteRoot = '/'; // pages are on this domain (the chat assistant reads this for its links)
 
 // 2. Current page and page settings
 if (header) {
@@ -76,7 +77,7 @@ function refreshCounts() {
 }
 
 async function refreshLists() {
-  if (page?.dataset.islJobPage) return showJob();
+  if (page?.dataset.islTemplate) return showTemplate();
   // A page built entirely from changing data (a tool): replaced whole with the latest version
   if (page?.dataset.islLivePage) {
     const fresh = await fetchText(`${ROOT}live/${page.dataset.islPage}.html`);
@@ -95,14 +96,16 @@ async function refreshLists() {
   ]);
 }
 
-// The job page (/find-work/job?id=...): the job's own fragment, with its title and search-engine data
-async function showJob() {
-  const id = new URLSearchParams(location.search).get('id') || '';
-  const status = page.querySelector('[data-isl-job-status]');
-  const fresh = /^[\w-]+$/.test(id) ? await fetchText(`${ROOT}live/job/${id}.html`) : null;
+// The pages that fill themselves in from the address: the job page (/find-work/job?id=...) and the
+// team member page (/team/member?name=...). Each job or person is a fragment with its title,
+// description and search-engine data.
+async function showTemplate() {
+  const value = new URLSearchParams(location.search).get(page.dataset.islParam) || '';
+  const status = page.querySelector('[data-isl-status]');
+  const fresh = /^[\w-]+$/.test(value) ? await fetchText(`${ROOT}live/${page.dataset.islTemplate}/${value}.html`) : null;
   if (!fresh) {
-    if (status) status.textContent = 'This job has been filled or is no longer open.';
-    page.dataset.islJs = ''; // nothing for the job page's script to work on
+    if (status) status.textContent = page.dataset.islMissing;
+    page.dataset.islJs = ''; // nothing for the page's script to work on
     return;
   }
   const holder = document.createElement('div');
@@ -110,12 +113,12 @@ async function showJob() {
   const t = holder.querySelector('template');
   page.innerHTML = '';
   page.append(t.content.cloneNode(true));
-  html.dataset.assistantJob = id;
+  if (t.dataset.assistantJob) html.dataset.assistantJob = t.dataset.assistantJob;
   document.title = t.dataset.title;
   const meta = (sel, make) => document.head.querySelector(sel) || document.head.appendChild(make());
   meta('meta[name="description"]', () => Object.assign(document.createElement('meta'), { name: 'description' })).content = t.dataset.description;
-  meta('link[rel="canonical"]', () => Object.assign(document.createElement('link'), { rel: 'canonical' })).href = location.origin + location.pathname + '?id=' + id;
-  // Search-engine data for the job (a script added like this is read, not run)
+  meta('link[rel="canonical"]', () => Object.assign(document.createElement('link'), { rel: 'canonical' })).href = `${location.origin}${location.pathname}?${page.dataset.islParam}=${value}`;
+  // Search-engine data (a script added like this is read, not run)
   holder.querySelectorAll('script[type="application/ld+json"]').forEach((s) => {
     const d = document.createElement('script');
     d.type = 'application/ld+json';

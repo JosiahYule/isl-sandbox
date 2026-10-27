@@ -50,11 +50,21 @@ function exportBrand(brand) {
     return { file, path, key, dom: new JSDOM(readFileSync(file, 'utf8')) };
   });
 
-  // Job pages become one Squarespace page (/find-work/job?id=...), like the live site's
-  const jobIds = {};
+  // ONE PAGE, FILLED IN: rather than a Squarespace page for every job and every person, each kind gets one
+  // page that fills itself in from the address (isl.js, showTemplate). Each job or person is saved as a
+  // fragment (live/<kind>/<value>.html) with its title, description and search-engine data.
+  const TEMPLATES = {
+    job: { path: '/find-work/job', param: 'id', mode: 'seeker', title: 'Job', note: 'Each open job, filled in from the job feed.',
+      loading: 'Loading the job…', missing: 'This job has been filled or is no longer open.', back: ['/find-work', 'See all open jobs'] },
+    person: { path: '/team/member', param: 'name', title: 'Team member', note: 'Each person on the team page, filled in by name.',
+      loading: 'Loading…', missing: 'We couldn’t find that person. They may have moved on.', back: ['/team', 'See the whole team'] },
+  };
+  const filledIn = {}; // page path -> its address on the filled-in page
   for (const p of pages) {
     const id = p.dom.window.document.documentElement.dataset.assistantJob;
-    if (id && p.path.startsWith('/find-work/')) { p.job = id; jobIds[p.path] = id; }
+    if (id && p.path.startsWith('/find-work/')) p.tpl = { kind: 'job', value: id };
+    else if (/^\/team\/[^/]+$/.test(p.path)) p.tpl = { kind: 'person', value: p.path.split('/')[2] };
+    if (p.tpl) filledIn[p.path] = `${TEMPLATES[p.tpl.kind].path}?${TEMPLATES[p.tpl.kind].param}=${p.tpl.value}`;
   }
 
   // ---------- Links ----------
@@ -64,7 +74,7 @@ function exportBrand(brand) {
   const pageLink = (v) => {
     const [, p, rest = ''] = v.match(/^([^?#]*)(.*)$/);
     const clean = p.replace(/\/+$/, '') || '/';
-    if (jobIds[clean]) return `/find-work/job?id=${jobIds[clean]}`;
+    if (filledIn[clean]) return filledIn[clean];
     return clean + rest;
   };
   const rewrite = (name, v) => {
@@ -178,8 +188,7 @@ function exportBrand(brand) {
   // ---------- One code block per page ----------
   mkdirSync(`${OUT}/blocks`, { recursive: true });
   const kit = [];
-  mkdirSync(`${OUT}/live/job`, { recursive: true });
-  let jobScript = null;
+  const tplScript = {}; // kind -> the page whose script the filled-in page uses (it's the same for each)
   for (const p of pages) {
     const doc = p.dom.window.document;
     const main = doc.querySelector('main#main');
@@ -201,14 +210,15 @@ function exportBrand(brand) {
     const title = (doc.querySelector('title')?.textContent || '').replace(/\s*\|\s*[^|]+$/, '');
     const description = doc.querySelector('meta[name="description"]')?.getAttribute('content') || '';
 
-    // Job pages: Squarespace has one job page (/find-work/job?id=...). Each job is saved as a fragment
-    // with its title, description and search-engine data, and isl.js fills the page from it.
-    if (p.job) {
-      writeFileSync(`${OUT}/live/job/${p.job}.html`, [
-        `<template data-title="${esc(doc.querySelector('title')?.textContent || '')}" data-description="${esc(description)}">`,
+    // A job or a person: saved as a fragment for the one filled-in page (TEMPLATES above)
+    if (p.tpl) {
+      mkdirSync(`${OUT}/live/${p.tpl.kind}`, { recursive: true });
+      writeFileSync(`${OUT}/live/${p.tpl.kind}/${p.tpl.value}.html`, [
+        `<template data-title="${esc(doc.querySelector('title')?.textContent || '')}" data-description="${esc(description)}"${html.dataset.assistantJob ? ` data-assistant-job="${esc(html.dataset.assistantJob)}"` : ''}>`,
         main.innerHTML.trim(), '</template>', ...data,
       ].join('\n'));
-      if (p.hasJs && !jobScript) jobScript = p.key;
+      tplScript[p.tpl.kind] ??= p.hasJs ? p.key : null;
+      p.tplHasJs = p.hasJs;
       continue;
     }
     // A page built entirely from changing data (the jobs report, pay on open jobs): refreshed whole
@@ -226,27 +236,30 @@ function exportBrand(brand) {
     };
     const open = '<div ' + Object.entries(attrs).filter(([, v]) => v != null).map(([k, v]) => `${k}="${v}"`).join(' ') + '>';
     const block = [
-      `<!-- ${NAMES[brand]} page: ${p.job ? '/find-work/job?id=' + p.job : p.path}. Text can be edited here; the styles and scripts come from the shared files (Code Injection). -->`,
+      `<!-- ${NAMES[brand]} page: ${p.path}. Text can be edited here; the styles and scripts come from the shared files (Code Injection). -->`,
       open,
       main.innerHTML.trim(),
       '</div>',
       ...data,
     ].join('\n') + '\n';
     writeFileSync(`${OUT}/blocks/${p.key}.html`, block);
-    kit.push({ key: p.key, path: p.path, job: p.job || null, title, description, size: Buffer.byteLength(block) });
+    kit.push({ key: p.key, path: p.path, title, description, size: Buffer.byteLength(block) });
   }
-  // The one job page: its script is the same for every job (p/job.js)
-  if (jobScript) {
-    writeFileSync(`${OUT}/p/job.js`, readFileSync(`${OUT}/p/${jobScript}.js`, 'utf8').replace(/^\/\/.*\n/, '// /find-work/job: the job page\'s scripts, run by isl.js\n'));
-    for (const p of pages) if (p.job) for (const f of readdirSync(`${OUT}/p`)) if (f.startsWith(p.key + '.') && !(p.key === jobScript && f !== `${p.key}.js`)) rmSync(`${OUT}/p/${f}`);
+  // The filled-in pages: one code block each, and one script (the same for every job, every person)
+  for (const [kind, t] of Object.entries(TEMPLATES)) {
+    if (!pages.some((p) => p.tpl?.kind === kind)) continue;
+    const from = tplScript[kind];
+    if (from) writeFileSync(`${OUT}/p/${kind}.js`, readFileSync(`${OUT}/p/${from}.js`, 'utf8').replace(/^\/\/.*\n/, `// ${t.path}: the page's scripts, run by isl.js\n`));
+    for (const p of pages) if (p.tpl?.kind === kind) for (const f of readdirSync(`${OUT}/p`)) if (f.startsWith(p.key + '.') && !(p.key === from && f !== `${p.key}.js`)) rmSync(`${OUT}/p/${f}`);
+    const attrs = [`id="isl-page"`, `data-isl-page="${kind}"`, from ? 'data-isl-js="1"' : '', `data-isl-template="${kind}"`, `data-isl-param="${t.param}"`, t.mode ? `data-assistant-mode="${t.mode}"` : ''].filter(Boolean).join(' ');
     const block = [
-      `<!-- ${NAMES[brand]} page: /find-work/job (every job: the address ends ?id=<job ID>). isl.js fills it in with the job; leave this block as it is. -->`,
-      `<div id="isl-page" data-isl-page="job" data-isl-js="1" data-isl-job-page="1" data-assistant-mode="seeker">`,
-      `<section class="section"><div class="wrap"><p data-isl-job-status>Loading the job…</p><p><a href="/find-work">See all open jobs</a></p></div></section>`,
+      `<!-- ${NAMES[brand]} page: ${t.path} (the address ends ?${t.param}=...). isl.js fills it in; leave this block as it is. -->`,
+      `<div ${attrs} data-isl-missing="${esc(t.missing)}">`,
+      `<section class="section"><div class="wrap"><p data-isl-status>${t.loading}</p><p><a href="${t.back[0]}">${t.back[1]}</a></p></div></section>`,
       '</div>',
     ].join('\n') + '\n';
-    writeFileSync(`${OUT}/blocks/job.html`, block);
-    kit.push({ key: 'job', path: '/find-work/job', job: null, title: 'Job', description: 'Each open job, filled in from the job feed.', size: Buffer.byteLength(block) });
+    writeFileSync(`${OUT}/blocks/${kind}.html`, block);
+    kit.push({ key: kind, path: t.path, title: t.title, description: t.note, size: Buffer.byteLength(block) });
   }
   writeFileSync(`${OUT}/live/counts.json`, JSON.stringify(counts));
   writeFileSync(`${OUT}/kit.json`, JSON.stringify({ brand, name: NAMES[brand], generated: new Date().toISOString(), pages: kit }, null, 1));
@@ -400,7 +413,7 @@ const copyText = (t, b) => navigator.clipboard.writeText(t).then(() => { const w
 fetch(ROOT + 'kit.json', { cache: 'no-cache' }).then((r) => r.json()).then((kit) => {
   document.getElementById('gen').textContent = 'Generated ' + new Date(kit.generated).toLocaleString('en-CA');
   const list = document.getElementById('pages');
-  const pages = kit.pages.filter((p) => !p.job).sort((a, b) => a.path.localeCompare(b.path));
+  const pages = kit.pages.slice().sort((a, b) => a.path.localeCompare(b.path));
   const esc = (s) => s.replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
   list.innerHTML = pages.map((p) => '<div class="card" data-find="' + esc((p.path + ' ' + p.title).toLowerCase()) + '">' +
     '<b>' + esc(p.title || p.path) + '</b><div class="btns"><button data-copy="blocks/' + p.key + '.html">Copy code block</button>' +

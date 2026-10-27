@@ -14,7 +14,10 @@
 // opens it ready for an employer.
 // =====================================================================
 const base = new URL('.', import.meta.url);      // .../assistant/
-const site = new URL('..', base);                // the site root (handles the /isl-sandbox/ prefix)
+// The site root (handles the /isl-sandbox/ prefix). On Squarespace the assistant's files are on GitHub
+// Pages but the pages are on the brand's domain: src/squarespace/core.js says so with data-site-root.
+const sqRoot = document.documentElement.dataset.siteRoot;
+const site = sqRoot ? new URL(sqRoot, location.href) : new URL('..', base);
 
 // The engine (and the job snapshot it searches) only load when someone sends a first message,
 // so pages where nobody opens the chat don't download them.
@@ -27,7 +30,11 @@ function loadJobs() {
 const respond = async (messages, context) => {
   enginePromise ||= import('./demo-engine.js').then(({ createEngine }) => createEngine({
     loadJobs,
-    siteUrl: (path) => { const u = new URL(path.replace(/^\//, ''), site); return u.pathname + u.search; },
+    siteUrl: (path) => {
+      const u = new URL(path.replace(/^\//, ''), site);
+      // Squarespace addresses have no trailing slash (/hire, not /hire/)
+      return (sqRoot ? u.pathname.replace(/(.)\/$/, '$1') : u.pathname) + u.search;
+    },
   })).catch((error) => { enginePromise = null; throw error; });
   return (await enginePromise)(messages, context);
 };
