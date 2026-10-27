@@ -191,6 +191,8 @@ function exportBrand(brand) {
     main.querySelectorAll('[data-isl-live]').forEach((el) => {
       el.setAttribute('data-isl-live', `${p.key}~${el.getAttribute('data-isl-live')}`);
       writeFileSync(`${OUT}/live/${el.getAttribute('data-isl-live')}.html`, el.outerHTML);
+      // The pasted copy is replaced on load, so it doesn't need the search text behind each job (most of its size)
+      el.querySelectorAll('[data-search]').forEach((j) => j.removeAttribute('data-search'));
     });
     // Scripts stay out of the code block (isl.js runs them), except data for search engines
     // (data the page's script reads, type application/json, stays too)
