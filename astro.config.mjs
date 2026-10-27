@@ -25,10 +25,16 @@ if (!['isl', 'as', 'ads'].includes(BRAND)) throw new Error(`Unknown BRAND "${BRA
 // A live build drops the noindex tag and the sandbox footer links, and writes the real domain into
 // the sitemap, canonical links and share links. Nothing else changes between the two.
 const LIVE = process.env.SITE_MODE === 'live';
+// SITE_MODE=squarespace builds a brand for its Squarespace site (scripts/export-squarespace.mjs runs it).
+// The pages become code blocks on the brand's own domain, so page links are plain (/about/), while the
+// styles, scripts and files they need load from the sandbox's GitHub Pages address (SQ_ASSETS below).
+// Photos load from Squarespace itself.
+const SQ = process.env.SITE_MODE === 'squarespace';
+const SQ_ASSETS = `https://josiahyule.github.io/isl-sandbox/sq/${BRAND}`;
 const DOMAINS = { isl: 'https://www.integratedstaffing.ca', as: 'https://www.accountantstaffing.ca', ads: 'https://www.administrativestaffing.ca' };
-const site = LIVE ? DOMAINS[BRAND] : 'https://josiahyule.github.io';
-const base = LIVE ? '/' : BRAND === 'isl' ? '/isl-sandbox' : `/isl-sandbox/${BRAND}`;
-const outDir = LIVE ? `./dist-live/${BRAND}` : BRAND === 'isl' ? './dist' : `./dist/${BRAND}`;
+const site = LIVE || SQ ? DOMAINS[BRAND] : 'https://josiahyule.github.io';
+const base = LIVE || SQ ? '/' : BRAND === 'isl' ? '/isl-sandbox' : `/isl-sandbox/${BRAND}`;
+const outDir = LIVE ? `./dist-live/${BRAND}` : SQ ? `./dist-sq/${BRAND}` : BRAND === 'isl' ? './dist' : `./dist/${BRAND}`;
 
 // PAGES: src/pages/ holds the pages every brand has (jobs, team, contact, the request form,
 // the legal pages), each reading the brand's facts from src/data/site.js. Pages that differ
@@ -99,8 +105,10 @@ const typography = {
 
 export default defineConfig({
   site, base, outDir,
+  ...(SQ && { build: { assetsPrefix: SQ_ASSETS } }), // Squarespace: Astro's own files load from GitHub Pages
   integrations: [brandPages, sitemap, typography],
   // __BRAND__ ('isl', 'as' or 'ads') can be read in any page, component or script
   // __LIVE__ is true in a live build (see SANDBOX OR LIVE above)
-  vite: { define: { __BRAND__: JSON.stringify(BRAND), __LIVE__: JSON.stringify(LIVE) } },
+  // __SQ__ is true in a Squarespace build (a Squarespace build is also a live one: no sandbox links)
+  vite: { define: { __BRAND__: JSON.stringify(BRAND), __LIVE__: JSON.stringify(LIVE || SQ), __SQ__: JSON.stringify(SQ), __SQ_ASSETS__: JSON.stringify(SQ_ASSETS) } },
 });

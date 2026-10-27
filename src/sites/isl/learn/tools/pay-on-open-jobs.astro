@@ -44,7 +44,7 @@ for (const r of rows) {
 const dollars = (v) => perHour(v).replace('/hour', '');
 const payText = (j) => j.payInfo.unit === 'year' ? `${j.pay} (about ${perHour(j.payInfo.hourly)})` : j.pay;
 ---
-<Base title="Pay on our open jobs" description="What Atlantic Canadian employers are offering right now, by role and province, from every job Integrated Staffing is hiring for.">
+<Base live title="Pay on our open jobs" description="What Atlantic Canadian employers are offering right now, by role and province, from every job Integrated Staffing is hiring for.">
   <PageHero compact title="Pay on our open jobs." lead="What employers are offering right now, from every job we’re hiring for." />
 
   <section class="tool" data-pay>

@@ -15,7 +15,7 @@ const c = copy.seekers;
 ---
 <Base assistantMode="seeker" title="Job Seekers" description={`${c.title} ${c.intro[0]}`}>
   <PageHero title={c.title} lead={c.intro[0]}>
-    <Button href="/find-work/" size="lg">See {jobs.length} open jobs</Button>
+    <Button href="/find-work/" size="lg"><span>See <span data-isl-count="all">{jobs.length}</span> open jobs</span></Button>
     <a class="textlink" href={links.resume}>Send your resume</a>
   </PageHero>
 

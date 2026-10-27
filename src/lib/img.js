@@ -14,8 +14,10 @@ const WIDTHS = [500, 750, 1000, 1500, 2500];
 const CDN = 'https://images.squarespace-cdn.com/content/v1/691490c94119776708e69bbe/';
 
 // The saved copy of a Squarespace image at (or just above) a width, or null if it isn't copied
+// A Squarespace build (SITE_MODE=squarespace) always uses Squarespace's own copy: the pages live there.
+const ON_SQUARESPACE = typeof __SQ__ !== 'undefined' && __SQ__;
 function copy(src, width) {
-  if (typeof src !== 'string' || !src.startsWith(CDN)) return null;
+  if (ON_SQUARESPACE || typeof src !== 'string' || !src.startsWith(CDN)) return null;
   const m = manifest[src.slice(CDN.length).split('?')[0]];
   if (!m) return null;
   const w = m.widths.find((x) => x >= width) ?? m.widths.at(-1);
@@ -28,7 +30,8 @@ function copy(src, width) {
 export function sized(src, width) {
   const saved = copy(src, width);
   if (saved) return saved;
-  if (src.startsWith('/')) return src.replace(/\.jpg$/, `-${width}w.jpg`);
+  // (in a Squarespace build these paths already carry the GitHub Pages address, src/lib/url.js)
+  if (src.startsWith('/') || (ON_SQUARESPACE && src.startsWith(__SQ_ASSETS__))) return src.replace(/\.jpg$/, `-${width}w.jpg`);
   return `${src.split('?')[0]}?format=${width}w`;
 }
 

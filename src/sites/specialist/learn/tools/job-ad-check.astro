@@ -25,7 +25,7 @@ const fullName = { NS: 'Nova Scotia', NB: 'New Brunswick', PE: 'Prince Edward Is
 // A weak example, so a visitor can see what the tool does before pasting their own (from the brand's file)
 const sample = tools.ad.sample;
 ---
-<Base title="Job ad check" description={`Paste a job ad for a score, the fixes that matter most${compare ? ', the pay rules in your province and how your pay compares with our open jobs' : ' and the pay rules in your province'}.`} assistantMode="employer">
+<Base live title="Job ad check" description={`Paste a job ad for a score, the fixes that matter most${compare ? ', the pay rules in your province and how your pay compares with our open jobs' : ' and the pay rules in your province'}.`} assistantMode="employer">
   <PageHero compact title="Job ad check." lead={`Paste a job ad for a score, the fixes that matter most and ${compare ? 'how your pay compares with our open jobs' : 'the pay rules in your province'}. It never leaves your browser.`} />
 
   <section class="tool" data-ad>

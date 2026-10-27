@@ -145,7 +145,7 @@ const TABLES = [
   ['14-10-0063-01', 'Employee wages by industry', 'https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=1410006301'],
 ];
 ---
-<Base title="Atlantic jobs report" description="Statistics Canada’s monthly Labour Force Survey for Nova Scotia, New Brunswick, PEI and Newfoundland and Labrador, in charts: unemployment, jobs, industries and wages." assistantMode="employer">
+<Base live title="Atlantic jobs report" description="Statistics Canada’s monthly Labour Force Survey for Nova Scotia, New Brunswick, PEI and Newfoundland and Labrador, in charts: unemployment, jobs, industries and wages." assistantMode="employer">
   <PageHero compact title="Atlantic jobs report." lead={lfs ? `${monthName(M)}, from Statistics Canada’s Labour Force Survey${releasedText ? `, released ${releasedText}` : ''}. It updates on its own each month.` : 'Statistics Canada’s monthly Labour Force Survey for the four Atlantic provinces, in charts.'} />
 
   {lfs?.fixture && <p class="sample wrap" role="note">Sample figures for building the page. These are not real.</p>}

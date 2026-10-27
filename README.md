@@ -212,7 +212,30 @@ Every push to the `main` branch rebuilds the preview, usually within a minute or
 
 The preview link is public: anyone with the address can open it. Every page includes `<meta name="robots" content="noindex">`, so search engines won't index the sandbox.
 
-## Going live
+## On Squarespace (the plan, October 2026)
+
+The three sites go live inside their existing Squarespace sites, so whoever runs them can keep working in Squarespace. Every deploy also builds a Squarespace version of each brand (`scripts/export-squarespace.mjs`, `SITE_MODE=squarespace`) and publishes it at `https://josiahyule.github.io/isl-sandbox/sq/<brand>/`:
+
+| File | What it is | Where it goes |
+| --- | --- | --- |
+| `kit.html` | The build kit: copy buttons for everything below, and each page's address, title and description | Open it in a browser |
+| `injection-header.html` | Loads the shared style file (`isl.css`) | Squarespace: Settings → Developer tools → Code Injection → Header |
+| `injection-footer.html` | The header and footer, and the shared script file (`isl.js`) | Code Injection → Footer |
+| `blocks/<page>.html` | One page | One full-width Code block on that page |
+
+How the pieces fit:
+
+- **Styles** (`isl.css`) are every page's styles in one file, scoped to the three areas we add to a Squarespace page (`#isl-header`, `#isl-page`, `#isl-footer`), with Squarespace's own type and spacing undone inside them (`src/squarespace/squarespace.css`). The rest of a Squarespace page (blog posts, native pages) keeps Squarespace's styles.
+- **Scripts** (`isl.js`, from `src/squarespace/core.js`) move the header to the top, mark the current page, run the menus and entrance effects, run each page's own script, and start the chat assistant.
+- **Jobs stay current.** A code block is a snapshot of the day it was pasted, so the parts built from jobs or StatCan data carry `data-isl-live` (or `<Base live>` for a whole tool page), and `isl.js` swaps in the copy from the latest hourly build. Edit those parts here, not in Squarespace: a change made in Squarespace is replaced on the next page load. Job counts (`data-isl-count`) update the same way.
+- **Job pages** are one Squarespace page, `/find-work/job?id=<job ID>` (the live site's address); `isl.js` fills it from `live/job/<ID>.html` and sets the title, description, canonical link and JobPosting data.
+- **Links**: page links are plain (`/about`); files (images, the assistant) load from GitHub Pages; photos load from Squarespace.
+
+Change something in the sandbox, then copy the changed page's code block into Squarespace again. Styles, scripts and job data update on their own.
+
+Before relying on it: the shared files load from Josiah's GitHub account. Move the repo to an account ISL owns and update the addresses (`SQ_ASSETS` in `astro.config.mjs`) before launch.
+
+## Going live (own host, not used: see "On Squarespace")
 
 The sandbox build stays as it is. A second build makes each brand ready for its own domain:
 

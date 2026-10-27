@@ -27,7 +27,7 @@ const count = { contract: jobs.filter((j) => j.type === 'contract').length, dire
     {brand.assistant && <button type="button" class="textlink" data-open-assistant>Or describe what you want to the job assistant</button>}
   </PageHero>
 
-  <section class="results">
+  <section class="results" data-isl-live="results">
     <div class="wrap">
       <form class:list={['search', industryOptions.length === 0 && 'search--3']} role="search" data-search>
         <label class="visually-hidden" for="q">Search jobs</label>

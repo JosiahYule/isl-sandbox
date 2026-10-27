@@ -13,7 +13,7 @@ import { url } from '../lib/url.js';
   <section class="nf">
     <div class="wrap">
       <form class="search" action={url('/find-work/')} method="get" role="search">
-        <label for="nf-q">Search {jobs.length} open jobs</label>
+        <label for="nf-q">Search <span data-isl-count="all">{jobs.length}</span> open jobs</label>
         <div class="bar">
           <input id="nf-q" name="q" type="search" placeholder="Job title, skill or city" autocomplete="off" />
           <button type="submit">Search</button>

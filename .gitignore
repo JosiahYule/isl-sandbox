@@ -12,3 +12,4 @@ dist-live/
 
 # Copied from assistant/ by scripts/sync-assistant.mjs
 public/assistant/
+dist-sq/

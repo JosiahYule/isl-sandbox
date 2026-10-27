@@ -27,7 +27,7 @@ const near = areas.map((a) => ({ ...a, n: jobs.filter((j) => j.area === a.key).l
           {lines.map((l, i) => <>{i > 0 && " "}<span class="line">{l}</span></>)}
         </h1>
         <p class="hero-lead">{lead}</p>
-        <form class="search" action={url('/find-work/')} method="get" role="search">
+        <form class="search" action={url('/find-work/')} method="get" role="search" data-isl-live="search">
           <label for="hero-q">{findJob ? `${findJob} Search ${jobs.length} open jobs` : `Looking for work? Search ${jobs.length} open jobs`}</label>
           <div class="search-bar">
             <input id="hero-q" name="q" type="search" placeholder="Job title, skill or city" autocomplete="off" />
@@ -39,7 +39,7 @@ const near = areas.map((a) => ({ ...a, n: jobs.filter((j) => j.area === a.key).l
       </div>
     </div>
 
-    {ticker.length > 0 && <div class="ticker" aria-label="Now hiring" data-ticker>
+    {ticker.length > 0 && <div class="ticker" aria-label="Now hiring" data-ticker data-isl-live="ticker">
       <p class="ticker-label"><span class="pulse" aria-hidden="true"></span>Now hiring</p>
       <!-- Job links pause on hover or focus; the separate button also lets touch users pause and resume. -->
       <button type="button" class="ticker-toggle" aria-pressed="false" data-ticker-toggle>

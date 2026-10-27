@@ -19,8 +19,10 @@ import { resolve } from 'node:path';
 // assistantMode: "employer" (hiring pages) or "seeker" (job pages) opens it ready for that visitor; leave out to let it ask
 // assistantJob: on a job page, that job's ID, so the assistant answers questions about the posting
 // footerOffices: false hides the footer's office row (the contact page already lists the offices)
+// live: the whole page is built from data that changes (the jobs report, pay on open jobs); on Squarespace
+//   the page is refreshed from the latest build every time it loads (src/squarespace/core.js)
 // schema: optional structured data (an object or a list) that search engines read, e.g. an office's address
-const { title, description = brand.scope, assistantMode, assistantJob, footerOffices = true, schema } = Astro.props;
+const { title, description = brand.scope, assistantMode, assistantJob, footerOffices = true, schema, live = false } = Astro.props;
 const assistant = (Astro.props.assistant ?? true) && brand.assistant; // AS and ADS: off for now
 // All assistant imports and its data share a content-versioned folder. This avoids mixing
 // newly published pages with an older cached widget or demo engine on GitHub Pages.
@@ -60,7 +62,7 @@ const colorVars = brand.colors ? Object.entries(brand.colors).map(([k, v]) => `-
   <body>
     <a class="skip" href="#main">Skip to content</a>
     <Header />
-    <main id="main">
+    <main id="main" data-isl-live-page={live ? '' : undefined}>
       <slot />
     </main>
     <Footer offices={footerOffices} />

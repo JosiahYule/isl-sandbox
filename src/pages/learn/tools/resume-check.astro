@@ -16,7 +16,7 @@ import { links } from '../../../data/site.js';
 const jobTerms = jobs.map((j) => ({ id: j.id, title: j.title, place: [j.city, j.province].filter(Boolean).join(', '), label: `${j.title}, ${[j.city, j.province].filter(Boolean).join(' ')}`, url: j.url, pay: j.pay, type: j.type, terms: keywordsFor(j) }));
 const groups = [...new Set(CHECKS.map((c) => c.group))];
 ---
-<Base title="Resume check" description="Paste your resume for a score and the fixes that matter most to recruiters. It never leaves your browser." assistantMode="seeker">
+<Base live title="Resume check" description="Paste your resume for a score and the fixes that matter most to recruiters. It never leaves your browser." assistantMode="seeker">
   <PageHero compact title="Resume check." lead="Paste your resume for a score, the fixes that matter most and the open jobs it fits. It never leaves your browser." />
 
   <section class="tool" data-resume>

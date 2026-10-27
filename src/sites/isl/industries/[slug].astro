@@ -43,7 +43,7 @@ const services = [ind.contract && ['Contract staffing', '/contract/'], ind.direc
     <Button href={`/find-work/?industry=${ind.slug}`} variant="outline">See open jobs</Button>
   </PageHero>
 
-  <section class="section section--rule">
+  <section class="section section--rule" data-isl-live="pay">
     <div class="wrap two">
       <div>
         <h2 class="h">Roles we fill</h2>
@@ -68,7 +68,7 @@ const services = [ind.contract && ['Contract staffing', '/contract/'], ind.direc
   </section>
 
   {open.length > 0 && (
-    <section class="section section--tint">
+    <section class="section section--tint" data-isl-live="open">
       <div class="wrap">
         <div class="section-head section-head--split jh">
           <h2>Open now</h2>
