@@ -367,6 +367,9 @@ function kitPage(brand, assets) {
 <h1>${NAMES[brand]}: Squarespace build kit</h1>
 <p class="meta" id="gen"></p>
 
+<h2>0. Try a page first (optional)</h2>
+<p>Code Injection changes every page at once. To see one page on Squarespace first, make a new page that isn't in the navigation, add a Code block, and paste that page's <b>Test version</b> (below): it carries the header, footer and shared files inside it, so it only affects that one page.</p>
+
 <h2>1. Once for the whole site</h2>
 <ol>
   <li>In Squarespace, open <b>Settings → Developer tools → Code Injection</b>.</li>
@@ -382,8 +385,10 @@ function kitPage(brand, assets) {
 </div>
 <script>
 const ROOT = ${JSON.stringify(assets + '/')};
+const get = async (file) => (await fetch(ROOT + file, { cache: 'no-cache' })).text();
 async function copy(file, btn) {
-  const text = await (await fetch(ROOT + file, { cache: 'no-cache' })).text();
+  // A test version: the page with the Code Injection parts inside it, for trying on one hidden page
+  const text = btn.dataset.test ? (await Promise.all(['injection-header.html', file, 'injection-footer.html'].map(get))).join('\n') : await get(file);
   await navigator.clipboard.writeText(text);
   const was = btn.textContent; btn.textContent = 'Copied'; btn.classList.add('done');
   setTimeout(() => { btn.textContent = was; btn.classList.remove('done'); }, 1600);
@@ -397,7 +402,8 @@ fetch(ROOT + 'kit.json', { cache: 'no-cache' }).then((r) => r.json()).then((kit)
   const esc = (s) => s.replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
   list.innerHTML = pages.map((p) => '<div class="card" data-find="' + esc((p.path + ' ' + p.title).toLowerCase()) + '">' +
     '<b>' + esc(p.title || p.path) + '</b><div class="btns"><button data-copy="blocks/' + p.key + '.html">Copy code block</button>' +
-    '<button class="ghost" data-text="' + esc(p.description) + '">Copy description</button></div>' +
+    '<button class="ghost" data-text="' + esc(p.description) + '">Copy description</button>' +
+    '<button class="ghost" data-copy="blocks/' + p.key + '.html" data-test="1">Test version</button></div>' +
     '<span class="addr">' + esc(p.path) + '</span><span class="meta">' + Math.round(p.size / 1024) + ' KB · ' + esc(p.description) + '</span></div>').join('');
   list.addEventListener('click', (e) => { const b = e.target.closest('[data-text]'); if (b) copyText(b.dataset.text, b); });
   document.getElementById('find').addEventListener('input', (e) => {
