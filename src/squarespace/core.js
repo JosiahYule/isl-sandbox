@@ -49,6 +49,15 @@ if (footer) {
     footer.querySelector('.lower')?.classList.add('lower--top');
   }
 }
+// Blog posts (Squarespace's own pages): a way back to every article, above the date
+const post = document.querySelector('.blog-item-wrapper');
+if (post && __HAS_LEARN__ && !post.querySelector('.isl-post-back')) {
+  const back = document.createElement('a');
+  back.className = 'isl-post-back';
+  back.href = '/learn';
+  back.textContent = '\u2190 All articles';
+  (post.querySelector('.blog-item-top-wrapper') || post).prepend(back);
+}
 if (page?.dataset.assistantMode) html.dataset.assistantMode = page.dataset.assistantMode;
 if (page?.dataset.assistantJob) html.dataset.assistantJob = page.dataset.assistantJob;
 

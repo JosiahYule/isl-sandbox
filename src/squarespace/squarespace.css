@@ -45,3 +45,46 @@ body { padding-top: 72px !important; }
 /* The hidden attribute: undoing everything above would undo it too (browsers treat it the same way) */
 :is(#isl-header, #isl-page, #isl-footer) :where([hidden]:not([hidden="until-found" i])) { display: none; }
 :is(#isl-header, #isl-page, #isl-footer) { text-align: left; letter-spacing: normal; word-spacing: normal; text-transform: none; font-style: normal; pointer-events: auto; visibility: visible; }
+
+/* 5. Blog posts. The posts stay Squarespace blog posts (written and edited in Squarespace, their bodies
+      built as code blocks with their own styles). These rules restyle only what Squarespace draws around
+      a post, so it matches the rest of the site: the date, the title and the links to the previous and
+      next posts. isl.js adds "All articles" above the date (ISL). "html body" and !important outrank the
+      Squarespace template's own blog styles. */
+html body .blog-item-wrapper { --isl-ink: #1a1a1a; --isl-soft: #666; --isl-line: #e8e8e8; --isl-accent: #0070ca; font-family: 'DM Sans Variable', 'DM Sans', system-ui, sans-serif; color: var(--isl-ink); }
+html body .blog-item-wrapper .blog-item-top-wrapper { text-align: left !important; margin-bottom: clamp(1.5rem, 3vw, 2.5rem) !important; }
+html body .blog-item-wrapper .entry-title {
+  font-family: 'DM Sans Variable', 'DM Sans', system-ui, sans-serif !important; font-weight: 600 !important; font-style: normal !important;
+  font-size: clamp(2.3rem, 1.2rem + 3.6vw, 4.4rem) !important; line-height: 1.04 !important; letter-spacing: -0.025em !important;
+  text-transform: none !important; color: var(--isl-ink) !important; text-wrap: balance; margin: 0.35em 0 0 !important; max-width: 20ch;
+}
+html body .blog-item-wrapper :is(.blog-meta-section, .blog-item-meta-wrapper, .blog-meta-item, .blog-meta-item a, time) {
+  font-family: 'DM Sans Variable', 'DM Sans', system-ui, sans-serif !important; font-size: 0.9rem !important; font-weight: 400 !important;
+  letter-spacing: normal !important; text-transform: none !important; color: var(--isl-soft) !important; text-decoration: none !important;
+}
+html body .blog-item-wrapper .isl-post-back {
+  display: inline-block; margin-bottom: 1.25rem; font-family: 'DM Sans Variable', 'DM Sans', system-ui, sans-serif;
+  font-size: 0.9rem; font-weight: 600; color: var(--isl-accent); text-decoration: none;
+}
+html body .blog-item-wrapper .isl-post-back:hover { text-decoration: underline; }
+/* Previous and next posts: two plain links over a rule, as the site's own lists are */
+html body .item-pagination {
+  font-family: 'DM Sans Variable', 'DM Sans', system-ui, sans-serif !important; border-top: 1.5px solid #1a1a1a !important;
+  background: none !important; padding: 1.5rem 0 0 !important; margin-top: clamp(2.5rem, 5vw, 4rem) !important;
+}
+html body .item-pagination { display: flex !important; justify-content: space-between; align-items: flex-start; gap: 1rem 2rem; flex-wrap: wrap; }
+html body .item-pagination .item-pagination-link { display: flex !important; align-items: center; gap: 0.75rem; max-width: 26rem; }
+html body .item-pagination .item-pagination-link--next { margin-left: auto; text-align: right; }
+html body .item-pagination .item-pagination-title { margin: 0.15rem 0 0 !important; }
+html body .blog-item-wrapper .blog-meta-section :is(.blog-meta-primary, .blog-meta-secondary) { display: inline-flex; flex-wrap: wrap; gap: 0.25rem 0.75rem; }
+html body .item-pagination :is(.item-pagination-prev-next, .item-pagination-label) {
+  font-family: inherit !important; font-size: 0.9rem !important; font-weight: 400 !important; letter-spacing: normal !important;
+  text-transform: none !important; color: #666 !important;
+}
+html body .item-pagination .item-pagination-title {
+  font-family: inherit !important; font-size: 1.25rem !important; font-weight: 600 !important; line-height: 1.25 !important;
+  letter-spacing: -0.01em !important; text-transform: none !important; color: #1a1a1a !important;
+}
+html body .item-pagination a { color: #1a1a1a !important; text-decoration: none !important; }
+html body .item-pagination a:hover .item-pagination-title { text-decoration: underline !important; }
+html body .item-pagination .item-pagination-icon { color: #1a1a1a !important; fill: #1a1a1a !important; stroke: #1a1a1a !important; }
