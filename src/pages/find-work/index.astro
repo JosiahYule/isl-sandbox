@@ -148,8 +148,11 @@ const count = { contract: jobs.filter((j) => j.type === 'contract').length, dire
     rows.forEach((row) => {
       const link = row.querySelector<HTMLAnchorElement>('h3 a');
       if (!link) return;
+      // Add the search to the job's link, keeping what the link already has (on Squarespace a job's
+      // address is /find-work/job?id=..., and replacing the whole query would drop the job's ID)
       const destination = new URL(link.href);
-      destination.search = context;
+      RESULT_KEYS.forEach((key) => destination.searchParams.delete(key));
+      new URLSearchParams(context).forEach((value, key) => destination.searchParams.set(key, value));
       link.href = destination.href;
     });
     if (track) {
