@@ -58,6 +58,10 @@ if (post && __HAS_LEARN__ && !post.querySelector('.isl-post-back')) {
   back.textContent = '\u2190 All articles';
   (post.querySelector('.blog-item-top-wrapper') || post).prepend(back);
 }
+// Squarespace puts the previous/next links outside the post, across the whole window: moved to the end
+// of the post, they line up with its text
+const pager = document.querySelector('.item-pagination');
+if (post && pager && !post.contains(pager)) post.append(pager);
 if (page?.dataset.assistantMode) html.dataset.assistantMode = page.dataset.assistantMode;
 if (page?.dataset.assistantJob) html.dataset.assistantJob = page.dataset.assistantJob;
 

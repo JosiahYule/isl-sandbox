@@ -87,7 +87,15 @@ html body .item-pagination .item-pagination-title {
 }
 html body .item-pagination a { color: #1a1a1a !important; text-decoration: none !important; }
 html body .item-pagination a:hover .item-pagination-title { text-decoration: underline !important; }
-html body .item-pagination .item-pagination-icon { color: #1a1a1a !important; fill: #1a1a1a !important; stroke: #1a1a1a !important; }
+html body .item-pagination .item-pagination-icon { color: #1a1a1a !important; fill: #1a1a1a !important; stroke: #1a1a1a !important; flex: none; }
+html body .item-pagination .item-pagination-icon svg { width: 0.9rem !important; height: 0.9rem !important; stroke-width: 3px !important; }
+html body .item-pagination { width: 100% !important; max-width: none !important; margin-bottom: clamp(3rem, 6vw, 4.5rem) !important; padding-left: 0 !important; padding-right: 0 !important; }
+/* Templates that show only the post's title get the site's small "Previous" / "Next" above it */
+html body .item-pagination .item-pagination-link:not(:has(.item-pagination-prev-next)) .item-pagination-title::before {
+  display: block; margin-bottom: 0.15rem; font-size: 0.9rem; font-weight: 400; letter-spacing: normal; color: #666;
+}
+html body .item-pagination .item-pagination-link--prev:not(:has(.item-pagination-prev-next)) .item-pagination-title::before { content: 'Previous'; }
+html body .item-pagination .item-pagination-link--next:not(:has(.item-pagination-prev-next)) .item-pagination-title::before { content: 'Next'; }
 
 /* 6. Blog post bodies. Every post is built from the blog design system (the isl-blog-format skill:
       .nl-intro, h3 section labels, .stat-strip, card grids with .sv-eyebrow/.sv-title/.sv-body,
