@@ -29,17 +29,19 @@ body { padding-top: 72px !important; }
 .sqs-layout:has(#isl-page), .sqs-layout:has(#isl-page) .row, .sqs-layout:has(#isl-page) .col { float: none !important; width: 100% !important; padding: 0 !important; margin: 0 !important; }
 #page:has(#isl-page) { padding: 0 !important; margin: 0 !important; }
 
-/* 4. Inside our areas, Squarespace's site styles (its fonts, heading sizes, link colours, spacing)
-      are undone, so the elements start from the browser's plain defaults, as they do in the sandbox.
-      Every rule after this one is more specific, so the site's own design applies on top.
-      SVG drawings are left alone: their colours are set on the drawing itself. */
-:is(#isl-header, #isl-page, #isl-footer) :where(:not(svg, svg *)) {
-  margin: revert; padding: revert; border: revert; border-radius: revert; outline: revert; background: revert; color: revert;
-  font: revert; letter-spacing: revert; word-spacing: revert; text-transform: revert; text-decoration: revert; text-align: revert;
-  text-indent: revert; text-shadow: revert; box-shadow: revert; list-style: revert; vertical-align: revert; float: revert; clear: revert;
-  min-width: revert; min-height: revert; max-width: revert; max-height: revert; appearance: revert; opacity: revert; transform: revert;
-  transition: revert; white-space: revert; box-sizing: revert;
+/* 4. Inside our areas, everything Squarespace's site styles set is undone, so each element starts from
+      the browser's plain defaults, as it does in the sandbox. Squarespace styles its own class names
+      (.header, .content, .section, .logo ...), and our markup uses some of the same names, so a rule like
+      Squarespace's ".header { pointer-events: none }" would otherwise reach our header and make it
+      unclickable. Every rule after this one is more specific, so the site's own design applies on top.
+      Left alone: SVG drawings (their colours are set on the drawing itself) and images and video, whose
+      width and height written on the tag would be undone too. */
+:is(#isl-header, #isl-page, #isl-footer) :where(:not(svg, svg *, img, picture, video, canvas, iframe)) { all: revert; }
+:is(#isl-header, #isl-page, #isl-footer) :where(img, picture, video, canvas, iframe) {
+  margin: revert; padding: revert; border: revert; border-radius: revert; outline: revert; background: revert;
+  box-shadow: revert; float: revert; vertical-align: revert; max-width: revert; max-height: revert; min-width: revert; min-height: revert;
+  opacity: revert; transform: revert; transition: revert; filter: revert; position: revert; visibility: revert; pointer-events: revert; object-fit: revert;
 }
-/* (Display and sizes aren't undone: Squarespace rarely sets them, and undoing them would also undo the
-   hidden attribute and the width and height written on images, which browsers treat the same way.) */
-:is(#isl-header, #isl-page, #isl-footer) { text-align: left; letter-spacing: normal; word-spacing: normal; text-transform: none; font-style: normal; }
+/* The hidden attribute: undoing everything above would undo it too (browsers treat it the same way) */
+:is(#isl-header, #isl-page, #isl-footer) :where([hidden]:not([hidden="until-found" i])) { display: none; }
+:is(#isl-header, #isl-page, #isl-footer) { text-align: left; letter-spacing: normal; word-spacing: normal; text-transform: none; font-style: normal; pointer-events: auto; visibility: visible; }
