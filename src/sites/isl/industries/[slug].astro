@@ -3,9 +3,6 @@
 // One template for the six industries with a `slug` in src/data/industries.js. Each page is
 // built from data the site already has, so it stays current with the job feed:
 //   roles       the roles ISL fills most often (industries.js)
-//   pay         middle and range of HOURLY pay on our open jobs in this industry (src/lib/jobpay.js);
-//               salaried roles are left out (a few manager salaries would skew what an hourly
-//               worker earns), and it only shows with at least three jobs
 //   open jobs   the jobs whose title matches the industry (industryOf in industries.js)
 //   contacts    who an employer talks to in each province (routing.js, as on the Contract page)
 import Base from '../../../layouts/Base.astro';
@@ -15,7 +12,6 @@ import JobRow from '../../../components/JobRow.astro';
 import CtaBand from '../../../components/CtaBand.astro';
 import { industryPages } from '../../../data/industries.js';
 import { jobs } from '../../../data/jobs.js';
-import { readPay, perHour } from '../../../lib/jobpay.js';
 import { url } from '../../../lib/url.js';
 import { route, provinceName } from '../../../../assistant/supabase/functions/_shared/routing.js';
 
@@ -25,45 +21,29 @@ export function getStaticPaths() {
 
 const { ind } = Astro.props;
 const open = jobs.filter((j) => j.industry === ind.slug);
-const paid = open.map((j) => readPay(j.pay)).filter((p) => p && p.unit === 'hour').map((p) => p.hourly).sort((a, b) => a - b);
-const mid = paid.length ? (paid.length % 2 ? paid[(paid.length - 1) / 2] : (paid[paid.length / 2 - 1] + paid[paid.length / 2]) / 2) : null;
 const shortName = ind.name.split(',')[0].toLowerCase();
 const service = ind.contract ? 'contract' : 'direct';
 const hireHref = `/hire/?service=${service}&details=${encodeURIComponent(`${ind.name}: `)}`;
 const local = [['NS', 'Halifax', 'halifax'], ['NB', 'Moncton', 'moncton'], ['PE', 'Charlottetown', 'charlottetown'], ['NL', "St. John's", 'st-johns']]
   .map(([province, city, key]) => ({ province, key, label: provinceName(province), ...route({ audience: 'employer', service: 'contract', place: { province, city } }) }));
-// Industries we also fill permanently: Zowie's team takes those searches, anywhere in Canada
-if (ind.direct) local.push({ key: 'direct', label: 'Permanent, all of Canada', ...route({ audience: 'employer', service: 'direct', place: null }) });
+// Permanent searches in any industry: Zowie's team, anywhere in Canada
+local.push({ key: 'direct', label: 'Permanent, all of Canada', ...route({ audience: 'employer', service: 'direct', place: null }) });
 const tel = (n) => `tel:+1${n.replace(/\D/g, '')}`;
-const services = [ind.contract && ['Contract staffing', '/contract/'], ind.direct && ['Direct hire', '/direct-hire/']].filter(Boolean);
+const services = [['Contract staffing', '/contract/'], ['Direct hire', '/direct-hire/']];
 ---
-<Base title={`${ind.name} staffing`} description={`${ind.name} staffing across Atlantic Canada: ${ind.roles.slice(0, 3).join(', ').toLowerCase()} and more, on contract${ind.direct ? ' and permanently' : ''}.`} assistantMode="employer">
+<Base title={`${ind.name} staffing`} description={`${ind.name} staffing: ${ind.roles.slice(0, 3).join(', ').toLowerCase()} and more, on contract and permanently, anywhere in Canada.`} assistantMode="employer">
   <PageHero compact title={`${ind.name}.`} lead={ind.note}>
     <Button href={hireHref}>Request workers</Button>
     <Button href={`/find-work/?industry=${ind.slug}`} variant="outline">See open jobs</Button>
   </PageHero>
 
-  <section class="section section--rule" data-isl-live="pay">
-    <div class="wrap two">
+  <section class="section section--rule">
+    <div class="wrap">
       <div>
         <h2 class="h">Roles we fill</h2>
         <ul class="roles">{ind.roles.map((r) => <li>{r}</li>)}</ul>
         <p class="svc-line">{services.map(([label, href], i) => <>{i > 0 && ' · '}<a href={url(href)}>{label}</a></>)}</p>
       </div>
-      {mid !== null && paid.length >= 3 ? (
-        <div class="pay">
-          <h2 class="h">Hourly pay on our open jobs</h2>
-          <p class="big">{perHour(mid)}</p>
-          <p class="sub">middle, from {perHour(paid[0])} to {perHour(paid.at(-1))} across {paid.length} jobs</p>
-          <a class="more" href={url('/learn/tools/pay-on-open-jobs/')}>Pay across every role</a>
-        </div>
-      ) : (
-        <div class="pay">
-          <h2 class="h">Pay</h2>
-          <p class="sub">Not enough open hourly jobs to show a range right now.</p>
-          <a class="more" href={url('/learn/tools/pay-on-open-jobs/')}>See pay across every role</a>
-        </div>
-      )}
     </div>
   </section>
 
@@ -79,35 +59,29 @@ const services = [ind.contract && ['Contract staffing', '/contract/'], ind.direc
     </section>
   )}
 
-  {ind.contract && (
-    <section class="section">
-      <div class="wrap">
-        <div class="section-head"><h2>Who you’ll talk to</h2></div>
-        <ul class="local" style={`--n:${local.length}`}>
-          {local.map((l) => (
-            <li>
-              <p class="l-prov">{l.label}</p>
-              <p class="l-name">{l.person?.name ?? `${l.office.city} office`}</p>
-              <a class="l-tel" href={tel(l.person?.phone || l.office.phone)}>{l.person?.phone || l.office.phone}</a>
-            </li>
-          ))}
-        </ul>
-      </div>
-    </section>
-  )}
+  <section class="section">
+    <div class="wrap">
+      <div class="section-head"><h2>Who you’ll talk to</h2></div>
+      <ul class="local" style={`--n:${local.length}`}>
+        {local.map((l) => (
+          <li>
+            <p class="l-prov">{l.label}</p>
+            <p class="l-name">{l.person?.name ?? `${l.office.city} office`}</p>
+            <a class="l-tel" href={tel(l.person?.phone || l.office.phone)}>{l.person?.phone || l.office.phone}</a>
+          </li>
+        ))}
+      </ul>
+    </div>
+  </section>
 
   <CtaBand title={`Need ${shortName} staff?`} href={hireHref} label="Request workers" />
 </Base>
 
 <style>
-  .two { display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); gap: var(--s7) clamp(2.5rem, 6vw, 6rem); align-items: start; }
   .h { font-size: var(--fs-h3); margin-bottom: var(--s4); }
-  .roles { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: 1fr 1fr; border-top: 1.5px solid var(--ink); }
+  .roles { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); column-gap: var(--s5); border-top: 1.5px solid var(--ink); } /* the full width now: three columns */
   .roles li { padding: var(--s3) var(--s3) var(--s3) 0; border-bottom: 1px solid var(--line); font-weight: var(--fw-bold); }
   .svc-line { margin-top: var(--s5); font-weight: var(--fw-bold); color: var(--ink-soft); }
-  .pay { border-top: 1.5px solid var(--ink); padding-top: var(--s4); }
-  .big { margin: 0; font-weight: var(--fw-light); font-size: var(--fs-figure-lg); letter-spacing: -0.04em; line-height: 1; font-variant-numeric: tabular-nums; }
-  .sub { margin: var(--s3) 0 0; color: var(--ink-soft); }
   .more { display: inline-block; margin-top: var(--s4); font-weight: var(--fw-bold); }
   .jh .lead { justify-self: end; font-weight: var(--fw-bold); font-size: var(--fs-body); }
   .list { border-top: 1.5px solid var(--ink); background: var(--paper); }
@@ -117,8 +91,8 @@ const services = [ind.contract && ['Contract staffing', '/contract/'], ind.direc
   .l-name { margin: 0; font-weight: var(--fw-bold); }
   .l-tel { font-weight: var(--fw-bold); color: var(--ink); text-decoration: none; font-variant-numeric: tabular-nums; }
   @media (max-width: 900px) {
-    .two { grid-template-columns: 1fr; }
     .local { grid-template-columns: 1fr 1fr; }
+    .roles { grid-template-columns: 1fr 1fr; }
     .jh .lead { justify-self: start; }
   }
   @media (max-width: 480px) { .roles { grid-template-columns: 1fr; } }

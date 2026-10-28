@@ -12,7 +12,7 @@ import { jobs } from '../../data/jobs.js';
 import { areas } from '../../data/areas.js';
 import { places } from '../../data/places.js';
 
-// Proof that we staff beyond the office cities: towns with open contract roles right now
+// Proof that we staff well beyond the offices: towns with open contract roles right now
 // that aren't in any office's own area (from the live job snapshot, so it updates with the feed).
 const officeTowns = new Set(areas.flatMap((a) => a.towns));
 const beyond = [...new Set(jobs.filter((j) => j.type === 'contract' && j.city && !officeTowns.has(j.city.toLowerCase())).map((j) => j.city.replace(' - ', '-')))];
@@ -43,8 +43,8 @@ const covered = [
   ['Orientation', 'Specific to your company and site.'],
 ];
 ---
-<Base assistantMode="employer" title="Contract staffing" description="Pre-screened contract workers across Atlantic Canada, on site within hours of your request, for one all-inclusive hourly rate.">
-  <PageHero photo={{ ...stock.welder, position: 'center' }} title="Pre-screened workers, on site within hours." lead="Anywhere in Atlantic Canada, not just our office cities. They work for you and stay on our payroll.">
+<Base assistantMode="employer" title="Contract staffing" description="Pre-screened contract workers anywhere in Canada, on site within hours of your request, for one all-inclusive hourly rate.">
+  <PageHero photo={{ ...stock.welder, position: 'center' }} title="Pre-screened workers, on site within hours." lead="Anywhere in Canada. They work for you and stay on our payroll.">
     <Button href="/hire/?service=contract" size="lg">Request workers</Button>
   </PageHero>
 
@@ -62,8 +62,8 @@ const covered = [
     <div class="wrap cov-grid">
       <div class="cov-copy">
         <div class="section-head">
-          <h2>All of Atlantic Canada, not just our office cities.</h2>
-          <p class="lead">Each office covers its whole province. Cape Breton, Fredericton, Gander: if the work is in Atlantic Canada, we can staff it.</p>
+          <h2>Wherever the work is.</h2>
+          <p class="lead">Our five offices cover Atlantic Canada, and we place contract workers anywhere in the country.</p>
         </div>
         {beyond.length > 0 && (
           <div class="now">

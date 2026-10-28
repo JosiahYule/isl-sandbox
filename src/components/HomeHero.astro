@@ -10,12 +10,13 @@
 //   findJob: the label over the job search (default: "Looking for work? Search N open jobs")
 import Photo from './Photo.astro';
 import { jobs } from '../data/jobs.js';
-import { areas } from '../data/areas.js';
+import { provinceName } from '../../assistant/supabase/functions/_shared/routing.js';
 import { url } from '../lib/url.js';
 const { photo, lines, lead, ticker = [], long = false, findJob } = Astro.props;
-// One-tap shortcuts under the search: each office area that has open jobs right now, busiest first
-const near = areas.map((a) => ({ ...a, n: jobs.filter((j) => j.area === a.key).length }))
-  .filter((a) => a.n > 0).sort((a, b) => b.n - a.n);
+// One-tap shortcuts under the search: each province with open jobs right now, busiest first
+const near = [...new Set(jobs.map((j) => j.province).filter(Boolean))]
+  .map((code) => ({ code, label: ({ PE: 'PEI' })[code] || provinceName(code) || code, n: jobs.filter((j) => j.province === code).length }))
+  .sort((a, b) => b.n - a.n);
 ---
   <section class:list={['hero', long && 'hero--long']}>
     <div class="hero-bg" data-animate>
@@ -33,7 +34,7 @@ const near = areas.map((a) => ({ ...a, n: jobs.filter((j) => j.area === a.key).l
             <input id="hero-q" name="q" type="search" placeholder="Job title, skill or city" autocomplete="off" />
             <button type="submit">Search</button>
           </div>
-          {near.length > 1 && <p class="near">Or browse {near.map((a, i) => <>{i > 0 && ' '}<a href={url(`/find-work/?area=${a.key}`)}>{a.label} <span>{a.n}</span></a></>)}</p>}
+          {near.length > 1 && <p class="near">Or browse {near.map((a, i) => <>{i > 0 && ' '}<a href={url(`/find-work/?province=${a.code}`)}>{a.label} <span>{a.n}</span></a></>)}</p>}
         </form>
         <p class="employer">Hiring? <a class="employer-go" href={url('/hire/')} data-cta-placement="home_hero">Request talent <span aria-hidden="true">→</span></a></p>
       </div>
@@ -109,7 +110,7 @@ const near = areas.map((a) => ({ ...a, n: jobs.filter((j) => j.area === a.key).l
   .search-bar input:focus { outline: 2px solid var(--accent); outline-offset: -2px; }
   .search-bar button { font: inherit; font-weight: var(--fw-bold); cursor: pointer; padding: 0 1.6rem; border: 0; background: var(--accent); color: #fff; }
   .search-bar button:hover { background: var(--accent-deep); }
-  .near { display: flex; flex-wrap: wrap; align-items: baseline; gap: var(--s2) var(--s4); margin: var(--s3) 0 0; font-size: var(--fs-small); color: rgb(255 255 255 / 0.72); }
+  .near { display: flex; flex-wrap: wrap; align-items: baseline; gap: var(--s2) var(--s4); margin: var(--s3) 0 0; width: max-content; max-width: min(100%, 44rem); max-width: min(calc(100vw - 2 * var(--gutter)), 44rem); /* may run a little wider than the search, so the four provinces fit on one line */ font-size: var(--fs-small); color: rgb(255 255 255 / 0.72); }
   .near a { color: #fff; text-decoration: underline; text-underline-offset: 0.25em; text-decoration-color: rgb(255 255 255 / 0.4); }
   .near a:hover { text-decoration-color: #fff; }
   .near span { font-variant-numeric: tabular-nums; color: rgb(255 255 255 / 0.66); }

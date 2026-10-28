@@ -4,17 +4,15 @@
 // The filter buttons dim the industries a service doesn't cover.
 // Props: initial: "all" (default) | "contract" | "direct"
 //        compact: hide the one-line descriptions
-//        only: "contract" | "direct" lists just that service's industries, as a plain hairline list
-//              (used on the service pages, where the other service's rows would only be noise)
+//        only: "contract" | "direct" lists the industries as a plain hairline list on that service's page.
+//              Every industry is listed on both: either service hires in any of them.
 import { industries } from '../data/industries.js';
 import { url } from '../lib/url.js';
 // Industries with their own page link to it
 const nameOf = (i) => i.slug ? `<a href="${url(`/industries/${i.slug}/`)}">${i.name}</a>` : i.name;
 
 const { initial = 'all', compact = false, only } = Astro.props;
-const other = { contract: 'direct', direct: 'contract' }[only];
-const otherLabel = { contract: 'Contract staffing too', direct: 'Direct hire too' }[other];
-const listed = only ? industries.filter((i) => i[only]) : [];
+const listed = only ? industries : [];
 const count = { all: industries.length, contract: industries.filter((i) => i.contract).length, direct: industries.filter((i) => i.direct).length };
 const filters = [
   { key: 'all', label: 'All industries' },
@@ -27,7 +25,6 @@ const filters = [
   {listed.map((i) => (
     <li>
       <span class="name" set:html={nameOf(i)} />
-      {i[other] && <span class:list={['svc', `svc--${other}`, 'also']}>{otherLabel}</span>}
     </li>
   ))}
 </ul>

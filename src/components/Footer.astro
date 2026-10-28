@@ -29,7 +29,7 @@ const sandboxSites = [{ key: 'isl', name: 'Integrated Staffing', href: '/isl-san
     <div class:list={['lower', !showOffices && 'lower--top']}>
       <div class="about">
         <a class="flogo" href={url('/')} aria-label={`${brand.name} home`}>
-          <img class:list={[!brand.logoWhite && 'invert']} src={asset(brand.logoWhite ?? brand.logo)} alt="" width={logoW} height={logoH} loading="lazy" onerror="this.parentElement.classList.add('no-img'); this.remove();" />
+          <img class:list={[!brand.logoWhite && 'invert']} src={asset(brand.logoWhite ?? brand.logo)} alt="" width={logoW} height={logoH} loading="lazy" style={brand.footerLogoHeight ? `--flogo-h:${brand.footerLogoHeight}px` : undefined} onerror="this.parentElement.classList.add('no-img'); this.remove();" />
           <span class="fword" aria-hidden="true">{brand.wordmark[0]}<br />{brand.wordmark[1]}</span>
         </a>
         <p>{brand.footerAbout ?? `${brand.name} has connected employers and job seekers since ${brand.since}. Locally owned and operated.`}</p>
@@ -79,7 +79,7 @@ const sandboxSites = [{ key: 'isl', name: 'Integrated Staffing', href: '/isl-san
   .lower--top { margin-top: 0; }
   /* The logo file is dark; brightness(0) + invert(1) turns every colour in it to white for the dark footer */
   .flogo { display: inline-block; margin-bottom: var(--s4); color: #fff; }
-  .flogo img { height: 40px; width: auto; }
+  .flogo img { height: var(--flogo-h, 40px); width: auto; }
   .flogo img.invert { filter: brightness(0) invert(1); }
   .fword { display: none; font-weight: var(--fw-bold); font-size: var(--fs-h3); line-height: 1; letter-spacing: -0.01em; }
   .flogo:global(.no-img) .fword { display: block; }

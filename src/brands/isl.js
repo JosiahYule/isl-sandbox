@@ -16,6 +16,7 @@ export const brand = {
   scope: 'Offices across Atlantic Canada. Permanent search nationwide.',
   titleTail: 'Contract and permanent staffing in Atlantic Canada', // the homepage's browser-tab title
   logo: `${cdn}/b4aaffd0-9d0e-4194-8851-2293b7d65d88/Integrated+Staffing+Full+Logo+-+Vector+File.png?format=750w`,
+  footerLogoHeight: 52, // the footer's logo, a bit larger than the 40px default
   favicon: '/favicon.svg',
   siteUrl: 'https://www.integratedstaffing.ca',
   email: 'info@integratedstaffing.ca',
@@ -103,7 +104,7 @@ export const forms = { requestEndpoint: '', referralEndpoint: '' };
 
 // The request form (/hire/)
 export const hire = {
-  lead: 'Contract workers anywhere in Atlantic Canada, permanent hires anywhere in Canada. A recruiter replies within one business day.',
+  lead: 'Contract workers and permanent hires, anywhere in Canada. A recruiter replies within one business day.',
   locations: ['Nova Scotia', 'New Brunswick', 'Prince Edward Island', 'Newfoundland and Labrador', 'Elsewhere in Canada'],
   routing: 'people', // the card names the recruiter, from assistant/.../routing.js
 };
