@@ -264,6 +264,9 @@ function exportBrand(brand) {
   writeFileSync(`${OUT}/live/counts.json`, JSON.stringify(counts));
   writeFileSync(`${OUT}/kit.json`, JSON.stringify({ brand, name: NAMES[brand], generated: new Date().toISOString(), pages: kit }, null, 1));
   writeFileSync(`${OUT}/kit.html`, kitPage(brand, ASSETS));
+  // The kit's own script must be valid JavaScript (a broken one leaves every Copy button dead)
+  const kitScript = kitPage(brand, ASSETS).split('<script>')[1].split('</script>')[0];
+  try { new Function(kitScript); } catch (e) { throw new Error(`kit.html script doesn't parse: ${e.message}`); }
 
   // The built pages themselves aren't published (they'd be copies of the site on another address),
   // nor are the files that only mean something at the root of a site
@@ -378,9 +381,12 @@ function kitPage(brand, assets) {
   input[type=search] { font: inherit; padding: 10px 12px; width: 100%; max-width: 420px; border: 1.5px solid #1a1a1a; margin: 8px 0 16px; }
   ol li { margin-bottom: 6px; }
   code { background: #eee; padding: 1px 5px; }
+  dialog { max-width: 720px; width: calc(100% - 40px); border: 1.5px solid #1a1a1a; padding: 20px; }
+  dialog textarea { width: 100%; height: 300px; font: 13px/1.4 ui-monospace, monospace; }
 </style></head><body><div class="wrap">
 <h1>${NAMES[brand]}: Squarespace build kit</h1>
 <p class="meta" id="gen"></p>
+<p id="err" hidden style="color:#b3261e;font-weight:600"></p>
 
 <h2>0. Try a page first (optional)</h2>
 <p>Code Injection changes every page at once. To see one page on Squarespace first, make a new page that isn't in the navigation, add a Code block, and paste that page's <b>Test version</b> (below): it carries the header, footer and shared files inside it, so it only affects that one page.</p>
@@ -398,34 +404,54 @@ function kitPage(brand, assets) {
 <input type="search" placeholder="Find a page" id="find" aria-label="Find a page">
 <div id="pages"></div>
 </div>
+<dialog id="manual"><p><b>Copy didn't work in this browser.</b> The code is selected below: press Ctrl+C (Cmd+C on a Mac), then close this.</p><textarea readonly></textarea><p><button type="button" id="manual-close">Close</button></p></dialog>
 <script>
+// Every file is loaded as soon as the page opens, so a click can copy straight away. (Browsers only
+// let a page write to the clipboard right after a click; waiting for a download first can be refused.)
 const ROOT = ${JSON.stringify(assets + '/')};
-const get = async (file) => (await fetch(ROOT + file, { cache: 'no-cache' })).text();
-async function copy(file, btn) {
-  // A test version: the page with the Code Injection parts inside it, for trying on one hidden page
-  const text = btn.dataset.test ? (await Promise.all(['injection-header.html', file, 'injection-footer.html'].map(get))).join('\n') : await get(file);
-  await navigator.clipboard.writeText(text);
-  const was = btn.textContent; btn.textContent = 'Copied'; btn.classList.add('done');
-  setTimeout(() => { btn.textContent = was; btn.classList.remove('done'); }, 1600);
+const NL = String.fromCharCode(10);
+const cache = {};
+const load = (file) => (cache[file] ||= fetch(ROOT + file, { cache: 'no-cache' }).then((r) => { if (!r.ok) throw new Error(file + ' ' + r.status); return r.text(); }));
+const textFor = (btn) => btn.dataset.text != null ? Promise.resolve(btn.dataset.text)
+  : btn.dataset.test ? Promise.all(['injection-header.html', btn.dataset.copy, 'injection-footer.html'].map(load)).then((parts) => parts.join(NL))
+  : load(btn.dataset.copy);
+const done = (btn) => { const was = btn.textContent; btn.textContent = 'Copied'; btn.classList.add('done'); setTimeout(() => { btn.textContent = was; btn.classList.remove('done'); }, 1600); };
+const dialog = document.getElementById('manual');
+document.getElementById('manual-close').addEventListener('click', () => dialog.close());
+function manual(text) { const t = dialog.querySelector('textarea'); t.value = text; dialog.showModal(); t.focus(); t.select(); }
+async function copy(btn) {
+  const pending = textFor(btn);
+  try {
+    // ClipboardItem takes the text while it's still loading, which keeps the click's permission (Safari needs this)
+    if (window.ClipboardItem && navigator.clipboard?.write) {
+      await navigator.clipboard.write([new ClipboardItem({ 'text/plain': pending.then((t) => new Blob([t], { type: 'text/plain' })) })]);
+    } else {
+      await navigator.clipboard.writeText(await pending);
+    }
+    done(btn);
+  } catch (e) {
+    try { manual(await pending); } catch (err) { alertBox('Couldn’t load that file (' + err.message + '). Refresh the page and try again.'); }
+  }
 }
-document.addEventListener('click', (e) => { const b = e.target.closest('[data-copy]'); if (b) copy(b.dataset.copy, b); });
-const copyText = (t, b) => navigator.clipboard.writeText(t).then(() => { const was = b.textContent; b.textContent = 'Copied'; b.classList.add('done'); setTimeout(() => { b.textContent = was; b.classList.remove('done'); }, 1600); });
+function alertBox(msg) { const p = document.getElementById('err'); p.textContent = msg; p.hidden = false; }
+document.addEventListener('click', (e) => { const b = e.target.closest('[data-copy],[data-text]'); if (b) copy(b); });
+['injection-header.html', 'injection-footer.html'].forEach((f) => load(f).catch(() => {}));
 fetch(ROOT + 'kit.json', { cache: 'no-cache' }).then((r) => r.json()).then((kit) => {
   document.getElementById('gen').textContent = 'Generated ' + new Date(kit.generated).toLocaleString('en-CA');
   const list = document.getElementById('pages');
   const pages = kit.pages.slice().sort((a, b) => a.path.localeCompare(b.path));
-  const esc = (s) => s.replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
+  const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
   list.innerHTML = pages.map((p) => '<div class="card" data-find="' + esc((p.path + ' ' + p.title).toLowerCase()) + '">' +
     '<b>' + esc(p.title || p.path) + '</b><div class="btns"><button data-copy="blocks/' + p.key + '.html">Copy code block</button>' +
     '<button class="ghost" data-text="' + esc(p.description) + '">Copy description</button>' +
     '<button class="ghost" data-copy="blocks/' + p.key + '.html" data-test="1">Test version</button></div>' +
     '<span class="addr">' + esc(p.path) + '</span><span class="meta">' + Math.round(p.size / 1024) + ' KB · ' + esc(p.description) + '</span></div>').join('');
-  list.addEventListener('click', (e) => { const b = e.target.closest('[data-text]'); if (b) copyText(b.dataset.text, b); });
+  pages.forEach((p) => load('blocks/' + p.key + '.html').catch(() => {}));
   document.getElementById('find').addEventListener('input', (e) => {
     const q = e.target.value.trim().toLowerCase();
     list.querySelectorAll('.card').forEach((c) => { c.hidden = q && !c.dataset.find.includes(q); });
   });
-});
+}).catch((e) => alertBox('The page list didn’t load (' + e.message + '). Refresh the page.'));
 </script></body></html>
 `;
 }
