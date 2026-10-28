@@ -54,7 +54,9 @@ function exportBrand(brand) {
   // page that fills itself in from the address (isl.js, showTemplate). Each job or person is saved as a
   // fragment (live/<kind>/<value>.html) with its title, description and search-engine data.
   const TEMPLATES = {
-    job: { path: '/find-work/job', param: 'id', mode: 'seeker', title: 'Job', note: 'Each open job, filled in from the job feed.',
+    // Each brand keeps its live site's job address, so old job links keep working:
+    // ISL /find-work/job?id=..., AS and ADS /job-details?jobcode=...
+    job: { ...(brand === 'isl' ? { path: '/find-work/job', param: 'id' } : { path: '/job-details', param: 'jobcode' }), mode: 'seeker', title: 'Job', note: 'Each open job, filled in from the job feed.',
       loading: 'Loading the job…', missing: 'This job has been filled or is no longer open.', back: ['/find-work', 'See all open jobs'] },
     person: { path: '/team/member', param: 'name', title: 'Team member', note: 'Each person on the team page, filled in by name.',
       loading: 'Loading…', missing: 'We couldn’t find that person. They may have moved on.', back: ['/team', 'See the whole team'] },
@@ -271,6 +273,14 @@ function exportBrand(brand) {
   // The built pages themselves aren't published (they'd be copies of the site on another address),
   // nor are the files that only mean something at the root of a site
   for (const p of pages) rmSync(p.file);
+  // URL Mappings for Squarespace (Settings > Developer tools > URL Mappings): the old addresses in the
+  // build's _redirects, in Squarespace's format. Old job links need none (the job page keeps its address).
+  const mappings = readFileSync(`${OUT}/_redirects`, 'utf8').split('\n')
+    .map((l) => l.trim().split(/\s+/)).filter((t) => t.length === 3 && t[0].startsWith('/') && !t.some((x) => x.includes('=')) && t[0] !== TEMPLATES.job.path)
+    .map(([from, to, code]) => `${from} -> ${pageLink(to)} ${code}`);
+  // ISL's blog moved from /learn to /blog (the new Learn page took /learn): forward every old post
+  if (brand === 'isl') mappings.push('/learn/[name] -> /blog/[name] 301');
+  writeFileSync(`${OUT}/url-mappings.txt`, mappings.join('\n') + '\n');
   for (const f of ['sitemap.xml', 'robots.txt', '_headers', '_redirects', 'favicon.svg']) rmSync(`${OUT}/${f}`, { force: true });
   if (PUBLISH) cpSync(OUT, `dist/sq/${brand}`, { recursive: true });
   console.log(`${brand}: ${kit.length} code blocks, isl.css ${(Buffer.byteLength(css) / 1024).toFixed(0)} KB, ${common.length} shared scripts`);
@@ -397,6 +407,7 @@ function kitPage(brand, assets) {
   <li>Paste the <b>Header</b> code into the Header box. <button data-copy="injection-header.html">Copy Header code</button></li>
   <li>Paste the <b>Footer</b> code into the Footer box. <button data-copy="injection-footer.html">Copy Footer code</button></li>
   <li>Save. Every page now has the new header and footer, and the new styles.</li>
+  <li>Open <b>Settings → Developer tools → URL Mappings</b> and paste the old addresses to forward. <button data-copy="url-mappings.txt">Copy URL Mappings</button></li>
 </ol>
 
 <h2>2. Each page</h2>

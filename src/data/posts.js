@@ -2,7 +2,11 @@
 // The sandbox links out to them rather than copying them in.
 // `audience` lets the Learn page filter by employer vs job seeker. TODO: check the tags.
 
-const base = 'https://www.integratedstaffing.ca/learn/';
+// On Squarespace (SITE_MODE=squarespace) the blog moved from /learn to /blog, so the new Learn page could
+// have /learn; old /learn/<post> links are forwarded by URL Mappings. The sandbox links to the live site,
+// where the posts are still under /learn until launch.
+const ON_SQUARESPACE = typeof __SQ__ !== 'undefined' && __SQ__;
+const base = ON_SQUARESPACE ? '/blog/' : 'https://www.integratedstaffing.ca/learn/';
 
 export const posts = [
   { title: 'Hiring through an uncertain economy', slug: 'hiring-in-an-uncertain-economy', date: '2026-10-01', audience: 'employers' },
