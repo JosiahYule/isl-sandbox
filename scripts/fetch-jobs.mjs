@@ -32,9 +32,11 @@ export async function refreshJobs({ url, out = 'assistant/data/jobs-snapshot.jso
 
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
   const url = process.env.AVIONTE_FEED_URL;
-  if (!url) console.log('fetch-jobs: no AVIONTE_FEED_URL set, using the saved job snapshot.');
+  // On GitHub, also say which jobs the build used as a notice on the run's summary page
+  const notice = (msg) => { console.log(`fetch-jobs: ${msg}`); if (process.env.GITHUB_ACTIONS) console.log(`::notice title=Job feed::${msg}`); };
+  if (!url) notice('no AVIONTE_FEED_URL set, using the saved job snapshot (not live jobs).');
   else try {
-    console.log(`fetch-jobs: ${await refreshJobs({ url })} jobs from the live feed.`);
+    notice(`${await refreshJobs({ url })} jobs from the live feed.`);
   } catch {
     // Feed URLs can contain credentials. Do not echo URLs or network exception messages.
     console.error('fetch-jobs: refresh failed. Publication stopped; the last published site is unchanged.');
