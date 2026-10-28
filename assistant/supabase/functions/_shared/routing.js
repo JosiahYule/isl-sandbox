@@ -80,7 +80,12 @@ export const RULES = [
 
 // ---- Places ------------------------------------------------------------
 
-const PROVINCE_NAMES = { NS: "Nova Scotia", NB: "New Brunswick", PE: "Prince Edward Island", NL: "Newfoundland and Labrador" };
+// Every province and territory: jobs can be anywhere in Canada
+const PROVINCE_NAMES = {
+  NS: "Nova Scotia", NB: "New Brunswick", PE: "Prince Edward Island", NL: "Newfoundland and Labrador",
+  QC: "Quebec", ON: "Ontario", MB: "Manitoba", SK: "Saskatchewan", AB: "Alberta", BC: "British Columbia",
+  YT: "Yukon", NT: "Northwest Territories", NU: "Nunavut",
+};
 export const provinceName = (code) => PROVINCE_NAMES[code] || code;
 
 // Towns people mention, with their province and (for New Brunswick) the nearer office.

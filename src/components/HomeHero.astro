@@ -9,13 +9,13 @@
 //   long:   a longer headline (AS and ADS keep their live sites' wording): a size smaller, and it wraps
 //   findJob: the label over the job search (default: "Looking for work? Search N open jobs")
 import Photo from './Photo.astro';
-import { jobs } from '../data/jobs.js';
-import { provinceName } from '../../assistant/supabase/functions/_shared/routing.js';
+import { jobs, provinces } from '../data/jobs.js';
 import { url } from '../lib/url.js';
 const { photo, lines, lead, ticker = [], long = false, findJob } = Astro.props;
-// One-tap shortcuts under the search: each province with open jobs right now, busiest first
+// One-tap shortcuts under the search: each province (or territory) with open jobs right now, busiest
+// first. Any province shows up as soon as the feed has a job there.
 const near = [...new Set(jobs.map((j) => j.province).filter(Boolean))]
-  .map((code) => ({ code, label: ({ PE: 'PEI' })[code] || provinceName(code) || code, n: jobs.filter((j) => j.province === code).length }))
+  .map((code) => ({ code, label: ({ PE: 'PEI' })[code] || provinces[code] || code, n: jobs.filter((j) => j.province === code).length }))
   .sort((a, b) => b.n - a.n);
 ---
   <section class:list={['hero', long && 'hero--long']}>

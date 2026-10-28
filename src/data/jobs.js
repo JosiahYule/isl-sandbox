@@ -78,4 +78,5 @@ export const jobs = snapshot
 export const provinces = {
   NS: 'Nova Scotia', NB: 'New Brunswick', PE: 'Prince Edward Island', NL: 'Newfoundland and Labrador',
   QC: 'Quebec', ON: 'Ontario', MB: 'Manitoba', SK: 'Saskatchewan', AB: 'Alberta', BC: 'British Columbia',
+  YT: 'Yukon', NT: 'Northwest Territories', NU: 'Nunavut',
 };

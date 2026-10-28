@@ -27,7 +27,11 @@ const AXIS = [15, top];
 const x = (v) => ((Math.min(Math.max(v, AXIS[0]), AXIS[1]) - AXIS[0]) / (AXIS[1] - AXIS[0])) * 100;
 // Gridlines and labels every $10 from $20 (the scale itself starts at $15)
 const ticks = Array.from({ length: (top - 20) / 10 + 1 }, (_, i) => 20 + i * 10);
-const provinces = [['', 'All'], ['NS', 'NS'], ['NB', 'NB'], ['PE', 'PEI'], ['NL', 'NL']];
+// Jobs outside Atlantic Canada share one chip, "Rest of Canada" (shown only when there are some)
+const ATLANTIC = ['NS', 'NB', 'PE', 'NL'];
+const provGroup = (code) => (ATLANTIC.includes(code) ? code : 'OTHER');
+const provinces = [['', 'All'], ['NS', 'NS'], ['NB', 'NB'], ['PE', 'PEI'], ['NL', 'NL'],
+  ...(rows.some((r) => r.jobs.some((j) => provGroup(j.province) === 'OTHER')) ? [['OTHER', 'Rest of Canada']] : [])];
 const types = [['', 'All'], ['contract', 'Contract'], ['direct', 'Permanent']];
 // Dots closer than 2.2% of the scale would cover each other (two jobs at $17.50 sit in exactly
 // the same spot), so they're stacked into lanes: middle first, then above, then below.
@@ -87,7 +91,7 @@ const payText = (j) => j.payInfo.unit === 'year' ? `${j.pay} (about ${perHour(j.
               <span class="offer-line" data-offer-line hidden aria-hidden="true"><span>Your offer</span></span>
               {r.jobs.map((j) => (
                 <a class:list={['dot', `dot--${j.type}`]} href={j.url} style={`left:${x(j.payInfo.hourly)}%;--lane:${j.lane}`}
-                   data-v={j.payInfo.hourly} data-prov={j.province} data-type={j.type}
+                   data-v={j.payInfo.hourly} data-prov={provGroup(j.province)} data-type={j.type}
                    data-tip={`${payText(j)}|${j.title}|${[j.city, j.province].filter(Boolean).join(', ')} · ${j.typeLabel}`}
                    aria-label={`${j.title}, ${[j.city, j.province].filter(Boolean).join(', ')}, ${j.typeLabel}, ${payText(j)}`}>
                   <span></span>
@@ -146,7 +150,7 @@ const payText = (j) => j.payInfo.unit === 'year' ? `${j.pay} (about ${perHour(j.
   const perHour = (v: number) => '$' + (Math.round(v * 100) / 100).toFixed(v % 1 ? 2 : 0) + '/hour';
   const median = (xs: number[]) => { const s = [...xs].sort((a, b) => a - b); const k = Math.floor(s.length / 2); return s.length % 2 ? s[k] : (s[k - 1] + s[k]) / 2; };
   const params = new URLSearchParams(location.search);
-  let prov = ['NS', 'NB', 'PE', 'NL'].includes(params.get('province') || '') ? params.get('province')! : '';
+  let prov = ['NS', 'NB', 'PE', 'NL', 'OTHER'].includes(params.get('province') || '') ? params.get('province')! : '';
   let type = ['contract', 'direct'].includes(params.get('type') || '') ? params.get('type')! : '';
   const offerForm = root.querySelector<HTMLFormElement>('.offer')!;
   const famSel = offerForm.elements.namedItem('family') as HTMLSelectElement;
@@ -154,7 +158,7 @@ const payText = (j) => j.payInfo.unit === 'year' ? `${j.pay} (about ${perHour(j.
   const offerOut = root.querySelector<HTMLElement>('[data-offer-out]')!;
   if ([...famSel.options].some((o) => o.value === params.get('family'))) famSel.value = params.get('family')!;
   if (Number(params.get('offer')) > 0) offerIn.value = params.get('offer')!;
-  const PROV_NAME: Record<string, string> = { NS: 'Nova Scotia', NB: 'New Brunswick', PE: 'PEI', NL: 'Newfoundland and Labrador' };
+  const PROV_NAME: Record<string, string> = { NS: 'Nova Scotia', NB: 'New Brunswick', PE: 'PEI', NL: 'Newfoundland and Labrador', OTHER: 'the rest of Canada' };
 
   // The province's minimum wage, from its chip
   const minFor = (p: string) => Number(root.querySelector<HTMLElement>(`.chips [data-prov="${p}"]`)?.dataset.min) || 0;
