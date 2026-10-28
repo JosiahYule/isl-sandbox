@@ -21,7 +21,7 @@ const people = [
   { name: 'Amber Antle', slug: 'amber-antle', role: '', photo: cdn('768d3e2a-b0eb-44af-a48c-2fa25c843713/IMG_0975.png') },
   { name: 'Natacha Bailey', slug: 'natacha-bailey', role: '', photo: cdn('e18bddfe-5d64-407c-bbee-4b34381d37c6/Headshot+-+N.+Bailey.png') },
   { name: 'Laura Coyle', slug: 'laura-coyle', role: '', photo: cdn('70f9ceb8-76bf-4415-b32f-cdbba19bd9e9/Laura+C+Headshot.png') },
-  { name: 'Michaila Doiron', slug: 'michaila-doiron', role: '', photo: cdn('96afec44-c1c5-4278-8497-ea049977aa7a/024A1684.jpg') },
+  { name: 'Michaila Doiron', slug: 'michaila-doiron', role: '', photo: cdn('4eec9320-8900-4e0f-9881-d3a8ccdc1506/integrated_sept2026_0391.jpg') },
   { name: 'Megan Ferguson', slug: 'megan-ferguson', role: '', photo: cdn('e09b703e-98d4-4fcd-81ee-784e873d0f3e/Headshot+-+Megan+Ferguson.jpg') },
   { name: 'Nicole Fudge', slug: 'nicole-fudge', role: '', photo: cdn('ef4581bc-24d6-4baf-9720-e7633a7936d1/websized-mdwed_2022_0128_1.jpg') },
   { name: 'Carrie Fullarton', slug: 'carrie-fullarton', role: '', photo: cdn('d54271f1-1eb7-4dfa-8743-5e586e637316/Carrie+F.+Headshot') },

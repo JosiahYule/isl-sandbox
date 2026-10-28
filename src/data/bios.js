@@ -16,7 +16,7 @@ export const bios = {
     bio: 'Greg oversees corporate services, strategic operations and growth across every region, and helps set the firm’s long-term direction with a focus on innovation, technology and the client and candidate experience. A Chartered Professional in Human Resources, he has led large organizational projects, including modernizing recruitment operations. He holds a Bachelor of Commerce and a Human Resources Management Certificate from Saint Mary’s University, and has received multiple Atlantic Business Magazine Top 50 CEO Awards.',
   },
   'ross-argante': {
-    title: 'Partner and General Manager', province: 'NS', email: 'ross@integratedstaffing.ca', phone: '902-266-2881',
+    title: 'Partner', province: 'NS', email: 'ross@integratedstaffing.ca', phone: '902-266-2881',
     linkedin: 'https://www.linkedin.com/in/ross-argante-2b19a548/',
     specialties: ['Construction', 'Transportation and warehousing', 'Waste management'],
     bio: 'Ross leads business development and operations, working with clients across Atlantic Canada. A Saint Mary’s University alumnus with a business background, he has experience in occupational health and safety and organizational development, and has led recruitment teams for the clients he serves.',
@@ -92,7 +92,7 @@ export const bios = {
     bio: 'Carrie is originally from Saint John and works with the Moncton and Saint John teams to serve clients and candidates. She brings a background in customer service, sales and recruitment, and 20 years of management experience.',
   },
   'skylar-hardwick': {
-    title: 'Staffing Coordinator and After-Hours Response Coordinator', province: 'NS', email: 'skylar@integratedstaffing.ca', phone: '902-393-2530',
+    title: 'Staffing Coordinator', province: 'NS', email: 'skylar@integratedstaffing.ca', phone: '902-393-2530',
     linkedin: 'https://www.linkedin.com/in/skylar-hardwick-208a19285/',
     specialties: [],
     bio: 'Skylar coordinates staffing and supports clients and employees, including after hours. She started at ISL as Office Administrator and brings a background in administrative support, customer service and office coordination. Originally from Pictou County, she moved to Halifax for university in 2014.',
@@ -133,7 +133,7 @@ export const bios = {
     bio: 'Jessica’s background includes safety administration, executive assistant and payroll administrator roles, plus marketing and administration. That range helps her understand what clients and candidates each need when she matches people to employers.',
   },
   'julia-parker': {
-    title: 'Bilingual Recruitment Assistant', province: 'NB', email: 'julia@integratedstaffing.ca', phone: '506-851-9352',
+    title: 'Recruitment Assistant', province: 'NB', email: 'julia@integratedstaffing.ca', phone: '506-851-9352',
     linkedin: 'https://www.linkedin.com/in/julia-parker-59babb359/',
     specialties: ['Bilingual (English and French)', 'Customer service'],
     bio: 'Julia is a Université de Moncton graduate with a Bachelor of Business Administration. A former varsity athlete, she took on leadership roles in committees and business competitions, and brings that people-focused experience to recruitment.',
