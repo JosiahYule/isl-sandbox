@@ -65,7 +65,7 @@ const gallery = [
       <div class="section-head section-head--split gal-head"><h2>The people behind the placements</h2><p class="lead"><a href={url('/team/')}>Meet the whole team</a></p></div>
       <div class="gallery" data-stagger>
         {gallery.map(([p, caption]) => (
-          <Photo src={p.src} alt={p.alt} ratio="4/3" sizes="(max-width: 900px) 50vw, 33vw" caption={caption} />
+          <Photo src={p.src} alt={p.alt} ratio="4/3" sizes="(max-width: 900px) 50vw, 33vw" />
         ))}
       </div>
     </div>
