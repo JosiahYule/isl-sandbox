@@ -121,7 +121,7 @@ html body .blog-item-content .nl-intro { font-size: clamp(1.125rem, 1rem + 0.35v
 html body .blog-item-content .nl-intro em { font-style: normal; font-weight: 600; color: var(--b-ink); }
 
 /* Section labels (h3) become section headings, over the site's hairline */
-html body .blog-item-content h3 {
+html body .blog-item-content :is(h2, h3) {
   font-size: clamp(1.45rem, 1.15rem + 1vw, 1.9rem); font-weight: 600; line-height: 1.15; letter-spacing: -0.02em;
   text-transform: none; color: var(--b-ink); margin: 3rem 0 1rem; padding-top: 1.5rem; border-top: 1px solid var(--b-line); text-wrap: balance;
 }
@@ -160,7 +160,7 @@ html body .blog-item-content .sb-desc { color: #444; }
 /* The closing box: a heading, a line and the site's button */
 html body .blog-item-content .cta-box { border-top: 1.5px solid var(--b-ink); }
 html body .blog-item-content .cta-box-eyebrow { font-size: 0.9rem; font-weight: 600; letter-spacing: normal; text-transform: none; color: var(--b-soft); }
-html body .blog-item-content .cta-box h3 { font-size: clamp(1.9rem, 1.2rem + 2.3vw, 3.2rem); font-weight: 600; line-height: 1.04; letter-spacing: -0.025em; border: 0; padding-top: 0; margin: 0 0 1rem; }
+html body .blog-item-content .cta-box :is(h2, h3) { font-size: clamp(1.9rem, 1.2rem + 2.3vw, 3.2rem); font-weight: 600; line-height: 1.04; letter-spacing: -0.025em; border: 0; padding-top: 0; margin: 0 0 1rem; }
 html body .blog-item-content .cta-box p { font-size: 1.0625rem; color: var(--b-soft); }
 html body .blog-item-content .cta-link {
   font-family: var(--b-font); font-size: 1rem; font-weight: 600; letter-spacing: normal; text-transform: none;
@@ -168,6 +168,6 @@ html body .blog-item-content .cta-link {
 }
 html body .blog-item-content .cta-link:hover { background: var(--b-accent-deep); }
 @media (max-width: 768px) {
-  html body .blog-item-content h3 { margin-top: 2.5rem; }
-  html body .blog-item-content .cta-box h3 { font-size: 1.9rem; }
+  html body .blog-item-content :is(h2, h3) { margin-top: 2.5rem; }
+  html body .blog-item-content .cta-box :is(h2, h3) { font-size: 1.9rem; }
 }
