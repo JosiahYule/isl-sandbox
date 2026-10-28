@@ -37,7 +37,7 @@ export const services = {
 // Links that leave the site
 export const links = {
   resume: 'https://www.integratedstaffing.ca/careers/general-apply', // "Send your resume"
-  referral: 'https://www.integratedstaffing.ca/referrals',
+  referral: '/referrals/', // the referral form (src/sites/isl/referrals.astro)
 };
 
 export const images = {
@@ -97,7 +97,9 @@ export const analytics = { ga4: '' };
 
 // Forms: the deployed isl-request function's URL (assistant/supabase/functions/isl-request).
 // Empty = the request form shows its confirmation but sends nothing (the sandbox preview).
-export const forms = { requestEndpoint: '' };
+// requestEndpoint: the request form's sending function. referralEndpoint: where the referral form posts
+// (a Formspree form address, https://formspree.io/f/<id>, or any endpoint that takes JSON). Empty: preview only.
+export const forms = { requestEndpoint: '', referralEndpoint: '' };
 
 // The request form (/hire/)
 export const hire = {

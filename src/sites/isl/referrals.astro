@@ -1,0 +1,199 @@
+---
+// REFERRALS  →  /referrals/
+// Someone tells us about a company that's hiring. The fields are the live site's referral form
+// (October 2026): who's referring, then the company and who to contact there.
+//
+// Sending: when forms.referralEndpoint is set (src/brands/isl.js, or PUBLIC_ISL_REFERRAL_ENDPOINT),
+// the form posts its answers there as JSON. A Formspree form address works as it is
+// (https://formspree.io/f/<id>): Formspree emails each referral to whoever the form is set up for.
+// With no endpoint, the form runs as a preview and says nothing was sent.
+import Base from '../../layouts/Base.astro';
+import PageHero from '../../components/PageHero.astro';
+import { brand, forms } from '../../data/site.js';
+import { industryPages } from '../../data/industries.js';
+import { url } from '../../lib/url.js';
+
+const tel = `tel:+1${brand.mainPhone.replaceAll('-', '')}`;
+// "Type of work": ISL's industries, so a referral lands with the right team
+const kinds = [...industryPages.map((i) => i.name), 'Something else'];
+---
+<Base assistantMode="employer" title="Make a referral" description="Know a company that’s hiring? Tell us who to contact and our team will take it from there.">
+  <PageHero compact title="Know a company that’s hiring?" lead="Tell us who to contact, and our team will take it from there.">
+    <a class="textlink" href={tel}>Prefer to talk? Call {brand.mainPhone}</a>
+  </PageHero>
+
+  <section class="section section--rule work">
+    <div class="wrap">
+      <form class="form" id="referral" data-endpoint={forms.referralEndpoint || undefined} novalidate>
+        <fieldset>
+          <legend>Your information</legend>
+          <div class="fields">
+            <div class="field">
+              <label for="r-first">First name</label>
+              <input id="r-first" name="your_first_name" autocomplete="given-name" required aria-describedby="e-first" />
+              <span class="err" id="e-first" hidden>Enter your first name.</span>
+            </div>
+            <div class="field">
+              <label for="r-last">Last name</label>
+              <input id="r-last" name="your_last_name" autocomplete="family-name" required aria-describedby="e-last" />
+              <span class="err" id="e-last" hidden>Enter your last name.</span>
+            </div>
+            <div class="field field--wide">
+              <label for="r-email">Email</label>
+              <input id="r-email" name="your_email" type="email" autocomplete="email" required aria-describedby="e-email" />
+              <span class="err" id="e-email" hidden data-empty="Enter your email address." data-bad="Enter an email address like name@example.ca.">Enter your email address.</span>
+            </div>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend>Who are you referring?</legend>
+          <div class="fields">
+            <div class="field field--wide">
+              <label for="r-company">Company name</label>
+              <input id="r-company" name="company" autocomplete="off" required aria-describedby="e-company" />
+              <span class="err" id="e-company" hidden>Enter the company’s name.</span>
+            </div>
+            <div class="field">
+              <label for="r-cfirst">Contact’s first name</label>
+              <input id="r-cfirst" name="contact_first_name" autocomplete="off" required aria-describedby="e-cfirst" />
+              <span class="err" id="e-cfirst" hidden>Enter their first name.</span>
+            </div>
+            <div class="field">
+              <label for="r-clast">Contact’s last name</label>
+              <input id="r-clast" name="contact_last_name" autocomplete="off" required aria-describedby="e-clast" />
+              <span class="err" id="e-clast" hidden>Enter their last name.</span>
+            </div>
+            <div class="field">
+              <label for="r-cemail">Contact’s email</label>
+              <input id="r-cemail" name="contact_email" type="email" autocomplete="off" required aria-describedby="e-cemail" />
+              <span class="err" id="e-cemail" hidden data-empty="Enter their email address." data-bad="Enter an email address like name@company.ca.">Enter their email address.</span>
+            </div>
+            <div class="field">
+              <label for="r-cphone">Contact’s phone <span class="opt-tag">(optional)</span></label>
+              <input id="r-cphone" name="contact_phone" type="tel" autocomplete="off" />
+            </div>
+            <div class="field field--wide">
+              <label for="r-kind">Type of work <span class="opt-tag">(optional)</span></label>
+              <select id="r-kind" name="type_of_work">
+                <option value="" selected>Choose one</option>
+                {kinds.map((k) => <option>{k}</option>)}
+              </select>
+            </div>
+            <div class="field field--wide">
+              <label for="r-more">Anything else we should know? <span class="opt-tag">(optional)</span></label>
+              <textarea id="r-more" name="additional_information" rows="3"></textarea>
+            </div>
+          </div>
+        </fieldset>
+
+        <!-- Hidden from people; bots fill it in, and anything that does is not sent -->
+        <label class="hp" aria-hidden="true">Website <input name="website" tabindex="-1" autocomplete="off" /></label>
+
+        <div class="submit">
+          <button type="submit">Submit referral</button>
+          <p>We use these details only to follow up on this referral. <a href={url('/privacy/')}>Privacy</a></p>
+        </div>
+        <p class="send-err" hidden role="alert">That didn’t send. Please try again, or call us at <a href={tel}>{brand.mainPhone}</a>.</p>
+        <div class="sent" hidden tabindex="-1">
+          <p class="sent-title">Thanks for the referral.</p>
+          <p class="sent-who"></p>
+        </div>
+      </form>
+    </div>
+  </section>
+</Base>
+
+<script>
+  import { track } from '../../scripts/analytics.js';
+
+  const form = document.querySelector<HTMLFormElement>('#referral')!;
+  const endpoint = form.dataset.endpoint;
+  const required = [...form.querySelectorAll<HTMLInputElement>('[required]')];
+  const errFor = (f: Element) => f.closest('.field')?.querySelector<HTMLElement>('.err');
+  const button = form.querySelector<HTMLButtonElement>('button[type="submit"]')!;
+  const errBox = form.querySelector<HTMLElement>('.send-err')!;
+  let started = false, sending = false, done = false;
+
+  // Errors clear as soon as the field is fixed
+  required.forEach((f) => f.addEventListener('input', () => {
+    if (f.checkValidity()) { f.removeAttribute('aria-invalid'); const e = errFor(f); if (e) e.hidden = true; }
+  }));
+  form.addEventListener('input', () => { if (!started) { started = true; track('form_start', { audience: 'employer', form_id: 'referral' }); } });
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    if (sending || done) return;
+    // Say what's missing, right under each field, and move to the first one
+    const bad = required.filter((f) => !f.checkValidity() || (f.type === 'email' && !/@[^@\s]+\.[^@\s]+$/.test(f.value)));
+    required.forEach((f) => {
+      const ok = !bad.includes(f);
+      if (ok) f.removeAttribute('aria-invalid'); else f.setAttribute('aria-invalid', 'true');
+      const err = errFor(f);
+      if (!err) return;
+      err.hidden = ok;
+      if (err.dataset.bad) err.textContent = f.value.trim() ? err.dataset.bad : err.dataset.empty!;
+    });
+    if (bad.length) { track('form_error', { audience: 'employer', form_id: 'referral', error_type: 'validation' }); bad[0].focus(); return; }
+
+    const data = Object.fromEntries(new FormData(form).entries()) as Record<string, string>;
+    const company = data.company.trim();
+    if (endpoint && !data.website) {
+      sending = true; errBox.hidden = true;
+      button.disabled = true; button.textContent = 'Sending…';
+      delete data.website;
+      try {
+        const res = await fetch(endpoint, {
+          method: 'POST', signal: AbortSignal.timeout(15000),
+          headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+          // _subject: the email's subject line when the endpoint is a Formspree form
+          body: JSON.stringify({ ...data, _subject: `Referral: ${company}`, page: location.pathname }),
+        });
+        if (!res.ok) throw new Error('Not accepted');
+      } catch {
+        sending = false; button.disabled = false; button.textContent = 'Submit referral';
+        errBox.hidden = false;
+        track('form_error', { audience: 'employer', form_id: 'referral', error_type: 'delivery' });
+        return;
+      }
+      track('generate_lead', { audience: 'employer', form_id: 'referral' });
+    }
+    done = true; sending = false;
+    form.querySelector<HTMLElement>('.submit')!.hidden = true;
+    form.querySelector('.sent-title')!.textContent = endpoint ? 'Thanks for the referral.' : 'Preview complete.';
+    form.querySelector('.sent-who')!.textContent = endpoint
+      ? `Our team will reach out to ${company}.`
+      : `Nothing was sent: the referral form isn’t connected yet.`;
+    const sent = form.querySelector<HTMLElement>('.sent')!;
+    sent.hidden = false; sent.focus();
+  });
+</script>
+
+<style>
+  .work { padding-top: clamp(2.5rem, 5vw, 4rem); }
+  .form { max-width: 46rem; }
+  fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
+  fieldset + fieldset { margin-top: var(--s7); }
+  legend { font-weight: var(--fw-bold); font-size: var(--fs-h3); padding: 0 0 var(--s3); margin-bottom: var(--s5); width: 100%; border-bottom: 1.5px solid var(--ink); }
+  .fields { display: grid; grid-template-columns: 1fr 1fr; gap: var(--s4) var(--s5); }
+  .field { display: grid; gap: var(--s1); align-content: start; font-size: var(--fs-small); font-weight: var(--fw-text); }
+  .field--wide { grid-column: 1 / -1; }
+  .opt-tag { color: var(--ink-soft); }
+  input, select, textarea {
+    font: inherit; font-size: var(--fs-body); font-weight: var(--fw-text); color: var(--ink);
+    padding: 0.75rem 0.85rem; border: 1.5px solid var(--line); background: var(--paper); width: 100%;
+  }
+  input:focus, select:focus, textarea:focus { outline: none; border-color: var(--ink); box-shadow: 0 0 0 3px var(--focus); }
+  [aria-invalid] { border-color: #b3261e !important; }
+  .err { color: #b3261e; font-weight: var(--fw-bold); font-size: var(--fs-small); }
+  .hp { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
+  .submit { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s3) var(--s5); margin-top: var(--s6); }
+  .submit button { font: inherit; font-weight: var(--fw-bold); font-size: var(--fs-body); cursor: pointer; padding: 1rem 1.8rem; border: 0; background: var(--accent); color: #fff; }
+  .submit button:hover { background: var(--accent-deep); }
+  .submit button:disabled { opacity: 0.7; cursor: progress; }
+  .submit p { font-size: var(--fs-small); color: var(--ink-soft); margin: 0; }
+  .send-err { margin-top: var(--s3); color: #b3261e; font-weight: var(--fw-bold); }
+  .sent { margin-top: var(--s6); padding-top: var(--s4); border-top: 3px solid var(--accent); }
+  .sent-title { font-weight: var(--fw-bold); font-size: var(--fs-h3); margin-bottom: var(--s2); }
+  @media (max-width: 620px) { .fields { grid-template-columns: 1fr; } }
+</style>

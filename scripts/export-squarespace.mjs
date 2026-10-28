@@ -421,8 +421,16 @@ function kitPage(brand, assets) {
 // let a page write to the clipboard right after a click; waiting for a download first can be refused.)
 const ROOT = ${JSON.stringify(assets + '/')};
 const NL = String.fromCharCode(10);
+// Copies are kept for a minute at most, so a kit left open in a tab never hands out an old version
 const cache = {};
-const load = (file) => (cache[file] ||= fetch(ROOT + file, { cache: 'no-cache' }).then((r) => { if (!r.ok) throw new Error(file + ' ' + r.status); return r.text(); }));
+const load = (file) => {
+  const hit = cache[file];
+  if (hit && Date.now() - hit.at < 60000) return hit.text;
+  const text = fetch(ROOT + file, { cache: 'no-cache' }).then((r) => { if (!r.ok) throw new Error(file + ' ' + r.status); return r.text(); });
+  text.catch(() => { delete cache[file]; });
+  cache[file] = { at: Date.now(), text };
+  return text;
+};
 const textFor = (btn) => btn.dataset.text != null ? Promise.resolve(btn.dataset.text)
   : btn.dataset.test ? Promise.all(['injection-header.html', btn.dataset.copy, 'injection-footer.html'].map(load)).then((parts) => parts.join(NL))
   : load(btn.dataset.copy);

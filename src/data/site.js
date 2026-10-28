@@ -17,7 +17,7 @@ export const social = current.social ?? [];
 const ga4 = { isl: import.meta.env.PUBLIC_ISL_GA4_ID, as: import.meta.env.PUBLIC_AS_GA4_ID, ads: import.meta.env.PUBLIC_ADS_GA4_ID };
 const endpoints = { isl: import.meta.env.PUBLIC_ISL_REQUEST_ENDPOINT, as: import.meta.env.PUBLIC_AS_REQUEST_ENDPOINT, ads: import.meta.env.PUBLIC_ADS_REQUEST_ENDPOINT };
 export const analytics = { ...current.analytics, ga4: ga4[BRAND] || current.analytics?.ga4 || '' };
-export const forms = { ...current.forms, requestEndpoint: endpoints[BRAND] || current.forms?.requestEndpoint || '' };
+export const forms = { ...current.forms, requestEndpoint: endpoints[BRAND] || current.forms?.requestEndpoint || '', referralEndpoint: (BRAND === 'isl' && import.meta.env.PUBLIC_ISL_REFERRAL_ENDPOINT) || current.forms?.referralEndpoint || '' };
 export const hire = current.hire;
 export const cta = current.cta;
 export const jobsNote = current.jobsNote;

@@ -11,7 +11,7 @@ const tel = (n) => `tel:+1${n.replaceAll('-', '')}`;
 const routes = [
   { t: "I'm hiring", d: `${services.contract.ask} or ${services.direct.ask.replace(/^A /, 'a ')}.`, href: url('/hire/'), cta: 'Request talent', kind: 'primary' },
   { t: "I'm looking for work", d: 'Browse open roles or send your resume.', href: url('/find-work/'), cta: 'Browse jobs' },
-  links.referral && { t: 'I know a company that’s hiring', d: 'Refer them to our team.', href: links.referral, cta: 'Make a referral' },
+  links.referral && { t: 'I know a company that’s hiring', d: 'Refer them to our team.', href: url(links.referral), cta: 'Make a referral' },
 ].filter(Boolean);
 const cities = offices.map((o) => o.city);
 const cityList = cities.slice(0, -1).join(', ') + ' and ' + cities.at(-1);
