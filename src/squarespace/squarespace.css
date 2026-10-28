@@ -117,7 +117,7 @@ html body .blog-item-content li { font-size: 1.0625rem; line-height: 1.7; margin
 html body .blog-item-content li::marker { color: var(--b-accent); }
 
 /* The intro: the site's lead paragraph */
-html body .blog-item-content .nl-intro { font-size: clamp(1.125rem, 1rem + 0.35vw, 1.25rem); font-weight: 300; line-height: 1.6; color: var(--b-ink); max-width: 60ch; margin: 0 0 2rem; padding-bottom: 2rem; border-bottom: 1px solid var(--b-line); }
+html body .blog-item-content .nl-intro { font-size: clamp(1.125rem, 1rem + 0.35vw, 1.25rem); font-weight: 300; line-height: 1.6; color: var(--b-ink); max-width: none; margin: 0 0 2rem; padding-bottom: 2rem; border-bottom: 1px solid var(--b-line); }
 html body .blog-item-content .nl-intro em { font-style: normal; font-weight: 600; color: var(--b-ink); }
 
 /* Section labels (h3) become section headings, over the site's hairline */
