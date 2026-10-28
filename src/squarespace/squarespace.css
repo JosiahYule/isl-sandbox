@@ -88,3 +88,78 @@ html body .item-pagination .item-pagination-title {
 html body .item-pagination a { color: #1a1a1a !important; text-decoration: none !important; }
 html body .item-pagination a:hover .item-pagination-title { text-decoration: underline !important; }
 html body .item-pagination .item-pagination-icon { color: #1a1a1a !important; fill: #1a1a1a !important; stroke: #1a1a1a !important; }
+
+/* 6. Blog post bodies. Every post is built from the blog design system (the isl-blog-format skill:
+      .nl-intro, h3 section labels, .stat-strip, card grids with .sv-eyebrow/.sv-title/.sv-body,
+      .compare-table, blockquote, .cta-box, .steps-list, .sources). Each post carries those styles in its
+      own code block; these rules restyle the same pieces to match the new site, so every post updates at
+      once with nothing pasted again. Mapping: section labels become real headings (no small capitals),
+      the intro becomes the site's lead, the pull quote matches the homepage quote, numbers match the
+      site's figures, and the closing box's button matches the site's buttons. */
+html body .blog-item-content {
+  --b-ink: #1a1a1a; --b-soft: #666; --b-line: #e8e8e8; --b-accent: #0070ca; --b-accent-deep: #005aaa;
+  --b-font: 'DM Sans Variable', 'DM Sans', system-ui, sans-serif;
+}
+html body .blog-item-content :is(.nb-post, p, li, td, th, blockquote, h2, h3, h4, a, em, strong) { font-family: var(--b-font); letter-spacing: normal; word-spacing: normal; }
+html body .blog-item-content p { font-size: 1.0625rem; font-weight: 400; line-height: 1.7; color: var(--b-ink); margin: 0 0 1rem; max-width: 68ch; }
+html body .blog-item-content a:not(.cta-link) { color: var(--b-accent); text-decoration: underline; text-underline-offset: 0.2em; text-decoration-thickness: 1px; }
+html body .blog-item-content a:not(.cta-link):hover { color: var(--b-accent-deep); text-decoration-thickness: 2px; }
+html body .blog-item-content :is(ul, ol) { padding-left: 1.2em; margin: 0 0 1rem; max-width: 68ch; }
+html body .blog-item-content li { font-size: 1.0625rem; line-height: 1.7; margin-bottom: 0.5rem; padding-left: 0.25em; color: var(--b-ink); }
+html body .blog-item-content li::marker { color: var(--b-accent); }
+
+/* The intro: the site's lead paragraph */
+html body .blog-item-content .nl-intro { font-size: clamp(1.125rem, 1rem + 0.35vw, 1.25rem); font-weight: 300; line-height: 1.6; color: var(--b-ink); max-width: 60ch; margin: 0 0 2rem; padding-bottom: 2rem; border-bottom: 1px solid var(--b-line); }
+html body .blog-item-content .nl-intro em { font-style: normal; font-weight: 600; color: var(--b-ink); }
+
+/* Section labels (h3) become section headings, over the site's hairline */
+html body .blog-item-content h3 {
+  font-size: clamp(1.45rem, 1.15rem + 1vw, 1.9rem); font-weight: 600; line-height: 1.15; letter-spacing: -0.02em;
+  text-transform: none; color: var(--b-ink); margin: 3rem 0 1rem; padding-top: 1.5rem; border-top: 1px solid var(--b-line); text-wrap: balance;
+}
+
+/* The pull quote: as the homepage's testimonial */
+html body .blog-item-content blockquote,
+html body .blog-item-content blockquote p {
+  font-size: clamp(1.35rem, 1rem + 1.2vw, 1.9rem); font-weight: 300; line-height: 1.35; letter-spacing: -0.015em;
+  color: var(--b-ink); font-style: normal; max-width: 34ch; border: 0; background: none;
+}
+html body .blog-item-content blockquote { margin: 2.5rem 0; padding: 0; }
+
+/* Number strips: the site's figures (large light number, plain label, no small capitals) */
+html body .blog-item-content .stat-strip { border-top: 1.5px solid var(--b-ink); }
+html body .blog-item-content .strip-card { border-color: var(--b-line); }
+html body .blog-item-content :is(.sc-eyebrow, .sv-eyebrow) { font-size: 0.9rem; font-weight: 600; letter-spacing: normal; text-transform: none; color: var(--b-ink); }
+html body .blog-item-content .sc-value { font-size: clamp(1.9rem, 1.2rem + 1.6vw, 2.6rem); font-weight: 300; letter-spacing: -0.03em; line-height: 1.05; color: var(--b-ink); font-variant-numeric: tabular-nums; }
+html body .blog-item-content .sc-label { font-size: 0.9rem; line-height: 1.5; color: var(--b-soft); }
+
+/* Card grids (named per post; their insides are always .sv-eyebrow, .sv-title, .sv-body) */
+html body .blog-item-content .sv-eyebrow { color: var(--b-accent); }
+html body .blog-item-content .sv-title { font-size: 1.25rem; font-weight: 600; line-height: 1.25; letter-spacing: -0.01em; color: var(--b-ink); }
+html body .blog-item-content .sv-body { font-size: 0.95rem; line-height: 1.65; color: #444; }
+
+/* Tables */
+html body .blog-item-content .compare-table th { font-size: 0.9rem; font-weight: 600; letter-spacing: normal; text-transform: none; color: var(--b-ink); border-bottom: 1.5px solid var(--b-ink); }
+html body .blog-item-content .compare-table td { font-size: 0.95rem; color: #333; border-bottom-color: var(--b-line); }
+html body .blog-item-content .compare-table td:first-child { font-weight: 600; color: var(--b-ink); }
+html body .blog-item-content :is(.table-note, .sources) { font-size: 0.9rem; color: var(--b-soft); letter-spacing: normal; }
+
+/* Numbered steps */
+html body .blog-item-content .step-num { font-weight: 300; color: var(--b-accent); letter-spacing: -0.03em; }
+html body .blog-item-content .sb-title { font-weight: 600; color: var(--b-ink); letter-spacing: -0.01em; }
+html body .blog-item-content .sb-desc { color: #444; }
+
+/* The closing box: a heading, a line and the site's button */
+html body .blog-item-content .cta-box { border-top: 1.5px solid var(--b-ink); }
+html body .blog-item-content .cta-box-eyebrow { font-size: 0.9rem; font-weight: 600; letter-spacing: normal; text-transform: none; color: var(--b-soft); }
+html body .blog-item-content .cta-box h3 { font-size: clamp(1.9rem, 1.2rem + 2.3vw, 3.2rem); font-weight: 600; line-height: 1.04; letter-spacing: -0.025em; border: 0; padding-top: 0; margin: 0 0 1rem; }
+html body .blog-item-content .cta-box p { font-size: 1.0625rem; color: var(--b-soft); }
+html body .blog-item-content .cta-link {
+  font-family: var(--b-font); font-size: 1rem; font-weight: 600; letter-spacing: normal; text-transform: none;
+  padding: 1rem 1.8rem; background: var(--b-accent); color: #fff; text-decoration: none; border-radius: 0;
+}
+html body .blog-item-content .cta-link:hover { background: var(--b-accent-deep); }
+@media (max-width: 768px) {
+  html body .blog-item-content h3 { margin-top: 2.5rem; }
+  html body .blog-item-content .cta-box h3 { font-size: 1.9rem; }
+}
