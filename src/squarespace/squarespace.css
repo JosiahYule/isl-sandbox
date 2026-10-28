@@ -11,7 +11,9 @@
 /* 2. Our header is fixed to the top of the window. (Code Injection can only add it at the end of the
       page; fixing it to the top means it shows in the right place before the script moves it.) */
 body { padding-top: 72px !important; }
-#isl-header { position: fixed; top: 0; left: 0; right: 0; z-index: 1000; }
+/* Its layer sits above anything Squarespace puts on the page (just under the chat window), so no
+   invisible Squarespace layer can sit on top of it and swallow clicks */
+#isl-header { position: fixed; top: 0; left: 0; right: 0; z-index: 2147482000; pointer-events: auto; }
 #isl-header .header { position: relative; }
 
 /* 3. The section holding one of our pages: full width, no padding, none of Squarespace's grid */
