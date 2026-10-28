@@ -11,7 +11,7 @@ import { BRAND } from './site.js';
 const cdn = (path) => `https://images.squarespace-cdn.com/content/v1/691490c94119776708e69bbe/${path}`;
 
 const people = [
-  { name: 'Greg White', slug: 'greg-white', role: 'CEO', team: 'Leadership', photo: cdn('347a41ba-e729-495e-ad94-39b2a85f1118/Headshot+-+G.+White.png') },
+  { name: 'Greg White', slug: 'greg-white', role: 'Partner', team: 'Leadership', photo: cdn('347a41ba-e729-495e-ad94-39b2a85f1118/Headshot+-+G.+White.png') },
   { name: 'Ross Argante', slug: 'ross-argante', role: 'Partner', team: 'Leadership', photo: cdn('4bb0b36f-5c7d-46b8-a60d-367f177563c9/integrated_2024_1723web+%281%29.jpg') },
   { name: 'Chance Skauge', slug: 'chance-skauge', role: 'Director of Business Development', team: 'Leadership', photo: cdn('ed563cb9-3419-44a3-a7e5-59589393f3c7/Headshot+-+Chance+Skauge.jpg') },
   { name: 'Zowie Tucker', slug: 'zowie-tucker', role: 'Senior Recruitment Consultant', team: 'Direct Hire', photo: cdn('471bd9d6-a42f-4bdd-84bc-47ae0b3f7e5d/Integrated+Staffing+Zowie+Tucker_1+%281%29.jpg') },

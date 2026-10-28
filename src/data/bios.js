@@ -10,7 +10,7 @@
 
 export const bios = {
   'greg-white': {
-    title: 'CEO', province: 'NS', email: 'greg@integratedstaffing.ca', phone: '902-471-1559',
+    title: 'Partner', province: 'NS', email: 'greg@integratedstaffing.ca', phone: '902-471-1559',
     linkedin: 'https://www.linkedin.com/in/greg-white-cphr-2514a77/',
     specialties: ['Workforce strategy', 'HR systems', 'Recruitment operations', 'Technology-driven staffing'],
     bio: 'Greg oversees corporate services, strategic operations and growth across every region, and helps set the firm’s long-term direction with a focus on innovation, technology and the client and candidate experience. A Chartered Professional in Human Resources, he has led large organizational projects, including modernizing recruitment operations. He holds a Bachelor of Commerce and a Human Resources Management Certificate from Saint Mary’s University, and has received multiple Atlantic Business Magazine Top 50 CEO Awards.',

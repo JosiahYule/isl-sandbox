@@ -1,7 +1,7 @@
 ---
 // TEAM MEMBER PAGES  →  /team/<slug>/
 // One template for everyone in src/data/team.js. Each page pulls together:
-//   the person      team.js + bios.js   photo, title, contact details, bio, specialties
+//   the person      team.js + bios.js   photo, title, contact details, bio (paragraphs split by a blank line)
 //   their office    site.js / areas.js  the office page for the province they're based in
 //   hiring help     routing.js          if they're who the chatbot hands employers to, say so
 //   colleagues      team.js             others based in the same province
@@ -54,14 +54,8 @@ const hireHref = isDirect || slug === 'zowie-tucker'
           {p.linkedin && <li><a href={p.linkedin}>LinkedIn</a></li>}
         </ul>
 
-        {p.bio && <p class="bio">{p.bio}</p>}
+        {p.bio && <div class="bio">{p.bio.split(/\n\s*\n/).map((para) => <p>{para.trim()}</p>)}</div>}
 
-        {p.specialties?.length > 0 && (
-          <div class="spec">
-            <p class="spec-label">Specialties</p>
-            <ul>{p.specialties.map((s) => <li>{s}</li>)}</ul>
-          </div>
-        )}
 
         {(contact || isDirect) && (
           <div class="hiring">
@@ -111,10 +105,6 @@ const hireHref = isDirect || slug === 'zowie-tucker'
 
   .bio { margin-top: var(--s6); font-size: var(--fs-lead); line-height: 1.7; max-width: 60ch; }
 
-  .spec { margin-top: var(--s6); }
-  .spec-label { font-size: var(--fs-small); font-weight: var(--fw-bold); color: var(--ink-soft); margin-bottom: var(--s2); }
-  .spec ul { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: var(--s2); }
-  .spec li { border: 1.5px solid var(--line); padding: 0.4rem 0.75rem; font-size: var(--fs-small); font-weight: var(--fw-text); }
 
   .hiring { margin-top: var(--s7); padding: var(--s5); background: var(--mist); display: flex; flex-wrap: wrap; gap: var(--s4); align-items: center; justify-content: space-between; }
   .h-text { margin: 0; font-weight: var(--fw-text); max-width: 44ch; }
