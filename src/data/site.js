@@ -20,7 +20,6 @@ export const analytics = { ...current.analytics, ga4: ga4[BRAND] || current.anal
 export const forms = { ...current.forms, requestEndpoint: endpoints[BRAND] || current.forms?.requestEndpoint || '', referralEndpoint: (BRAND === 'isl' && import.meta.env.PUBLIC_ISL_REFERRAL_ENDPOINT) || current.forms?.referralEndpoint || '' };
 export const hire = current.hire;
 export const cta = current.cta;
-export const jobsNote = current.jobsNote;
 export const tools = current.tools;
 // Specialist brands only (AS, ADS); null for ISL
 export const field = current.field ?? null;

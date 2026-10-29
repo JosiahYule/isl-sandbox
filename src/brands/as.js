@@ -60,7 +60,6 @@ export const links = {
   sister: { name: 'Administrative Staffing', href: 'https://www.administrativestaffing.ca', what: 'office and administrative roles' },
 };
 
-export const jobsNote = (date) => `Sandbox preview: a sample of Accountant Staffing postings from ${date}. The live board will read Tracker RMS.`;
 
 export const social = [
   { label: 'LinkedIn', href: 'https://www.linkedin.com/company/accountant-staffing' },

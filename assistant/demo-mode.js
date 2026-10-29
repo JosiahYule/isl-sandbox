@@ -44,8 +44,7 @@ function start() {
     send: respond,
     mode: document.documentElement.dataset.assistantMode,
     job: document.documentElement.dataset.assistantJob,
-    note: 'Demo mode: real job search and contact routing, with scripted replies until the AI is connected.',
-    noteFr: 'Mode démo : vraie recherche d’emplois et vrais contacts, avec des réponses préparées en attendant que l’IA soit branchée.',
+    fine: false, // no small print under the chat box
   });
   document.addEventListener('click', (e) => {
     const t = e.target.closest('[data-open-assistant]');

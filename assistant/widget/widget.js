@@ -390,9 +390,11 @@
       form.append(input, btn);
       form.onsubmit = (e) => { e.preventDefault(); const v = input.value.trim(); if (v && !busy) submit(v); };
 
+      // opts.fine === false: no small print under the chat box
       const note = state.lang === "fr" ? opts.noteFr || opts.note : opts.note;
-      const fine = note ? el("p", "fine demo", note) : el("p", "fine", ui().fine);
-      panel.append(head, log, form, fine);
+      const fine = opts.fine === false ? null : note ? el("p", "fine demo", note) : el("p", "fine", ui().fine);
+      panel.append(head, log, form);
+      if (fine) panel.append(fine);
       root.append(panel);
       requestAnimationFrame(() => { log.scrollTop = log.scrollHeight; });
       if (!busy) input.focus({ preventScroll: true });

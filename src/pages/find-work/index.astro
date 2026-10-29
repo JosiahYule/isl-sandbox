@@ -7,11 +7,11 @@
 import Base from '../../layouts/Base.astro';
 import JobRow from '../../components/JobRow.astro';
 import PageHero from '../../components/PageHero.astro';
-import { jobs, provinces, snapshotDate } from '../../data/jobs.js';
+import { jobs, provinces } from '../../data/jobs.js';
 import { areas } from '../../data/areas.js';
 import { url } from '../../lib/url.js';
 import { industryPages } from '../../data/industries.js';
-import { brand, links, services, jobsNote, field } from '../../data/site.js';
+import { brand, links, services, field } from '../../data/site.js';
 // Industries that have open jobs right now, for the industry filter
 const industryOptions = industryPages.map((i) => ({ slug: i.slug, name: i.name, n: jobs.filter((j) => j.industry === i.slug).length })).filter((i) => i.n);
 
@@ -73,7 +73,6 @@ const count = { contract: jobs.filter((j) => j.type === 'contract').length, dire
         <p class="empty-title">No roles match that search.</p>
         <p>Try a broader term or another province. Or <a href={links.resume}>send us your resume</a> and we'll contact you when something fits.</p>
       </div>
-      <p class="note">{jobsNote(snapshotDate)}</p>
     </div>
   </section>
 

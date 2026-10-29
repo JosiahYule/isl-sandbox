@@ -146,7 +146,6 @@ Send your resume to jobs@example.ca`,
 };
 
 // The job board's footnote
-export const jobsNote = (date) => `Sandbox preview: real postings from ISL's job feed as of ${date}. Some may have been filled since.`;
 
 export const social = [
   { label: 'LinkedIn', href: 'https://www.linkedin.com/company/integratedstaffing' },

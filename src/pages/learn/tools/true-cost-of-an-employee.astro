@@ -152,7 +152,7 @@ const rate = (v) => `${Number((v * 100).toFixed(3))}%`;
         <li>CPP is {rate(RATES.cpp.rate)} above the {money(RATES.cpp.exemption, false)} exemption up to {money(RATES.cpp.ympe, false)}, then {rate(RATES.cpp.cpp2Rate)} up to {money(RATES.cpp.yampe, false)}. EI is {rate(RATES.ei.employeeRate * RATES.ei.employerFactor)} up to {money(RATES.ei.max, false)}. Workers’ comp stops at each province’s earnings ceiling.</li>
         <li>It counts only what the law requires. Benefits, overtime, training and the cost of finding and replacing people would add more.</li>
       </ul>
-      <p class="src">{RATES.year} rates. Sources: {SOURCES.map(([label, href], i) => <>{i > 0 && ', '}<a href={href}>{label}</a></>)}. An estimate, not payroll or tax advice.</p>
+      <p class="src">{RATES.year} rates. Sources: {SOURCES.map(([label, href], i) => <>{i > 0 && ', '}<a href={href}>{label}</a></>)}.</p>
     </div></div>
   </section>
 </Base>
