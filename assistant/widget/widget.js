@@ -40,6 +40,25 @@
   const LAUNCHER = { ask: "Ask ISL", seeker: "Find a job", employer: "Hiring? Ask us", job: "Ask about this job" };
   const SUBTITLE = { ask: "Jobs and hiring", seeker: "Job search", employer: "Hiring help", job: "About this job" };
 
+  // The same window in French. The conversation's language comes back from the assistant on every
+  // reply (meta.lang), so the labels follow whatever language the visitor is writing in.
+  const GREETINGS_FR = {
+    ask: { text: "Bonjour! Je peux vous aider à trouver un emploi, ou à trouver les bonnes personnes à embaucher. Qu’est-ce qui vous amène aujourd’hui?", choices: ["Je cherche du travail", "J'embauche"], placeholder: "Écrivez un message" },
+    seeker: { text: "Bonjour! Dites-moi quel type de travail vous cherchez et où, et je vous montrerai ce qui est ouvert.", choices: ["Travail en entrepôt", "Bureau et administration", "Conduite", "Métiers"], placeholder: "p. ex. Cariste à Moncton" },
+    employer: { text: "Bonjour! Dites-moi de qui vous avez besoin et où, et je vous mettrai en contact avec la bonne personne de notre équipe.", choices: ["3 journaliers en Nouvelle-Écosse rurale", "Un contrôleur permanent à Moncton", "Personnel d'entrepôt à Halifax la semaine prochaine"], placeholder: "p. ex. 3 journaliers en Nouvelle-Écosse rurale" },
+    job: { text: "Bonjour! Des questions sur cet emploi? Demandez-moi le salaire, les heures ou ce qu’il faut pour postuler.", choices: ["Quelles sont les heures?", "De quoi ai-je besoin?", "Emplois semblables"], placeholder: "Une question sur cet emploi" },
+  };
+  const LAUNCHER_FR = { ask: "Demandez à ISL", seeker: "Trouver un emploi", employer: "Vous embauchez?", job: "Questions sur cet emploi" };
+  const SUBTITLE_FR = { ask: "Emplois et embauche", seeker: "Recherche d’emploi", employer: "Aide à l’embauche", job: "À propos de cet emploi" };
+  const UI = {
+    en: { contract: "Contract", tempToPerm: "Temp to perm", view: "View job", apply: "Apply", request: "Your request", office: (c) => `About the ${c} office`, open: "Open the ISL assistant",
+      panel: "ISL assistant", reset: "Start over", resetLabel: "Start a new conversation", close: "Close", typing: "Typing", message: "Your message", send: "Send",
+      fine: "AI assistant. Check the full posting before you apply.", fallback: "Here's what I found.", error: "Something went wrong. Please try again.", other: "Français", otherLabel: "Continuer en français" },
+    fr: { contract: "Contrat", tempToPerm: "Temporaire à permanent", view: "Voir l’offre", apply: "Postuler", request: "Votre demande", office: (c) => `À propos du bureau de ${c}`, open: "Ouvrir l’assistant ISL",
+      panel: "Assistant ISL", reset: "Recommencer", resetLabel: "Commencer une nouvelle conversation", close: "Fermer", typing: "En train d’écrire", message: "Votre message", send: "Envoyer",
+      fine: "Assistant IA. Lisez l’offre complète avant de postuler.", fallback: "Voici ce que j’ai trouvé.", error: "Un problème est survenu. Veuillez réessayer.", other: "English", otherLabel: "Continue in English" },
+  };
+
   const CSS = `
     :host { all: initial; }
     * { box-sizing: border-box; }
@@ -48,6 +67,7 @@
     .root { --blue: #0070CA; --blue-deep: #005AAA; --blue-tint: #e6f1fa; --dark: #1a1a1a; --ink: #1a1a1a; --muted: #666; --line: #e8e8e8; --mist: #f5f5f5; --white: #fff;
       font-family: "DM Sans Variable", "DM Sans", system-ui, -apple-system, "Segoe UI", sans-serif; color: var(--ink); font-size: 14.5px; line-height: 1.5; }
     button { font-family: inherit; }
+    .choices .lang { border-style: dashed; color: var(--muted); }
 
     /* Launcher */
     .launcher { position: fixed; right: calc(20px + env(safe-area-inset-right, 0px)); bottom: calc(20px + var(--isl-chat-lift, 0px) + env(safe-area-inset-bottom, 0px)); transition: bottom 0.25s ease; z-index: 2147483000;
@@ -222,7 +242,9 @@
     const pageMode = context.job ? "job" : GREETINGS[opts.mode] ? opts.mode : "ask";
 
     // ---- State: the conversation. turns: [{role, content, jobs?, contact?, summary?, choices?, meta?}] ----
-    let state = { open: !!opts.startOpen, turns: [], mode: pageMode };
+    // Start in French when the visitor's browser is set to French; they can switch on the greeting
+    const browserFr = /^fr\b/i.test((navigator.languages && navigator.languages[0]) || navigator.language || "");
+    let state = { open: !!opts.startOpen, turns: [], mode: pageMode, lang: opts.lang || (browserFr ? "fr" : "en") };
     try { const saved = JSON.parse(sessionStorage.getItem(STORE_KEY) || "null"); if (saved && Array.isArray(saved.turns)) state = { ...state, ...saved, mode: saved.turns.length ? saved.mode : pageMode }; } catch {}
     const save = () => { try { sessionStorage.setItem(STORE_KEY, JSON.stringify(state)); } catch {} };
     let busy = false;
@@ -230,6 +252,8 @@
     let fresh = -1; // index of the newest turn, so only it animates in
 
     const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
+    const ui = () => UI[state.lang === "fr" ? "fr" : "en"];
+    const greetings = () => (state.lang === "fr" ? GREETINGS_FR : GREETINGS);
     const tel = (n) => "tel:+1" + String(n).replace(/\D/g, "");
 
     function jobCard(job) {
@@ -238,21 +262,21 @@
       c.dataset.jobId = job.id;
       c.append(el("h4", null, job.title));
       const m = el("div", "meta");
-      m.append(el("span", "kind", job.employment === "Temporary / contract" ? "Contract" : job.employment));
+      m.append(el("span", "kind", job.employment === "Temporary / contract" ? ui().contract : job.employment === "Temp to perm" ? ui().tempToPerm : job.employment));
       if (job.location) m.append(el("span", null, job.location));
       if (job.pay) m.append(el("span", null, job.pay));
       c.append(m);
       if (job.reason) c.append(el("p", "why", job.reason));
       const a = el("div", "actions");
-      const view = el("a", "view", "View job"); view.href = job.viewUrl;
-      const apply = el("a", "apply", "Apply"); apply.href = job.applyUrl;
+      const view = el("a", "view", ui().view); view.href = job.viewUrl;
+      const apply = el("a", "apply", ui().apply); apply.href = job.applyUrl;
       a.append(view, apply); c.append(a);
       return c;
     }
 
     function summaryCard(rows) {
       const s = el("div", "summary");
-      s.append(el("p", null, "Your request"));
+      s.append(el("p", null, ui().request));
       const dl = el("dl");
       rows.forEach(([k, v]) => dl.append(el("dt", null, k), el("dd", null, v)));
       s.append(dl);
@@ -282,7 +306,7 @@
       if (p.email) { const a = el("a"); a.href = "mailto:" + p.email; a.innerHTML = ICON.mail; a.append(p.email); reach.append(a); }
       c.append(who, reach);
       if (p.action?.href) { const go = el("a", "go", p.action.label); go.href = p.action.href; c.append(go); }
-      if (p.officeUrl && p.office) { const o = el("a", "office-link", `About the ${p.office} office`); o.href = p.officeUrl; c.append(o); }
+      if (p.officeUrl && p.office) { const o = el("a", "office-link", ui().office(p.office)); o.href = p.officeUrl; c.append(o); }
       return c;
     }
     const initials = (n) => String(n || "").split(/\s+/).map((w) => w[0]).join("").slice(0, 2).toUpperCase();
@@ -301,58 +325,73 @@
       if (!state.open) {
         const b = el("button", "launcher");
         b.type = "button";
-        b.innerHTML = ICON.chat + `<span>${LAUNCHER[state.mode] || LAUNCHER.ask}</span>`;
-        b.setAttribute("aria-label", "Open the ISL assistant");
+        const launch = state.lang === "fr" ? LAUNCHER_FR : LAUNCHER;
+        b.innerHTML = ICON.chat;
+        b.append(el("span", null, launch[state.mode] || launch.ask));
+        b.setAttribute("aria-label", ui().open);
         b.onclick = () => { state.open = true; opening = true; save(); render(); };
         root.append(b);
         schedulePlacement();
         return;
       }
 
-      const g = GREETINGS[state.greet || state.mode] || GREETINGS.ask;
+      const g = greetings()[state.greet || state.mode] || greetings().ask;
       const panel = el("div", "panel" + (opening ? " opening" : ""));
       opening = false;
       panel.setAttribute("role", "dialog");
-      panel.setAttribute("aria-label", "ISL assistant");
+      panel.setAttribute("aria-label", ui().panel);
+      panel.lang = state.lang === "fr" ? "fr" : "en";
       panel.onkeydown = (e) => { if (e.key === "Escape") { state.open = false; save(); render(); } };
 
       const head = el("div", "head");
       head.append(el("div", "mark", "ISL"));
       const t = el("div", "t");
-      t.append(el("strong", null, "Integrated Staffing"), el("span", null, SUBTITLE[state.mode] || SUBTITLE.ask));
-      const reset = el("button", "icon-btn"); reset.type = "button"; reset.innerHTML = ICON.reset; reset.title = "Start over"; reset.setAttribute("aria-label", "Start a new conversation");
-      reset.onclick = () => { if (busy) return; state.turns = []; state.mode = pageMode; state.greet = null; save(); render(); };
-      const close = el("button", "icon-btn"); close.type = "button"; close.innerHTML = ICON.close; close.setAttribute("aria-label", "Close");
+      const sub = state.lang === "fr" ? SUBTITLE_FR : SUBTITLE;
+      t.append(el("strong", null, "Integrated Staffing"), el("span", null, sub[state.mode] || sub.ask));
+      const reset = el("button", "icon-btn"); reset.type = "button"; reset.innerHTML = ICON.reset; reset.title = ui().reset; reset.setAttribute("aria-label", ui().resetLabel);
+      reset.onclick = () => { if (busy) return; state.turns = []; state.mode = pageMode; state.greet = null; save(); render(); }; // keeps the language they chose
+      const close = el("button", "icon-btn"); close.type = "button"; close.innerHTML = ICON.close; close.setAttribute("aria-label", ui().close);
       close.onclick = () => { state.open = false; save(); render(); };
       head.append(t, reset, close);
 
       const log = el("div", "log");
       log.setAttribute("aria-live", "polite");
       log.append(el("div", "msg bot", g.text));
-      if (!state.turns.length) log.append(choiceRow(g.choices));
+      if (!state.turns.length) {
+        const row = choiceRow(g.choices);
+        // Switch language before the conversation starts (it isn't sent as a message)
+        const sw = el("button", "lang", ui().other); sw.type = "button"; sw.lang = state.lang === "fr" ? "en" : "fr";
+        sw.setAttribute("aria-label", ui().otherLabel);
+        sw.onclick = () => { state.lang = state.lang === "fr" ? "en" : "fr"; save(); render(); };
+        row.append(sw);
+        log.append(row);
+      }
 
       const lastBot = state.turns.map((x) => x.role).lastIndexOf("assistant");
       state.turns.forEach((turn, i) => {
         const anim = i >= fresh && fresh >= 0 ? " new" : "";
         if (turn.role === "error") { log.append(el("div", "msg err" + anim, turn.content)); return; }
-        log.append(el("div", "msg " + (turn.role === "user" ? "me" : "bot") + anim, turn.content));
+        const msg = el("div", "msg " + (turn.role === "user" ? "me" : "bot") + anim, turn.content);
+        if (turn.lang) msg.lang = turn.lang; // screen readers read French in a French voice
+        log.append(msg);
         if (turn.summary?.length) log.append(summaryCard(turn.summary));
         if (turn.insight?.figure) log.append(insightCard(turn.insight));
         if (turn.contact) log.append(contactCard(turn.contact));
         if (turn.jobs?.length) { const s = el("div", "stack"); turn.jobs.forEach((j) => s.append(jobCard(j))); log.append(s); }
         if (i === lastBot && i === state.turns.length - 1 && turn.choices?.length && !busy) log.append(choiceRow(turn.choices));
       });
-      if (busy) { const ty = el("div", "msg bot typing"); ty.innerHTML = "<i></i><i></i><i></i>"; ty.setAttribute("aria-label", "Typing"); log.append(ty); }
+      if (busy) { const ty = el("div", "msg bot typing"); ty.innerHTML = "<i></i><i></i><i></i>"; ty.setAttribute("aria-label", ui().typing); log.append(ty); }
 
       const form = el("form");
       const input = el("textarea"); input.rows = 1; input.placeholder = g.placeholder;
-      input.setAttribute("aria-label", "Your message"); input.maxLength = 1500;
+      input.setAttribute("aria-label", ui().message); input.maxLength = 1500;
       input.onkeydown = (e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); form.requestSubmit(); } };
-      const btn = el("button", "send"); btn.type = "submit"; btn.disabled = busy; btn.innerHTML = ICON.send; btn.setAttribute("aria-label", "Send");
+      const btn = el("button", "send"); btn.type = "submit"; btn.disabled = busy; btn.innerHTML = ICON.send; btn.setAttribute("aria-label", ui().send);
       form.append(input, btn);
       form.onsubmit = (e) => { e.preventDefault(); const v = input.value.trim(); if (v && !busy) submit(v); };
 
-      const fine = opts.note ? el("p", "fine demo", opts.note) : el("p", "fine", "AI assistant. Check the full posting before you apply.");
+      const note = state.lang === "fr" ? opts.noteFr || opts.note : opts.note;
+      const fine = note ? el("p", "fine demo", note) : el("p", "fine", ui().fine);
       panel.append(head, log, form, fine);
       root.append(panel);
       requestAnimationFrame(() => { log.scrollTop = log.scrollHeight; });
@@ -367,17 +406,18 @@
       busy = true; save(); render();
       // Send the words (and the memo from each reply). The greeting goes first so the
       // backend knows which kind of visitor this page expects.
-      const g = GREETINGS[state.greet] || GREETINGS.ask;
-      const messages = [{ role: "assistant", content: g.text, meta: { mode: state.greet === "ask" ? null : state.greet === "job" ? "seeker" : state.greet } }]
+      const g = greetings()[state.greet] || greetings().ask;
+      const messages = [{ role: "assistant", content: g.text, meta: { mode: state.greet === "ask" ? null : state.greet === "job" ? "seeker" : state.greet, lang: state.lang } }]
         .concat(state.turns.filter((x) => x.role === "user" || x.role === "assistant").map((x) => (x.role === "assistant" ? { role: x.role, content: x.content, meta: x.meta } : { role: x.role, content: x.content })));
       try {
         const r = await send(messages, context);
         // A short "typing" pause that grows with the reply, so it reads like someone answering, not a machine
         await new Promise((ok) => setTimeout(ok, Math.min(400 + (r.reply || "").length * 6, 1200)));
         if (r.meta?.mode && GREETINGS[r.meta.mode] && !(state.mode === "job" && r.meta.mode === "seeker")) state.mode = r.meta.mode; // header follows the conversation
-        state.turns.push({ role: "assistant", content: r.reply || "Here's what I found.", jobs: r.jobs || [], contact: r.contact || null, summary: r.summary || null, insight: r.insight || null, choices: r.choices || [], meta: r.meta || null });
+        if (r.meta?.lang === "fr" || r.meta?.lang === "en") state.lang = r.meta.lang; // labels follow the conversation's language
+        state.turns.push({ role: "assistant", content: r.reply || ui().fallback, lang: r.meta?.lang || null, jobs: r.jobs || [], contact: r.contact || null, summary: r.summary || null, insight: r.insight || null, choices: r.choices || [], meta: r.meta || null });
       } catch (e) {
-        state.turns.push({ role: "error", content: e?.message || "Something went wrong. Please try again." });
+        state.turns.push({ role: "error", content: e?.message || ui().error });
       }
       fresh = state.turns.length - 1;
       busy = false; save(); render();

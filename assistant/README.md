@@ -25,6 +25,26 @@ Both can also ask what a role pays ("what do forklift operators make in NB?", an
 | `test/` | Tests you can run with Node. `conversation.test.mjs` plays scripted chats through the demo engine. |
 | `demo/` | Builds the preview page (`node demo/build.mjs data/feed.json`). |
 
+## French
+
+The chat works in French and English. Each conversation follows the visitor: French in, French out,
+and it switches if they switch. The window starts in French when the visitor's browser is set to French,
+and the greeting has a Français / English button.
+
+- **Understanding French:** `FRENCH` in `demo-engine.js` turns French words and phrases into the English
+  words the rules already understand. To teach it a new French word, add a line there.
+- **Replies:** every reply is written in both languages with `L('English', 'Français')`. Buttons are written
+  once in English and translated in one place (`BUTTONS_FR`); tapped French buttons are read back to English.
+- **The window's own labels** (View job, Apply, Your request...) are in `UI` and `GREETINGS_FR` in `widget/widget.js`.
+- Job titles and posting text come from the job feed and stay in English. Staff job titles stay as they are on the team page.
+- The request form a French conversation fills in stays in English (the form and recruiters' inboxes are English), with a note that the visitor wrote in French.
+- Have a French-speaking colleague read through the French replies before launch.
+
+## Opening hours and urgent requests
+
+Offices are open 8:30 to 4:30, Monday to Friday. Outside those hours the bot gives the response coordinators'
+numbers, taken from the team data (anyone whose title is Response Coordinator), so it stays in step with the team page.
+
 ## Who gets the request (routing)
 
 `routing.js` decides who an employer is handed to. It never guesses: the bot can only hand out people listed there.
@@ -36,7 +56,7 @@ Both can also ask what a role pays ("what do forklift operators make in NB?", an
 | Contract, New Brunswick | Kelli Wetmore (Moncton line; Saint John line for Saint John, Quispamsis, Rothesay, Sussex, Fredericton) |
 | Contract, PEI | Chance Skauge (Charlottetown office) |
 | Contract, Newfoundland and Labrador | Crystal Murphy (St. John's office) |
-| Contract outside Atlantic Canada | Halifax office main line (`OUTSIDE_OFFICE` in routing.js) |
+| Contract outside Atlantic Canada | Chance Skauge (`OUTSIDE_PERSON` in routing.js) |
 | Job seeker questions, Halifax | Skylar Hardwick |
 
 **To change who handles an office**, edit `PEOPLE` and the matching line in `RULES`, for example:

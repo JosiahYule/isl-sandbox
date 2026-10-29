@@ -49,7 +49,7 @@ export const PEOPLE = {
   },
   chance: {
     name: "Chance Skauge", first: "Chance", office: "charlottetown", slug: "chance-skauge",
-    handles: "New client requests, all of PEI",
+    handles: "New client requests, all of PEI and outside Atlantic Canada",
     phone: "902-393-3217", email: "chance@integratedstaffing.ca", photo: cdn("ed563cb9-3419-44a3-a7e5-59589393f3c7/Headshot+-+Chance+Skauge.jpg"),
   },
   crystal: {
@@ -87,8 +87,10 @@ export const RULES = [
 // and "jobs" routes to the recruiter for the job seeker's area.
 export const DUTIES = [
   { topic: "marketing", words: /\b(marketing|social media|instagram|facebook|linkedin|tiktok|youtube|web ?site|advertising|advertisements?|ads|brand(ing)?|logo|media|press|newsletter|sponsor(s|ship|ships|ing)?|events? (sponsorship|partnership))\b/, people: ["josiah-yule"] },
+  { topic: "jobs on ISL's own team", words: /\b(jobs (at|with) (isl|you|your company)|work(ing)? (at|for) (isl|you|integrated)|join(ing)? (your|the isl|isl'?s) team|internal (jobs|positions|hiring|recruitment|roles|openings)|hiring for (isl|your own team|your team))\b/, people: ["shelley-lewis"] },
+  { topic: "health and safety", words: /\b(health (and|&) safety|ohs|oh&s|ohsa|safety|whmis|ppe|safety training|safety orientation|incident reports?)\b/, people: ["shelley-lewis"] },
   { topic: "human resources", words: /\b(hr|human resources)\b/, people: ["shelley-lewis"] },
-  { topic: "talent and culture", words: /\b(talent (and|&) culture|company culture|jobs (at|with) (isl|you|your company)|work(ing)? (at|for) (isl|you|integrated)|join(ing)? (your|the isl|isl'?s) team|internal (jobs|positions|hiring|recruitment|roles)|employee engagement)\b/, people: ["erika-smeltzer"] },
+  { topic: "talent and culture", words: /\b(talent (and|&) culture|company culture|employee engagement)\b/, people: ["erika-smeltzer"] },
   { topic: "business development", words: /\b(business development|partnerships?|partner(ing)? with (you|isl)|new business|bd)\b/, people: ["chance-skauge"] },
   { topic: "finance", words: /\b(finance|financial|accounting|accounts (receivable|payable)|the books|bookkeeping)\b/, people: ["michaila-doiron"] },
   { topic: "direct hire", words: /\b(direct hire|permanent (placements?|searches|search|division|team|hires?|hiring|recruitment)|perm (division|team|placements?|side))\b/, people: ["zowie-tucker"] },
@@ -166,8 +168,8 @@ export function placeFrom(text) {
   return { province, city: cityLabel, rural, outside: false, label };
 }
 
-// Which office takes requests for work outside Atlantic Canada (contract or unsure; permanent goes to Zowie).
-export const OUTSIDE_OFFICE = "halifax";
+// Who takes contract (or unsure) requests for work outside Atlantic Canada; permanent goes to Zowie.
+export const OUTSIDE_PERSON = "chance";
 
 // Which office covers a place.
 export function officeFor(place) {
@@ -192,13 +194,17 @@ export function officeFor(place) {
 export function route({ audience = "employer", service = "unsure", place = null } = {}) {
   const office = officeFor(place);
   // Contract staffing reaches anywhere in Canada. Work outside Atlantic Canada has no local
-  // office, so it falls through to the Halifax office (change OUTSIDE_OFFICE to send it elsewhere).
+  // office, so employers go to OUTSIDE_PERSON (Chance).
+  if (audience === "employer" && service !== "direct" && place?.outside) {
+    const p = PEOPLE[OUTSIDE_PERSON];
+    return { person: p, office: OFFICES[p.office], unavailable: null };
+  }
   const rule = RULES.find((r) =>
     (!r.audience || r.audience === audience) &&
     (!r.service || r.service === service) &&
     (!r.office || r.office === office?.key));
   const person = rule?.person ? PEOPLE[rule.person] : null;
-  return { person, office: office || (person ? OFFICES[person.office] : OFFICES[OUTSIDE_OFFICE]), unavailable: null };
+  return { person, office: office || (person ? OFFICES[person.office] : OFFICES.halifax), unavailable: null };
 }
 
 // What the chat window shows as a contact card.

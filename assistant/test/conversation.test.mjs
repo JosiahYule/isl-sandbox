@@ -10,7 +10,7 @@ const respond = createEngine({ loadJobs: async () => jobs, siteUrl: (p) => '/isl
 let failures = 0;
 async function talk(name, lines, check, greetingMode, context = {}) {
   console.log(`\n=== ${name}`);
-  const messages = greetingMode ? [{ role: 'assistant', content: '(greeting)', meta: { mode: greetingMode } }] : [];
+  const messages = greetingMode || name.startsWith('FR: greeting') ? [{ role: 'assistant', content: '(greeting)', meta: { mode: greetingMode || null, lang: name.startsWith('FR: greeting') ? 'fr' : undefined } }] : [];
   let last;
   for (const line of lines) {
     messages.push({ role: 'user', content: line });
@@ -38,7 +38,7 @@ await talk('Employer: step by step', ["I'm hiring", 'Forklift operators', 'New B
 await talk('Employer: Saint John area', ['need two drivers in Quispamsis on contract asap'],
   (r) => expect(r.contact?.name === 'Kelli Wetmore' && r.contact.phone === '506-851-9306', 'Quispamsis goes to Kelli'));
 await talk('Employer: contract outside Atlantic', ["I'm hiring", '10 cleaners', 'Elsewhere in Canada', 'For a set time', 'As soon as possible'],
-  (r) => expect(r.contact?.name === 'Halifax office' && /outside Atlantic Canada/.test(r.reply), 'contract anywhere in Canada goes to the Halifax office'));
+  (r) => expect(r.contact?.name === 'Chance Skauge' && /outside Atlantic Canada/.test(r.reply), 'contract outside Atlantic Canada goes to Chance'));
 await talk('Employer: permanent outside Atlantic', ['we need a permanent controller in Calgary'],
   (r) => expect(r.contact?.name === 'Zowie Tucker', 'permanent anywhere goes to Zowie'));
 await talk('Employer: Canada-wide question', ['can you place temp workers anywhere in canada?'],
@@ -96,7 +96,7 @@ await talk('Everyday words: chef', ['chef positions'], (r) => expect(r.jobs?.som
 await talk('No match: no random jobs', ['electrician'], (r) => expect(!r.jobs?.length || r.jobs.every((j) => /technician|erector|installation|carpenter|millwright|assembler|foreman|inspector|welder|mechanic|plumb/i.test(j.title)), 'only related trades'));
 await talk('Pay filter', ['jobs that pay over $25 an hour'], (r) => expect(r.jobs?.length && /\$25\/hour or more/.test(r.reply), 'filters by pay'));
 await talk('Nothing nearby: offer elsewhere', ['warehouse jobs in moncton', 'Show me those'], (r) => expect(r.jobs?.length, 'shows the jobs elsewhere'));
-await talk('French', ["J'ai besoin de 3 journaliers à Dieppe"], (r) => expect(/^Je comprends le français/.test(r.reply) && /Three labourers in Dieppe/.test(r.reply), 'reads French, says so once'));
+await talk('French employer, answered in French', ["J'ai besoin de 3 journaliers à Dieppe"], (r) => expect(/^Trois journaliers à Dieppe, c’est noté!/.test(r.reply) && r.meta.lang === 'fr' && r.choices.includes('Pour une période déterminée'), 'French reply and French buttons'));
 
 // ---- People already working through ISL ----
 await talk('Worker: T4, then office', ['I need my T4', 'Moncton'], (r) => expect(r.contact?.name === 'Moncton office' && noCards(r), 'Moncton office card'));
@@ -111,7 +111,7 @@ await talk('Scam check', ['someone texted me offering a job from integrated staf
 // ---- Who ISL can place: citizens and permanent residents ----
 await talk('Eligibility: work permit', ["I'm on a work permit, can I apply?"], (r) => expect(/citizen or a permanent resident/.test(r.reply) && noCards(r), 'explains the rule, no jobs'));
 await talk('Eligibility: international student', ['I am an international student looking for part time work'], (r) => expect(/citizen or a permanent resident/.test(r.reply) && noCards(r), 'explains the rule'));
-await talk('Eligibility: French permit', ["J'ai un permis de travail, est-ce que je peux postuler?"], (r) => expect(/citizen or a permanent resident/.test(r.reply), 'French permit question'));
+await talk('Eligibility: French permit', ["J'ai un permis de travail, est-ce que je peux postuler?"], (r) => expect(/citoyen canadien ou résident permanent/.test(r.reply) && r.meta.lang === 'fr', 'French permit question, answered in French'));
 await talk('Eligibility: has PR and a search', ['I have my PR, looking for warehouse work in halifax'], (r) => expect(/all set/.test(r.reply) && r.jobs?.length, 'confirms and searches'));
 await talk('Eligibility: question', ['do I need to be a Canadian citizen to work with you?'], (r) => expect(/citizen or a permanent resident/.test(r.reply), 'states the rule'));
 await talk('Newcomer', ['I just moved to Canada, can you help me find work?'], (r) => expect(/citizen or a permanent resident/.test(r.reply), 'mentions the rule kindly'));
@@ -131,7 +131,8 @@ await talk('Who: marketing', ['who is in charge of marketing'], (r) => expect(r.
 await talk('Who: HR', ['who handles HR?'], (r) => expect(r.contact?.name === 'Shelley Lewis', 'HR goes to Shelley'));
 await talk('Who: the company', ['who is the CEO'], (r) => expect(r.contact?.name === 'Greg White' && /Ross Argante/.test(r.reply), 'both Partners'));
 await talk('Who: client requests by province', ['who handles new client requests in New Brunswick'], (r) => expect(r.contact?.name === 'Kelli Wetmore', 'NB clients go to Kelli'));
-await talk('Who: unknown topic', ['who is responsible for health and safety'], (r) => expect(/not sure/.test(r.reply) && r.contact?.name === 'Halifax office', 'honest, with the Halifax office'));
+await talk('Who: health and safety', ['who is responsible for health and safety'], (r) => expect(r.contact?.name === 'Shelley Lewis', 'safety goes to Shelley'));
+await talk('Who: unknown topic', ['who looks after the parking lot'], (r) => expect(/not sure/.test(r.reply) && r.contact?.name === 'Halifax office', 'honest, with the Halifax office'));
 await talk('Name: first name', ['how do I reach Chance?'], (r) => expect(r.contact?.name === 'Chance Skauge' && r.contact.email === 'chance@integratedstaffing.ca', 'Chance card'));
 await talk('Name: two people', ['I need to talk to Nicole'], (r) => expect(/two people/.test(r.reply) && r.choices.length === 2, 'asks which Nicole'));
 await talk('Name: not a name', ['is there any chance of a forklift job in halifax'], (r) => expect(r.jobs?.length && !r.contact, 'a search, not Chance'));
@@ -147,7 +148,26 @@ await talk('Role: senior architect (employer page)', ['a senior architect in Alb
 await talk('Role: architect, no page hint', ['we need an architect'], (r) => expect(r.meta.mode === 'employer' && /architect/.test(r.reply), 'employer, not a job search'));
 await talk('Role: words it has never seen', ['3 tire techs in Truro'], (r) => expect(/Three tire techs in Truro/.test(r.reply), 'takes their words'), 'employer');
 await talk('Role: permanent buyer', ['permanent buyer in Charlottetown'], (r) => expect(r.contact?.name === 'Zowie Tucker', 'permanent goes to Zowie'), 'employer');
-await talk('Jobs at ISL itself', ['do you have jobs working at ISL itself'], (r) => expect(r.contact?.name === 'Erika Smeltzer' && !r.jobs?.length, 'Erika, no search'));
+await talk('Jobs at ISL itself', ['do you have jobs working at ISL itself'], (r) => expect(r.contact?.name === 'Shelley Lewis' && !r.jobs?.length, 'Shelley, no search'));
+
+// ---- French: understood and answered in French, buttons included ----
+const fr = (r) => r.meta?.lang === 'fr';
+await talk('FR: job search', ['je cherche du travail en entrepôt à Halifax'], (r) => expect(fr(r) && /postes d’entrepôt/.test(r.reply) && r.choices.includes('Ailleurs'), 'French search, French buttons'));
+await talk('FR: elision and nearby', ["emplois d'entrepôt à Moncton", 'Montrez-les-moi'], (r) => expect(fr(r) && r.jobs?.length, 'reads d’entrepôt, widens'));
+await talk('FR: no accent words', ['cuisinier à Dartmouth'], (r) => expect(fr(r) && /cuisine/.test(r.reply), 'detected as French'));
+await talk('FR: buttons round trip', ['Je cherche du travail', 'Métiers', 'Seulement permanent'], (r) => expect(fr(r) && /permanents/.test(r.reply), 'French buttons are understood'));
+await talk('FR: no experience', ["je n'ai pas d'expérience"], (r) => expect(fr(r) && /débutants/.test(r.reply), 'entry-level'));
+await talk('FR: citizen question', ['Faut-il être citoyen canadien?'], (r) => expect(fr(r) && /citoyen canadien ou résident permanent/.test(r.reply), 'states the rule in French'));
+await talk('FR: worker hurt', ['je me suis blessé au travail'], (r) => expect(fr(r) && /911/.test(r.reply) && /8 h 30/.test(r.reply), 'safety first, hours and urgent line'));
+await talk('FR: who', ['qui est responsable du marketing?'], (r) => expect(fr(r) && r.contact?.name === 'Josiah Yule', 'Josiah'));
+await talk('FR: employer, full flow', ['nous embauchons', 'des caristes', 'Nouveau-Brunswick', 'Pour une période déterminée', 'Dès que possible'],
+  (r) => expect(fr(r) && r.contact?.name === 'Kelli Wetmore' && r.contact.action.label === 'Envoyer ma demande à Kelli' && r.summary.some(([k, v]) => k === 'Poste' && v === 'Caristes'), 'routed, French card and summary'));
+await talk('FR: employer own words', ['un architecte principal en Alberta', 'Permanent'], (r) => expect(fr(r) && r.contact?.name === 'Zowie Tucker' && r.summary.some(([k, v]) => k === 'Poste' && v === 'Architecte principal'), 'keeps their words'), 'employer');
+await talk('FR: pay card', ['combien gagnent les chauffeurs en Nouvelle-Écosse?'], (r) => expect(fr(r) && /\$\/heure/.test(r.insight?.figure) && /Nouvelle-Écosse/.test(r.insight.kicker), 'French figures'));
+await talk('FR: job page', ['Quel est le salaire?'], (r) => expect(fr(r) && /^Le salaire est de 19 \$\/heure/.test(r.reply), 'French pay answer'), 'seeker', ctx);
+await talk('FR: switch and back', ['Français', 'English'], (r) => expect(r.meta.lang === 'en' && /^Sure!/.test(r.reply), 'switches back to English'));
+await talk('FR: greeting language carries', ['asdfgh'], (r) => expect(fr(r) && /^(Désolé|Hmm, je)/.test(r.reply), 'French from the greeting'), null, {});
+await talk('EN: stays English', ['warehouse jobs in halifax'], (r) => expect(r.meta.lang === 'en' && /^Good news/.test(r.reply), 'English unchanged'));
 
 console.log(failures ? `\n${failures} failed` : '\nall passed');
 if (failures) process.exit(1);
