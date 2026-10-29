@@ -37,7 +37,7 @@ Base.astro sets it in the sandbox, `src/squarespace/core.js` on Squarespace), an
 | Services | Contract staffing, Direct hire | Temporary recruitment, Permanent recruitment |
 | Terms | 90-day replacement on permanent hires | No upfront fees; one all-inclusive hourly rate; one-time fee on first-year compensation; six-month guarantee (their FAQ pages) |
 | Jobs | the Avionte feed | the saved sample postings (`src/brands/jobs/as.json`, `ads.json`) until Tracker RMS is connected. They carry no pay, so pay questions go to the office |
-| "Who's in charge of…" | everyone on the team page | marketing (Josiah); anything else goes to the Halifax office, since their team pages aren't up yet |
+| "Who's in charge of…" | everyone on the team page | marketing (Josiah, at josiah@accountantstaffing.com); anything else goes to the Halifax office, since their team pages aren't up yet |
 | After hours | the response coordinators' numbers | office hours only |
 
 Work a brand doesn't do goes to the sister company that does: warehouse or labour work on AS or ADS goes to

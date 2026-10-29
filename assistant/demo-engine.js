@@ -937,7 +937,8 @@ function profileFor(key) {
       "st. john's", 'mount pearl', 'paradise', 'conception bay south', 'torbay'],
     // Josiah looks after marketing for all three brands. Everything else goes to the office for now:
     // the team pages for these two brands aren't up yet.
-    directory: DIRECTORY.filter((p) => p.slug === 'josiah-yule'),
+    // His AS/ADS address for queries about these two brands; the phone is the same.
+    directory: DIRECTORY.filter((p) => p.slug === 'josiah-yule').map((p) => ({ ...p, email: 'josiah@accountantstaffing.com' })),
     duties: DUTIES.filter((d) => ['marketing', 'clients', 'jobs'].includes(d.topic)), teamPage: false, urgent: '',
     temp: ['temporary', 'temporaire', 'temporaires'], tempTitle: ['Temporary', 'Temporaire'], onlyTemp: 'Only temporary', workerButton: `I work with ${name}`,
     paths: { contract: '/temporary-recruitment/', direct: '/permanent-recruitment/' }, tempName: 'Temporary recruitment', directName: 'Permanent recruitment',

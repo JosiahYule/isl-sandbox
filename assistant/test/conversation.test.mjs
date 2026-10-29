@@ -193,7 +193,7 @@ await talk('AS: worker hurt', ['I got hurt at work'], (r) => expect(/your Accoun
 await talk('AS: payroll widens to accounting', ['payroll jobs'], (r) => expect(/accounting and finance roles are close/.test(r.reply) && r.jobs?.length, 'accounting roles, not office ones'));
 await talk('AS: pay', ['what do accountants make?'], (r) => expect(/don’t list pay yet/.test(r.reply) && !r.insight, 'says honestly there is no pay data'));
 await talk('AS: cost', ['what would a $30/hour employee really cost me?'], (r) => expect(r.insight?.figure && /true-cost/.test(r.insight.link.href), 'the cost calculator works'));
-await talk('AS: who, marketing', ["who's in charge of marketing?"], (r) => expect(r.contact?.name === 'Josiah Yule' && !r.choices?.length, 'Josiah, no team page link'));
+await talk('AS: who, marketing', ["who's in charge of marketing?"], (r) => expect(r.contact?.name === 'Josiah Yule' && r.contact.email === 'josiah@accountantstaffing.com' && !r.choices?.length, 'Josiah, AS/ADS email, no team page link'));
 await talk('AS: who, the CEO', ['who is the CEO?'], (r) => expect(r.contact?.name === 'Halifax office' && !/team page/.test(r.reply), 'the Halifax office'));
 await talk('AS: about', ['what is accountant staffing?'], (r) => expect(/Since 2002/.test(r.reply) && /accounting and finance professionals/.test(r.reply), 'about the brand'));
 await talk('AS: not a citizen', ["I'm on a work permit"], (r) => expect(/placed through Accountant Staffing/.test(r.reply), 'the rule, in its name'));
