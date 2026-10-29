@@ -1,6 +1,7 @@
 // Team members, from the live site's bio pages.
 // `slug` is the bio page address on the live site (integratedstaffing.ca/<slug>).
-// `photo` is the headshot from their live bio page (Squarespace image store), without a size.
+// `photo` is the headshot from the live Our team page (Squarespace image store), without a size.
+// (Kayla's, Laura's and Michaila's September 2026 photos were on the team page before their bio pages.)
 // Note: on the live site several headshots carry another person's name as their alt text (e.g. Kelli's says
 // "Zowie Tucker"), so photos are matched by their place on each bio page, not by alt text.
 // Titles, provinces, contact details and bios come from src/data/bios.js (merged in below).
@@ -17,10 +18,10 @@ const people = [
   { name: 'Zowie Tucker', slug: 'zowie-tucker', role: 'Senior Recruitment Consultant', team: 'Direct Hire', photo: cdn('471bd9d6-a42f-4bdd-84bc-47ae0b3f7e5d/Integrated+Staffing+Zowie+Tucker_1+%281%29.jpg') },
   { name: 'Shane Ico', slug: 'shane-ico', role: 'Recruitment Consultant', team: 'Direct Hire', photo: cdn('854d545a-6cd8-41ec-aea2-db95d41993cf/Integrated+Staffing+Shane+Ico.jpg') },
   { name: 'Lisa Laviolette', slug: 'lisa-laviolette', role: 'Recruitment Consultant', team: 'Direct Hire', photo: cdn('967f478a-b4c1-4236-8703-48d355f1cce2/d247e9aa-54c1-4a72-b108-ab50880696c2.jpg') },
-  { name: 'Kayla Jamieson', slug: 'kayla-jamieson', role: 'Recruitment Consultant', team: 'Direct Hire', photo: cdn('75e91452-b766-4e60-ac55-0c75bb6c2616/Kayla+Jamieson.png') },
+  { name: 'Kayla Jamieson', slug: 'kayla-jamieson', role: 'Recruitment Consultant', team: 'Direct Hire', photo: cdn('3be903e7-f0fd-423d-8b33-5562545360b9/integrated_sept2026_0229.jpg') },
   { name: 'Amber Antle', slug: 'amber-antle', role: '', photo: cdn('768d3e2a-b0eb-44af-a48c-2fa25c843713/IMG_0975.png') },
   { name: 'Natacha Bailey', slug: 'natacha-bailey', role: '', photo: cdn('e18bddfe-5d64-407c-bbee-4b34381d37c6/Headshot+-+N.+Bailey.png') },
-  { name: 'Laura Coyle', slug: 'laura-coyle', role: '', photo: cdn('70f9ceb8-76bf-4415-b32f-cdbba19bd9e9/Laura+C+Headshot.png') },
+  { name: 'Laura Coyle', slug: 'laura-coyle', role: '', photo: cdn('a6378644-c150-49a8-a96c-c60c80b5e6b5/integrated_sept2026_0480.jpg') },
   { name: 'Michaila Doiron', slug: 'michaila-doiron', role: '', photo: cdn('4eec9320-8900-4e0f-9881-d3a8ccdc1506/integrated_sept2026_0391.jpg') },
   { name: 'Megan Ferguson', slug: 'megan-ferguson', role: '', photo: cdn('e09b703e-98d4-4fcd-81ee-784e873d0f3e/Headshot+-+Megan+Ferguson.jpg') },
   { name: 'Nicole Fudge', slug: 'nicole-fudge', role: '', photo: cdn('ef4581bc-24d6-4baf-9720-e7633a7936d1/websized-mdwed_2022_0128_1.jpg') },
