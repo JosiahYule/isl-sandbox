@@ -210,6 +210,10 @@ await talk('ADS: employer, executive assistant', ['An executive assistant in St.
 await talk('ADS: employer, outside Atlantic', ["I'm hiring", 'A receptionist', 'Elsewhere in Canada', 'Permanent'], (r) => expect(r.contact?.name === 'Halifax office' && /head office/.test(r.reply), 'Halifax, the head office'));
 await talk('ADS: drivers go to ISL', ['we need 2 delivery drivers in Moncton'], (r) => expect(/Integrated Staffing/.test(r.reply) && r.contact?.name === 'Kelli Wetmore', 'ISL’s NB recruiter'));
 await talk('ADS: bookkeeper elsewhere, not a referral', ['bookkeeper jobs in Halifax'], (r) => expect(/Newfoundland and Labrador/.test(r.reply) && !/sister/.test(r.reply), 'offers its own job in NL'));
+// Josiah, Oct 29: AS and ADS take what either can do; only work neither does goes to ISL. Same hours, no after-hours line.
+await talk('ADS: accountant hire stays with AS/ADS', ['we need a temporary accountant in Halifax asap'], (r) => expect(r.contact?.name === 'Halifax office' && !/Integrated Staffing/.test(r.reply), 'the shared office, not ISL'));
+await talk('ADS: hours, no after-hours line', ['what are your office hours?'], (r) => expect(/8:30 to 4:30/.test(r.reply) && !/around the clock|response coordinator/.test(r.reply), 'hours only'));
+await talk('ADS: not a citizen', ["I'm an international student"], (r) => expect(/placed through Administrative Staffing, you need to be a Canadian citizen or a permanent resident/.test(r.reply), 'same rule as ISL'));
 await talk('ADS: who runs ADS', ['who runs ADS?'], (r) => expect(r.contact?.name === 'Halifax office', 'not mistaken for ads'));
 await talk('ADS: scam', ['is this text from administrative staffing real?'], (r) => expect(/Administrative Staffing never charges/.test(r.reply), 'own name'));
 
