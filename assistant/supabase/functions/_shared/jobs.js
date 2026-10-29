@@ -46,7 +46,7 @@ const AREAS = {
   halifax: ["halifax", "dartmouth", "bedford", "sackville", "lower sackville", "burnside", "hammonds plains", "cole harbour", "timberlea", "fall river", "enfield", "windsor junction"],
   hrm: ["halifax", "dartmouth", "bedford", "sackville", "lower sackville", "burnside", "hammonds plains", "cole harbour", "timberlea", "fall river", "enfield"],
   "st. john's": ["st. john's", "st johns", "mount pearl", "paradise", "conception bay south", "cbs", "torbay", "portugal cove"],
-  moncton: ["moncton", "dieppe", "riverview", "shediac"],
+  moncton: ["moncton", "dieppe", "riverview", "shediac", "scoudouc", "memramcook"],
   "saint john": ["saint john", "quispamsis", "rothesay", "grand bay-westfield"],
   charlottetown: ["charlottetown", "stratford", "cornwall"],
 };
@@ -164,7 +164,7 @@ export function provinceCode(input) {
   return s.toUpperCase().slice(0, 2);
 }
 
-function placesFor(city) {
+export function placesFor(city) {
   const c = String(city || "").trim().toLowerCase();
   if (!c) return [];
   return AREAS[c] || AREAS[c.replace(/^st\.? /, "st. ")] || [c];

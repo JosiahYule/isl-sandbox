@@ -78,6 +78,28 @@ export const RULES = [
   // Anything else falls through to the office's main line.
 ];
 
+// ---- Who looks after what inside ISL ----------------------------------
+// For "who's in charge of marketing?" and "who do I talk to about partnerships?".
+// Each line: the words people use for a topic, and the team member(s) to show (slugs from the
+// team page, src/data/team.js). To change who looks after something, change the slug. A topic
+// that isn't listed gets "I'm not sure", with the team page and the Halifax office.
+// Special cases handled in code: "clients" routes to the client services person for the province,
+// and "jobs" routes to the recruiter for the job seeker's area.
+export const DUTIES = [
+  { topic: "marketing", words: /\b(marketing|social media|instagram|facebook|linkedin|tiktok|youtube|web ?site|advertising|advertisements?|ads|brand(ing)?|logo|media|press|newsletter|sponsor(s|ship|ships|ing)?|events? (sponsorship|partnership))\b/, people: ["josiah-yule"] },
+  { topic: "human resources", words: /\b(hr|human resources)\b/, people: ["shelley-lewis"] },
+  { topic: "talent and culture", words: /\b(talent (and|&) culture|company culture|jobs (at|with) (isl|you|your company)|work(ing)? (at|for) (isl|you|integrated)|join(ing)? (your|the isl|isl'?s) team|internal (jobs|positions|hiring|recruitment|roles)|employee engagement)\b/, people: ["erika-smeltzer"] },
+  { topic: "business development", words: /\b(business development|partnerships?|partner(ing)? with (you|isl)|new business|bd)\b/, people: ["chance-skauge"] },
+  { topic: "finance", words: /\b(finance|financial|accounting|accounts (receivable|payable)|the books|bookkeeping)\b/, people: ["michaila-doiron"] },
+  { topic: "direct hire", words: /\b(direct hire|permanent (placements?|searches|search|division|team|hires?|hiring|recruitment)|perm (division|team|placements?|side))\b/, people: ["zowie-tucker"] },
+  { topic: "operations", words: /\b(operations|general manager|day[- ]to[- ]day)\b/, people: ["ross-argante"] },
+  { topic: "corporate services", words: /\bcorporate services\b/, people: ["greg-white"] },
+  { topic: "the front desk", words: /\b(reception|front desk|office administrator|the office admin)\b/, people: ["amber-antle"] },
+  { topic: "clients", words: /\b(new clients?|client (requests?|services|accounts?)|hiring requests?|staffing requests?|contract (staffing|workers|placements?)|temps?)\b/, people: [] },
+  { topic: "jobs", words: /\b(a job|jobs|job postings?|applying|applications?|my application|a position|job seekers?|candidates?)\b/, people: [] },
+  { topic: "the company", words: /\b(the company|isl|integrated staffing|ceo|president|owners?|own (isl|the company)|the boss|leadership|in charge( here)?|running (the|this) (company|place|show))\b/, people: ["greg-white", "ross-argante"] },
+];
+
 // ---- Places ------------------------------------------------------------
 
 // Every province and territory: jobs can be anywhere in Canada
@@ -104,8 +126,10 @@ const TOWNS = {
     "grand falls-windsor", "grand falls - windsor", "corner brook", "clarenville", "carbonear", "bay roberts", "goose bay",
     "happy valley-goose bay", "labrador city", "stephenville", "deer lake", "marystown", "placentia", "bonavista", "twillingate"],
 };
+// Every town name above, for spelling correction in the scripted assistant ("halifx" -> "halifax").
+export const TOWN_NAMES = Object.values(TOWNS).flat();
 const SAINT_JOHN_AREA = ["saint john", "quispamsis", "rothesay", "grand bay-westfield", "sussex", "st. stephen", "fredericton", "oromocto"];
-const OUTSIDE = /\b(ontario|toronto|ottawa|quebec|québec|montreal|montréal|manitoba|winnipeg|saskatchewan|regina|saskatoon|alberta|calgary|edmonton|british columbia|vancouver|victoria|yukon|nunavut|northwest territories|across canada|anywhere in canada|elsewhere in canada|outside (of )?atlantic|out west|remote)\b/i;
+const OUTSIDE = /\b(ontario|toronto|ottawa|quebec|québec|montreal|montréal|manitoba|winnipeg|saskatchewan|regina|saskatoon|alberta|calgary|edmonton|british columbia|vancouver|victoria|yukon|nunavut|northwest territories|across canada|anywhere in canada|elsewhere in canada|outside (of )?atlantic|out west)\b/i;
 
 const PROVINCE_RE = [
   ["NS", /\bnova scotia\b|\bn\.?s\.?\b(?!\w)/i],
@@ -142,6 +166,9 @@ export function placeFrom(text) {
   return { province, city: cityLabel, rural, outside: false, label };
 }
 
+// Which office takes requests for work outside Atlantic Canada (contract or unsure; permanent goes to Zowie).
+export const OUTSIDE_OFFICE = "halifax";
+
 // Which office covers a place.
 export function officeFor(place) {
   if (!place || place.outside) return null;
@@ -160,19 +187,18 @@ export function officeFor(place) {
  *   -> { person, office, unavailable }
  *   person:      an entry from PEOPLE, or null (then use the office's main line)
  *   office:      the office that covers the place (or the person's office)
- *   unavailable: a reason string when ISL can't take this on (contract outside Atlantic Canada)
+ *   unavailable: always null now (kept so older callers still work)
  */
 export function route({ audience = "employer", service = "unsure", place = null } = {}) {
   const office = officeFor(place);
-  if (audience === "employer" && service !== "direct" && place?.outside) {
-    return { person: null, office: null, unavailable: "contract-outside" };
-  }
+  // Contract staffing reaches anywhere in Canada. Work outside Atlantic Canada has no local
+  // office, so it falls through to the Halifax office (change OUTSIDE_OFFICE to send it elsewhere).
   const rule = RULES.find((r) =>
     (!r.audience || r.audience === audience) &&
     (!r.service || r.service === service) &&
     (!r.office || r.office === office?.key));
   const person = rule?.person ? PEOPLE[rule.person] : null;
-  return { person, office: office || (person ? OFFICES[person.office] : OFFICES.halifax), unavailable: null };
+  return { person, office: office || (person ? OFFICES[person.office] : OFFICES[OUTSIDE_OFFICE]), unavailable: null };
 }
 
 // What the chat window shows as a contact card.

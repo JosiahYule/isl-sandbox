@@ -15,9 +15,11 @@ Both can also ask what a role pays ("what do forklift operators make in NB?", an
 | `supabase/functions/_shared/jobs.js` | Cleans the Avionte feed and searches it. No AI in here. |
 | `supabase/functions/_shared/assistant.js` | The bot's instructions and the tools it may call. Edit the tone and rules here. |
 | `supabase/functions/_shared/routing.js` | **Who handles what.** The offices, the people, and the rules that pick one for each request. |
+| `supabase/functions/_shared/routing.js` → `DUTIES` | **Who looks after what inside ISL** ("who's in charge of marketing?"). One line per topic, naming team members by their team page slug. |
+| `supabase/functions/_shared/directory.js` | The team (names, titles, phones, emails, photos), generated from the website's team data by `npm run sync-assistant`. Don't edit it by hand. |
 | `supabase/functions/_shared/insights.js` | Pay on open jobs for a role, the true cost of an employee, and answers from one posting. No AI in here. |
 | `supabase/functions/_shared/pay.js`, `payroll.js`, `jobtext.js` | The same pay, payroll and posting-reading code the website's tools use (the site imports them from here). |
-| `demo-engine.js` | The conversation without AI (rule-based), used until the backend is live. Same search and routing. |
+| `demo-engine.js` | The conversation without AI (rule-based), used until the backend is live. Same search and routing. It understands job seekers, employers, people already working through ISL (pay, T4s, hours, a missed shift, an injury), office and people questions, and who ISL can place (Canadian citizens and permanent residents). Its everyday-word list (`SYNONYMS`) is where to teach it new words. |
 | `demo-mode.js` | Starts the widget in demo mode on the website. |
 | `widget/widget.js` | The chat bubble that goes on the website. |
 | `test/` | Tests you can run with Node. `conversation.test.mjs` plays scripted chats through the demo engine. |
@@ -34,7 +36,7 @@ Both can also ask what a role pays ("what do forklift operators make in NB?", an
 | Contract, New Brunswick | Kelli Wetmore (Moncton line; Saint John line for Saint John, Quispamsis, Rothesay, Sussex, Fredericton) |
 | Contract, PEI | Chance Skauge (Charlottetown office) |
 | Contract, Newfoundland and Labrador | Crystal Murphy (St. John's office) |
-| Contract outside Atlantic Canada | Not offered; the bot suggests a permanent search |
+| Contract outside Atlantic Canada | Halifax office main line (`OUTSIDE_OFFICE` in routing.js) |
 | Job seeker questions, Halifax | Skylar Hardwick |
 
 **To change who handles an office**, edit `PEOPLE` and the matching line in `RULES`, for example:
