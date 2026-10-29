@@ -13,7 +13,7 @@ import { jobs } from '../../data/jobs.js';
 
 const c = copy.seekers;
 ---
-<Base assistantMode="seeker" title="Job Seekers" description={`${c.title} ${c.intro[0]}`}>
+<Base assistantMode="seeker" title="Job seekers" description={`${c.title} ${c.intro[0]}`}>
   <PageHero title={c.title} lead={c.intro[0]}>
     <Button href="/find-work/" size="lg"><span>See <span data-isl-count="all">{jobs.length}</span> open jobs</span></Button>
     <a class="textlink" href={links.resume}>Send your resume</a>
@@ -50,7 +50,7 @@ const c = copy.seekers;
         <h2>{c.findTitle}</h2>
         <p class="lead">{c.findText}</p>
       </div>
-      <Button href="/find-work/" size="lg">Job Opportunities</Button>
+      <Button href="/find-work/" size="lg">See job opportunities</Button>
     </div>
   </section>
 </Base>

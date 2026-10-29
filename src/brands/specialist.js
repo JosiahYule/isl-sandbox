@@ -23,17 +23,17 @@ export const provinceOffice = { NS: 'Halifax', PE: 'Halifax', NB: 'Moncton', NL:
 // Old addresses (/job-opportunities, /our-team, /about-us, /contact-us) redirect to these: src/sites/specialist/redirects.txt.js
 export const nav = [
   { label: 'Employers', href: '/employers/' },
-  { label: 'Job Seekers', href: '/job-seekers/' },
-  { label: 'Job Opportunities', href: '/find-work/' },
-  { label: 'About Us', href: '/about/' },
-  { label: 'Our Team', href: '/team/' },
+  { label: 'Job seekers', href: '/job-seekers/' },
+  { label: 'Job opportunities', href: '/find-work/' },
+  { label: 'About us', href: '/about/' },
+  { label: 'Our team', href: '/team/' },
   { label: 'Learn', href: '/learn/' },
-  { label: 'Contact Us', href: '/contact/' },
+  { label: 'Contact us', href: '/contact/' },
 ];
 
 export const services = {
-  contract: { name: 'Temporary Recruitment', href: '/temporary-recruitment/', jobLabel: 'Temporary', ask: 'A temporary contractor', askMeta: 'Pre-screened, ready at a moment’s notice' },
-  direct: { name: 'Permanent Recruitment', href: '/permanent-recruitment/', jobLabel: 'Permanent', ask: 'A permanent hire', askMeta: 'A full search with a six-month guarantee' },
+  contract: { name: 'Temporary recruitment', href: '/temporary-recruitment/', jobLabel: 'Temporary', ask: 'A temporary contractor', askMeta: 'Pre-screened, ready at a moment’s notice' },
+  direct: { name: 'Permanent recruitment', href: '/permanent-recruitment/', jobLabel: 'Permanent', ask: 'A permanent hire', askMeta: 'A full search with a six-month guarantee' },
 };
 
 // The terms, as the live FAQ pages state them

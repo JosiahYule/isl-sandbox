@@ -23,7 +23,7 @@ const areaLinks = areas.map((a) => ({ ...a, n: jobs.filter((j) => j.area === a.k
 const count = { contract: jobs.filter((j) => j.type === 'contract').length, direct: jobs.filter((j) => j.type === 'direct').length };
 ---
 <Base assistantMode="seeker" title="Find work" description={field ? `Temporary and permanent ${field.short} jobs across Atlantic Canada.` : 'Contract and permanent jobs across Atlantic Canada and beyond.'}>
-  <PageHero title={field ? 'Job Opportunities' : 'Find your next job.'} lead={field ? `Temporary and permanent ${field.short} roles across Atlantic Canada.` : 'Contract and permanent roles across Atlantic Canada.'}>
+  <PageHero title={field ? 'Job opportunities.' : 'Find your next job.'} lead={field ? `Temporary and permanent ${field.short} roles across Atlantic Canada.` : 'Contract and permanent roles across Atlantic Canada.'}>
     {brand.assistant && <button type="button" class="textlink" data-open-assistant>Or describe what you want to the job assistant</button>}
   </PageHero>
 
