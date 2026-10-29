@@ -14,6 +14,7 @@
 const ROOT = new URL('.', import.meta.url).href; // https://josiahyule.github.io/isl-sandbox/sq/<brand>/
 const COMMON = __COMMON__;                        // shared scripts every page runs (c/*.js)
 const ASSISTANT = __ASSISTANT__;                  // the assistant's folder, or '' when it's off for this brand
+const BRAND = __BRAND__;                          // 'isl', 'as' or 'ads': the chat assistant speaks for this brand
 
 const html = document.documentElement;
 const header = document.getElementById('isl-header');
@@ -25,6 +26,7 @@ const path = location.pathname.replace(/\/+$/, '') || '/';
 if (header && document.body.firstElementChild !== header) document.body.prepend(header);
 html.classList.add('isl-site');
 html.dataset.siteRoot = '/'; // pages are on this domain (the chat assistant reads this for its links)
+html.dataset.brand = BRAND;
 
 // 2. Current page and page settings
 if (header) {

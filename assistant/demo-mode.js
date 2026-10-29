@@ -4,7 +4,12 @@
 // On the live site, every message goes to the Supabase function and Claude
 // writes the reply. Until that backend is deployed, demo-engine.js stands in:
 // rule-based conversation, but the REAL job search (jobs.js) over a snapshot
-// of ISL's postings and the REAL contact routing (routing.js).
+// of the brand's postings and the REAL contact routing (routing.js).
+//
+// One assistant serves all three sites. <html data-brand="isl|as|ads"> says which brand this is
+// (Base.astro sets it in the sandbox, src/squarespace/core.js on Squarespace).
+// ISL searches its Avionte feed; Accountant Staffing and Administrative Staffing search their
+// saved sample postings (jobs-as.json, jobs-ads.json) until their Tracker RMS feeds are connected.
 //
 // The page can say which kind of visitor to expect with
 //   <html data-assistant-mode="employer">   (hiring pages)
@@ -18,18 +23,22 @@ const base = new URL('.', import.meta.url);      // .../assistant/
 // Pages but the pages are on the brand's domain: src/squarespace/core.js says so with data-site-root.
 const sqRoot = document.documentElement.dataset.siteRoot;
 const site = sqRoot ? new URL(sqRoot, location.href) : new URL('..', base);
+const brand = ['as', 'ads'].includes(document.documentElement.dataset.brand) ? document.documentElement.dataset.brand : 'isl';
+const jobsFile = brand === 'isl' ? 'jobs-snapshot.json' : `jobs-${brand}.json`;
 
 // The engine (and the job snapshot it searches) only load when someone sends a first message,
 // so pages where nobody opens the chat don't download them.
 let jobsPromise, enginePromise;
 function loadJobs() {
-  return (jobsPromise ||= fetch(new URL('jobs-snapshot.json', base), { signal: AbortSignal.timeout(10000) })
+  return (jobsPromise ||= fetch(new URL(jobsFile, base), { signal: AbortSignal.timeout(10000) })
     .then((r) => { if (!r.ok) throw new Error('Jobs unavailable'); return r.json(); })
+    .then((d) => (Array.isArray(d) ? d : d.jobs)) // the AS and ADS files keep their jobs under "jobs"
     .catch((error) => { jobsPromise = null; throw error; }));
 }
 const respond = async (messages, context) => {
   enginePromise ||= import('./demo-engine.js').then(({ createEngine }) => createEngine({
     loadJobs,
+    brand,
     siteUrl: (path) => {
       const u = new URL(path.replace(/^\//, ''), site);
       // Squarespace addresses have no trailing slash (/hire, not /hire/)
@@ -42,6 +51,7 @@ const respond = async (messages, context) => {
 function start() {
   const chat = window.ISLJobChat.mount({
     send: respond,
+    brand,
     mode: document.documentElement.dataset.assistantMode,
     job: document.documentElement.dataset.assistantJob,
     fine: false, // no small print under the chat box

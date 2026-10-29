@@ -30,6 +30,27 @@
 (function () {
   const STORE_KEY = "isl-chat-v2";
 
+  // The three brands share this window. What changes: the name and mark in the header, the colours,
+  // what a temporary job is called, and the examples offered first. ISL's values are the defaults below.
+  // Colours come from each brand's own site (src/brands/as.js, ads.js), with the same contrast checks.
+  const BRANDS = {
+    isl: { name: "Integrated Staffing", mark: "ISL", ask: "Ask ISL", askFr: "Demandez à ISL" },
+    as: {
+      name: "Accountant Staffing", mark: "AS", ask: "Ask us", askFr: "Demandez-nous", temp: ["Temporary", "Temporaire"],
+      colors: { blue: "#0f2b52", "blue-deep": "#081a33", "blue-tint": "#e6f1f9", dark: "#0f2b52", "dark-hover": "#081a33", edge: "#44a2d5", perm: "#1d78ae", mark: "#44a2d5", "mark-ink": "#0f2b52" },
+      seeker: [["Accountant", "Bookkeeper", "Tax", "Management"], "e.g. Bookkeeper in Halifax", ["Comptable", "Teneur de livres", "Impôts", "Gestion"], "p. ex. Teneur de livres à Halifax"],
+      employer: [["A permanent controller in Halifax", "A temporary accountant in Moncton", "A bookkeeper in St. John’s for 3 months"], "e.g. A temporary accountant in Moncton",
+        ["Un contrôleur permanent à Halifax", "Un comptable temporaire à Moncton", "Un teneur de livres à St. John’s pour 3 mois"], "p. ex. Un comptable temporaire à Moncton"],
+    },
+    ads: {
+      name: "Administrative Staffing", mark: "ADS", ask: "Ask us", askFr: "Demandez-nous", temp: ["Temporary", "Temporaire"],
+      colors: { blue: "#21356e", "blue-deep": "#152452", "blue-tint": "#fdf1e6", dark: "#111b37", "dark-hover": "#0a1124", edge: "#f08624", perm: "#b84f00", mark: "#f08624", "mark-ink": "#111b37" },
+      seeker: [["Office and admin", "Reception", "HR", "Bookkeeping"], "e.g. Receptionist in Halifax", ["Bureau et administration", "Réception", "RH", "Tenue de livres"], "p. ex. Réceptionniste à Halifax"],
+      employer: [["A receptionist in Halifax next week", "A permanent administrative assistant in Moncton", "An executive assistant in St. John’s"], "e.g. A receptionist in Halifax next week",
+        ["Un réceptionniste à Halifax la semaine prochaine", "Une adjointe administrative permanente à Moncton", "Un adjoint de direction à St. John’s"], "p. ex. Un réceptionniste à Halifax la semaine prochaine"],
+    },
+  };
+
   // What the window says first, for each kind of visitor.
   const GREETINGS = {
     ask: { text: "Hi there! I can help you find a job, or find the right people to hire. Which brings you here today?", choices: ["I'm looking for work", "I'm hiring"], placeholder: "Type a message" },
@@ -64,7 +85,8 @@
     * { box-sizing: border-box; }
     /* ISL brand: DM Sans, ISL blue #0070CA, near-black #1A1A1A, hairline #E8E8E8, square corners, no shadows.
        DM Sans comes from the host page (fonts loaded on the page also work inside a shadow root). */
-    .root { --blue: #0070CA; --blue-deep: #005AAA; --blue-tint: #e6f1fa; --dark: #1a1a1a; --ink: #1a1a1a; --muted: #666; --line: #e8e8e8; --mist: #f5f5f5; --white: #fff;
+    .root { --blue: #0070CA; --blue-deep: #005AAA; --blue-tint: #e6f1fa; --dark: #1a1a1a; --dark-hover: #000; --ink: #1a1a1a; --muted: #666; --line: #e8e8e8; --mist: #f5f5f5; --white: #fff;
+      --edge: var(--blue); --perm: var(--blue); --mark: var(--blue); --mark-ink: #fff; /* AS and ADS set their own (BRANDS above) */
       font-family: "DM Sans Variable", "DM Sans", system-ui, -apple-system, "Segoe UI", sans-serif; color: var(--ink); font-size: 14.5px; line-height: 1.5; }
     button { font-family: inherit; }
     .choices .lang { border-style: dashed; color: var(--muted); }
@@ -72,8 +94,8 @@
     /* Launcher */
     .launcher { position: fixed; right: calc(20px + env(safe-area-inset-right, 0px)); bottom: calc(20px + var(--isl-chat-lift, 0px) + env(safe-area-inset-bottom, 0px)); transition: bottom 0.25s ease; z-index: 2147483000;
       display: flex; align-items: center; gap: 10px; border: 0; cursor: pointer; padding: 14px 18px 14px 15px;
-      background: var(--dark); color: var(--white); font-weight: 600; font-size: 14.5px; line-height: 1; border-bottom: 3px solid var(--blue); }
-    .launcher:hover { background: #000; }
+      background: var(--dark); color: var(--white); font-weight: 600; font-size: 14.5px; line-height: 1; border-bottom: 3px solid var(--edge); }
+    .launcher:hover { background: var(--dark-hover); }
     .launcher svg { width: 20px; height: 20px; flex: none; }
     /* Phones: icon only, so the button doesn't cover the page */
     @media (max-width: 600px) { .launcher { padding: 14px; } .launcher span { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); } }
@@ -88,8 +110,8 @@
     .panel.opening { animation: open .28s cubic-bezier(.2,.7,.1,1); }
     @keyframes open { from { opacity: 0; transform: translateY(12px); } }
     @media (max-width: 480px) { .panel { right: 0; bottom: 0; width: 100vw; height: 100%; border: 0; } }
-    .head { display: flex; align-items: center; gap: 12px; padding: 12px 10px 12px 16px; background: var(--dark); color: var(--white); border-bottom: 3px solid var(--blue); }
-    .mark { width: 34px; height: 34px; flex: none; display: grid; place-items: center; background: var(--blue); color: #fff; font-weight: 700; font-size: 12px; letter-spacing: .02em; }
+    .head { display: flex; align-items: center; gap: 12px; padding: 12px 10px 12px 16px; background: var(--dark); color: var(--white); border-bottom: 3px solid var(--edge); }
+    .mark { width: 34px; height: 34px; flex: none; display: grid; place-items: center; background: var(--mark); color: var(--mark-ink); font-weight: 700; font-size: 12px; letter-spacing: .02em; }
     .head .t { flex: 1; min-width: 0; }
     .head strong { display: block; font-size: 14.5px; }
     .head span { display: block; font-size: 12px; opacity: .72; }
@@ -111,11 +133,11 @@
     /* Job cards: near-black edge for contract, ISL blue for permanent */
     .stack { display: flex; flex-direction: column; gap: 8px; align-self: stretch; }
     .card { background: var(--white); border: 1px solid var(--line); border-left: 4px solid var(--dark); padding: 12px 14px; display: grid; gap: 6px; }
-    .card.perm { border-left-color: var(--blue); }
+    .card.perm { border-left-color: var(--perm); }
     .card h4 { margin: 0; font-size: 15px; font-weight: 700; letter-spacing: -.01em; }
     .meta { display: flex; flex-wrap: wrap; gap: 4px 10px; font-size: 12.5px; color: var(--muted); }
     .meta .kind { font-weight: 700; color: var(--ink); }
-    .card.perm .meta .kind { color: var(--blue); }
+    .card.perm .meta .kind { color: var(--perm); }
     .why { margin: 0; font-size: 13px; color: var(--muted); }
     .actions { display: flex; gap: 8px; margin-top: 4px; }
     .actions a { flex: 1; text-align: center; text-decoration: none; font-weight: 600; font-size: 13px; padding: 8px 10px; }
@@ -201,10 +223,13 @@
     const send = opts.send || httpTransport(opts.endpoint, opts.anonKey);
     const host = document.createElement("div");
     host.id = "isl-job-chat";
+    const brand = BRANDS[opts.brand] || BRANDS.isl;
+    const storeKey = brand === BRANDS.isl ? STORE_KEY : STORE_KEY + "-" + opts.brand; // the sandbox serves all three brands from one address
     (opts.container || document.body).appendChild(host);
     const shadow = host.attachShadow({ mode: "open" });
     shadow.innerHTML = `<style>${CSS}</style><div class="root"></div>`;
     const root = shadow.querySelector(".root");
+    for (const [k, v] of Object.entries(brand.colors || {})) root.style.setProperty("--" + k, v);
     // Temporarily move the launcher out of the way of a form or application action.
     // The chat remains available from inline links; an open conversation is never hidden.
     let positionFrame = 0;
@@ -245,15 +270,26 @@
     // Start in French when the visitor's browser is set to French; they can switch on the greeting
     const browserFr = /^fr\b/i.test((navigator.languages && navigator.languages[0]) || navigator.language || "");
     let state = { open: !!opts.startOpen, turns: [], mode: pageMode, lang: opts.lang || (browserFr ? "fr" : "en") };
-    try { const saved = JSON.parse(sessionStorage.getItem(STORE_KEY) || "null"); if (saved && Array.isArray(saved.turns)) state = { ...state, ...saved, mode: saved.turns.length ? saved.mode : pageMode }; } catch {}
-    const save = () => { try { sessionStorage.setItem(STORE_KEY, JSON.stringify(state)); } catch {} };
+    try { const saved = JSON.parse(sessionStorage.getItem(storeKey) || "null"); if (saved && Array.isArray(saved.turns)) state = { ...state, ...saved, mode: saved.turns.length ? saved.mode : pageMode }; } catch {}
+    const save = () => { try { sessionStorage.setItem(storeKey, JSON.stringify(state)); } catch {} };
     let busy = false;
     let opening = !!state.open; // animate the window in only on the render right after it opens
     let fresh = -1; // index of the newest turn, so only it animates in
 
     const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
-    const ui = () => UI[state.lang === "fr" ? "fr" : "en"];
-    const greetings = () => (state.lang === "fr" ? GREETINGS_FR : GREETINGS);
+    // The brand's words: its name in the labels, what temporary jobs are called, its first examples
+    const fr = () => state.lang === "fr";
+    const ui = () => {
+      const u = UI[fr() ? "fr" : "en"];
+      if (brand === BRANDS.isl) return u;
+      return { ...u, contract: brand.temp[fr() ? 1 : 0], open: fr() ? `Ouvrir l’assistant ${brand.name}` : `Open the ${brand.name} assistant`, panel: fr() ? `Assistant ${brand.name}` : `${brand.name} assistant` };
+    };
+    const greetings = () => {
+      const g = fr() ? GREETINGS_FR : GREETINGS;
+      if (brand === BRANDS.isl) return g;
+      const i = fr() ? 2 : 0;
+      return { ...g, seeker: { ...g.seeker, choices: brand.seeker[i], placeholder: brand.seeker[i + 1] }, employer: { ...g.employer, choices: brand.employer[i], placeholder: brand.employer[i + 1] } };
+    };
     const tel = (n) => "tel:+1" + String(n).replace(/\D/g, "");
 
     function jobCard(job) {
@@ -325,7 +361,7 @@
       if (!state.open) {
         const b = el("button", "launcher");
         b.type = "button";
-        const launch = state.lang === "fr" ? LAUNCHER_FR : LAUNCHER;
+        const launch = { ...(state.lang === "fr" ? LAUNCHER_FR : LAUNCHER), ask: state.lang === "fr" ? brand.askFr : brand.ask };
         b.innerHTML = ICON.chat;
         b.append(el("span", null, launch[state.mode] || launch.ask));
         b.setAttribute("aria-label", ui().open);
@@ -344,10 +380,10 @@
       panel.onkeydown = (e) => { if (e.key === "Escape") { state.open = false; save(); render(); } };
 
       const head = el("div", "head");
-      head.append(el("div", "mark", "ISL"));
+      head.append(el("div", "mark", brand.mark));
       const t = el("div", "t");
       const sub = state.lang === "fr" ? SUBTITLE_FR : SUBTITLE;
-      t.append(el("strong", null, "Integrated Staffing"), el("span", null, sub[state.mode] || sub.ask));
+      t.append(el("strong", null, brand.name), el("span", null, sub[state.mode] || sub.ask));
       const reset = el("button", "icon-btn"); reset.type = "button"; reset.innerHTML = ICON.reset; reset.title = ui().reset; reset.setAttribute("aria-label", ui().resetLabel);
       reset.onclick = () => { if (busy) return; state.turns = []; state.mode = pageMode; state.greet = null; save(); render(); }; // keeps the language they chose
       const close = el("button", "icon-btn"); close.type = "button"; close.innerHTML = ICON.close; close.setAttribute("aria-label", ui().close);

@@ -42,7 +42,7 @@ export const brand = {
   },
   ctaTone: 'bright', // the closing band in the site's orange
   logoHeight: 55, // the wordmark is small inside this logo, so it's shown a little taller than ISL's
-  assistant: false,
+  assistant: true,  // the job assistant chat (searches the sample postings until Tracker RMS is connected)
   officePages: false,
 };
 

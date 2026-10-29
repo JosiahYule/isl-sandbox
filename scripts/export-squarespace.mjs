@@ -154,6 +154,7 @@ function exportBrand(brand) {
   writeFileSync(`${OUT}/isl.js`, readFileSync('src/squarespace/core.js', 'utf8')
     .replace('__COMMON__', JSON.stringify(common))
     .replace('__ASSISTANT__', JSON.stringify(assistantDir))
+    .replace('__BRAND__', JSON.stringify(brand))
     .replace('__HAS_LEARN__', JSON.stringify(brand === 'isl'))); // ISL's Learn page lists the blog posts
 
   // ---------- Header and footer (Code Injection) ----------

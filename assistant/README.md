@@ -25,6 +25,29 @@ Both can also ask what a role pays ("what do forklift operators make in NB?", an
 | `test/` | Tests you can run with Node. `conversation.test.mjs` plays scripted chats through the demo engine. |
 | `demo/` | Builds the preview page (`node demo/build.mjs data/feed.json`). |
 
+## Accountant Staffing and Administrative Staffing
+
+The same assistant runs on all three sites. The page says which brand it is (`<html data-brand="as">`:
+Base.astro sets it in the sandbox, `src/squarespace/core.js` on Squarespace), and `profileFor()` in
+`demo-engine.js` holds what differs:
+
+| | ISL | AS and ADS |
+|---|---|---|
+| Requests go to | the named recruiter (`RULES`) | the office that covers the province (`routeSpecialist`): Halifax for NS and PEI, Moncton for NB, St. John's for NL, Halifax for anywhere else |
+| Services | Contract staffing, Direct hire | Temporary recruitment, Permanent recruitment |
+| Terms | 90-day replacement on permanent hires | No upfront fees; one all-inclusive hourly rate; one-time fee on first-year compensation; six-month guarantee (their FAQ pages) |
+| Jobs | the Avionte feed | the saved sample postings (`src/brands/jobs/as.json`, `ads.json`) until Tracker RMS is connected. They carry no pay, so pay questions go to the office |
+| "Who's in charge of…" | everyone on the team page | marketing (Josiah); anything else goes to the Halifax office, since their team pages aren't up yet |
+| After hours | the response coordinators' numbers | office hours only |
+
+Work a brand doesn't do goes to the sister company that does: warehouse or labour work on AS or ADS goes to
+Integrated Staffing (employers get ISL's recruiter for the area), accounting on ADS to Accountant Staffing,
+and office roles on AS to Administrative Staffing. The chat window takes each brand's name, mark and colours
+from `BRANDS` in `widget/widget.js`.
+
+When the AS and ADS team pages are filled in, add their people to the directory and widen their `duties`
+in `profileFor()`, and the bot will name people the way it does on ISL.
+
 ## French
 
 The chat works in French and English. Each conversation follows the visitor: French in, French out,

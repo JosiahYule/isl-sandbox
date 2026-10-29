@@ -207,6 +207,22 @@ export function route({ audience = "employer", service = "unsure", place = null 
   return { person, office: office || (person ? OFFICES[person.office] : OFFICES.halifax), unavailable: null };
 }
 
+// ---- Accountant Staffing and Administrative Staffing ---------------------
+// The two specialist brands share three offices (the same as src/brands/specialist.js) and
+// route by office, not by person: the office that covers the province takes the request.
+// PEI has no office of its own, so Halifax covers it. Anywhere outside Atlantic Canada goes to
+// Halifax, the head office (the website's request form does the same).
+export const SPECIALIST_OFFICES = {
+  halifax: { key: "halifax", city: "Halifax", province: "NS", phone: "902-491-1301", address: "99 Wyse Road, Suite 1320, Dartmouth" },
+  moncton: { key: "moncton", city: "Moncton", province: "NB", phone: "506-800-0074", address: "814 Main St, Suite 200, Moncton" },
+  "st-johns": { key: "st-johns", city: "St. John's", province: "NL", phone: "709-800-8818", address: "E115-120 Torbay Rd, St. John's" },
+};
+const SPECIALIST_PROVINCE = { NS: "halifax", PE: "halifax", NB: "moncton", NL: "st-johns" };
+export const specialistOffice = (province) => SPECIALIST_OFFICES[SPECIALIST_PROVINCE[province] || "halifax"];
+export function routeSpecialist({ place = null } = {}) {
+  return { person: null, office: specialistOffice(place && !place.outside ? place.province : ""), unavailable: null };
+}
+
 // What the chat window shows as a contact card.
 export function toContact({ person, office }, action) {
   return {

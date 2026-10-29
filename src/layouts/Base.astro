@@ -23,7 +23,7 @@ import { resolve } from 'node:path';
 //   the page is refreshed from the latest build every time it loads (src/squarespace/core.js)
 // schema: optional structured data (an object or a list) that search engines read, e.g. an office's address
 const { title, description = brand.scope, assistantMode, assistantJob, footerOffices = true, schema, live = false } = Astro.props;
-const assistant = (Astro.props.assistant ?? true) && brand.assistant; // AS and ADS: off for now
+const assistant = (Astro.props.assistant ?? true) && brand.assistant;
 // All assistant imports and its data share a content-versioned folder. This avoids mixing
 // newly published pages with an older cached widget or demo engine on GitHub Pages.
 const assistantVersion = assistant ? JSON.parse(readFileSync(resolve('public/assistant/version.json'), 'utf8')).version : '';

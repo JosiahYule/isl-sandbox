@@ -31,7 +31,7 @@
 // =====================================================================
 import { toCard, SITE, stemText, placesFor, provinceCode } from './jobs.js';
 const PROVINCE_CODES = new Set(['NS', 'NB', 'PE', 'NL', 'QC', 'ON', 'MB', 'SK', 'AB', 'BC', 'YT', 'NT', 'NU']);
-import { placeFrom, route, toContact, provinceName, OFFICES, TOWN_NAMES, DUTIES, officeFor } from './routing.js';
+import { placeFrom, route, toContact, provinceName, OFFICES, TOWN_NAMES, DUTIES, officeFor, SPECIALIST_OFFICES, specialistOffice, routeSpecialist } from './routing.js';
 import { DIRECTORY } from './directory.js';
 import { payFor, payInsight, costFor, costInsight, jobAnswer } from './insights.js';
 import { familyOf } from './pay.js';
@@ -67,7 +67,7 @@ const FRENCH = [
   ['<feuilles? de temps>', 'timesheet'], ['<(soumettre|envoyer|entrer|remettre) mes heures>', 'submit my hours'],
   ['<démissionner>|<quitter mon (affectation|poste|emploi|placement)>', 'i want to quit'],
   ['<mot de passe>|<portail>|<me connecter>|<ouvrir une session>', 'portal'],
-  ["<je travaille (avec|pour|chez|par l'entremise d'?) ?(isl|vous|integrated)>|<je suis placée? par (isl|vous)>", 'i work with isl'],
+  ["<je travaille (avec|pour|chez|par l'entremise d'?) ?(isl|vous|integrated|integrated staffing|accountant staffing|administrative staffing)>|<je suis placée? par (isl|vous|accountant staffing|administrative staffing)>", 'i work with isl'],
   // Offices, people, scams
   ['<numéros? de téléphone>|<votre numéro>', 'phone number'], ["<heures d'ouverture>|<heures de bureau>|<êtes-vous ouverts?>|<quand êtes-vous ouverts?>", 'office hours'],
   ["<en dehors des heures( de bureau)?>|<après les heures>|<la nuit>|<24 ?h(eures)? sur 24>|<jour et nuit>", 'after hours'],
@@ -80,7 +80,7 @@ const FRENCH = [
   ['<santé et (la )?sécurité>|<sst>', 'health and safety'], ['<ressources humaines>|<rh>', 'human resources'],
   ['<médias sociaux>|<réseaux sociaux>|<publicités?>|<site web>|<site internet>|<commandites?>|<commandite>', 'marketing'],
   ['<développement des affaires>|<partenariats?>', 'business development'], ['<finances>', 'finance'],
-  ["<emplois? (chez|à|avec) isl>|<travailler (chez|pour) (isl|vous)>|<(joindre|faire partie de) votre équipe>|<postes internes>", 'jobs at isl'],
+  ["<emplois? (chez|à|avec) (isl|accountant staffing|administrative staffing)>|<travailler (chez|pour) (isl|vous|accountant staffing|administrative staffing)>|<(joindre|faire partie de) votre équipe>|<postes internes>", 'jobs at isl'],
   // Who ISL can place
   ['<citoyen(ne)? canadien(ne)?>', 'canadian citizen'], ['<je suis citoyen(ne)?>', "i'm a citizen"], ["<je suis citoyen(ne)? ou rp>", "i'm a citizen or pr"],
   ["<je n'ai pas (ma|la) (rp|résidence permanente)>|<pas (encore )?résidente? permanente?>", "i'm not a permanent resident"],
@@ -108,7 +108,7 @@ const FRENCH = [
   ['<mois>', 'months'], ['<semaines>', 'weeks'], ['<jours>', 'days'],
   ['<plus de>|<au-dessus de>', 'over'], ['<au moins>|<minimum>', 'at least'],
   // Looking for work
-  ['<je (re)?cherche>', "i'm looking for"], ["<(un|une|des|du|d') ?(emplois?|travail|jobs?|postes?|boulots?|job)>", ' work'], ['<emplois?>|<boulots?>', 'jobs'],
+  ["<je (re)?cherche (un |une )?(emploi|poste|travail) (de|d'|comme|en tant que) ?>", "i'm looking for work as a "], ['<je (re)?cherche>', "i'm looking for"], ["<(un|une|des|du|d') ?(emplois?|travail|jobs?|postes?|boulots?|job)>", ' work'], ['<emplois?>|<boulots?>', 'jobs'],
   ['<comment (je )?postuler?>|<comment poser ma candidature>', 'how do i apply'], ['<postuler>', 'apply'],
   ['<vérifier mon cv>|<réviser mon cv>', 'check my resume'], ['<envoyer mon cv>', 'send my resume'], ['<mon cv>', 'my resume'], ['<cv>', 'resume'],
   ["<(est-ce|c'est) gratuit>|<gratuit>", 'is it free'], ['<frais>', 'fee'],
@@ -118,7 +118,8 @@ const FRENCH = [
   ['<cuisiniers>|<cuisinières>', 'cooks'], ['<cuisinier>|<cuisinière>', 'cook'], ['<cuisine>', 'kitchen'],
   ['<serveurs>|<serveuses>', 'servers'], ['<serveur>|<serveuse>', 'server'], ["<préposée?s à l'entretien>|<concierges>", 'cleaners'], ["<préposée? à l'entretien>|<concierge>", 'cleaner'],
   ['<nettoyage>|<entretien ménager>|<ménage>', 'cleaning'], ['<comptables>', 'accountants'], ['<comptable>', 'accountant'], ['<comptabilité>', 'accounting'], ['<adjointe?s? administratifs?>|<adjointes? administratives?>|<administrati(f|ve|fs|ves)>|<administration>', 'admin'],
-  ['<réceptionnistes>', 'receptionists'], ['<réceptionniste>', 'receptionist'], ['<caristes>', 'forklift operators'], ['<cariste>', 'forklift operator'], ['<chariots? élévateurs?>', 'forklift'],
+  ['<réceptionnistes>', 'receptionists'], ['<réceptionniste>', 'receptionist'], ['<teneurs de livres>|<teneuses de livres>', 'bookkeepers'], ['<teneur de livres>|<teneuse de livres>', 'bookkeeper'], ['<tenue de livres>', 'bookkeeping'],
+  ['<impôts?>|<fiscalité>|<déclarations? de revenus>', 'tax'], ['<adjointe?s? de direction>', 'executive assistant'], ['<contrôleurs>|<contrôleuses>', 'controllers'], ['<contrôleur>|<contrôleuse>', 'controller'], ['<accueil>', 'reception'], ['<caristes>', 'forklift operators'], ['<cariste>', 'forklift operator'], ['<chariots? élévateurs?>', 'forklift'],
   ['<menuisiers>|<charpentiers>', 'carpenters'], ['<menuisier>|<charpentier>', 'carpenter'], ['<soudeurs>', 'welders'], ['<soudeur>', 'welder'], ['<soudure>', 'welding'],
   ['<électriciens>', 'electricians'], ['<électricien>', 'electrician'], ['<électricité>', 'electrical'], ['<mécaniciens>', 'mechanics'], ['<mécanicien>', 'mechanic'], ['<mécanique>', 'mechanical'],
   ['<plombiers>', 'plumbers'], ['<plombier>', 'plumber'], ['<plomberie>', 'plumbing'],
@@ -169,7 +170,14 @@ const BUTTONS_FR = {
   'What are the hours?': 'Quelles sont les heures?', 'What’s the pay?': 'Quel est le salaire?', 'What do I need?': 'De quoi ai-je besoin?',
   'What’s the job like?': "En quoi consiste l'emploi?", 'Similar jobs': 'Emplois semblables',
   '$18/hour': '18 $/heure', '$20/hour': '20 $/heure', '$25/hour': '25 $/heure',
+  // Accountant Staffing and Administrative Staffing
+  'I work with Accountant Staffing': 'Je travaille avec Accountant Staffing', 'I work with Administrative Staffing': 'Je travaille avec Administrative Staffing',
+  'Only temporary': 'Seulement temporaire', 'Accountant': 'Comptable', 'Bookkeeper': 'Teneur de livres', 'Tax': 'Impôts', 'Reception': 'Réception',
+  'HR': 'RH', 'Bookkeeping': 'Tenue de livres', 'An accountant': 'Un comptable', 'A bookkeeper': 'Un teneur de livres', 'A controller': 'Un contrôleur',
+  'A receptionist': 'Un réceptionniste', 'An administrative assistant': 'Un adjoint administratif', 'An executive assistant': 'Un adjoint de direction',
 };
+// "I work with ISL" (or with Accountant Staffing, Administrative Staffing): the worker button on each site
+const WORKER_RE = /^i work with (isl|integrated staffing|accountant staffing|administrative staffing|you)$/;
 const BUTTONS_EN = Object.fromEntries(Object.entries(BUTTONS_FR).map(([en, fr]) => [lower(fr), en]));
 const ROLE_WORDS_FR = { driver: 'chauffeur', 'forklift operator': 'cariste', labourer: 'journalier', 'general labourer': 'journalier', cook: 'cuisinier', cleaner: 'préposé à l’entretien', welder: 'soudeur', carpenter: 'charpentier', electrician: 'électricien', accountant: 'comptable', receptionist: 'réceptionniste', 'warehouse worker': 'préposé d’entrepôt', controller: 'contrôleur', manager: 'gestionnaire' };
 const buttonFr = (c) => BUTTONS_FR[c] || c.replace(/^How do I reach (.+)\?$/, 'Comment joindre $1?').replace(/^Show me (.+) jobs$/, (m, r) => `Voir les emplois : ${ROLE_WORDS_FR[r] || r}`);
@@ -236,7 +244,7 @@ const STOP = new Set(("i im i'm am a an the and or but for to of in on at by wit
   'instead area city town rural place places where everywhere nearby close closer us you your yes no okay ok thanks thank sure maybe right now ' +
   'seasonal days weeks months week month somewhere more next actually now then still asap urgent urgently hiring hire hired student students ' +
   'ticket licence license help apply level senior junior assistant international county prince saint john 2025 2026 heavy light duty skilled ' +
-  'general trade services service team member people staff employee employees place company').split(/\s+/));
+  'general trade services service team member people staff employee employees place company staffing integrated').split(/\s+/));
 
 // Everyday words people use, and what they mean in the job feed.
 //   kw:  words to look for in job titles and categories
@@ -250,7 +258,12 @@ const DRIVING = T('driving', ['driver'], ['Drivers']);
 const CLEANING = T('cleaning', ['cleaner', 'janitor', 'custodian'], [], 'General labour');
 const LABOUR = T('general labour', [], ['General labour']);
 const TRADES = T('skilled trades', [], ['Skilled trades']);
-const ACCOUNTING = T('accounting and finance', ['accounting', 'accounts', 'payroll', 'tax', 'financial', 'bookkeeper', 'controller'], [], 'Office and administration');
+const ACCOUNTING = T('accounting and finance', ['accounting', 'accountant', 'accounts', 'payroll', 'tax', 'financial', 'finance', 'bookkeeper', 'controller'], [], 'Office and administration');
+// Narrower than the whole field, so "bookkeeper" on Accountant Staffing finds bookkeepers, not every accountant
+// (wide: what to show when nothing that narrow is open)
+const ACCOUNTANT = { ...T('accountant', ['accountant', 'cpa'], [], 'Office and administration'), wide: ACCOUNTING };
+const BOOKKEEPING = { ...T('bookkeeping', ['bookkeeper', 'bookkeeping'], [], 'Office and administration'), wide: ACCOUNTING };
+const TAX = { ...T('tax', ['tax'], [], 'Office and administration'), wide: ACCOUNTING };
 const KITCHEN = T('kitchen', ['cook', 'kitchen', 'steward', 'dishwasher'], [], 'Hospitality');
 const HOSPITALITY = T('hospitality', [], ['Hospitality']);
 const MANAGEMENT = T('management', ['manager', 'supervisor', 'foreman', 'lead', 'director'], [], 'Professional and management');
@@ -273,8 +286,9 @@ const SYNONYMS = {
   plumber: T('plumbing', ['plumber', 'plumbing'], [], 'Skilled trades'), plumbing: T('plumbing', ['plumber', 'plumbing'], [], 'Skilled trades'),
   mechanic: T('mechanic', ['mechanic', 'mechanical', 'technician'], [], 'Skilled trades'), mechanical: T('mechanic', ['mechanic', 'mechanical', 'technician'], [], 'Skilled trades'),
   maintenance: T('maintenance', ['maintenance', 'technician', 'millwright'], [], 'Skilled trades'), technician: T('technician', ['technician'], [], 'Skilled trades'),
-  accounting: ACCOUNTING, accountant: ACCOUNTING, accountants: ACCOUNTING, finance: ACCOUNTING, financial: ACCOUNTING, bookkeeping: ACCOUNTING, bookkeeper: ACCOUNTING, cpa: ACCOUNTING, tax: ACCOUNTING,
-  payroll: T('payroll', ['payroll'], [], 'Office and administration'),
+  accounting: ACCOUNTING, finance: ACCOUNTING, financial: ACCOUNTING, accountant: ACCOUNTANT, accountants: ACCOUNTANT, cpa: ACCOUNTANT,
+  bookkeeping: BOOKKEEPING, bookkeeper: BOOKKEEPING, bookkeepers: BOOKKEEPING, tax: TAX, taxes: TAX,
+  payroll: { ...T('payroll', ['payroll'], [], 'Office and administration'), wide: ACCOUNTING },
   kitchen: KITCHEN, cook: KITCHEN, cooks: KITCHEN, cooking: KITCHEN, chef: KITCHEN, chefs: KITCHEN, culinary: KITCHEN, food: KITCHEN, dishwasher: KITCHEN, restaurant: KITCHEN,
   hospitality: HOSPITALITY, events: HOSPITALITY, event: HOSPITALITY, banquet: HOSPITALITY, server: HOSPITALITY, servers: HOSPITALITY, serving: HOSPITALITY,
   waiter: HOSPITALITY, waitress: HOSPITALITY, bartender: HOSPITALITY, catering: HOSPITALITY, hotel: HOSPITALITY,
@@ -382,6 +396,7 @@ function add(out, term) {
   out.fam.push(...term.fam.filter((f) => !out.fam.includes(f)));
   if (term.rel && !out.rel) out.rel = term.rel;
   if (term.entry) out.entry = true;
+  if (term.wide && !out.wide) out.wide = term.wide;
 }
 const hasTerms = (terms) => !!(terms && (terms.kw.length || terms.fam.length));
 const termLabel = (terms) => (terms?.labels.length ? terms.labels.slice(0, 2).join(' or ') : '');
@@ -434,6 +449,7 @@ const ROLES = [
   [/servers?|banquet staff|event staff/, 'event and banquet staff member', 'event and banquet staff'],
   [/cleaners?|janitors?|custodians?/, 'cleaner', 'cleaners'],
   [/receptionists?|front desk/, 'receptionist', 'receptionists'],
+  [/executive assistants?/, 'executive assistant', 'executive assistants'],
   [/admin(istrative)? (assistants?|staff|support)|office (assistants?|staff|admin)|admin/, 'administrative assistant', 'administrative staff'],
   [/data entry/, 'data entry clerk', 'data entry clerks'],
   [/customer service|call centre|call center|contact centre|csrs?/, 'customer service rep', 'customer service reps'],
@@ -525,9 +541,9 @@ const FAQ = [
   ['w-time', /\b(submit|send|enter|log|report|hand in|fill (in|out)) (my )?(hours|time|timecard|time card|timesheet|time sheet)\b|\btime ?(card|sheet)s?\b/],
   ['w-quit', /\bquit (my|the) (job|assignment|placement)\b|\b(leave|end|finish) my (assignment|placement)\b|\bi want to quit\b|\bresign\b/],
   ['w-portal', /\b(log ?in|sign ?in|password|portal)\b/],
-  ['w-general', /\b(i|i'?m|i am) (currently |already |now )?(work|working|placed|on (an )?assignment) (for|with|through|at|by) (isl|you|integrated|your (company|agency))\b|\bmy (assignment|placement)\b|\bi work with isl\b/],
+  ['w-general', /\b(i|i'?m|i am) (currently |already |now )?(work|working|placed|on (an )?assignment) (for|with|through|at|by) (isl|you|integrated|integrated staffing|accountant staffing|administrative staffing|your (company|agency))\b|\bmy (assignment|placement)\b|\bi work with isl\b/],
   // Checking a message is really from ISL
-  ['scam', /\b(scam|fake|legit|legitimate|fraud|phishing)\b|\bis (this|that|it) (really )?(you|real|from you)\b|\b(text|texted|message|messaged|email|emailed|whatsapp|telegram|called)\b.*\b(real|you guys|from you|from isl|from integrated)\b/],
+  ['scam', /\b(scam|fake|legit|legitimate|fraud|phishing)\b|\bis (this|that|it) (really )?(you|real|from you)\b|\b(text|texted|message|messaged|email|emailed|whatsapp|telegram|called)\b.*\b(real|you guys|from you|from isl|from integrated|from accountant staffing|from administrative staffing)\b/],
   // "Who's in charge of marketing?", "who do I talk to about partnerships?"
   ['who', /\bwho (is|are|'s|s) (the |your |isl'?s )?(ceo|president|owners?|boss|founders?|partners?|head|director|leader|leadership|manager|gm)\b|\bwho owns\b|\bwho\b.*\b(in charge|responsible|handles?|runs?|manages?|oversees?|looks after|leads?|deals with|takes care of|is the (head|director|manager|lead)|(do|should|can|would) i (talk|speak|reach out|go|write) to|(do|should|can|would) i (contact|email|call|ask)|to (talk|speak) to)\b|\b(in charge of|responsible for|head of|director of)\b|\b(contact|person|someone|somebody) (for|about|regarding|in charge of)\b/],
   // Reaching a person or an office
@@ -545,7 +561,7 @@ const FAQ = [
   ['e-payrolling', /\bpayroll(ing)? (for|services?|our)\b|\bhandle (our )?payroll\b|\bpayrolling\b|\bput (them|our staff|people) on your payroll\b/],
   ['e-existing', /\b(existing|current) (client|customer|account)\b|\bmy (rep|account manager|account rep)\b|\bour (rep|account|account manager)\b|\binvoices?\b|\bbilling\b|\bapprove (a |the )?(timesheet|time ?card|hours)\b/],
   // Jobs on ISL's own team
-  ['isljobs', /\b(jobs?|work(ing)?|careers?|positions?|openings?|employment) (at|for|with) (isl|integrated staffing|your (company|office|team|agency))( itself)?\b|\bjoin (your|the isl|isl'?s|the) team\b|\bwork for you guys\b|\bwork(ing)? at your (office|company)\b|\binternal (jobs|positions|openings)\b/],
+  ['isljobs', /\b(jobs?|work(ing)?|careers?|positions?|openings?|employment) (at|for|with) (isl|integrated staffing|accountant staffing|administrative staffing|your (company|office|team|agency))( itself)?\b|\bjoin (your|the isl|isl'?s|the) team\b|\bwork for you guys\b|\bwork(ing)? at your (office|company)\b|\binternal (jobs|positions|openings)\b/],
   // Everyone
   ['count', /\bhow many (jobs|openings|positions|postings|roles)\b/],
   ['apply', /\bhow (do|can) i apply\b|\bapply(ing)? (for|to)\b|\bapplication process\b|\bwhere (do|can) i apply\b/],
@@ -561,7 +577,7 @@ const FAQ = [
   ['recruiter', /\bdrug (test|testing|screen)|\bbackground check|\bcriminal (record|background) check|\bpolice check|\bhow (often|when) (do|will) (you|i|we) (get )?paid\b|\bpay ?day\b|\bhow long (does it|will it) take (to|for)\b|\bhow (old|young)\b|\bminimum age\b|\b(i'?m|i am) 1[3-7]\b/],
   ['interview', /\binterview\b.*\b(tips|advice|prepare|help|ready)\b|\bhow (do|should) i prepare\b/],
   ['newcomer', /\b(just )?(moved|arrived|came|immigrated) (here|to canada|to nova scotia|to new brunswick|to pei|to newfoundland|to halifax|to moncton|from)\b|\bnewcomer\b|\bnew to canada\b|\bimmigrant\b/],
-  ['about', /\bwhat (is|does) (isl|integrated staffing)|\bwho are you\b|\bwhat do you do\b|\bhow does (this|it|isl) work\b/],
+  ['about', /\bwhat (is|does) (isl|integrated staffing|accountant staffing|administrative staffing)|\bwho are you\b|\bwhat do you do\b|\bhow does (this|it|isl) work\b/],
   ['resumecheck', /\b(check|review|improve|fix|look at|rate|score|feedback on|help with) (my |a )?(resume|cv)\b|\b(resume|cv) (check|review|tips|help|feedback)\b/],
   ['jobad', /\b(check|review|improve|write|fix|feedback on|help with) (my |our |a |this )?(job )?(ad|advert|posting|job description)\b|\bjob (ad|posting) (check|review|help|feedback)\b/],
   ['resume', /\bsend (my|a) resume\b|\bgeneral appli|\b(drop off|bring( in)?|hand in) (my |a )?resume\b|\bresume\b/],
@@ -631,7 +647,7 @@ function dataQuestion(text, asked, context) {
 // ---------- Reading the conversation ----------
 // Walks every visitor message in order and builds up what we know.
 const freshSeek = () => ({ terms: null, unknownWork: '', attrs: [], minPay: null, place: null, employment: 'any', page: 0 });
-function readConversation(messages, context, vocab) {
+function readConversation(messages, context, vocab, directory) {
   const st = {
     mode: null,
     seek: freshSeek(),
@@ -686,7 +702,7 @@ function readConversation(messages, context, vocab) {
     if (st.dataQ) { st.dataPlace = place; continue; } // answered from data: doesn't change the search or the request
     if (faq === 'restart') { st.mode = null; st.seek = freshSeek(); st.hire = { role: null, place: null, service: null, start: null }; continue; }
     if (faq && faq.startsWith('w-')) { st.mode = st.mode === 'employer' ? st.mode : 'worker'; continue; }
-    st.named = peopleNamed(lower(plain)).length ? peopleNamed(lower(plain)) : peopleNamed(lower(typed));
+    st.named = peopleNamed(lower(plain), directory).length ? peopleNamed(lower(plain), directory) : peopleNamed(lower(typed), directory);
     if (st.named.length || faq === 'who' || faq === 'isljobs') continue;
     if (faq === 'scam' || faq === 'human' || faq === 'contact' || faq === 'officehours' || faq === 'officewhere' || faq === 'afterhours' || faq === 'count') continue;
     if (asked === 'worker-office' || asked === 'office-pick') continue; // picking an office, not a search
@@ -694,7 +710,7 @@ function readConversation(messages, context, vocab) {
     // Mode: the newest clear signal wins, so "actually I'm looking for work" switches.
     if (/^(i'?m hiring|i'?m an employer)$/.test(t.trim()) || (EMPLOYER_RE.test(t) && !/\bare you hiring\b/.test(t))) st.mode = 'employer';
     else if (/^(i'?m looking for work|find me a job)$/.test(t.trim()) || SEEKER_RE.test(t)) st.mode = 'seeker';
-    else if (/^i work with isl$/.test(t.trim())) st.mode = 'worker';
+    else if (WORKER_RE.test(t.trim())) st.mode = 'worker';
     else if (faq && faq.startsWith('e-')) st.mode = 'employer';
 
     if (st.mode === 'employer' || (!st.mode && asked?.startsWith('hire-'))) {
@@ -781,7 +797,7 @@ const TERM_FR = {
   hospitality: 'en hôtellerie et restauration', management: 'de gestion', IT: 'en TI', 'farm and harvest': 'agricoles', manufacturing: 'en fabrication',
   forklift: 'de cariste', inventory: 'en inventaire', receptionist: 'de réceptionniste', construction: 'en construction', carpentry: 'de charpentier-menuisier',
   electrical: 'd’électricien', welding: 'de soudeur', plumbing: 'de plombier', mechanic: 'de mécanicien', maintenance: 'd’entretien', technician: 'de technicien',
-  payroll: 'en paie', professional: 'professionnels', engineering: 'en génie', architecture: 'en architecture', 'HR and recruitment': 'en RH et recrutement',
+  payroll: 'en paie', accountant: 'de comptable', bookkeeping: 'de tenue de livres', tax: 'en fiscalité', professional: 'professionnels', engineering: 'en génie', architecture: 'en architecture', 'HR and recruitment': 'en RH et recrutement',
   landscaping: 'en aménagement paysager', 'waste and recycling': 'en gestion des déchets', security: 'en sécurité', sales: 'en vente', retail: 'en commerce de détail',
   healthcare: 'en santé', 'customer service': 'en service à la clientèle', 'entry-level': 'pour débutants', 'hands-on': 'manuels',
 };
@@ -804,7 +820,7 @@ const ROLE_FR = {
   millwright: ['mécanicien de chantier', 'mécaniciens de chantier'], technician: ['technicien', 'techniciens'], cook: ['cuisinier', 'cuisiniers'],
   dishwasher: ['plongeur', 'plongeurs'], 'event and banquet staff member': ['membre du personnel de banquet', 'personnel de banquet et d’événements'],
   cleaner: ['préposé à l’entretien', 'préposés à l’entretien'], receptionist: ['réceptionniste', 'réceptionnistes'],
-  'administrative assistant': ['adjoint administratif', 'personnel administratif'], 'data entry clerk': ['commis à la saisie de données', 'commis à la saisie de données'],
+  'administrative assistant': ['adjoint administratif', 'personnel administratif'], 'executive assistant': ['adjoint de direction', 'adjoints de direction'], 'data entry clerk': ['commis à la saisie de données', 'commis à la saisie de données'],
   'customer service rep': ['représentant du service à la clientèle', 'représentants du service à la clientèle'], bookkeeper: ['teneur de livres', 'teneurs de livres'],
   'payroll administrator': ['administrateur de la paie', 'administrateurs de la paie'], CFO: ['directeur financier', 'directeurs financiers'],
   controller: ['contrôleur', 'contrôleurs'], accountant: ['comptable', 'comptables'], engineer: ['ingénieur', 'ingénieurs'],
@@ -818,6 +834,9 @@ const frMoney = (s) => String(s || '')
   .replace(/\$\s?(\d{1,3}(?:,\d{3})*(?:\.\d+)?)/g, (m, n) => n.replace(/,/g, ' ').replace('.', ',') + ' $')
   .replace(/\/hour\b/g, '/heure').replace(/\/year\b/g, '/an').replace(/\s(per|an|a|\/)\s?(hour|hr)\b/gi, '/heure').replace(/\s(per|a)\s(year|annum)\b/gi, '/an').replace(/ to /g, ' à ');
 const LINKS_FR = {
+  'Job opportunities': 'Offres d’emploi', 'How temporary recruitment works': 'Fonctionnement du recrutement temporaire', 'How permanent recruitment works': 'Fonctionnement du recrutement permanent',
+  'Temporary recruitment': 'Recrutement temporaire', 'Permanent recruitment': 'Recrutement permanent', 'Integrated Staffing jobs': 'Emplois chez Integrated Staffing',
+  'Accountant Staffing jobs': 'Emplois chez Accountant Staffing', 'Administrative Staffing jobs': 'Emplois chez Administrative Staffing',
   'Send my resume': 'Envoyer mon CV', 'All open jobs': 'Tous les emplois ouverts', 'Find Work': 'Trouver un emploi', 'Our team': 'Notre équipe',
   'Check my resume': 'Vérifier mon CV', 'Pay on our open jobs': 'Salaire de nos emplois ouverts', 'Advice on our Learn page': 'Conseils sur notre page Apprendre',
   'How contract staffing works': 'Fonctionnement du personnel contractuel', 'How direct hire works': 'Fonctionnement de l’embauche directe',
@@ -843,41 +862,102 @@ const TOPIC_FR = {
   finance: 'des finances', 'direct hire': 'de l’embauche directe', operations: 'des opérations', 'corporate services': 'des services corporatifs', 'the front desk': 'de l’accueil',
 };
 
-// What to say to someone already working through ISL, before handing them to their office
+// What to say to someone already working through the brand ({us} is its name), before handing them to their office
 const WORKER_REPLIES = {
-  'w-hurt': ['I’m sorry you were hurt. If it’s serious, call 911 first. Then tell your supervisor on site and call your ISL office right away, so the injury can be reported.',
-    'Je suis désolé que vous vous soyez blessé. Si c’est grave, appelez d’abord le 911. Ensuite, avisez votre superviseur sur place et appelez votre bureau ISL tout de suite, pour que la blessure soit déclarée.'],
-  'w-absent': ['Thanks for letting us know. Please call your ISL office as soon as you can, before your shift if possible, so they can let the site know.',
-    'Merci de nous prévenir. Appelez votre bureau ISL le plus tôt possible, avant votre quart si vous le pouvez, pour qu’il avise le lieu de travail.'],
-  'w-pay': ['Sorry about that. Your ISL office can look into your pay and sort it out.', 'Désolé pour ce problème. Votre bureau ISL peut vérifier votre paie et régler la situation.'],
-  'w-tax': ['Your ISL office can help you get that.', 'Votre bureau ISL peut vous aider à l’obtenir.'],
-  'w-time': ['Your ISL office can walk you through sending in your hours.', 'Votre bureau ISL peut vous expliquer comment envoyer vos heures.'],
-  'w-quit': ['Please talk to your ISL office before you stop, so they can let the site know and help with what’s next.', 'Parlez à votre bureau ISL avant d’arrêter, pour qu’il avise le lieu de travail et vous aide pour la suite.'],
-  'w-portal': ['Your ISL office can help you sign in.', 'Votre bureau ISL peut vous aider à vous connecter.'],
-  'w-general': ['Your ISL office is the best place for anything about your assignment.', 'Votre bureau ISL est le meilleur endroit pour tout ce qui concerne votre affectation.'],
+  'w-hurt': ['I’m sorry you were hurt. If it’s serious, call 911 first. Then tell your supervisor on site and call your {us} office right away, so the injury can be reported.',
+    'Je suis désolé que vous vous soyez blessé. Si c’est grave, appelez d’abord le 911. Ensuite, avisez votre superviseur sur place et appelez votre bureau {us} tout de suite, pour que la blessure soit déclarée.'],
+  'w-absent': ['Thanks for letting us know. Please call your {us} office as soon as you can, before your shift if possible, so they can let the site know.',
+    'Merci de nous prévenir. Appelez votre bureau {us} le plus tôt possible, avant votre quart si vous le pouvez, pour qu’il avise le lieu de travail.'],
+  'w-pay': ['Sorry about that. Your {us} office can look into your pay and sort it out.', 'Désolé pour ce problème. Votre bureau {us} peut vérifier votre paie et régler la situation.'],
+  'w-tax': ['Your {us} office can help you get that.', 'Votre bureau {us} peut vous aider à l’obtenir.'],
+  'w-time': ['Your {us} office can walk you through sending in your hours.', 'Votre bureau {us} peut vous expliquer comment envoyer vos heures.'],
+  'w-quit': ['Please talk to your {us} office before you stop, so they can let the site know and help with what’s next.', 'Parlez à votre bureau {us} avant d’arrêter, pour qu’il avise le lieu de travail et vous aide pour la suite.'],
+  'w-portal': ['Your {us} office can help you sign in.', 'Votre bureau {us} peut vous aider à vous connecter.'],
+  'w-general': ['Your {us} office is the best place for anything about your assignment.', 'Votre bureau {us} est le meilleur endroit pour tout ce qui concerne votre affectation.'],
 };
 
 // ---------- Team members by name: "how do I reach Chance?" ----------
-const PROVINCE_OFFICE = { NS: 'halifax', NB: 'moncton', PE: 'charlottetown', NL: 'st-johns' };
 const escapeRe = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-function peopleNamed(t) {
+function peopleNamed(t, directory) {
   const asks = String.raw`(who is|who's|whos|reach|contact|call|email|e-mail|phone|text|talk to|speak to|speak with|talk with|get a hold of|get hold of|number for|message|is|ask for|looking for|connect me with|connect me to)`;
-  const full = DIRECTORY.filter((p) => new RegExp(`\\b${escapeRe(lower(p.name))}\\b`).test(t));
+  const full = directory.filter((p) => new RegExp(`\\b${escapeRe(lower(p.name))}\\b`).test(t));
   if (full.length) return full;
-  return DIRECTORY.filter((p) => {
+  return directory.filter((p) => {
     const f = escapeRe(lower(p.first));
     return new RegExp(`\\b${asks} ${f}\\b|\\b${f}'?s (email|phone|number|cell|extension|contact|line)\\b`).test(t);
   });
 }
-// A team member as a contact card
-const personCard = (p) => toContact({ person: { name: p.name, first: p.first, handles: [p.title, p.province === 'PE' ? 'PEI' : provinceName(p.province)].filter(Boolean).join(', '), phone: p.phone, email: p.email, photo: p.photo }, office: OFFICES[PROVINCE_OFFICE[p.province]] || OFFICES.halifax });
-const bySlug = (slug) => DIRECTORY.find((p) => p.slug === slug);
 
-// The five offices, one line each
-const OFFICE_LINES = Object.values(OFFICES).map((o) => `${o.city === 'Halifax' ? 'Halifax (Dartmouth)' : o.city}: ${o.phone}`).join('\n');
-const OFFICE_CHOICES = ['Halifax', 'Moncton', 'Saint John', 'Charlottetown', "St. John's"];
-// Opening hours, and who to call for something urgent outside them (the response coordinators, from the team data)
-const RESPONSE_LINES = DIRECTORY.filter((p) => /response coordinator/i.test(p.title) && p.phone).map((p) => `${p.name}: ${p.phone}`).join('\n');
+// ---------- The three brands ----------
+// One engine runs all three sites. What differs between them is in the brand's profile below:
+// its name, its offices and who takes which request, how it names its two services, its terms,
+// and the buttons it offers. ISL routes to named recruiters; Accountant Staffing and
+// Administrative Staffing route to the office that covers the province (routing.js).
+const LIVE = { isl: 'https://www.integratedstaffing.ca', as: 'https://www.accountantstaffing.ca', ads: 'https://www.administrativestaffing.ca' };
+// Each brand's live job board: what a sister company's referral links to
+const JOB_BOARD = { isl: LIVE.isl + '/find-work', as: LIVE.as + '/job-opportunities', ads: LIVE.ads + '/job-opportunities' };
+// Work that is ISL's, not the specialist brands': labour, warehouse, driving, trades, hospitality
+const ISL_FAMILIES = ['Drivers', 'Hospitality', 'Warehouse and logistics', 'Skilled trades', 'General labour'];
+const ISL_LABELS = new Set(['warehouse', 'forklift', 'inventory', 'driving', 'cleaning', 'construction', 'general labour', 'skilled trades', 'carpentry', 'electrical',
+  'welding', 'plumbing', 'mechanic', 'maintenance', 'technician', 'kitchen', 'hospitality', 'farm and harvest', 'landscaping', 'waste and recycling', 'manufacturing',
+  'security', 'healthcare', 'retail', 'hands-on']);
+const ISL_ROLES = new Set(['labourer', 'demolition labourer', 'forklift operator', 'warehouse worker', 'picker and packer', 'shipper and receiver', 'driver', 'welder',
+  'carpenter', 'electrician', 'millwright', 'technician', 'cook', 'dishwasher', 'event and banquet staff member', 'cleaner', 'security guard', 'landscaper', 'farm worker', 'mover']);
+const SPECIALIST_LABELS = { as: new Set(['accounting and finance', 'payroll', 'tax', 'bookkeeping', 'accountant']), ads: new Set(['office and admin', 'receptionist', 'customer service', 'HR and recruitment']) };
+
+function profileFor(key) {
+  if (key !== 'as' && key !== 'ads') {
+    return {
+      key: 'isl', name: 'Integrated Staffing', us: 'ISL', byPerson: true,
+      offices: OFFICES, route,
+      officeOf: (prov) => OFFICES[{ NS: 'halifax', NB: 'moncton', PE: 'charlottetown', NL: 'st-johns' }[prov]] || OFFICES.halifax,
+      officeChoices: ['Halifax', 'Moncton', 'Saint John', 'Charlottetown', "St. John's"],
+      // The office cities and the towns right around them (these don't need a "we cover it")
+      officeCities: ['halifax', 'dartmouth', 'bedford', 'sackville', 'lower sackville', 'burnside', 'cole harbour', 'timberlea', 'moncton', 'dieppe', 'riverview',
+        'saint john', 'quispamsis', 'rothesay', 'charlottetown', 'stratford', 'cornwall', "st. john's", 'mount pearl', 'paradise', 'conception bay south', 'torbay'],
+      directory: DIRECTORY, duties: DUTIES, teamPage: true,
+      // Response coordinators, from the team data: who to call for something urgent outside office hours
+      urgent: DIRECTORY.filter((p) => /response coordinator/i.test(p.title) && p.phone).map((p) => `${p.name}: ${p.phone}`).join('\n'),
+      temp: ['contract', 'contractuel', 'contractuels'], tempTitle: ['Contract', 'Contrat'], onlyTemp: 'Only contract', workerButton: 'I work with ISL',
+      paths: { contract: '/contract/', direct: '/direct-hire/' }, tempName: 'Contract staffing', directName: 'Direct hire',
+      howTemp: 'How contract staffing works', howDirect: 'How direct hire works', findWorkLabel: 'Find Work',
+      generalApply: SITE.base + SITE.generalApplyPath, payData: true, officePages: true,
+      seekKinds: null, // the biggest job families in the feed
+      hireRoles: ['General labourers', 'Warehouse staff', 'Office and admin', 'A permanent hire'],
+    };
+  }
+  const as = key === 'as';
+  const name = as ? 'Accountant Staffing' : 'Administrative Staffing';
+  return {
+    key, name, us: name, byPerson: false, since: as ? 2002 : 2006,
+    field: as ? ['accounting and finance professionals', 'des professionnels de la comptabilité et de la finance'] : ['administrative professionals', 'des professionnels de l’administration'],
+    offices: SPECIALIST_OFFICES, route: routeSpecialist, officeOf: specialistOffice,
+    officeChoices: ['Halifax', 'Moncton', "St. John's"],
+    officeCities: ['halifax', 'dartmouth', 'bedford', 'sackville', 'lower sackville', 'burnside', 'cole harbour', 'timberlea', 'moncton', 'dieppe', 'riverview',
+      "st. john's", 'mount pearl', 'paradise', 'conception bay south', 'torbay'],
+    // Josiah looks after marketing for all three brands. Everything else goes to the office for now:
+    // the team pages for these two brands aren't up yet.
+    directory: DIRECTORY.filter((p) => p.slug === 'josiah-yule'),
+    duties: DUTIES.filter((d) => ['marketing', 'clients', 'jobs'].includes(d.topic)), teamPage: false, urgent: '',
+    temp: ['temporary', 'temporaire', 'temporaires'], tempTitle: ['Temporary', 'Temporaire'], onlyTemp: 'Only temporary', workerButton: `I work with ${name}`,
+    paths: { contract: '/temporary-recruitment/', direct: '/permanent-recruitment/' }, tempName: 'Temporary recruitment', directName: 'Permanent recruitment',
+    howTemp: 'How temporary recruitment works', howDirect: 'How permanent recruitment works', findWorkLabel: 'Job opportunities',
+    generalApply: 'https://evoportalus.tracker-rms.com/AccountingStaffingAndAdministrativeStaffing/apply', // the Tracker RMS portal both brands share
+    payData: false, // the sample postings carry no pay yet (it comes with the Tracker RMS feed)
+    officePages: false,
+    seekKinds: as ? ['Accountant', 'Bookkeeper', 'Tax', 'Management'] : ['Office and admin', 'Reception', 'HR', 'Bookkeeping'],
+    hireRoles: as ? ['An accountant', 'A bookkeeper', 'A controller', 'A permanent hire'] : ['A receptionist', 'An administrative assistant', 'An executive assistant', 'A permanent hire'],
+    // Work this brand doesn't do, and the sister company that does: { key, name, what }
+    sisterFor(terms) {
+      const labels = terms?.labels || [];
+      const fam = [...(terms?.fam || []), terms?.rel].filter(Boolean);
+      if (labels.some((l) => ISL_LABELS.has(l)) || fam.some((f) => ISL_FAMILIES.includes(f))) return { key: 'isl', name: 'Integrated Staffing' };
+      const other = as ? 'ads' : 'as';
+      if (labels.some((l) => SPECIALIST_LABELS[other].has(l))) return { key: other, name: as ? 'Administrative Staffing' : 'Accountant Staffing' };
+      return null;
+    },
+  };
+}
 
 // =====================================================================
 // The engine. Give it the conversation; it gives back the next reply:
@@ -885,7 +965,22 @@ const RESPONSE_LINES = DIRECTORY.filter((p) => /response coordinator/i.test(p.ti
 // choices: quick replies (strings are sent as messages; {label, href} are links)
 // meta.lang: the conversation's language ('en' or 'fr'); the chat window follows it.
 // =====================================================================
-export function createEngine({ loadJobs, siteUrl = (path) => SITE.base + path }) {
+const ISL_ROUTE = route; // ISL's own routing, for referrals from its sister companies
+
+// brand: 'isl' (the default), 'as' (Accountant Staffing) or 'ads' (Administrative Staffing)
+export function createEngine({ loadJobs, siteUrl = (path) => SITE.base + path, brand = 'isl' }) {
+  const P = profileFor(brand);
+  const route = P.route; // who takes the call, the brand's way: by person (ISL) or by office
+  const OFFICES = P.offices;
+  const DUTIES = P.duties;
+  // The offices, one line each, and as buttons
+  const OFFICE_LINES = Object.values(OFFICES).map((o) => `${o.city === 'Halifax' ? 'Halifax (Dartmouth)' : o.city}: ${o.phone}`).join('\n');
+  const OFFICE_CHOICES = P.officeChoices;
+  const RESPONSE_LINES = P.urgent;
+  // A team member as a contact card
+  const personCard = (p) => toContact({ person: { name: p.name, first: p.first, handles: [p.title, p.province === 'PE' ? 'PEI' : provinceName(p.province)].filter(Boolean).join(', '), phone: p.phone, email: p.email, photo: p.photo }, office: P.officeOf(p.province) });
+  const bySlug = (slug) => P.directory.find((p) => p.slug === slug);
+  const workerText = (topic) => WORKER_REPLIES[topic].map((x) => x.replace(/\{us\}/g, P.us));
   const readJobs = loadJobs;
   // Resolve pay once per feed (the same array comes back while the cache is warm)
   const resolved = new WeakMap();
@@ -895,14 +990,14 @@ export function createEngine({ loadJobs, siteUrl = (path) => SITE.base + path })
     return resolved.get(raw);
   };
   const links = {
-    generalApply: SITE.base + SITE.generalApplyPath,
+    generalApply: P.generalApply,
     learn: siteUrl('/learn/'),
-    contract: siteUrl('/contract/'),
-    direct: siteUrl('/direct-hire/'),
+    contract: siteUrl(P.paths.contract),
+    direct: siteUrl(P.paths.direct),
     findWork: siteUrl('/find-work/'),
     contact: siteUrl('/contact/'),
     team: siteUrl('/team/'),
-    payTool: siteUrl('/learn/tools/pay-on-open-jobs/'),
+    payTool: P.payData ? siteUrl('/learn/tools/pay-on-open-jobs/') : '',
     resumeCheck: siteUrl('/learn/tools/resume-check/'),
     jobsReport: siteUrl('/learn/tools/jobs-report/'),
   };
@@ -916,11 +1011,15 @@ export function createEngine({ loadJobs, siteUrl = (path) => SITE.base + path })
     `Pour toute urgence en dehors de ces heures, nos coordonnateurs des demandes urgentes sont joignables jour et nuit :\n${RESPONSE_LINES}`) : '');
   const officeName = (office) => L(`Our ${office.city} office`, `Notre bureau de ${office.city}`);
   const whoName = (r) => (r.person ? r.person.first : officeName(r.office));
+  const spec = !P.byPerson; // Accountant Staffing or Administrative Staffing
+  const deFr = /^[aeiou]/i.test(P.us) ? `d’${P.us}` : `de ${P.us}`; // "d’ISL", "d’Accountant Staffing"
+  const findWorkFr = spec ? 'la page Offres d’emploi' : 'la page Trouver un emploi';
+  const nOffices = () => (FR ? numberFr(Object.keys(OFFICES).length) : numberWord(Object.keys(OFFICES).length));
 
   return async function respond(messages, context = {}) {
     const jobs = await loadJobs();
     const vocab = vocabularyFor(jobs);
-    const { st, asked } = readConversation(messages, context, vocab);
+    const { st, asked } = readConversation(messages, context, vocab, P.directory);
     FR = st.lang === 'fr';
     const seed = messages.filter((m) => m.role === 'user').length;
     const r = st.langSwitch ? languageTurn(st) : await answer(st, asked, context, jobs, seed);
@@ -961,7 +1060,7 @@ export function createEngine({ loadJobs, siteUrl = (path) => SITE.base + path })
   function languageTurn(st) {
     if (st.mode === 'employer') return { reply: L('Sure! Who do you need, and where?', 'Bien sûr! Je peux vous aider en français. De qui avez-vous besoin, et où?'), meta: { mode: 'employer', ask: 'hire-role' } };
     if (st.mode === 'seeker') return { reply: L('Sure! What kind of work are you looking for, and where?', 'Bien sûr! Je peux vous aider en français. Quel type de travail recherchez-vous, et où?'), meta: { mode: 'seeker', ask: 'seek-work' } };
-    return { reply: L('Sure! Are you looking for work, or hiring?', 'Bien sûr! Je peux vous aider en français. Cherchez-vous du travail, ou embauchez-vous?'), choices: ["I'm looking for work", "I'm hiring", 'I work with ISL'], meta: { ask: 'mode' } };
+    return { reply: L('Sure! Are you looking for work, or hiring?', 'Bien sûr! Je peux vous aider en français. Cherchez-vous du travail, ou embauchez-vous?'), choices: ["I'm looking for work", "I'm hiring", P.workerButton], meta: { ask: 'mode' } };
   }
 
   async function answer(st, asked, context, jobs, seed) {
@@ -974,7 +1073,7 @@ export function createEngine({ loadJobs, siteUrl = (path) => SITE.base + path })
       return { reply: L('Sure, let’s start fresh! ', 'Bien sûr, recommençons! ') + modeQ, choices: ["I'm looking for work", "I'm hiring"], meta: { ask: 'mode' } };
     }
     if (faq === 'hello' && !st.mode) {
-      return { reply: pick([L('Hi there! ', 'Bonjour! ') + modeQ, L('Hello! Are you here to find work, or to find people?', 'Bonjour! Êtes-vous ici pour trouver du travail, ou pour trouver des gens?')], seed), choices: ["I'm looking for work", "I'm hiring", 'I work with ISL'], meta: { ask: 'mode' } };
+      return { reply: pick([L('Hi there! ', 'Bonjour! ') + modeQ, L('Hello! Are you here to find work, or to find people?', 'Bonjour! Êtes-vous ici pour trouver du travail, ou pour trouver des gens?')], seed), choices: ["I'm looking for work", "I'm hiring", P.workerButton], meta: { ask: 'mode' } };
     }
     if (faq === 'thanks') {
       return {
@@ -992,15 +1091,15 @@ export function createEngine({ loadJobs, siteUrl = (path) => SITE.base + path })
       return { reply: L('I’m doing great, thanks for asking! ', 'Je vais très bien, merci de demander! ') + (st.mode ? L('Where were we?', 'Où en étions-nous?') : modeQ), choices: st.mode ? [] : ["I'm looking for work", "I'm hiring"], meta: { mode: st.mode, ask: st.mode ? asked : 'mode' } };
     }
     if (faq === 'bot') {
-      return { reply: L('I’m ISL’s virtual assistant, not a person. I can find open jobs for you, or connect you with the right recruiter if you’re hiring. For anything else, our offices are happy to help. What brings you here today?',
-        'Je suis l’assistant virtuel d’ISL, pas une personne. Je peux trouver des emplois ouverts pour vous, ou vous mettre en contact avec le bon recruteur si vous embauchez. Pour tout le reste, nos bureaux sont heureux de vous aider. Qu’est-ce qui vous amène aujourd’hui?'), choices: ["I'm looking for work", "I'm hiring", 'Contact an office'], meta: { mode: st.mode, ask: 'mode' } };
+      return { reply: L(`I’m ${P.us}’s virtual assistant, not a person. I can find open jobs for you, or connect you with the right ${P.byPerson ? 'recruiter' : 'office'} if you’re hiring. For anything else, our offices are happy to help. What brings you here today?`,
+        `Je suis l’assistant virtuel ${deFr}, pas une personne. Je peux trouver des emplois ouverts pour vous, ou vous mettre en contact avec ${P.byPerson ? 'le bon recruteur' : 'le bon bureau'} si vous embauchez. Pour tout le reste, nos bureaux sont heureux de vous aider. Qu’est-ce qui vous amène aujourd’hui?`), choices: ["I'm looking for work", "I'm hiring", 'Contact an office'], meta: { mode: st.mode, ask: 'mode' } };
     }
     if (faq === 'joke') {
       return { reply: L('I’m much better at finding jobs than telling jokes! ', 'Je suis bien meilleur pour trouver des emplois que pour raconter des blagues! ') + modeQ, choices: ["I'm looking for work", "I'm hiring"], meta: { mode: st.mode, ask: 'mode' } };
     }
     if (faq === 'upset') {
-      return { reply: L(`Sorry about that. I’m a simple assistant and I don’t understand everything yet. You can browse every opening on Find Work, or call an office and a person will help:\n${OFFICE_LINES}`,
-        `Désolé. Je suis un assistant simple et je ne comprends pas encore tout. Vous pouvez parcourir toutes les offres sur la page Trouver un emploi, ou appeler un bureau et une personne vous aidera :\n${OFFICE_LINES}`), choices: [{ label: 'Find Work', href: links.findWork }, 'Start over'], meta: meta() };
+      return { reply: L(`Sorry about that. I’m a simple assistant and I don’t understand everything yet. You can browse every opening on ${P.findWorkLabel}, or call an office and a person will help:\n${OFFICE_LINES}`,
+        `Désolé. Je suis un assistant simple et je ne comprends pas encore tout. Vous pouvez parcourir toutes les offres sur ${findWorkFr}, ou appeler un bureau et une personne vous aidera :\n${OFFICE_LINES}`), choices: [{ label: P.findWorkLabel, href: links.findWork }, 'Start over'], meta: meta() };
     }
 
     // A team member by name, or "who looks after ...?"
@@ -1008,10 +1107,10 @@ export function createEngine({ loadJobs, siteUrl = (path) => SITE.base + path })
     if (faq === 'who') return whoTurn(st);
 
     // People already working through ISL
-    if ((faq && faq.startsWith('w-')) || asked === 'worker-office' || /^i work with isl$/i.test(st.lastText.trim())) return workerTurn(st, asked);
+    if ((faq && faq.startsWith('w-')) || asked === 'worker-office' || WORKER_RE.test(lower(st.lastText).trim())) return workerTurn(st, asked);
     if (faq === 'scam') {
-      return { reply: L(`Good on you for checking. ISL never charges job seekers a fee, and never asks for banking details or a payment to apply or to start a job. If a message asks for either, don’t reply. To check whether it’s really us, call an office directly:\n${OFFICE_LINES}`,
-        `Bonne idée de vérifier. ISL ne demande jamais de frais aux chercheurs d’emploi, et ne demande jamais de coordonnées bancaires ni de paiement pour postuler ou commencer un emploi. Si un message demande l’un ou l’autre, n’y répondez pas. Pour vérifier si c’est vraiment nous, appelez directement un bureau :\n${OFFICE_LINES}`), choices: OFFICE_CHOICES, meta: meta({ ask: 'office-pick' }) };
+      return { reply: L(`Good on you for checking. ${P.us} never charges job seekers a fee, and never asks for banking details or a payment to apply or to start a job. If a message asks for either, don’t reply. To check whether it’s really us, call an office directly:\n${OFFICE_LINES}`,
+        `Bonne idée de vérifier. ${P.us} ne demande jamais de frais aux chercheurs d’emploi, et ne demande jamais de coordonnées bancaires ni de paiement pour postuler ou commencer un emploi. Si un message demande l’un ou l’autre, n’y répondez pas. Pour vérifier si c’est vraiment nous, appelez directement un bureau :\n${OFFICE_LINES}`), choices: OFFICE_CHOICES, meta: meta({ ask: 'office-pick' }) };
     }
     // Reaching an office: a named place gets that office's card, otherwise all five lines
     if (['human', 'contact', 'officehours', 'officewhere', 'afterhours'].includes(faq) || (asked === 'office-pick' && st.anyPlace) || /^contact an office$/i.test(st.lastText.trim())) return officeTurn(st, faq, asked);
@@ -1024,6 +1123,8 @@ export function createEngine({ loadJobs, siteUrl = (path) => SITE.base + path })
     if (faq === 'jobad') { st.mode = 'employer'; const t = employerTurn(st, asked, seed); return { ...t, reply: L('We can take that off your plate: we write the ad, post it, screen everyone who applies and send you the people worth meeting. ', 'Nous pouvons nous en charger : nous rédigeons l’annonce, la publions, présélectionnons chaque candidat et vous envoyons les personnes qui valent la peine d’être rencontrées. ') + t.reply }; }
     if (faq && faq.startsWith('e-')) return employerFaq(faq, st, asked);
     if (faq === 'price' && st.mode !== 'employer' && st.mode !== 'seeker') {
+      if (spec) return { reply: L('It’s always free for job seekers. Employers pay no upfront fees: you pay only if you hire one of our candidates. Temporary recruitment is one all-inclusive hourly rate that covers the contractor’s pay, employer EI and CPP, payroll and our fee. Permanent recruitment is a one-time fee based on the hire’s first-year compensation. Are you hiring?',
+        'C’est toujours gratuit pour les chercheurs d’emploi. Les employeurs n’ont aucuns frais initiaux : vous payez seulement si vous embauchez un de nos candidats. Le recrutement temporaire, c’est un seul taux horaire tout compris qui couvre le salaire du contractuel, les cotisations de l’employeur à l’AE et au RPC, la paie et nos frais. Le recrutement permanent, ce sont des frais uniques basés sur la rémunération de la première année. Embauchez-vous?'), choices: ["I'm hiring", "I'm looking for work"], meta: { ask: 'mode' } };
       return { reply: L('It’s always free for job seekers. For employers, contract staffing is one hourly rate per worker, with wages, payroll and workers’ compensation included, and a permanent search is one invoice, a percentage of the hire’s annual salary. The exact rate depends on the role. Are you hiring?',
         'C’est toujours gratuit pour les chercheurs d’emploi. Pour les employeurs, le personnel contractuel, c’est un seul taux horaire par travailleur, qui comprend le salaire, la paie et l’indemnisation des accidentés du travail, et une recherche permanente, c’est une seule facture, un pourcentage du salaire annuel de la personne embauchée. Le tarif exact dépend du poste. Embauchez-vous?'), choices: ["I'm hiring", "I'm looking for work"], meta: { ask: 'mode' } };
     }
@@ -1041,13 +1142,13 @@ export function createEngine({ loadJobs, siteUrl = (path) => SITE.base + path })
     }
     if (faq && !['more', 'elsewhere', 'otherwork', 'otherplace', 'newcomer', 'ack'].includes(faq) && !(faq === 'pay' && st.seek.minPay)) return seekerFaq(faq, st);
     if (faq === 'newcomer' && !hasTerms(st.seek.terms) && !st.seek.place) {
-      return { reply: L('Welcome! We’d love to help you find work. One thing to know first: to be placed through ISL, you need to be a Canadian citizen or a permanent resident. What kind of work are you looking for, and where?',
-        'Bienvenue! Nous serions ravis de vous aider à trouver du travail. Une chose à savoir d’abord : pour être placé par ISL, il faut être citoyen canadien ou résident permanent. Quel type de travail recherchez-vous, et où?'), choices: topFamilies(jobs), meta: { mode: 'seeker', ask: 'seek-work' } };
+      return { reply: L(`Welcome! We’d love to help you find work. One thing to know first: to be placed through ${P.us}, you need to be a Canadian citizen or a permanent resident. What kind of work are you looking for, and where?`,
+        `Bienvenue! Nous serions ravis de vous aider à trouver du travail. Une chose à savoir d’abord : pour être placé par ${P.us}, il faut être citoyen canadien ou résident permanent. Quel type de travail recherchez-vous, et où?`), choices: kindsFor(jobs), meta: { mode: 'seeker', ask: 'seek-work' } };
     }
     if (faq === 'otherplace') return { reply: L('No problem! Type the town or province you’d like to work in.', 'Pas de problème! Écrivez la ville ou la province où vous aimeriez travailler.'), meta: { mode: 'seeker', ask: 'seek-place' } };
     if (!st.understood) return fallback(st, asked, seed);
     if (!st.mode && !hasTerms(st.seek.terms) && !st.seek.place && !st.seek.attrs.length && !st.seek.minPay) {
-      return { reply: L('Happy to help! ', 'Avec plaisir! ') + modeQ, choices: ["I'm looking for work", "I'm hiring", 'I work with ISL'], meta: { ask: 'mode' } };
+      return { reply: L('Happy to help! ', 'Avec plaisir! ') + modeQ, choices: ["I'm looking for work", "I'm hiring", P.workerButton], meta: { ask: 'mode' } };
     }
     return seekerTurn(st, seed, jobs);
   }
@@ -1055,13 +1156,13 @@ export function createEngine({ loadJobs, siteUrl = (path) => SITE.base + path })
   // ---------------- Didn't understand ----------------
   function fallback(st, asked, seed) {
     if (asked === 'unclear') {
-      return { reply: L(`Sorry, I’m still not following. You can browse every opening on Find Work, or call an office and a person will help:\n${OFFICE_LINES}`,
-        `Désolé, je ne vous suis toujours pas. Vous pouvez parcourir toutes les offres sur la page Trouver un emploi, ou appeler un bureau et une personne vous aidera :\n${OFFICE_LINES}`), choices: [{ label: 'Find Work', href: links.findWork }, 'Find me a job', "I'm hiring"], meta: { mode: st.mode, ask: 'unclear2' } };
+      return { reply: L(`Sorry, I’m still not following. You can browse every opening on ${P.findWorkLabel}, or call an office and a person will help:\n${OFFICE_LINES}`,
+        `Désolé, je ne vous suis toujours pas. Vous pouvez parcourir toutes les offres sur ${findWorkFr}, ou appeler un bureau et une personne vous aidera :\n${OFFICE_LINES}`), choices: [{ label: P.findWorkLabel, href: links.findWork }, 'Find me a job', "I'm hiring"], meta: { mode: st.mode, ask: 'unclear2' } };
     }
     return {
       reply: pick([L('Sorry, I didn’t quite catch that. I can find you a job, help you hire, or point you to the right office.', 'Désolé, je n’ai pas bien compris. Je peux vous trouver un emploi, vous aider à embaucher ou vous diriger vers le bon bureau.'),
         L('Hmm, I’m not sure I follow. I can help you find work, hire staff, or reach one of our offices.', 'Hmm, je ne suis pas sûr de comprendre. Je peux vous aider à trouver du travail, à embaucher du personnel ou à joindre un de nos bureaux.')], seed),
-      choices: ['Find me a job', "I'm hiring", 'I work with ISL', 'Contact an office'],
+      choices: ['Find me a job', "I'm hiring", P.workerButton, 'Contact an office'],
       meta: { mode: st.mode, ask: 'unclear' },
     };
   }
@@ -1070,9 +1171,9 @@ export function createEngine({ loadJobs, siteUrl = (path) => SITE.base + path })
   function workerTurn(st, asked) {
     const topic = st.lastFaq?.startsWith('w-') ? st.lastFaq : st.lastMeta?.topic || 'w-general';
     const urgent = topic === 'w-hurt' || topic === 'w-absent';
-    const intro = asked === 'worker-office' ? L('Here’s your office:', 'Voici votre bureau :') : L(...WORKER_REPLIES[topic]);
+    const intro = asked === 'worker-office' ? L('Here’s your office:', 'Voici votre bureau :') : L(...workerText(topic));
     // A missed shift or an injury can happen at any hour: give the after-hours line too
-    const afterHours = urgent && asked !== 'worker-office' ? '\n' + hoursLine() + ' ' + urgentLine() : '';
+    const afterHours = urgent && asked !== 'worker-office' ? '\n' + [hoursLine(), urgentLine()].filter(Boolean).join(' ') : '';
     const place = asked === 'worker-office' ? placeFrom(st.lastText) : st.anyPlace;
     if (!place || place.outside) {
       return { reply: `${intro}${afterHours}\n${L('Which office do you work with?', 'Avec quel bureau travaillez-vous?')}`, choices: OFFICE_CHOICES, meta: { mode: 'worker', ask: 'worker-office', topic } };
@@ -1088,17 +1189,21 @@ export function createEngine({ loadJobs, siteUrl = (path) => SITE.base + path })
       return { reply: L(`We have ${nw(named.length)} people by that name: ${list(named.map((p) => `${p.name} (${p.title})`))}. Which one?`, `Nous avons ${nw(named.length)} personnes portant ce nom : ${listFr(named.map((p) => `${p.name} (${p.title})`))}. Laquelle?`), choices: named.map((p) => `How do I reach ${p.name}?`).slice(0, 4), meta: { mode: st.mode } };
     }
     const p = named[0];
-    return { reply: L(`${p.name} is our ${p.title}${p.province ? ` in ${p.province === 'PE' ? 'PEI' : provinceName(p.province)}` : ''}. Here’s how to reach ${p.first}:`, `${p.name} (${p.title}${p.province ? ', ' + provFr(p.province) : ''}). Voici comment joindre ${p.first} :`), contact: personCard(p), choices: [{ label: 'Our team', href: links.team }], meta: { mode: st.mode } };
+    return { reply: L(`${p.name} is our ${p.title}${p.province ? ` in ${p.province === 'PE' ? 'PEI' : provinceName(p.province)}` : ''}. Here’s how to reach ${p.first}:`, `${p.name} (${p.title}${p.province ? ', ' + provFr(p.province) : ''}). Voici comment joindre ${p.first} :`), contact: personCard(p), choices: P.teamPage ? [{ label: 'Our team', href: links.team }] : [], meta: { mode: st.mode } };
   }
   function whoTurn(st) {
-    const t = lower(st.lastPlain || st.lastText);
+    // "Who runs ADS?" is about the company, not about ads (marketing)
+    const t0 = lower(st.lastPlain || st.lastText);
+    const t = P.key === 'ads' ? t0.replace(/\bads\b/g, 'the company') : t0;
     const duty = DUTIES.find((d) => d.words.test(t));
+    const teamChoice = P.teamPage ? [{ label: 'Our team', href: links.team }] : [];
     const place = st.anyPlace;
     if (duty?.topic === 'clients' || (duty?.topic === 'the company' && /\bhir(e|ing)\b/.test(t))) {
       if (place) {
         const r = route({ audience: 'employer', service: 'contract', place });
         return { reply: r.person ? L(`${r.person.first} handles new client requests there.`, `${r.person.first} s’occupe des nouvelles demandes de clients dans cette région.`) : L(`${officeName(r.office)} handles those.`, `${officeName(r.office)} s’en occupe.`), contact: toContact(r), choices: ["I'm hiring"], meta: { mode: st.mode } };
       }
+      if (spec) return { reply: L('Each office takes requests for its own area: Halifax for Nova Scotia and PEI, Moncton for New Brunswick, and St. John’s for Newfoundland and Labrador. Where’s the work?', 'Chaque bureau reçoit les demandes de sa région : Halifax pour la Nouvelle-Écosse et l’Île-du-Prince-Édouard, Moncton pour le Nouveau-Brunswick, et St. John’s pour Terre-Neuve-et-Labrador. Où se trouve le travail?'), choices: ['Nova Scotia', 'New Brunswick', 'PEI', 'Newfoundland and Labrador'], meta: { mode: 'employer', ask: 'hire-place' } };
       return { reply: L('It depends on where the work is. Meg looks after Nova Scotia, Kelli New Brunswick, Chance PEI and everywhere outside Atlantic Canada, and Crystal Newfoundland and Labrador. Zowie leads permanent searches everywhere. Where’s the work?',
         'Cela dépend de l’endroit où se trouve le travail. Meg s’occupe de la Nouvelle-Écosse, Kelli du Nouveau-Brunswick, Chance de l’Île-du-Prince-Édouard et de tout ce qui est hors du Canada atlantique, et Crystal de Terre-Neuve-et-Labrador. Zowie dirige les recherches permanentes partout. Où se trouve le travail?'), choices: ['Nova Scotia', 'New Brunswick', 'PEI', 'Newfoundland and Labrador', 'Elsewhere in Canada'], meta: { mode: 'employer', ask: 'hire-place' } };
     }
@@ -1108,13 +1213,14 @@ export function createEngine({ loadJobs, siteUrl = (path) => SITE.base + path })
     }
     const people = (duty?.people || []).map(bySlug).filter(Boolean);
     if (!people.length) {
+      if (!P.teamPage) return { reply: L('I’m not sure who looks after that, but our Halifax office can point you to the right person.', 'Je ne sais pas qui s’occupe de cela, mais notre bureau de Halifax peut vous diriger vers la bonne personne.'), contact: toContact({ person: null, office: OFFICES.halifax }), meta: { mode: st.mode } };
       return { reply: L('I’m not sure who looks after that. Our team page lists everyone with their role, or our Halifax office can point you to the right person.', 'Je ne sais pas qui s’occupe de cela. Notre page Équipe présente tout le monde avec son rôle, ou notre bureau de Halifax peut vous diriger vers la bonne personne.'), contact: toContact({ person: null, office: OFFICES.halifax }), choices: [{ label: 'Our team', href: links.team }], meta: { mode: st.mode } };
     }
     if (people.length > 1) {
       return { reply: L(`ISL is led by its two Partners, ${people[0].name} and ${people[1].name}. Here’s how to reach ${people[0].first}:`, `ISL est dirigée par ses deux associés, ${people[0].name} et ${people[1].name}. Voici comment joindre ${people[0].first} :`), contact: personCard(people[0]), choices: [`How do I reach ${people[1].first}?`, { label: 'Our team', href: links.team }], meta: { mode: st.mode } };
     }
     const p = people[0];
-    return { reply: L(`${p.name}, our ${p.title}, looks after ${duty.topic}. Here’s how to reach ${p.first}:`, `${p.name} (${p.title}) s’occupe ${TOPIC_FR[duty.topic] || 'de cela'}. Voici comment joindre ${p.first} :`), contact: personCard(p), choices: [{ label: 'Our team', href: links.team }], meta: { mode: st.mode } };
+    return { reply: L(`${p.name}, our ${p.title}, looks after ${duty.topic}. Here’s how to reach ${p.first}:`, `${p.name} (${p.title}) s’occupe ${TOPIC_FR[duty.topic] || 'de cela'}. Voici comment joindre ${p.first} :`), contact: personCard(p), choices: teamChoice, meta: { mode: st.mode } };
   }
 
   // ---------------- Offices ----------------
@@ -1129,7 +1235,7 @@ export function createEngine({ loadJobs, siteUrl = (path) => SITE.base + path })
     }
     const intro = faq === 'human' ? L('Of course! I can’t put a call through from here, but our offices are happy to help:', 'Bien sûr! Je ne peux pas transférer d’appel d’ici, mais nos bureaux seront heureux de vous aider :')
       : faq === 'officehours' || faq === 'afterhours' ? `${hoursLine()}${urgentLine() ? '\n' + urgentLine() : ''}\n${L('Our offices:', 'Nos bureaux :')}`
-      : L('Here are our five offices:', 'Voici nos cinq bureaux :');
+      : L(`Here are our ${nOffices()} offices:`, `Voici nos ${nOffices()} bureaux :`);
     return { reply: `${intro}\n${OFFICE_LINES}\n${L('Tap one for its address.', 'Touchez-en un pour voir son adresse.')}`, choices: OFFICE_CHOICES, meta: { mode: st.mode, ask: 'office-pick' } };
   }
 
@@ -1141,7 +1247,7 @@ export function createEngine({ loadJobs, siteUrl = (path) => SITE.base + path })
     return {
       reply: L(`We have ${jobs.length} open jobs right now: ${list(sorted.map(([p, n]) => `${n} in ${p === 'PE' ? 'PEI' : provinceName(p)}`))}. What kind of work are you looking for?`,
         `Nous avons ${jobs.length} emplois ouverts en ce moment : ${listFr(sorted.map(([p, n]) => `${n} ${inProvFr(p)}`))}. Quel type de travail recherchez-vous?`),
-      choices: topFamilies(jobs), meta: { mode: st.mode === 'employer' ? 'employer' : 'seeker', ask: 'seek-work' },
+      choices: kindsFor(jobs), meta: { mode: st.mode === 'employer' ? 'employer' : 'seeker', ask: 'seek-work' },
     };
   }
   // The provinces with open jobs right now (most first), and "Other" to type any place
@@ -1151,7 +1257,8 @@ export function createEngine({ loadJobs, siteUrl = (path) => SITE.base + path })
     const label = (p) => (p === 'PE' ? 'PEI' : provinceName(p));
     return [...Object.entries(by).sort((a, b) => b[1] - a[1]).map(([p]) => label(p)).slice(0, 5), 'Other'];
   }
-  // The biggest job families in the feed, as tap-to-answer buttons
+  // The kinds of work to offer as buttons: the brand's own list, or the biggest job families in the feed
+  function kindsFor(jobs) { return P.seekKinds || topFamilies(jobs); }
   function topFamilies(jobs) {
     const by = {};
     for (const j of jobs) { const f = familyOf(j.title); if (f !== 'Other') by[f] = (by[f] || 0) + 1; }
@@ -1168,15 +1275,23 @@ export function createEngine({ loadJobs, siteUrl = (path) => SITE.base + path })
     const m = { mode: 'employer', ask: asked?.startsWith('hire-') ? asked : null, known: st.prevKnown };
     switch (faq) {
       case 'e-canada':
+        if (spec) return { reply: L('We recruit across Atlantic Canada, from offices in Halifax, Moncton and St. John’s. For a role elsewhere in Canada, our Halifax office can tell you what we can do. Who do you need, and where?', 'Nous recrutons dans tout le Canada atlantique, à partir de nos bureaux de Halifax, de Moncton et de St. John’s. Pour un poste ailleurs au Canada, notre bureau de Halifax peut vous dire ce que nous pouvons faire. De qui avez-vous besoin, et où?'), choices: P.hireRoles, meta: { mode: 'employer', ask: 'hire-role' } };
         return { reply: L('Yes! We place contract workers and run permanent searches anywhere in Canada. Our five offices cover Atlantic Canada, Chance takes contract requests from everywhere else, and Zowie leads permanent searches anywhere in the country. Who do you need, and where?',
           'Oui! Nous plaçons du personnel contractuel et menons des recherches permanentes partout au Canada. Nos cinq bureaux couvrent le Canada atlantique, Chance reçoit les demandes de personnel contractuel de partout ailleurs, et Zowie dirige les recherches permanentes partout au pays. De qui avez-vous besoin, et où?'), choices: ['General labourers', 'Warehouse staff', 'Office and admin', 'A permanent hire'], meta: { mode: 'employer', ask: 'hire-role' } };
       case 'e-howcontract':
+        if (spec) return { reply: L('We find, test and interview the contractor, and they stay on our payroll. You pay one all-inclusive hourly rate that covers their pay, employer EI and CPP, payroll and our fee. About one in four of our temporary assignments turns into a permanent hire.',
+          'Nous trouvons, évaluons et rencontrons le contractuel, qui reste sur notre liste de paie. Vous payez un seul taux horaire tout compris qui couvre son salaire, les cotisations de l’employeur à l’AE et au RPC, la paie et nos frais. Environ une affectation temporaire sur quatre mène à une embauche permanente.'), choices: [{ label: P.howTemp, href: links.contract }, ...keepGoing], meta: m };
         return { reply: L('We find, screen and place the worker, and they stay on our payroll. You pay one hourly rate per worker, with wages, payroll and workers’ compensation included. When the work is done, they move on, or you can hire them if it’s a fit.',
           'Nous trouvons, présélectionnons et plaçons le travailleur, qui reste sur notre liste de paie. Vous payez un seul taux horaire par travailleur, qui comprend le salaire, la paie et l’indemnisation des accidentés du travail. Quand le travail est terminé, la personne passe à autre chose, ou vous pouvez l’embaucher si c’est un bon choix.'), choices: [{ label: 'How contract staffing works', href: links.contract }, ...keepGoing], meta: m };
       case 'e-diff':
+        if (spec) return { reply: L('Temporary recruitment is for a set stretch of time: the contractor stays on our payroll and you pay one hourly rate. Permanent recruitment is a full search: the hire joins your payroll from day one, and you pay a one-time fee based on their first-year compensation, only if you hire. A temporary assignment can also turn into a permanent hire.',
+          'Le recrutement temporaire, c’est pour une période déterminée : le contractuel reste sur notre liste de paie et vous payez un seul taux horaire. Le recrutement permanent, c’est une recherche complète : la personne fait partie de votre liste de paie dès le premier jour, et vous payez des frais uniques basés sur sa rémunération de la première année, seulement si vous embauchez. Une affectation temporaire peut aussi mener à une embauche permanente.'), choices: [{ label: P.tempName, href: links.contract }, { label: P.directName, href: links.direct }, ...keepGoing], meta: m };
         return { reply: L('Contract is for a set stretch of time: the worker stays on our payroll and you pay one hourly rate. Direct hire is a permanent search: they join your payroll from day one, and you pay one invoice, a percentage of their annual salary. Contract can also turn into a hire if it’s a fit.',
           'Le contrat, c’est pour une période déterminée : le travailleur reste sur notre liste de paie et vous payez un seul taux horaire. L’embauche directe, c’est une recherche permanente : la personne fait partie de votre liste de paie dès le premier jour, et vous payez une seule facture, un pourcentage de son salaire annuel. Un contrat peut aussi mener à une embauche si c’est un bon choix.'), choices: [{ label: 'Contract staffing', href: links.contract }, { label: 'Direct hire', href: links.direct }, ...keepGoing], meta: m };
       case 'e-guarantee':
+        if (spec) return { reply: h.service === 'contract' || h.service === 'temp-to-perm'
+          ? L(`If a contractor doesn’t work out, we’ll find you a replacement, or you can end the contract. For permanent hires, there’s a six-month guarantee. ${whoName(r)} can walk you through the details:`, `Si un contractuel ne convient pas, nous vous trouvons un remplaçant, ou vous pouvez mettre fin au contrat. Pour les embauches permanentes, il y a une garantie de six mois. ${whoName(r)} peut vous expliquer les détails :`)
+          : L(`For permanent hires, yes: if the hire resigns or is let go within six months of starting, we find a suitable replacement at no extra cost. ${whoName(r)} can walk you through the details:`, `Pour les embauches permanentes, oui : si la personne démissionne ou est congédiée dans les six mois suivant son entrée en poste, nous trouvons un remplaçant convenable sans frais supplémentaires. ${whoName(r)} peut vous expliquer les détails :`), contact: toContact(r), choices: keepGoing, meta: m };
         return { reply: L(`For permanent hires, yes: if the hire doesn’t work out within 90 days, we replace them. ${whoName(r)} can walk you through the details:`, `Pour les embauches permanentes, oui : si l’embauche ne fonctionne pas dans les 90 jours, nous remplaçons la personne. ${whoName(r)} peut vous expliquer les détails :`), contact: toContact(r), choices: keepGoing, meta: m };
       case 'e-speed':
         return { reply: L(`It depends on the role and how many people you need. For anything urgent, calling is quickest. ${hoursLine()} ${whoName(r)} can tell you how soon:`, `Cela dépend du poste et du nombre de personnes. Pour une urgence, appeler est le plus rapide. ${hoursLine()} ${whoName(r)} peut vous dire dans quel délai :`), contact: toContact(r), choices: keepGoing, meta: m };
@@ -1193,19 +1308,20 @@ export function createEngine({ loadJobs, siteUrl = (path) => SITE.base + path })
   function seekerFaq(faq, st) {
     const meta = { mode: 'seeker' };
     const office = route({ audience: 'seeker', place: st.seek.place || st.anyPlace });
-    const kinds = ['Warehouse work', 'Office and admin', 'Driving', 'Trades'];
+    const kinds = P.seekKinds || ['Warehouse work', 'Office and admin', 'Driving', 'Trades'];
     switch (faq) {
       case 'apply':
         return { reply: L('It’s easy: each job card has an Apply button that opens the application for that role. If nothing fits yet, send your resume and a recruiter will reach out when something does.', 'C’est simple : chaque fiche d’emploi a un bouton Postuler qui ouvre le formulaire de ce poste. Si rien ne convient pour l’instant, envoyez votre CV et un recruteur vous contactera quand quelque chose correspondra.'), choices: [{ label: 'Send my resume', href: links.generalApply }, 'Show me jobs'], meta };
       case 'fees':
         return { reply: L('Not a cent! It’s completely free for job seekers. We never charge a fee, and we’ll never ask for banking details to apply.', 'Pas un sou! C’est entièrement gratuit pour les chercheurs d’emploi. Nous ne demandons jamais de frais, et nous ne vous demanderons jamais vos coordonnées bancaires pour postuler.'), choices: ['Show me jobs'], meta };
       case 'pay': case 'price':
+        if (!P.payData) return { reply: L('Pay is shared on each posting when the employer allows it, and your recruiter can tell you what any role pays.', 'Le salaire est indiqué sur chaque offre quand l’employeur le permet, et votre recruteur peut vous dire ce que paie n’importe quel poste.'), choices: ['Show me jobs'], meta };
         return { reply: L('Pay is listed on each job card when the employer has shared it. To see what our open jobs pay by role, try the pay tool.', 'Le salaire est indiqué sur chaque fiche quand l’employeur l’a communiqué. Pour voir ce que paient nos emplois ouverts selon le poste, essayez notre outil de salaires.'), choices: [{ label: 'Pay on our open jobs', href: links.payTool }, 'Show me jobs'], meta };
       case 'eligible-no':
-        return { reply: L('Thanks for asking before you apply. To be placed through ISL, you need to be a Canadian citizen or a permanent resident, so we can’t place people on a work or study permit, and we can’t sponsor permits. Once you have your permanent residence, we’d love to hear from you!',
-          'Merci de vous renseigner avant de postuler. Pour être placé par ISL, il faut être citoyen canadien ou résident permanent, donc nous ne pouvons pas placer les personnes qui ont un permis de travail ou d’études, et nous ne pouvons pas parrainer de permis. Quand vous aurez votre résidence permanente, nous serions ravis d’avoir de vos nouvelles!'), choices: ['Contact an office', 'Start over'], meta: { ...meta, ask: 'eligible' } };
+        return { reply: L(`Thanks for asking before you apply. To be placed through ${P.us}, you need to be a Canadian citizen or a permanent resident, so we can’t place people on a work or study permit, and we can’t sponsor permits. Once you have your permanent residence, we’d love to hear from you!`,
+          `Merci de vous renseigner avant de postuler. Pour être placé par ${P.us}, il faut être citoyen canadien ou résident permanent, donc nous ne pouvons pas placer les personnes qui ont un permis de travail ou d’études, et nous ne pouvons pas parrainer de permis. Quand vous aurez votre résidence permanente, nous serions ravis d’avoir de vos nouvelles!`), choices: ['Contact an office', 'Start over'], meta: { ...meta, ask: 'eligible' } };
       case 'eligible-ask':
-        return { reply: L('To be placed through ISL, you need to be a Canadian citizen or a permanent resident. If that’s you, you’re all set on that front! What kind of work are you looking for?', 'Pour être placé par ISL, il faut être citoyen canadien ou résident permanent. Si c’est votre cas, vous êtes en règle de ce côté-là! Quel type de travail recherchez-vous?'), choices: ["I'm a citizen or PR", 'Warehouse work', 'Office and admin', 'Trades'], meta: { ...meta, ask: 'seek-work' } };
+        return { reply: L(`To be placed through ${P.us}, you need to be a Canadian citizen or a permanent resident. If that’s you, you’re all set on that front! What kind of work are you looking for?`, `Pour être placé par ${P.us}, il faut être citoyen canadien ou résident permanent. Si c’est votre cas, vous êtes en règle de ce côté-là! Quel type de travail recherchez-vous?`), choices: ["I'm a citizen or PR", ...(P.seekKinds ? P.seekKinds.slice(0, 3) : ['Warehouse work', 'Office and admin', 'Trades'])], meta: { ...meta, ask: 'seek-work' } };
       case 'eligible-yes':
         return { reply: L('Great, you’re all set on that front! What kind of work are you looking for, and where?', 'Parfait, vous êtes en règle de ce côté-là! Quel type de travail recherchez-vous, et où?'), choices: kinds, meta: { ...meta, ask: 'seek-work' } };
       case 'permit':
@@ -1218,6 +1334,7 @@ export function createEngine({ loadJobs, siteUrl = (path) => SITE.base + path })
         return { reply: L('Good luck! Read the posting again and match your experience to what it asks for, have a couple of examples ready of work you’re proud of, and bring a question or two about the role. Your recruiter can tell you more about the employer, too.',
           'Bonne chance! Relisez l’offre et faites le lien entre votre expérience et ce qui est demandé, préparez quelques exemples de travail dont vous êtes fier, et apportez une ou deux questions sur le poste. Votre recruteur peut aussi vous en dire plus sur l’employeur.'), choices: ['Show me jobs', { label: 'Advice on our Learn page', href: links.learn }], meta };
       case 'about':
+        if (spec) return { reply: L(`We’re ${P.name}! Since ${P.since}, we’ve recruited ${P.field[0]} for temporary and permanent roles across Atlantic Canada, from offices in Halifax, Moncton and St. John's. What kind of work are you looking for?`, `Nous sommes ${P.name}! Depuis ${P.since}, nous recrutons ${P.field[1]} pour des postes temporaires et permanents dans tout le Canada atlantique, à partir de nos bureaux de Halifax, de Moncton et de St. John's. Quel type de travail recherchez-vous?`), choices: kinds, meta: { ...meta, ask: 'seek-work' } };
         return { reply: L('We’re Integrated Staffing! We place people in contract and permanent jobs, from five local offices across Atlantic Canada. What kind of work are you looking for?', 'Nous sommes Integrated Staffing! Nous plaçons des gens dans des emplois contractuels et permanents, à partir de cinq bureaux locaux dans le Canada atlantique. Quel type de travail recherchez-vous?'), choices: kinds, meta: { ...meta, ask: 'seek-work' } };
       case 'resume':
         return { reply: L('Good idea. Send your resume once, and a recruiter will reach out when a role fits.', 'Bonne idée. Envoyez votre CV une fois, et un recruteur vous contactera quand un poste correspondra.'), choices: [{ label: 'Send my resume', href: links.generalApply }, 'Show me jobs'], meta };
@@ -1241,7 +1358,7 @@ export function createEngine({ loadJobs, siteUrl = (path) => SITE.base + path })
         reply: st.lastFaq === 'otherwork' ? L('Sure! What kind of work would you like?', 'Bien sûr! Quel type de travail aimeriez-vous?')
           : pick([L(`Love to help! We have ${jobs.length} open jobs right now. What kind of work are you looking for, and where?`, `Avec plaisir! Nous avons ${jobs.length} emplois ouverts en ce moment. Quel type de travail recherchez-vous, et où?`),
             L(`Let’s find you something! We have ${jobs.length} open jobs right now. What kind of work, and which area?`, `Trouvons-vous quelque chose! Nous avons ${jobs.length} emplois ouverts en ce moment. Quel type de travail, et dans quelle région?`)], seed),
-        choices: topFamilies(jobs), meta: { ...meta, ask: 'seek-work' },
+        choices: kindsFor(jobs), meta: { ...meta, ask: 'seek-work' },
       };
     }
 
@@ -1271,13 +1388,13 @@ export function createEngine({ loadJobs, siteUrl = (path) => SITE.base + path })
     const ranked = [...nearby.sort(newest), ...others.sort(newest)];
 
     // How to describe it: "night-shift warehouse roles paying $25/hour or more" / "postes d’entrepôt de nuit payant 25 $/heure ou plus"
-    const adj = [...s.attrs.map((a) => ATTRS[a].label), s.employment === 'permanent' ? 'permanent' : s.employment === 'temporary' ? 'contract' : ''].filter(Boolean).join(' ');
+    const adj = [...s.attrs.map((a) => ATTRS[a].label), s.employment === 'permanent' ? 'permanent' : s.employment === 'temporary' ? P.temp[0] : ''].filter(Boolean).join(' ');
     const what = [adj, termLabel(terms)].filter(Boolean).join(' ');
     const fmtPay = (fr) => (s.minPay.unit === 'hour' ? (fr ? `${s.minPay.value} $/heure` : `$${s.minPay.value}/hour`) : (fr ? `${s.minPay.value.toLocaleString('fr-CA')} $ par année` : `$${s.minPay.value.toLocaleString('en-CA')} a year`));
     const payPhrase = s.minPay ? L(` paying ${fmtPay(false)} or more`, ` payant ${fmtPay(true)} ou plus`) : '';
     const rolesWord = (n) => {
       if (!FR) return `${what ? what + ' ' : ''}${n === 1 ? 'role' : 'roles'}`;
-      const typeFr = s.employment === 'permanent' ? (n === 1 ? 'permanent' : 'permanents') : s.employment === 'temporary' ? (n === 1 ? 'contractuel' : 'contractuels') : '';
+      const typeFr = s.employment === 'permanent' ? (n === 1 ? 'permanent' : 'permanents') : s.employment === 'temporary' ? (n === 1 ? P.temp[1] : P.temp[2]) : '';
       return [n === 1 ? 'poste' : 'postes', termFr(terms), ...s.attrs.map((a) => ATTR_FR[a]), typeFr].filter(Boolean).join(' ');
     };
     const where = s.place ? (FR ? ' ' + whereFr(s.place, true) : s.place.outside ? ` in ${s.place.label}` : city ? ` around ${city}` : ` in ${s.place.label}`) : '';
@@ -1287,9 +1404,19 @@ export function createEngine({ loadJobs, siteUrl = (path) => SITE.base + path })
     const choices = [];
     if (ranked.length > (s.page + 1) * PAGE) choices.push('Show more');
     if (s.employment !== 'permanent') choices.push('Only permanent');
-    if (s.employment !== 'temporary') choices.push('Only contract');
+    if (s.employment !== 'temporary') choices.push(P.onlyTemp);
     choices.push('Somewhere else');
 
+    // Work this brand doesn't do (warehouse work on Accountant Staffing): point to the sister company
+    const sister = !everywhere.length && P.sisterFor ? P.sisterFor(terms) : null;
+    if (sister) {
+      const label = termLabel(terms);
+      return {
+        reply: welcome + L(`${P.name} recruits ${P.field[0]}, so we don’t have ${label ? label + ' ' : ''}jobs. ${sister.name}, our sister company, does. You can see their open jobs here:`,
+          `${P.name} recrute ${P.field[1]}, alors nous n’avons pas d’emplois ${termFr(terms) || 'de ce type'}. ${sister.name}, notre entreprise sœur, en a. Vous pouvez voir leurs emplois ouverts ici :`),
+        choices: [{ label: `${sister.name} jobs`, href: JOB_BOARD[sister.key] }, 'Other kinds of work'], meta,
+      };
+    }
     // Nothing in the place they asked about: say so, and offer what's open elsewhere
     if (!ranked.length) {
       const none = (extra = '') => L(`I couldn’t find any ${rolesWord(2)}${payPhrase}${where}${extra} right now`, `Je n’ai trouvé aucun ${rolesWord(1)}${where}${payPhrase}${extra} en ce moment`);
@@ -1300,6 +1427,14 @@ export function createEngine({ loadJobs, siteUrl = (path) => SITE.base + path })
         const outside = s.place.outside && !jobs.some((j) => !ATLANTIC.includes(j.province)) ? L(' Our open jobs are in Atlantic Canada right now.', ' Nos emplois ouverts sont dans le Canada atlantique en ce moment.') : '';
         const elsewhere = parts.length === 1 ? L(`We do have ${parts[0]}.`, `Nous en avons ${parts[0]}.`) : L(`We do have ${nw(everywhere.length)} elsewhere: ${list(parts)}.`, `Nous en avons ${nw(everywhere.length)} ailleurs : ${listFr(parts)}.`);
         return { reply: `${welcome}${none()}${L(', sorry!', ', désolé!')}${outside} ${elsewhere}`, choices: ['Show me those', resume, 'Other kinds of work'], meta: { ...meta, ask: 'seek-widen' } };
+      }
+      // Nothing that narrow: the whole field ("no bookkeeping roles, but these accounting and finance roles")
+      const wide = terms?.wide ? jobs.filter((j) => fits(j, terms.wide) && typeOk(j) && (!s.place?.province || j.province === s.place.province)) : [];
+      if (wide.length && !s.attrs.length && !s.minPay) {
+        return {
+          reply: welcome + L(`I couldn’t find any ${rolesWord(2)}${where} right now, but these ${terms.wide.label} roles are close:`, `Je n’ai trouvé aucun ${rolesWord(1)}${where} en ce moment, mais ces postes ${TERM_FR[terms.wide.label]} s’en rapprochent :`),
+          jobs: wide.sort(newest).slice(0, PAGE).map((j) => toCard(j, '')), choices: [resume, 'Other kinds of work', 'Somewhere else'], meta: { ...meta, ask: 'seek-results' },
+        };
       }
       // Nothing exact: suggest the nearest family ("no receptionist roles, but these office roles")
       const rel = terms?.rel ? jobs.filter((j) => familyOf(j.title) === terms.rel && typeOk(j) && (!s.place?.province || j.province === s.place.province)) : [];
@@ -1353,8 +1488,8 @@ export function createEngine({ loadJobs, siteUrl = (path) => SITE.base + path })
 
     if (topic === 'apply') return { reply: L('Tap Apply on this page. It opens the application for this job, and it’s always free.', 'Touchez « Postuler » sur cette page. Le formulaire de cet emploi s’ouvre, et c’est toujours gratuit.'), choices: [{ label: 'Apply now', href: job.applyUrl }, 'What do I need?', 'Similar jobs'], meta };
     if (topic === 'type') {
-      const kind = job.employment === 'Permanent' ? ['permanent', 'permanent'] : job.employment === 'Temp to perm' ? ['temp-to-perm', 'temporaire menant à un poste permanent'] : ['contract', 'contractuel'];
-      return { reply: L(`It’s a ${kind[0]} job, in ${job.city}.`, `C’est un emploi ${kind[1]}, à ${job.city}.`), choices, meta };
+      const kind = job.employment === 'Permanent' ? ['permanent', 'permanent'] : job.employment === 'Temp to perm' ? ['temp-to-perm', 'temporaire menant à un poste permanent'] : [P.temp[0], P.temp[1]];
+      return { reply: L(`It’s ${/^[aeiou]/.test(kind[0]) ? 'an' : 'a'} ${kind[0]} job, in ${job.city}.`, `C’est un emploi ${kind[1]}, à ${job.city}.`), choices, meta };
     }
     if (topic === 'location') return { reply: L(`It’s in ${job.city}, ${prov}. The recruiter shares the exact site when you’re placed.`, `C’est à ${job.city}, ${prov}. Le recruteur vous donne l’adresse exacte une fois que vous êtes placé.`), choices, meta };
     if (topic === 'similar') {
@@ -1398,6 +1533,12 @@ export function createEngine({ loadJobs, siteUrl = (path) => SITE.base + path })
       : st.mode === 'employer' && st.hire.role && !st.hire.role.generic ? st.hire.role.many
       : st.lastMeta?.role || seekWords || (job ? job.title : '');
     const mode = st.mode || st.lastMeta?.mode || null;
+    if (!P.payData) {
+      const office = route({ audience: mode === 'employer' ? 'employer' : 'seeker', place: place || st.hire.place || st.seek.place });
+      return mode === 'employer'
+        ? { reply: L('Our open jobs don’t list pay yet, so I can’t give you a figure from them. The office below can tell you what the market is paying for the role, and I can work out what an hourly wage really costs you.', 'Nos emplois ouverts n’indiquent pas encore le salaire, alors je ne peux pas vous donner de chiffre. Le bureau ci-dessous peut vous dire ce que le marché paie pour ce poste, et je peux calculer ce que vous coûte vraiment un salaire horaire.'), contact: toContact(office), choices: ['What would one cost me?', ...(st.hire.role ? ['Back to my request'] : [])], meta: { mode } }
+        : { reply: L('Our open jobs don’t list pay yet. Your recruiter can tell you what any role pays before you apply.', 'Nos emplois ouverts n’indiquent pas encore le salaire. Votre recruteur peut vous dire ce que paie un poste avant que vous postuliez.'), contact: toContact(office), choices: ['Show me jobs'], meta: { mode } };
+    }
     if (!role) {
       return { reply: L('Which role? Tell me and I’ll show you what our open jobs pay.', 'Quel poste? Dites-le-moi et je vous montrerai ce que paient nos emplois ouverts.'), choices: ['Forklift operators', 'Drivers', 'General labourers', 'Office and admin'], meta: { mode, ask: 'pay-role' } };
     }
@@ -1472,6 +1613,12 @@ export function createEngine({ loadJobs, siteUrl = (path) => SITE.base + path })
 
     if (['price', 'fees', 'pay'].includes(st.lastFaq)) {
       const r = route({ audience: 'employer', service: h.service === 'direct' ? 'direct' : 'contract', place: h.place });
+      if (spec) return {
+        reply: h.service === 'direct'
+          ? L('Happy to explain. Permanent recruitment is a one-time fee based on the hire’s first-year compensation, and you pay it only if you hire one of our candidates. The office below can quote it for your role.', 'Avec plaisir. Le recrutement permanent, ce sont des frais uniques basés sur la rémunération de la première année, et vous les payez seulement si vous embauchez un de nos candidats. Le bureau ci-dessous peut vous donner un prix pour votre poste.')
+          : L('Happy to explain. Temporary recruitment is one all-inclusive hourly rate that covers the contractor’s pay, employer EI and CPP, payroll and our fee. The rate depends on the level of the role and the contractor’s experience, so the office below can quote it for you.', 'Avec plaisir. Le recrutement temporaire, c’est un seul taux horaire tout compris qui couvre le salaire du contractuel, les cotisations de l’employeur à l’AE et au RPC, la paie et nos frais. Le taux dépend du niveau du poste et de l’expérience du contractuel, alors le bureau ci-dessous peut vous donner un prix.'),
+        contact: toContact(r), meta: meta(asked),
+      };
       return {
         reply: h.service === 'direct'
           ? L('Happy to explain. A permanent search is one invoice, a percentage of the hire’s annual salary, agreed before the search starts. The person below can quote it for your role.', 'Avec plaisir. Une recherche permanente, c’est une seule facture, un pourcentage du salaire annuel de la personne embauchée, convenu avant le début de la recherche. La personne ci-dessous peut vous donner un prix pour votre poste.')
@@ -1485,13 +1632,23 @@ export function createEngine({ loadJobs, siteUrl = (path) => SITE.base + path })
       return {
         reply: asked === 'hire-role' ? L('No problem. What’s the job title, or the type of work?', 'Pas de problème. Quel est le titre du poste, ou le type de travail?')
           : pick([L('Happy to help you find someone! Who do you need, and how many?', 'Avec plaisir! De qui avez-vous besoin, et combien de personnes?'), L('Great, let’s find you the right people! Who do you need, and how many?', 'Parfait, trouvons les bonnes personnes! De qui avez-vous besoin, et combien?')], seed),
-        choices: ['General labourers', 'Warehouse staff', 'Office and admin', 'A permanent hire'],
+        choices: P.hireRoles,
         meta: meta('hire-role'),
       };
     }
     // 2. Where
     if (!h.place) {
       return { reply: ack + L('Where’s the work located?', 'Où se trouve le travail?'), choices: ['Nova Scotia', 'New Brunswick', 'PEI', 'Newfoundland and Labrador', 'Elsewhere in Canada'], meta: meta('hire-place') };
+    }
+    // Work this brand doesn't do (labourers on Accountant Staffing): Integrated Staffing, the sister company, does
+    if (spec && (h.role.free ? ISL_FAMILIES.includes(familyOf(h.role.one)) : ISL_ROLES.has(h.role.one))) {
+      const r = ISL_ROUTE({ audience: 'employer', service: h.service === 'direct' ? 'direct' : 'contract', place: h.place });
+      const them = FR && roleFr ? roleFr[1] : h.role.many;
+      return {
+        reply: ack + L(`${cap(them)} are outside what ${P.name} recruits for, but Integrated Staffing, our sister company, places them every day. ${r.person ? `${r.person.first} handles new client requests there:` : `Their ${r.office.city} office can help:`}`,
+          `Les ${them} ne font pas partie des postes que recrute ${P.name}, mais Integrated Staffing, notre entreprise sœur, en place tous les jours. ${r.person ? `${r.person.first} s’occupe des nouvelles demandes de clients dans cette région :` : `Son bureau de ${r.office.city} peut vous aider :`}`),
+        contact: toContact(r), choices: [{ label: 'Integrated Staffing', href: LIVE.isl }, 'Start over'], meta: meta('hire-done'),
+      };
     }
     // 3. Contract or permanent
     if (!h.service) {
@@ -1505,7 +1662,9 @@ export function createEngine({ loadJobs, siteUrl = (path) => SITE.base + path })
 
     // 5. Route to the right person
     const r = route({ audience: 'employer', service: service === 'direct' ? 'direct' : h.service === 'unsure' ? 'unsure' : 'contract', place: h.place });
-    const SERVICE = { direct: ['Permanent (direct hire)', 'Permanent (embauche directe)'], contract: ['Contract', 'Contrat'], 'temp-to-perm': ['Contract, with the option to hire', 'Contrat, avec possibilité d’embauche'], unsure: ['Not sure yet', 'Pas encore décidé'] }[h.service];
+    const SERVICE = (spec
+      ? { direct: ['Permanent', 'Permanent'], contract: ['Temporary', 'Temporaire'], 'temp-to-perm': ['Temporary, with the option to hire', 'Temporaire, avec possibilité d’embauche'], unsure: ['Not sure yet', 'Pas encore décidé'] }
+      : { direct: ['Permanent (direct hire)', 'Permanent (embauche directe)'], contract: ['Contract', 'Contrat'], 'temp-to-perm': ['Contract, with the option to hire', 'Contrat, avec possibilité d’embauche'], unsure: ['Not sure yet', 'Pas encore décidé'] })[h.service];
     const startFr = (s) => ({ 'As soon as possible': 'Dès que possible', 'In the next few weeks': 'Dans les prochaines semaines', 'Planning ahead': 'Planification à l’avance' }[s] || s.replace(/^In (\w+)$/, (m, mo) => `En ${MONTHS_FR[mo] || mo}`));
     const placeLabel = h.place.outside ? (FR ? cap(whereFr(h.place).replace(/^(à l’|à |en |au |dans les )/, '').replace(/^extérieur/, 'Hors')) : cap(h.place.label))
       : h.place.city ? `${h.place.city}, ${FR ? provFr(h.place.province) : provinceName(h.place.province)}` : FR ? cap(h.place.rural ? whereFr(h.place).replace(/^en /, '') : provFr(h.place.province)) : cap(h.place.label);
@@ -1527,8 +1686,15 @@ export function createEngine({ loadJobs, siteUrl = (path) => SITE.base + path })
     const action = { label: first ? `Send my request to ${first}` : `Send my request to ${r.office.city}`, href: siteUrl('/hire/?' + hireParams.toString()) };
 
     let reply;
-    const unsureToo = h.service === 'unsure' ? L(', and can help you choose between contract and permanent too', ', et peut aussi vous aider à choisir entre contrat et permanent') : '';
-    if (service === 'direct') {
+    const unsureToo = h.service === 'unsure' ? L(`, and can help you choose between ${P.temp[0]} and permanent too`, `, et peut aussi vous aider à choisir entre ${spec ? 'temporaire' : 'contrat'} et permanent`) : '';
+    if (spec) {
+      // The office that covers the province takes it (outside Atlantic Canada: Halifax, the head office)
+      const local = h.place.city && P.officeCities.includes(h.place.city.toLowerCase());
+      const task = service === 'direct' ? L(' will run the search and take it from here', ' mènera la recherche et prendra le relais') : L(' will take it from here', ' prendra le relais');
+      reply = h.place.outside ? L(`Our Halifax office, our head office, takes requests from outside Atlantic Canada${unsureToo}.`, `Notre bureau de Halifax, notre siège social, reçoit les demandes de l’extérieur du Canada atlantique${unsureToo}.`)
+        : local ? L(`Our ${r.office.city} office${task}${unsureToo}.`, `Notre bureau de ${r.office.city}${task}${unsureToo}.`)
+        : L(`Our ${r.office.city} office covers ${provinceName(h.place.province)} and${task}${unsureToo}.`, `Notre bureau de ${r.office.city} couvre ${inProvFr(h.place.province).replace(/^(en|au|à l’|à) ?/, (m) => ({ en: 'la ', au: 'le ', 'à l’': 'l’', à: '' })[m.trim()] ?? '')} et${task}${unsureToo}.`);
+    } else if (service === 'direct') {
       reply = L(`${first} leads our direct hire team and will take it from here.`, `${first} dirige notre équipe d’embauche directe et prendra le relais.`);
     } else if (h.place.outside) {
       reply = L(`${first || officeName(r.office)} takes contract requests from outside Atlantic Canada${unsureToo}.`, `${first || officeName(r.office)} reçoit les demandes de personnel contractuel de l’extérieur du Canada atlantique${unsureToo}.`);
@@ -1542,17 +1708,13 @@ export function createEngine({ loadJobs, siteUrl = (path) => SITE.base + path })
         : L(`Our ${r.office.city} office covers ${provinceName(h.place.province)}.`, `Notre bureau de ${r.office.city} couvre toute la province.`);
     }
     // A town without an office (Cape Breton, Fredericton, Gander...): say plainly that we cover it
-    // The office cities and the towns right around them (these don't need a "we cover it")
-    const OFFICE_CITIES = ['halifax', 'dartmouth', 'bedford', 'sackville', 'lower sackville', 'burnside', 'cole harbour', 'timberlea',
-      'moncton', 'dieppe', 'riverview', 'saint john', 'quispamsis', 'rothesay', 'charlottetown', 'stratford', 'cornwall',
-      "st. john's", 'mount pearl', 'paradise', 'conception bay south', 'torbay'];
-    const beyondOffice = h.place.city && !OFFICE_CITIES.includes(h.place.city.toLowerCase()) && !h.place.outside;
+    const beyondOffice = h.place.city && !P.officeCities.includes(h.place.city.toLowerCase()) && !h.place.outside;
     const opener = beyondOffice ? L(`Good news, we cover ${h.place.city}!`, `Bonne nouvelle, nous couvrons ${h.place.city}!`) : pick([L('Thanks, that’s everything I need!', 'Merci, j’ai tout ce qu’il me faut!'), L('Perfect, that’s all I need!', 'Parfait, c’est tout ce qu’il me faut!')], seed);
     return {
       reply: `${opener} ${reply}`,
       summary,
-      contact: { ...toContact(r, action), officeUrl: r.office?.key && service !== 'direct' && !h.place.outside ? siteUrl(`/offices/${r.office.key}/`) : '' },
-      choices: [{ label: service === 'direct' ? 'How direct hire works' : 'How contract staffing works', href: service === 'direct' ? links.direct : links.contract }, 'Start over'],
+      contact: { ...toContact(r, action), officeUrl: P.officePages && r.office?.key && service !== 'direct' && !h.place.outside ? siteUrl(`/offices/${r.office.key}/`) : '' },
+      choices: [{ label: service === 'direct' ? P.howDirect : P.howTemp, href: service === 'direct' ? links.direct : links.contract }, 'Start over'],
       meta: meta('hire-done'),
     };
   }

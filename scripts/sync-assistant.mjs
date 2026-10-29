@@ -40,6 +40,9 @@ const files = [
   ['assistant/demo-engine.js', 'demo-engine.js'],
   ['assistant/demo-mode.js', 'demo-mode.js'],
   ['assistant/data/jobs-snapshot.json', 'jobs-snapshot.json'],
+  // Accountant Staffing and Administrative Staffing: their saved sample postings (src/data/jobs.js reads the same files)
+  ['src/brands/jobs/as.json', 'jobs-as.json'],
+  ['src/brands/jobs/ads.json', 'jobs-ads.json'],
 ];
 const hash = createHash('sha256');
 for (const [from] of files) hash.update(readFileSync(from));

@@ -5,7 +5,7 @@ import { readFileSync } from 'node:fs';
 import { createEngine } from '../../public/assistant/demo-engine.js';
 
 const jobs = JSON.parse(readFileSync(process.argv[2] || new URL('../data/jobs-snapshot.json', import.meta.url)));
-const respond = createEngine({ loadJobs: async () => jobs, siteUrl: (p) => '/isl-sandbox' + p });
+let respond = createEngine({ loadJobs: async () => jobs, siteUrl: (p) => '/isl-sandbox' + p });
 
 let failures = 0;
 async function talk(name, lines, check, greetingMode, context = {}) {
@@ -168,6 +168,50 @@ await talk('FR: job page', ['Quel est le salaire?'], (r) => expect(fr(r) && /^Le
 await talk('FR: switch and back', ['Français', 'English'], (r) => expect(r.meta.lang === 'en' && /^Sure!/.test(r.reply), 'switches back to English'));
 await talk('FR: greeting language carries', ['asdfgh'], (r) => expect(fr(r) && /^(Désolé|Hmm, je)/.test(r.reply), 'French from the greeting'), null, {});
 await talk('EN: stays English', ['warehouse jobs in halifax'], (r) => expect(r.meta.lang === 'en' && /^Good news/.test(r.reply), 'English unchanged'));
+
+// ---- Accountant Staffing and Administrative Staffing: the same assistant, their own brand ----
+// They route to the office that covers the province, name their services "temporary" and
+// "permanent", and point work they don't do to the sister company that does.
+const sample = (b) => JSON.parse(readFileSync(new URL(`../../src/brands/jobs/${b}.json`, import.meta.url))).jobs;
+respond = createEngine({ loadJobs: async () => sample('as'), siteUrl: (p) => '/isl-sandbox/as' + p, brand: 'as' });
+await talk('AS: bot says who it is', ['are you a bot?'], (r) => expect(/Accountant Staffing’s virtual assistant/.test(r.reply) && r.choices.includes("I'm looking for work"), 'names the brand'));
+await talk('AS: job search', ['bookkeeper jobs in st johns'], (r) => expect(r.jobs?.length && r.jobs.every((j) => /Bookkeeper/.test(j.title)), 'finds the bookkeeper jobs'));
+await talk('AS: accounting jobs in Halifax', ['accounting jobs in Halifax'], (r) => expect(r.jobs?.length >= 2 && r.jobs.every((j) => /NS/.test(j.location)), 'accounting roles around Halifax'));
+await talk('AS: temporary only', ["I'm looking for work", 'Accountant', 'Only temporary'], (r) => expect(r.jobs?.every((j) => j.employment !== 'Permanent') && /temporary/.test(r.reply), 'temporary, in its own words'));
+await talk('AS: warehouse goes to ISL', ['warehouse jobs in halifax'], (r) => expect(/Integrated Staffing, our sister company/.test(r.reply) && r.choices.some((c) => c.href === 'https://www.integratedstaffing.ca/find-work'), 'points to ISL’s job board'));
+await talk('AS: reception goes to ADS', ['receptionist jobs in Moncton'], (r) => expect(/Administrative Staffing/.test(r.reply), 'points to ADS'));
+await talk('AS: employer, full flow', ["I'm hiring", 'A controller', 'New Brunswick', 'Permanent'],
+  (r) => expect(r.contact?.name === 'Moncton office' && r.contact.phone === '506-800-0074' && r.summary.some(([k, v]) => k === 'Type' && v === 'Permanent') && r.choices[0].label === 'How permanent recruitment works', 'Moncton office, permanent'));
+await talk('AS: employer, PEI goes to Halifax', ['we need a temporary accountant in Charlottetown asap'],
+  (r) => expect(r.contact?.name === 'Halifax office' && /we cover Charlottetown! Our Halifax office covers Prince Edward Island/.test(r.reply) && r.summary.some(([k, v]) => k === 'Type' && v === 'Temporary'), 'Halifax covers PEI'));
+await talk('AS: employer, labourers go to ISL', ['I need 3 labourers in Truro'], (r) => expect(/Integrated Staffing, our sister company/.test(r.reply) && r.contact?.name === 'Meg Antonick', 'ISL’s recruiter for Nova Scotia'));
+await talk('AS: fees', ['how much do you charge?'], (r) => expect(/no upfront fees/.test(r.reply) && /first-year compensation/.test(r.reply), 'the brand’s own terms'));
+await talk('AS: guarantee', ["I'm hiring", 'does it come with a guarantee?'], (r) => expect(/six months/.test(r.reply) && !/90 days/.test(r.reply), 'six months, not ISL’s 90 days'));
+await talk('AS: offices', ['where are your offices?'], (r) => expect(/three offices/.test(r.reply) && r.choices.length === 3 && /902-491-1301/.test(r.reply), 'its three offices'));
+await talk('AS: worker', ['I work with Accountant Staffing', 'Moncton'], (r) => expect(r.contact?.name === 'Moncton office', 'their office'));
+await talk('AS: worker hurt', ['I got hurt at work'], (r) => expect(/your Accountant Staffing office/.test(r.reply) && !/response coordinators/.test(r.reply), 'own office, no ISL numbers'));
+await talk('AS: payroll widens to accounting', ['payroll jobs'], (r) => expect(/accounting and finance roles are close/.test(r.reply) && r.jobs?.length, 'accounting roles, not office ones'));
+await talk('AS: pay', ['what do accountants make?'], (r) => expect(/don’t list pay yet/.test(r.reply) && !r.insight, 'says honestly there is no pay data'));
+await talk('AS: cost', ['what would a $30/hour employee really cost me?'], (r) => expect(r.insight?.figure && /true-cost/.test(r.insight.link.href), 'the cost calculator works'));
+await talk('AS: who, marketing', ["who's in charge of marketing?"], (r) => expect(r.contact?.name === 'Josiah Yule' && !r.choices?.length, 'Josiah, no team page link'));
+await talk('AS: who, the CEO', ['who is the CEO?'], (r) => expect(r.contact?.name === 'Halifax office' && !/team page/.test(r.reply), 'the Halifax office'));
+await talk('AS: about', ['what is accountant staffing?'], (r) => expect(/Since 2002/.test(r.reply) && /accounting and finance professionals/.test(r.reply), 'about the brand'));
+await talk('AS: not a citizen', ["I'm on a work permit"], (r) => expect(/placed through Accountant Staffing/.test(r.reply), 'the rule, in its name'));
+await talk('AS: apply', ['how do I apply?'], (r) => expect(r.choices.some((c) => /tracker-rms/.test(c.href || '')), 'the shared Tracker RMS portal'));
+await talk('AS FR: employer', ['Un comptable temporaire à Moncton', 'Dès que possible'], (r) => expect(fr(r) && r.contact?.name === 'Bureau de Moncton' && r.summary.some(([k, v]) => k === 'Type' && v === 'Temporaire'), 'French, temporary'), 'employer');
+await talk('AS FR: job search', ['Je cherche un emploi de teneur de livres'], (r) => expect(fr(r) && r.jobs?.length && r.jobs.every((j) => /Bookkeeper/.test(j.title)), 'French bookkeeper'));
+
+respond = createEngine({ loadJobs: async () => sample('ads'), siteUrl: (p) => '/isl-sandbox/ads' + p, brand: 'ads' });
+await talk('ADS: office jobs', ['office admin jobs'], (r) => expect(r.jobs?.length && /Administrative Staffing|open/.test(r.reply), 'finds office roles'));
+await talk('ADS: HR', ['HR jobs in Halifax'], (r) => expect(r.jobs?.some((j) => /Human Resources/.test(j.title)), 'HR manager'));
+await talk('ADS: accounting goes to AS', ['tax jobs in Moncton'], (r) => expect(/Accountant Staffing, our sister company/.test(r.reply) && r.choices.some((c) => c.href === 'https://www.accountantstaffing.ca/job-opportunities'), 'points to AS'));
+await talk('ADS: employer, executive assistant', ['An executive assistant in St. John’s', 'For a set time', 'In the next few weeks'],
+  (r) => expect(r.contact?.name === "St. John's office" && r.summary.some(([k, v]) => k === 'Role' && v === 'Executive assistant'), 'St. John’s office'), 'employer');
+await talk('ADS: employer, outside Atlantic', ["I'm hiring", 'A receptionist', 'Elsewhere in Canada', 'Permanent'], (r) => expect(r.contact?.name === 'Halifax office' && /head office/.test(r.reply), 'Halifax, the head office'));
+await talk('ADS: drivers go to ISL', ['we need 2 delivery drivers in Moncton'], (r) => expect(/Integrated Staffing/.test(r.reply) && r.contact?.name === 'Kelli Wetmore', 'ISL’s NB recruiter'));
+await talk('ADS: bookkeeper elsewhere, not a referral', ['bookkeeper jobs in Halifax'], (r) => expect(/Newfoundland and Labrador/.test(r.reply) && !/sister/.test(r.reply), 'offers its own job in NL'));
+await talk('ADS: who runs ADS', ['who runs ADS?'], (r) => expect(r.contact?.name === 'Halifax office', 'not mistaken for ads'));
+await talk('ADS: scam', ['is this text from administrative staffing real?'], (r) => expect(/Administrative Staffing never charges/.test(r.reply), 'own name'));
 
 console.log(failures ? `\n${failures} failed` : '\nall passed');
 if (failures) process.exit(1);
