@@ -8,6 +8,7 @@
 
 import { bios } from './bios.js';
 import { asTeam } from './team-as.js';
+import { adsTeam } from './team-ads.js';
 import { BRAND } from './site.js';
 
 const cdn = (path) => `https://images.squarespace-cdn.com/content/v1/691490c94119776708e69bbe/${path}`;
@@ -46,7 +47,7 @@ const people = [
 ];
 
 // Each person, with their title, province, contact details and bio from bios.js.
-// These are ISL's people. Accountant Staffing's are in team-as.js (with their bios).
-// TODO: Administrative Staffing's team, which shows an empty team (the offices) until then.
+// These are ISL's people. Accountant Staffing's and Administrative Staffing's are in team-as.js and
+// team-ads.js (with their bios).
 const islTeam = people.map((p) => ({ ...p, ...(bios[p.slug] || {}), role: bios[p.slug]?.title || p.role }));
-export const team = { isl: islTeam, as: asTeam }[BRAND] || [];
+export const team = { isl: islTeam, as: asTeam, ads: adsTeam }[BRAND] || [];

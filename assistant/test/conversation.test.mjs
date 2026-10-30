@@ -217,7 +217,9 @@ await talk('ADS: bookkeeper elsewhere, not a referral', ['bookkeeper jobs in Hal
 await talk('ADS: accountant hire stays with AS/ADS', ['we need a temporary accountant in Halifax asap'], (r) => expect(r.contact?.name === 'Halifax office' && !/Integrated Staffing/.test(r.reply), 'the shared office, not ISL'));
 await talk('ADS: hours, no after-hours line', ['what are your office hours?'], (r) => expect(/8:30 to 4:30/.test(r.reply) && !/around the clock|response coordinator/.test(r.reply), 'hours only'));
 await talk('ADS: not a citizen', ["I'm an international student"], (r) => expect(/placed through Administrative Staffing, you need to be a Canadian citizen or a permanent resident/.test(r.reply), 'same rule as ISL'));
-await talk('ADS: who runs ADS', ['who runs ADS?'], (r) => expect(r.contact?.name === 'Halifax office', 'not mistaken for ads'));
+await talk('ADS: who runs ADS', ['who runs ADS?'], (r) => expect(/four partners/.test(r.reply), 'the partners, not ads (marketing)'));
+await talk('ADS: a person by name', ['how do I reach Josephine?'], (r) => expect(r.contact?.name === 'Josephine Dalrymple' && r.contact.email === 'josephine@administrativestaffing.ca', 'Josephine'));
+await talk('ADS: marketing', ["who's in charge of marketing?"], (r) => expect(r.contact?.name === 'Josiah Yule' && r.contact.email === 'josiah@accountantstaffing.com', 'Josiah, AS/ADS email'));
 await talk('ADS: scam', ['is this text from administrative staffing real?'], (r) => expect(/Administrative Staffing never charges/.test(r.reply), 'own name'));
 
 console.log(failures ? `\n${failures} failed` : '\nall passed');

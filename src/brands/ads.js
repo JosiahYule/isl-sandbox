@@ -21,7 +21,7 @@ export const brand = {
   logoSize: [256, 86],
   favicon: '/brands/ads-favicon.svg',
   siteUrl: 'https://www.administrativestaffing.ca',
-  email: '',
+  email: 'info@accountantstaffing.com', // the address the live privacy policy gives (read October 30, 2026)
   resumeEmail: '',
   mainPhone: '902-491-1301',
   footerAbout: 'Atlantic Canada’s specialist recruitment firm for administrative professionals. Locally owned and operated.',

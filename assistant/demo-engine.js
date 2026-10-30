@@ -32,7 +32,7 @@
 import { toCard, SITE, stemText, placesFor, provinceCode } from './jobs.js';
 const PROVINCE_CODES = new Set(['NS', 'NB', 'PE', 'NL', 'QC', 'ON', 'MB', 'SK', 'AB', 'BC', 'YT', 'NT', 'NU']);
 import { placeFrom, route, toContact, provinceName, OFFICES, TOWN_NAMES, DUTIES, officeFor, SPECIALIST_OFFICES, specialistOffice, routeSpecialist } from './routing.js';
-import { DIRECTORY, DIRECTORY_AS } from './directory.js';
+import { DIRECTORY, DIRECTORY_AS, DIRECTORY_ADS } from './directory.js';
 import { payFor, payInsight, costFor, costInsight, jobAnswer } from './insights.js';
 import { familyOf } from './pay.js';
 import { resolveCompensation, compensationRates } from './compensation.js';
@@ -905,10 +905,10 @@ const ISL_ROLES = new Set(['labourer', 'demolition labourer', 'forklift operator
   'carpenter', 'electrician', 'millwright', 'technician', 'cook', 'dishwasher', 'event and banquet staff member', 'cleaner', 'security guard', 'landscaper', 'farm worker', 'mover']);
 const SPECIALIST_LABELS = { as: new Set(['accounting and finance', 'payroll', 'tax', 'bookkeeping', 'accountant']), ads: new Set(['office and admin', 'receptionist', 'customer service', 'HR and recruitment']) };
 
-// Who looks after what at Accountant Staffing (from the titles on its team page)
-const AS_DUTIES = {
+// Who looks after what at Accountant Staffing and Administrative Staffing (from the titles on their team pages)
+const SPECIALIST_DUTIES = {
   'the company': ['troy-yeo-cpa-ca', 'gillian-pendlebury', 'greg-white', 'ross-argante'], // the partners
-  finance: ['michaila-doiron'], operations: ['gillian-pendlebury'], 'the front desk': ['amber-antle'],
+  finance: ['michaila-doiron'], operations: ['gillian-pendlebury'], 'the front desk': ['amber-antle'], marketing: ['josiah-yule'],
 };
 
 function profileFor(key) {
@@ -941,14 +941,12 @@ function profileFor(key) {
     officeChoices: ['Halifax', 'Moncton', "St. John's"],
     officeCities: ['halifax', 'dartmouth', 'bedford', 'sackville', 'lower sackville', 'burnside', 'cole harbour', 'timberlea', 'moncton', 'dieppe', 'riverview',
       "st. john's", 'mount pearl', 'paradise', 'conception bay south', 'torbay'],
-    // Accountant Staffing: its own team (src/data/team-as.js, via directory.js), and who looks after
-    // what, from the titles on its team page. Administrative Staffing's team page isn't built yet, so
-    // there only Josiah (marketing for all three brands, at his AS/ADS address) is named; anything
-    // else goes to the Halifax office.
-    directory: as ? DIRECTORY_AS : DIRECTORY.filter((p) => p.slug === 'josiah-yule').map((p) => ({ ...p, email: 'josiah@accountantstaffing.com' })),
-    duties: DUTIES.filter((d) => ['marketing', 'clients', 'jobs', ...(as ? ['the company', 'finance', 'operations', 'the front desk'] : [])].includes(d.topic))
-      .map((d) => (as && AS_DUTIES[d.topic] ? { ...d, people: AS_DUTIES[d.topic] } : d)),
-    teamPage: as, urgent: '',
+    // Each brand's own team (src/data/team-as.js, team-ads.js, via directory.js: the same people),
+    // and who looks after what, from the titles on their team pages.
+    directory: as ? DIRECTORY_AS : DIRECTORY_ADS,
+    duties: DUTIES.filter((d) => ['marketing', 'clients', 'jobs', 'the company', 'finance', 'operations', 'the front desk'].includes(d.topic))
+      .map((d) => (SPECIALIST_DUTIES[d.topic] ? { ...d, people: SPECIALIST_DUTIES[d.topic] } : d)),
+    teamPage: true, urgent: '',
     temp: ['temporary', 'temporaire', 'temporaires'], tempTitle: ['Temporary', 'Temporaire'], onlyTemp: 'Only temporary', workerButton: `I work with ${name}`,
     paths: { contract: '/temporary-recruitment/', direct: '/permanent-recruitment/' }, tempName: 'Temporary recruitment', directName: 'Permanent recruitment',
     howTemp: 'How temporary recruitment works', howDirect: 'How permanent recruitment works', findWorkLabel: 'Job opportunities',
