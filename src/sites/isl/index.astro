@@ -20,13 +20,13 @@ const orgSchema = {
   sameAs: social.map((s) => s.href),
   department: offices.map((o) => ({ '@type': 'EmploymentAgency', name: `${brand.name} ${o.city}`, telephone: '+1-' + o.phone, address: o.address })),
 };
-// The "Now hiring" strip in the hero: the newest real postings
-const ticker = jobs.slice(0, 14);
+// The newest real postings, along the bottom of the hero
+const latest = jobs.slice(0, 3);
 
 ---
 <Base description="Contract and permanent staffing from five offices across Atlantic Canada. Search open jobs, or tell us who you need." schema={orgSchema}>
-  <!-- 1. HERO: ISL's own photo, the promise, a job search, and a strip of real open jobs -->
-  <HomeHero photo={{ src: photos.warehouse.src, position: '65% center' }} lines={['Workers in hours.', 'Hires that stay.']} lead={`Contract and permanent staffing across Atlantic Canada. Locally owned since ${brand.since}.`} ticker={ticker} />
+  <!-- 1. HERO: ISL's own photo, the promise, a job search, and the newest real openings -->
+  <HomeHero photo={{ src: photos.warehouse.src, position: '65% center' }} lines={['Workers in hours.', 'Hires that stay.']} lead={`Contract and permanent staffing across Atlantic Canada. Locally owned since ${brand.since}.`} latest={latest} />
 
   <!-- 2. WE RECRUIT. The live site's signature line, with three short lines beside it -->
   <WeRecruit />

@@ -1,17 +1,21 @@
 ---
 // HOMEPAGE HERO: the brand's photo across the full width, the promise over it, one way in for
-// each audience (a job search, and "Request talent"), and a strip of real open jobs.
+// each audience (a job search, and "Request talent"), and the newest real openings along the bottom.
 // Shared by all three brands' homepages, so they open the same way.
 //
 // <HomeHero photo={{ src, position }} lines={['Workers in hours.', 'Hires that stay.']} lead="..." />
 //   lines:  the headline, one line each (kept whole on wide screens)
-//   ticker: the jobs in the "Now hiring" strip; none (or too few to scroll) leaves the strip out
+//   latest: the newest open jobs, shown along the bottom edge (three on a computer, two on a phone);
+//           none leaves the row out
 //   long:   a longer headline (AS and ADS keep their live sites' wording): a size smaller, and it wraps
 //   findJob: the label over the job search (default: "Looking for work? Search N open jobs")
 import Photo from './Photo.astro';
 import { jobs, provinces } from '../data/jobs.js';
 import { url } from '../lib/url.js';
-const { photo, lines, lead, ticker = [], long = false, findJob } = Astro.props;
+const { photo, lines, lead, latest = [], long = false, findJob } = Astro.props;
+// Postings often carry the client or a code after a dash ("Construction Manager - NB Power",
+// "... Representative – Efficiency Group –CD"): the row shows the job, the posting has the rest
+const shortTitle = (t) => String(t).split(/\s+[-–—]\s*|\s*[-–—]\s+/)[0].replace(/\s*\/\s*/g, ' / ').trim();
 // One-tap shortcuts under the search: each province (or territory) with open jobs right now, busiest
 // first. Any province shows up as soon as the feed has a job there.
 const near = [...new Set(jobs.map((j) => j.province).filter(Boolean))]
@@ -40,43 +44,30 @@ const near = [...new Set(jobs.map((j) => j.province).filter(Boolean))]
       </div>
     </div>
 
-    {ticker.length > 0 && <div class="ticker" aria-label="Now hiring" data-ticker data-isl-live="ticker">
-      <p class="ticker-label"><span class="pulse" aria-hidden="true"></span>Now hiring</p>
-      <!-- Job links pause on hover or focus; the separate button also lets touch users pause and resume. -->
-      <button type="button" class="ticker-toggle" aria-pressed="false" data-ticker-toggle>
-        <svg class="i-pause" viewBox="0 0 16 16" aria-hidden="true"><rect x="3.5" y="3" width="3" height="10"/><rect x="9.5" y="3" width="3" height="10"/></svg>
-        <svg class="i-play" viewBox="0 0 16 16" aria-hidden="true"><path d="M5 3l8 5-8 5z"/></svg>
-        <span class="visually-hidden">Pause the job list</span>
-      </button>
-      <div class="ticker-track">
-        {[0, 1].map((copy) => (
-          <ul class="ticker-list" aria-hidden={copy === 1 ? 'true' : undefined}>
-            {ticker.map((j) => (
-              <li><a href={j.url} tabindex={copy === 1 ? -1 : undefined}><strong>{j.title.replace(/\s*\/\s*/g, ' / ')}</strong><span>{[j.city, j.province].filter(Boolean).join(', ')}</span><span>{j.pay || (j.payStatus === 'conflict' ? j.payLabel : '')}</span></a></li>
-            ))}
-          </ul>
-        ))}
+    <!-- The newest openings: still, small and quiet, so the headline and the search lead -->
+    {latest.length > 0 && <div class="latest" data-isl-live="latest" data-latest>
+      <div class="wrap latest-inner">
+        <p class="latest-label">Latest openings</p>
+        <ul class="latest-list">
+          {latest.slice(0, 3).map((j) => (
+            <li><a href={j.url}><strong>{shortTitle(j.title)}</strong><span>{[[j.city, j.province].filter(Boolean).join(', '), j.pay || (j.payStatus === 'conflict' ? j.payLabel : '')].filter(Boolean).join(' · ')}</span></a></li>
+          ))}
+        </ul>
+        <a class="latest-all" href={url('/find-work/')}>All {jobs.length} jobs <span aria-hidden="true">→</span></a>
       </div>
     </div>}
   </section>
 
 <script>
-  // The ticker's pause button: pressed = paused
-  const tk = document.querySelector<HTMLElement>('[data-ticker]');
-  // While the ticker runs along the bottom of the screen, the chat button sits just above it
-  // instead of covering the last posting (--isl-chat-lift is read by the assistant widget)
-  if (tk && 'IntersectionObserver' in window) {
+  // When the row of openings sits at the bottom of the screen, the chat button (when it's on) sits
+  // just above it instead of covering "All jobs" (--isl-chat-lift is read by the assistant widget)
+  const row = document.querySelector<HTMLElement>('[data-latest]');
+  if (row && 'IntersectionObserver' in window) {
     new IntersectionObserver(([e]) => {
       const covering = e.isIntersecting && e.boundingClientRect.bottom > innerHeight - 90;
       document.documentElement.style.setProperty('--isl-chat-lift', covering ? `${Math.ceil(innerHeight - e.boundingClientRect.top)}px` : '0px');
-    }, { threshold: [0, 0.25, 0.5, 0.75, 1] }).observe(tk);
+    }, { threshold: [0, 0.25, 0.5, 0.75, 1] }).observe(row);
   }
-  const tb = tk?.querySelector<HTMLButtonElement>('[data-ticker-toggle]');
-  tb?.addEventListener('click', () => {
-    const paused = tk!.classList.toggle('is-paused');
-    tb.setAttribute('aria-pressed', String(paused));
-    tb.querySelector('.visually-hidden')!.textContent = paused ? 'Play the job list' : 'Pause the job list';
-  });
 </script>
 
 <style>
@@ -123,37 +114,31 @@ const near = [...new Set(jobs.map((j) => j.province).filter(Boolean))]
   :global(.motion) .hero-bg :global(img) { transform: scale(1.08); transition: transform 2.6s var(--ease); }
   :global(.motion) .hero-bg.is-in :global(img) { transform: none; }
 
-  /* Now hiring: real postings scrolling along the bottom edge. Pauses on hover or focus. */
-  .ticker { position: relative; display: flex; min-width: 0; max-width: 100%; align-items: stretch; border-top: 1px solid rgb(255 255 255 / 0.16); background: var(--dark); }
-  /* Solid, not see-through: over a light patch of photo, translucent grey text failed contrast */
-  .ticker-label { flex: none; display: flex; align-items: center; gap: var(--s2); margin: 0; padding: 0 var(--s5) 0 var(--gutter); font-size: var(--fs-small); font-weight: var(--fw-bold); background: var(--direct); color: #fff; white-space: nowrap; }
-  .pulse { width: 8px; height: 8px; border-radius: 50%; background: #fff; }
-  :global(.motion) .pulse { animation: pulse 2s ease-out infinite; }
-  @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgb(255 255 255 / 0.7); } 70%, 100% { box-shadow: 0 0 0 8px rgb(255 255 255 / 0); } }
-  .ticker-track { display: flex; overflow: hidden; flex: 1; min-width: 0; mask-image: linear-gradient(90deg, transparent, #000 4%, #000 96%, transparent); }
-  .ticker-list { display: flex; flex: none; list-style: none; margin: 0; padding: 0; }
-  :global(.motion) .ticker-list { animation: ticker 70s linear infinite; }
-  /* Keep automatic pausing on the job links so focusing or hovering Play can resume movement. */
-  .ticker-track:hover .ticker-list, .ticker-track:focus-within .ticker-list, .ticker.is-paused .ticker-list { animation-play-state: paused; }
-  .ticker.is-paused .pulse { animation: none; }
-  /* Pause / play: only shown when the list actually moves */
-  .ticker-toggle { display: none; flex: none; place-items: center; width: 44px; border: 0; border-right: 1px solid rgb(255 255 255 / 0.16); background: var(--dark); color: #fff; cursor: pointer; }
-  :global(.motion) .ticker-toggle { display: grid; }
-  .ticker-toggle svg { width: 14px; height: 14px; fill: currentColor; }
-  .ticker-toggle .i-play, .ticker.is-paused .ticker-toggle .i-pause { display: none; }
-  .ticker.is-paused .ticker-toggle .i-play { display: block; }
-  .ticker-toggle:hover { background: #000; }
-  @keyframes ticker { to { transform: translateX(-100%); } }
-  .ticker-list a { display: flex; gap: var(--s3); align-items: baseline; padding: var(--s4) var(--s6) var(--s4) 0; margin-left: var(--s6); color: #fff; text-decoration: none; white-space: nowrap; font-size: var(--fs-small); border-left: 1px solid rgb(255 255 255 / 0.16); padding-left: var(--s6); margin-left: 0; }
-  .ticker-list a span { color: rgb(255 255 255 / 0.66); }
-  .ticker-list a:hover strong { text-decoration: underline; }
-  @media (prefers-reduced-motion: reduce) { .ticker-track { overflow-x: auto; } }
+  /* Latest openings: three postings in a quiet row along the bottom edge, over the photo's dark wash.
+     No box, no motion: a hairline, a small label in the gutter, then the jobs. */
+  .latest { border-top: 1px solid rgb(255 255 255 / 0.18); }
+  .latest-inner { display: grid; grid-template-columns: 9.5rem 1fr auto; align-items: center; gap: var(--s5) var(--s6); padding-block: var(--s5) var(--s5); }
+  .latest-label { margin: 0; font-size: var(--fs-small); color: rgb(255 255 255 / 0.72); }
+  .latest-list { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--s6); list-style: none; margin: 0; padding: 0; }
+  .latest-list a { display: grid; gap: 2px; color: #fff; text-decoration: none; font-size: var(--fs-small); line-height: 1.35; }
+  .latest-list strong { font-weight: var(--fw-bold); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .latest-list span { color: rgb(255 255 255 / 0.78); font-variant-numeric: tabular-nums; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .latest-list a:hover strong { text-decoration: underline; text-underline-offset: 0.2em; }
+  .latest-all { justify-self: end; font-size: var(--fs-small); font-weight: var(--fw-bold); color: #fff; text-decoration: underline; text-underline-offset: 0.25em; text-decoration-color: rgb(255 255 255 / 0.4); white-space: nowrap; }
+  .latest-all:hover { text-decoration-color: #fff; }
+  .latest-all span { display: inline-block; transition: transform 0.2s var(--ease); }
+  .latest-all:hover span { transform: translateX(3px); }
+  @media (max-width: 1100px) { .latest-list li:nth-child(3) { display: none; } .latest-list { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 
   @media (max-width: 900px) {
     .hero { min-height: 0; }
     .hero-bg::after { background: linear-gradient(0deg, color-mix(in srgb, var(--wash) 92%, transparent) 0%, color-mix(in srgb, var(--wash) 70%, transparent) 55%, color-mix(in srgb, var(--wash) 45%, transparent) 100%); }
     .hero-inner { padding-block: var(--s8) var(--s7); }
     .search-bar button { padding: 0 1.1rem; }
-    .ticker-label { padding-left: var(--s4); padding-right: var(--s4); }
+    /* Phones: the label, two openings one under the other, then the link */
+    .latest-inner { grid-template-columns: 1fr auto; gap: var(--s3) var(--s4); padding-block: var(--s5); }
+    .latest-label { grid-column: 1; }
+    .latest-all { grid-column: 2; grid-row: 1; }
+    .latest-list { grid-column: 1 / -1; grid-template-columns: 1fr; gap: var(--s3); }
   }
 </style>

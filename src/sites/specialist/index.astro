@@ -21,7 +21,7 @@ const orgSchema = {
   department: offices.map((o) => ({ '@type': 'EmploymentAgency', name: `${brand.name} ${o.city}`, telephone: '+1-' + o.phone, address: o.address })),
 };
 // A moving strip needs enough postings to fill it; with only a few, the search alone is cleaner
-const ticker = jobs.length >= 6 ? jobs.slice(0, 14) : [];
+const latest = jobs.length >= 3 ? jobs.slice(0, 3) : [];
 
 // The two services, permanent first (as on the live sites), with figures from their FAQ pages
 const svcs = [
@@ -33,7 +33,7 @@ const svcs = [
 ---
 <Base description={`${c.lead}`} schema={orgSchema}>
   <!-- 1. HERO -->
-  <HomeHero photo={images.hero} lines={c.h1} lead={c.lead} ticker={ticker} findJob={c.findJob} long />
+  <HomeHero photo={images.hero} lines={c.h1} lead={c.lead} latest={latest} findJob={c.findJob} long />
 
   <!-- 2. WHY CHOOSE US, then the two services -->
   <section class="section">

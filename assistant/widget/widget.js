@@ -282,7 +282,7 @@
     for (const [k, v] of Object.entries(brand.colors || {})) root.style.setProperty("--" + k, v);
     // The launcher always stays visible: a button that disappears while you scroll looks broken, and on a
     // job page it hid the "Ask about this job" button on arrival. Sticky bars at the bottom of the page
-    // (the jobs ticker, the phone Apply bar) lift it above themselves with --isl-chat-lift instead.
+    // (the homepage's latest openings, the phone Apply bar) lift it above themselves with --isl-chat-lift instead.
     // The one exception: the site's full-screen phone menu.
     document.addEventListener('isl:menu', (event) => { host.style.display = event.detail?.open ? 'none' : ''; });
     // What the page tells the backend: on a job page, which job it is
