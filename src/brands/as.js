@@ -39,7 +39,7 @@ export const brand = {
     ink: '#14233a', 'line-strong': '#14233a', 'ink-soft': '#556070',
     mist: '#f1f6fa', 'mist-deep': '#e4edf5',
   },
-  assistant: true,  // the job assistant chat (searches the sample postings until Tracker RMS is connected)
+  assistant: false, // the job assistant chat: PAUSED (see src/brands/isl.js)
   officePages: false,
 };
 

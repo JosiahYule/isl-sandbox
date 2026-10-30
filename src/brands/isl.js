@@ -24,7 +24,9 @@ export const brand = {
   loginUrl: 'https://integratedstaffing.myavionte.com/satellite/login?buildId=gye6ARhjPvM&appId=BOLD',
   // Colours: ISL blue is the default in src/styles/tokens.css, so nothing to override here
   colors: null,
-  assistant: true,   // the job assistant chat
+  // Paused October 30, 2026: the rule-based chat can't follow corrections or negations ("not permanent"),
+  // so it stays off until the AI version passes its tests. Set back to true to show it again; nothing was deleted.
+  assistant: false,  // the job assistant chat: PAUSED
   officePages: true, // a page for each office (/offices/halifax/ ...)
 };
 
