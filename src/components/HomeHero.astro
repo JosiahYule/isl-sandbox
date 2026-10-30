@@ -45,7 +45,9 @@ const near = [...new Set(jobs.map((j) => j.province).filter(Boolean))]
     </div>
 
     <!-- The newest openings: still, small and quiet, so the headline and the search lead -->
-    {latest.length > 0 && <div class="latest" data-isl-live="latest" data-latest>
+    <!-- data-isl-was: this row replaced the scrolling "ticker"; Squarespace code blocks pasted before
+         the change still hold the ticker, and isl.js swaps it for this row (src/squarespace/core.js) -->
+    {latest.length > 0 && <div class="latest" data-isl-live="latest" data-isl-was="ticker" data-latest>
       <div class="wrap latest-inner">
         <p class="latest-label">Latest openings</p>
         <ul class="latest-list">
@@ -117,6 +119,8 @@ const near = [...new Set(jobs.map((j) => j.province).filter(Boolean))]
   /* Latest openings: three postings in a quiet row along the bottom edge, over the photo's dark wash.
      No box, no motion: a hairline, a small label in the gutter, then the jobs. */
   .latest { border-top: 1px solid rgb(255 255 255 / 0.18); }
+  /* An old pasted ticker (Squarespace) stays hidden until isl.js swaps in the row above */
+  :global([data-isl-live$="~ticker"]) { display: none !important; }
   .latest-inner { display: grid; grid-template-columns: 9.5rem 1fr auto; align-items: center; gap: var(--s5) var(--s6); padding-block: var(--s5) var(--s5); }
   .latest-label { margin: 0; font-size: var(--fs-small); color: rgb(255 255 255 / 0.72); }
   .latest-list { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--s6); list-style: none; margin: 0; padding: 0; }

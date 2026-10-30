@@ -109,7 +109,8 @@ async function refreshLists() {
       const t = document.createElement('template');
       t.innerHTML = fresh.trim();
       const next = t.content.firstElementChild;
-      if (next && next.dataset.islLive === el.dataset.islLive) el.replaceWith(next);
+      // (or the part that replaced it: data-isl-was names the part an older pasted block may still hold)
+      if (next && (next.dataset.islLive === el.dataset.islLive || next.dataset.islWas === el.dataset.islLive)) el.replaceWith(next);
     }),
   ]);
 }

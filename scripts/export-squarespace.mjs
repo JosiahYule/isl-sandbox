@@ -206,7 +206,11 @@ function exportBrand(brand) {
     // Job lists and other job-based parts: the hourly build's copy is what isl.js swaps in
     main.querySelectorAll('[data-isl-live]').forEach((el) => {
       el.setAttribute('data-isl-live', `${p.key}~${el.getAttribute('data-isl-live')}`);
+      // A part that replaced an older one (data-isl-was) is also published under the old name, so a
+      // code block pasted before the change gets the new part instead of keeping the old one
+      if (el.hasAttribute('data-isl-was')) el.setAttribute('data-isl-was', `${p.key}~${el.getAttribute('data-isl-was')}`);
       writeFileSync(`${OUT}/live/${el.getAttribute('data-isl-live')}.html`, el.outerHTML);
+      if (el.hasAttribute('data-isl-was')) writeFileSync(`${OUT}/live/${el.getAttribute('data-isl-was')}.html`, el.outerHTML);
       // The pasted copy is replaced on load, so it doesn't need the search text behind each job (most of its size)
       el.querySelectorAll('[data-search]').forEach((j) => j.removeAttribute('data-search'));
     });
