@@ -7,6 +7,8 @@ import { brand, analytics } from '../data/site.js';
 import { url } from '../lib/url.js';
 ---
 <LegalPage title="Privacy" lead="What we collect on this site, why, and what you can ask us to do with it." updated="2026-10-22">
+  {brand.key !== 'isl' && <p>This page covers what this website collects. Our <a href={url('/privacy-policy/')}>privacy policy</a> covers how JMS Accountant Staffing Ltd., including {brand.name}, protects the personal information of everyone who uses its services.</p>}
+
   <h2>What we collect</h2>
   <ul>
     <li><strong>When you request talent:</strong> your name, work email, company and phone if you give them, where the work is and what you need. We use it to reply to your request and to keep in touch about it. We also record a request reference, campaign tags, the landing page and referring website so we can understand how enquiries reach us. If you accept analytics, a Google Analytics identifier can accompany the enquiry to connect it to later hiring outcomes.</li>

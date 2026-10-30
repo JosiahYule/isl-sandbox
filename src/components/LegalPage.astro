@@ -2,11 +2,12 @@
 // LEGAL PAGE: the frame for Privacy, Terms and Accessibility. A short intro, a draft notice
 // while ISL reviews the wording, then the page's sections as plain prose.
 // <LegalPage title="Privacy" lead="..." updated="2026-10-20">...sections...</LegalPage>
+// draft={false}: an approved document as it stands (AS and ADS's privacy policy), without the review notice
 import Base from '../layouts/Base.astro';
 import PageHero from './PageHero.astro';
 import { brand } from '../data/site.js';
-const { title, lead, description, updated } = Astro.props;
-const date = new Date(updated + 'T12:00:00').toLocaleDateString('en-CA', { month: 'long', day: 'numeric', year: 'numeric' });
+const { title, lead, description, updated, draft = true } = Astro.props;
+const date = updated && new Date(updated + 'T12:00:00').toLocaleDateString('en-CA', { month: 'long', day: 'numeric', year: 'numeric' });
 ---
 <Base title={title} description={description || lead}>
   <PageHero compact title={`${title}.`} lead={lead} />
@@ -14,7 +15,7 @@ const date = new Date(updated + 'T12:00:00').toLocaleDateString('en-CA', { month
     <div class="wrap">
       <div class="prose">
         <!-- TODO: remove this notice once ISL (and its lawyer, if needed) has approved the wording -->
-        <p class="draft">Draft for {brand.short}’s review. Last updated {date}.</p>
+        {draft && <p class="draft">Draft for {brand.short}’s review. Last updated {date}.</p>}
         <slot />
       </div>
     </div>

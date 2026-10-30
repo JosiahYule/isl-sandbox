@@ -11,11 +11,10 @@ import { team } from '../../data/team.js';
 import { BRAND } from '../../data/site.js';
 
 // Each live site's addresses (read in the browser, October 30, 2026) that differ from the new pages.
-// /, /employers, /job-seekers, /permanent-recruitment and /temporary-recruitment stay as they are.
+// /, /employers, /job-seekers, /permanent-recruitment, /temporary-recruitment and /privacy-policy stay as they are.
 const moved = [
   ['/job-opportunities', '/find-work/'], // the live sites' menu labels, kept as the new pages' names
   ['/our-team', '/team/'],
-  ['/privacy-policy', '/privacy/'],
   ...(BRAND === 'ads'
     ? [['/about-us', '/about/'], ['/contact-us', '/contact/'], ['/employers-1', '/employers/']] // ADS: and an unlisted copy of Employers
     : [['/employers1', '/employers/']]), // AS: About and Contact are already /about and /contact; an unlisted copy of Employers

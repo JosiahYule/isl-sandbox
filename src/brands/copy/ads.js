@@ -92,7 +92,8 @@ export const copy = {
     ],
   },
 
-  // Temporary Recruitment FAQ  (questions and answers EXACT; the live fees answer says "contract accountant")
+  // Temporary Recruitment FAQ  (questions and answers EXACT, except the fees answer: the live page says "contract
+  // accountant", copied from Accountant Staffing's; "temporary worker" as on the ADS Permanent FAQ, Josiah's call October 30)
   temporary: {
     title: 'Temporary recruitment FAQ',
     faq: [
@@ -104,7 +105,7 @@ export const copy = {
       ['How long does it take to fill a position?', 'As part of the registration process, candidates must pass a thorough pre-screening process including skills testing, a comprehensive interview and reference checking. Consequently, our contractors are ready to go at a moment’s notice and we are able to fill temporary positions very quickly.'],
       ['Can I determine the length of a contract?', 'Absolutely. Our contracts are designed to ensure you have complete flexibility in your staffing needs. While it helps the process to know the approximate length at the start of the contract, you are free to terminate the contract at any time, without penalty, should your needs change or extend the contract should the person continue to be available.'],
       ['Do contract employees ever become permanent?', 'Yes. In a significant number of our assignments, the contract employee is hired permanently by our client either during the contract or following its completion. In fact, many employers view the contract option as a good way of seeing if the person is a good long-term fit before making the decision to hire permanently.'],
-      ['Are there any upfront fees?', 'No. We work only on a contingency basis. Whether you require a contract accountant or would like to engage our services to complete a permanent search, you pay a fee only if you hire one of our candidates.'],
+      ['Are there any upfront fees?', 'No. We work only on a contingency basis. Whether you require a temporary worker or would like to engage our services to complete a permanent search, you pay a fee only if you hire one of our candidates.'],
       ['How much does the service cost?', 'On a temporary staffing basis, our fee is built into an hourly rate which includes all costs: the contractor’s salary, employer EI and CPP benefits, payroll processing costs and contract staffing fees. The hourly rate depends on the level of position and the individual contractor’s experience and skills.'],
       ['What happens if the contractor does not work out?', 'Occasionally a contractor does not work out or decides to move on to another position. If this happens, we will source new contractor candidates to consider as replacements. Alternatively, you may choose to end the contract.'],
     ],
