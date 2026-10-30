@@ -93,6 +93,40 @@ numbers, taken from the team data (anyone whose title is Response Coordinator), 
 
 Rules are read top to bottom and the first match wins.
 
+## Testing the chat (assistant/evals)
+
+The chat is paused on all three sites (`assistant: false` in `src/brands/`) until a version passes this test.
+
+`assistant/evals/cases.mjs` holds conversations with the outcome each must reach: the request it builds,
+who it routes to, which jobs it shows, what it says. The checks look at what the chat did, not its wording,
+so the rules engine and any AI model sit the same test. `node assistant/evals/run.mjs` runs it:
+
+```
+npm run eval                                                  the rules engine (free)
+ANTHROPIC_API_KEY=... npm run eval -- --target ai             the AI, Claude Haiku 5.5 by default
+ANTHROPIC_API_KEY=... npm run eval -- --target ai --model claude-sonnet-5-5 --repeat 3
+```
+
+Every run prints the pass rate by language and area, the critical failures, the slowest replies and, for the
+AI, the tokens used and an estimated cost, and saves the details in `assistant/evals/results/`.
+The AI runs through `_shared/converse.js`, the same code as the website's function, against the fixed postings
+in `test/fixtures/jobs.json`. Set a monthly spend limit in the Claude Console before using a key; a full run on
+Haiku costs cents.
+
+The bar before the chat goes back on (from the October 30 decision memo): no critical failures (a reversed
+request, an invented job or contact, a wrong safety answer, claiming a request was sent), and at least 95% of
+cases passing in English and in French, repeated a few times because AI answers vary. Then a staff-only pilot.
+Grow the cases from real misses: every one worth fixing becomes a case.
+
+Baseline, October 30: the rules engine passes 24 of 33, with 9 critical failures, all corrections and
+negations ("not permanent", "make that 5", "I can't work nights"). That's the number the AI has to beat.
+
+What the AI gets that the rules engine doesn't: each earlier reply comes with a note of what was on screen
+(the job cards in order, the request summary), so "the first one" and "make that 5" can be resolved;
+`search_jobs` takes `exclude` for what the visitor ruled out; `find_contact` keeps the length and notes
+(more than one place, a wage they mentioned) and is called again after a correction. When the model can't be
+reached (an outage, the spend limit), the visitor gets the offices and their numbers, never an error.
+
 ## The tools, in conversation
 
 The chat answers with the same figures as the website's tools, so the two never disagree:

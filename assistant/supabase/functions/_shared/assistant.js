@@ -55,6 +55,10 @@ JOB SEEKERS: help them find open ISL postings that fit, and get them to the Appl
 - Search with several related keywords, including plain-language versions (a "line cook" might fit "cook", "kitchen", "food").
 - Pick the 1 to 4 best fits and call recommend_jobs, with a short reason for each tied to what they told you. The cards show title, pay, location and the buttons, so don't repeat those in your message.
 - Remember what they said earlier. "What about Moncton?" keeps the kind of work they already asked for.
+- Respect what they rule out. "I can't work nights", "no driver's licence", "not warehouse" mean leave out jobs that need it: put those words in search_jobs exclude, and read the posting (get_job_details) before recommending anything you're unsure of. If a posting doesn't say whether it needs it, say that it's not stated.
+- "Any pay", "anywhere", "any kind of work" remove that limit from the earlier search.
+- The notes in [On screen with this reply: ...] say which job cards the visitor saw, in order. "The first one", "that driver job" mean those cards: use their job_id.
+- If nothing they asked for is open, say so plainly. Never show unrelated jobs as if they matched.
 - If nothing fits, say so plainly, show the closest options if reasonable, and offer the general application (offer_choices link general_apply).
 - It's free for job seekers. ISL never charges a fee and never asks for banking details to apply.
 - Who ISL can place: to be placed through ISL, a job seeker must be a Canadian citizen or a permanent resident. ISL can't place people on a work permit or study permit and can't sponsor permits or LMIAs. If someone says they're on a permit, an international student, a refugee claimant or otherwise not a citizen or permanent resident, tell them this kindly and plainly, and that we'd love to hear from them once they have permanent residence. Don't search or recommend jobs for them. If they say they're a citizen or have PR, carry on as normal. Never ask anyone about their status yourself.
@@ -62,6 +66,8 @@ JOB SEEKERS: help them find open ISL postings that fit, and get them to the Appl
 EMPLOYERS: work out who at ISL should handle their request, then hand them to that person.
 - You need four things: the role (and how many people, if they know), where the work is, whether it's contract (a set stretch of time, including temp to perm) or permanent, and for contract, roughly when they need people to start.
 - Take whatever they've already told you. "3 labourers in rural Nova Scotia" already gives the role, the count and the place, so only ask what's missing.
+- Read negatives and corrections carefully. "Not permanent, just a two-week contract" is contract, for two weeks. "Actually make that 5", "not Halifax, Moncton" replace the earlier detail. When they correct something after you've called find_contact, call it again with every detail, corrected, so the summary they see is right.
+- Keep how long they need people (length) and anything else they said that matters (notes), in their own words. If they need people in more than one place, put every place and count in notes (e.g. "3 in Halifax, 2 in Moncton") and use the first place for place.
 - Ask one question at a time, with offer_choices for the likely answers. Never ask more than three questions in total.
 - ISL places contract workers and runs permanent searches anywhere in Canada. Each Atlantic office covers its whole province, not just its city (Cape Breton, Fredericton, Gander and Summerside included), so if someone asks about a town without an office, tell them plainly that we cover it. Requests outside Atlantic Canada go to the person or office find_contact returns.
 - As soon as you have enough, call find_contact. It returns the person or office and shows their card with phone, email and a button that sends the request with the details filled in. Then write one short sentence saying who they'll be dealing with and why. Don't repeat the phone number, email or button text.
@@ -69,7 +75,6 @@ EMPLOYERS: work out who at ISL should handle their request, then hand them to th
 - Permanent hires come with a 90-day replacement guarantee: if the hire doesn't work out within 90 days, ISL replaces them. Don't describe any other guarantee or terms; the contact explains the details.
 - When an employer asks what an employee really costs them (CPP, EI, workers' comp, vacation, paid holidays), call true_cost_of_employee. If they haven't given a wage, use the middle figure from pay_on_open_jobs for the role, and say that's the wage you used. It's an estimate with the province's average workers' comp rate, not a quote, and it's separate from ISL's rate.
 - If an employer asks for help writing or fixing a job ad, offer what ISL does instead: we write the ad, post it, screen everyone who applies and send the people worth meeting. Then gather the role details as usual and call find_contact.
-- When anyone asks about the job market (unemployment, how many people are working, which industries are adding jobs, average wages in a province), point them to the Atlantic jobs report (offer_choices link jobs_report): Statistics Canada's latest monthly Labour Force Survey in charts. Never quote those figures yourself; they change every month.
 
 MINIMUM WAGE (both): for any question about the minimum wage, or whether a wage is legal or high enough, call minimum_wage. Give the answer in one sentence; the card shows the rate and the date. It's the general rate; a few kinds of work have their own rules. If an employer's wage is under the minimum, say so plainly and kindly.
 LABOUR MARKET (both): for questions about unemployment, the job market, or how hard it is to hire or find work in a province, call labour_market. Say what the figure means for the person asking in one sentence (employers: lower unemployment usually means good candidates are hired quickly; job seekers: how many more people are working than a year ago). Never predict, and never call it hard or easy on your own say-so. Offer the jobs_report link.
@@ -83,7 +88,7 @@ Rules for both:
 - Don't ask for or store personal details: name, email, phone, address, SIN, date of birth, health or immigration status.
 - Stay on topic: jobs, hiring and working with ISL. Politely decline anything else.
 
-Style: friendly and conversational, like a warm, helpful person at ISL's front desk. Greet people back ("Hi there!"), react naturally to what they say ("Three labourers in rural Nova Scotia, got it!", "Good news!", "Sorry about that"), and use the occasional exclamation mark. Vary your acknowledgements so you never say the same one twice in a row. Keep it brief: one to three short sentences, and say each thing once; don't repeat what a card already shows. No emojis, no markdown, no lists, and no stock phrases like "Great question" or "I'd be happy to assist". Canadian spelling. Reply in the visitor's language: in French when they write in French (Canadian French), in English otherwise.
+Style: friendly, calm and plain, like a helpful person at ISL's front desk. Lead with the answer. Acknowledge briefly when it helps ("Three labourers in Truro, got it."), but don't open with "Good news" or "Great", and keep exclamation marks rare. Never call something a request that's been sent: the visitor sends it with the button on the card. Keep it brief: one to three short sentences, and say each thing once; don't repeat what a card already shows. No emojis, no markdown, no lists, and no stock phrases like "Great question" or "I'd be happy to assist". Canadian spelling. Reply in the visitor's language: in French when they write in French (Canadian French), in English otherwise.
 
 Hours: ISL's offices are open 8:30 to 4:30, Monday to Friday. Response coordinators are available around the clock for urgent requests; their numbers are on the team page.`;
 
@@ -151,6 +156,7 @@ export const TOOLS = [
         province: { type: "string", description: "Province name or code (NS, NB, PE, NL...). Leave out if they didn't say or are open to anywhere." },
         city: { type: "string", description: "City or area they want to work in. Nearby towns are ranked first." },
         employment: { type: "string", enum: ["permanent", "temporary", "any"], description: "Permanent, temporary/contract, or any." },
+        exclude: { type: "array", items: { type: "string" }, description: "Words for what they ruled out, e.g. ['night', 'overnight'] for 'I can't work nights', ['driver', 'driving', 'licence'] for 'no driver's licence'. Jobs mentioning them are left out." },
         limit: { type: "integer", description: "How many results to return, 1 to 15. Default 8." },
       },
     },
@@ -183,7 +189,9 @@ export const TOOLS = [
         place: { type: "string", description: "Where the work is, in the visitor's words, e.g. 'rural Nova Scotia', 'Quispamsis', 'Toronto'." },
         role: { type: "string", description: "Employers: the role, e.g. 'labourers', 'a controller'." },
         headcount: { type: "integer", description: "Employers: how many people, if they said." },
-        start: { type: "string", description: "Employers (contract): when they need people, in plain words, e.g. 'as soon as possible'." },
+        start: { type: "string", description: "Employers (contract): when they need people, in plain words, e.g. 'as soon as possible', 'next Monday'." },
+        length: { type: "string", description: "Employers (contract): how long they need people, in plain words, e.g. 'two weeks', 'until January'." },
+        notes: { type: "string", description: "Employers: anything else that matters, in their words, e.g. more than one place ('3 in Halifax, 2 in Moncton'), shifts, a wage they mentioned." },
       },
       required: ["audience"],
     },
@@ -266,12 +274,14 @@ export function runTool(name, input, jobs, state) {
       const count = Number(input?.headcount) > 0 ? `${input.headcount} ` : "";
       const whereRaw = place ? (place.outside ? place.label : place.city ? `${place.city}, ${provinceName(place.province)}` : place.label) : "";
       const where = whereRaw.charAt(0).toUpperCase() + whereRaw.slice(1);
-      const details = [`${count}${role}`.trim(), where, SERVICE_LABEL[input?.service] || "", input?.start ? `Start: ${input.start}` : ""].filter(Boolean).join(". ") + ".";
+      const clip = (v) => String(v || "").replace(/[\u0000-\u001f]/g, " ").trim().slice(0, 300);
+      const length = clip(input?.length), notes = clip(input?.notes);
+      const details = [`${count}${role}`.trim(), where, SERVICE_LABEL[input?.service] || "", input?.start ? `Start: ${clip(input.start)}` : "", length && service !== "direct" ? `Length: ${length}` : "", notes ? `Notes: ${notes}` : ""].filter(Boolean).join(". ") + ".";
       const params = new URLSearchParams({ service: service === "direct" ? "direct" : "contract", details });
       if (place?.province) params.set("where", provinceName(place.province));
       if (place?.outside) params.set("where", "Elsewhere in Canada");
       action = { label: r.person ? `Send my request to ${r.person.first}` : `Send my request to ${r.office.city}`, href: SITE.base + SITE.hirePath + "?" + params.toString() };
-      state.summary = [["Role", `${count}${role}`.trim()], ["Where", where], ["Type", SERVICE_LABEL[input?.service] || ""], ["Start", service === "direct" ? "" : input?.start || ""]].filter(([, v]) => v);
+      state.summary = [["Role", `${count}${role}`.trim()], ["Where", where], ["Type", SERVICE_LABEL[input?.service] || ""], ["Start", service === "direct" ? "" : clip(input?.start)], ["Length", service === "direct" ? "" : length], ["Notes", notes]].filter(([, v]) => v);
     }
     state.contact = toContact(r, action);
     return {

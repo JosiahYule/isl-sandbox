@@ -235,6 +235,9 @@ export function searchJobs(jobs, filters = {}) {
 
   let pool = jobs;
   if (prov) pool = pool.filter((j) => j.province === prov);
+  // What they ruled out ("I can't work nights", "no driver's licence"): leave out postings that mention it
+  const outs = (Array.isArray(filters.exclude) ? filters.exclude : []).map((w) => stemText(norm(String(w)))).filter((w) => w && w.length > 2);
+  if (outs.length) pool = pool.filter((j) => { const s = stemsFor(j); return !outs.some((o) => s.title.includes(o) || s.desc.includes(o)); });
   if (want.startsWith("perm")) pool = pool.filter((j) => j.employment !== "Temporary / contract");
   if (want.startsWith("temp") || want.startsWith("contract")) pool = pool.filter((j) => j.employment !== "Permanent");
 

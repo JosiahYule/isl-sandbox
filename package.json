@@ -18,7 +18,8 @@
     "dev:as": "BRAND=as astro dev",
     "dev:ads": "BRAND=ads astro dev",
     "test": "npm run build:all && node --test test/*.test.mjs && node assistant/test/conversation.test.mjs test/fixtures/jobs.json",
-    "lead-outcomes": "node scripts/lead-outcomes.mjs"
+    "lead-outcomes": "node scripts/lead-outcomes.mjs",
+    "eval": "node assistant/evals/run.mjs"
   },
   "dependencies": {
     "@fontsource-variable/dm-sans": "^5.3.0",

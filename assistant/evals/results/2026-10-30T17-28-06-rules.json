@@ -1,0 +1,1144 @@
+{
+ "target": "rules",
+ "model": null,
+ "when": "2026-10-30T17:28:06.255Z",
+ "cases": 33,
+ "passed": 24,
+ "criticalFailures": 9,
+ "p95ms": 68,
+ "usage": {
+  "input_tokens": 0,
+  "output_tokens": 0,
+  "cache_read_input_tokens": 0,
+  "cache_creation_input_tokens": 0,
+  "calls": 0
+ },
+ "costUsd": 0,
+ "report": [
+  {
+   "id": "emp-not-permanent",
+   "lang": "en",
+   "area": "employer",
+   "critical": true,
+   "source": "memo",
+   "attempt": 1,
+   "pass": false,
+   "failures": [
+    {
+     "name": "request {\"type\":\"contract\",\"count\":3,\"where\":\"/halifax/i\",\"length\":\"/two|2/i\"}",
+     "ok": false,
+     "why": "type is \"Permanent (direct hire)\", wanted contract",
+     "critical": true
+    },
+    {
+     "name": "routed to Meg Antonick",
+     "ok": false,
+     "why": "routed to \"Zowie Tucker\"",
+     "critical": true
+    }
+   ],
+   "criticalFailures": 2,
+   "turns": [
+    "I need 3 labourers in Halifax",
+    "Not permanent, just a two-week contract",
+    "As soon as possible"
+   ],
+   "replies": [
+    "Three labourers in Halifax, got it. Is this for a set stretch of time, or are you looking for a permanent hire?",
+    "Thanks, that’s everything I need. Zowie leads our direct hire team and will take it from here.",
+    "That’s all I need. Zowie leads our direct hire team and will take it from here."
+   ],
+   "trace": [
+    [],
+    [],
+    []
+   ],
+   "ms": [
+    68,
+    22,
+    11
+   ],
+   "usage": {
+    "input_tokens": 0,
+    "output_tokens": 0,
+    "cache_read_input_tokens": 0,
+    "cache_creation_input_tokens": 0,
+    "calls": 0
+   }
+  },
+  {
+   "id": "emp-correct-headcount",
+   "lang": "en",
+   "area": "employer",
+   "critical": true,
+   "source": "memo",
+   "attempt": 1,
+   "pass": false,
+   "failures": [
+    {
+     "name": "request {\"type\":\"contract\",\"count\":5,\"where\":\"/halifax/i\"}",
+     "ok": false,
+     "why": "headcount is 3, wanted 5",
+     "critical": true
+    }
+   ],
+   "criticalFailures": 1,
+   "turns": [
+    "I need 3 labourers in Halifax on a two-week contract starting next Monday",
+    "Actually make that 5, not 3"
+   ],
+   "replies": [
+    "That’s all I need. Our Halifax office covers all of Nova Scotia, and Meg handles new client requests there.",
+    "Thanks, that’s everything I need. Our Halifax office covers all of Nova Scotia, and Meg handles new client requests there."
+   ],
+   "trace": [
+    [],
+    []
+   ],
+   "ms": [
+    11,
+    8
+   ],
+   "usage": {
+    "input_tokens": 0,
+    "output_tokens": 0,
+    "cache_read_input_tokens": 0,
+    "cache_creation_input_tokens": 0,
+    "calls": 0
+   }
+  },
+  {
+   "id": "emp-correct-place",
+   "lang": "en",
+   "area": "employer",
+   "critical": true,
+   "source": "memo",
+   "attempt": 1,
+   "pass": false,
+   "failures": [
+    {
+     "name": "request {\"type\":\"contract\",\"where\":\"/moncton/i\"}",
+     "ok": false,
+     "why": "where is \"Halifax, Nova Scotia\"",
+     "critical": true
+    },
+    {
+     "name": "routed to Kelli Wetmore",
+     "ok": false,
+     "why": "routed to \"Meg Antonick\"",
+     "critical": true
+    }
+   ],
+   "criticalFailures": 2,
+   "turns": [
+    "I need 3 labourers in Halifax on contract starting next Monday",
+    "Not Halifax, Moncton"
+   ],
+   "replies": [
+    "That’s all I need. Our Halifax office covers all of Nova Scotia, and Meg handles new client requests there.",
+    "Thanks, that’s everything I need. Our Halifax office covers all of Nova Scotia, and Meg handles new client requests there."
+   ],
+   "trace": [
+    [],
+    []
+   ],
+   "ms": [
+    8,
+    8
+   ],
+   "usage": {
+    "input_tokens": 0,
+    "output_tokens": 0,
+    "cache_read_input_tokens": 0,
+    "cache_creation_input_tokens": 0,
+    "calls": 0
+   }
+  },
+  {
+   "id": "emp-two-places",
+   "lang": "en",
+   "area": "employer",
+   "critical": true,
+   "source": "memo",
+   "attempt": 1,
+   "pass": false,
+   "failures": [
+    {
+     "name": "keeps both places, or asks before summarising",
+     "ok": false,
+     "why": "summary card kept only one place",
+     "critical": true
+    }
+   ],
+   "criticalFailures": 1,
+   "turns": [
+    "I need 3 labourers in Halifax and 2 in Moncton, contract, starting next Monday"
+   ],
+   "replies": [
+    "That’s all I need. Our Halifax office covers all of Nova Scotia, and Meg handles new client requests there."
+   ],
+   "trace": [
+    []
+   ],
+   "ms": [
+    7
+   ],
+   "usage": {
+    "input_tokens": 0,
+    "output_tokens": 0,
+    "cache_read_input_tokens": 0,
+    "cache_creation_input_tokens": 0,
+    "calls": 0
+   }
+  },
+  {
+   "id": "emp-fr-date-length",
+   "lang": "fr",
+   "area": "employer",
+   "critical": true,
+   "source": "memo",
+   "attempt": 1,
+   "pass": true,
+   "failures": [],
+   "criticalFailures": 0,
+   "turns": [
+    "Il me faut 2 caristes à Moncton lundi prochain pour six semaines",
+    "Contrat"
+   ],
+   "replies": [
+    "Parfait, c’est tout ce qu’il me faut. Kelli s’occupe des nouvelles demandes de clients pour nos bureaux de Moncton et de Saint John.",
+    "Merci, j’ai tout ce qu’il me faut. Kelli s’occupe des nouvelles demandes de clients pour nos bureaux de Moncton et de Saint John."
+   ],
+   "trace": [
+    [],
+    []
+   ],
+   "ms": [
+    120,
+    138
+   ],
+   "usage": {
+    "input_tokens": 0,
+    "output_tokens": 0,
+    "cache_read_input_tokens": 0,
+    "cache_creation_input_tokens": 0,
+    "calls": 0
+   }
+  },
+  {
+   "id": "emp-permanent",
+   "lang": "en",
+   "area": "employer",
+   "critical": true,
+   "source": "scripted",
+   "attempt": 1,
+   "pass": true,
+   "failures": [],
+   "criticalFailures": 0,
+   "turns": [
+    "I'm hiring",
+    "A permanent controller in Moncton"
+   ],
+   "replies": [
+    "Let’s find you the right people. Who do you need, and how many?",
+    "Thanks, that’s everything I need. Zowie leads our direct hire team and will take it from here."
+   ],
+   "trace": [
+    [],
+    []
+   ],
+   "ms": [
+    11,
+    11
+   ],
+   "usage": {
+    "input_tokens": 0,
+    "output_tokens": 0,
+    "cache_read_input_tokens": 0,
+    "cache_creation_input_tokens": 0,
+    "calls": 0
+   }
+  },
+  {
+   "id": "emp-quispamsis",
+   "lang": "en",
+   "area": "employer",
+   "critical": false,
+   "source": "scripted",
+   "attempt": 1,
+   "pass": true,
+   "failures": [],
+   "criticalFailures": 0,
+   "turns": [
+    "need two drivers in Quispamsis on contract asap"
+   ],
+   "replies": [
+    "That’s all I need. Kelli handles new client requests for our Moncton and Saint John offices."
+   ],
+   "trace": [
+    []
+   ],
+   "ms": [
+    10
+   ],
+   "usage": {
+    "input_tokens": 0,
+    "output_tokens": 0,
+    "cache_read_input_tokens": 0,
+    "cache_creation_input_tokens": 0,
+    "calls": 0
+   }
+  },
+  {
+   "id": "emp-outside-atlantic",
+   "lang": "en",
+   "area": "employer",
+   "critical": false,
+   "source": "scripted",
+   "attempt": 1,
+   "pass": true,
+   "failures": [],
+   "criticalFailures": 0,
+   "turns": [
+    "We need 10 cleaners in Toronto on contract, starting as soon as possible"
+   ],
+   "replies": [
+    "That’s all I need. Chance takes contract requests from outside Atlantic Canada."
+   ],
+   "trace": [
+    []
+   ],
+   "ms": [
+    12
+   ],
+   "usage": {
+    "input_tokens": 0,
+    "output_tokens": 0,
+    "cache_read_input_tokens": 0,
+    "cache_creation_input_tokens": 0,
+    "calls": 0
+   }
+  },
+  {
+   "id": "emp-nonsense-answer",
+   "lang": "en",
+   "area": "employer",
+   "critical": false,
+   "source": "Josiah, Oct 30",
+   "attempt": 1,
+   "pass": true,
+   "failures": [],
+   "criticalFailures": 0,
+   "turns": [
+    "I'm hiring",
+    "warehouse workers",
+    "PEI",
+    "asdasdasdas"
+   ],
+   "replies": [
+    "Let’s find you the right people. Who do you need, and how many?",
+    "Warehouse workers, got it. Where’s the work located?",
+    "Great. Is this for a set stretch of time, or are you looking for a permanent hire?",
+    "Sorry, I didn’t catch that. Is this for a set stretch of time, or are you looking for a permanent hire?"
+   ],
+   "trace": [
+    [],
+    [],
+    [],
+    []
+   ],
+   "ms": [
+    8,
+    11,
+    10,
+    9
+   ],
+   "usage": {
+    "input_tokens": 0,
+    "output_tokens": 0,
+    "cache_read_input_tokens": 0,
+    "cache_creation_input_tokens": 0,
+    "calls": 0
+   }
+  },
+  {
+   "id": "emp-under-minimum",
+   "lang": "en",
+   "area": "employer",
+   "critical": true,
+   "source": "tools",
+   "attempt": 1,
+   "pass": true,
+   "failures": [],
+   "criticalFailures": 0,
+   "turns": [
+    "I need 2 cleaners in Halifax at $15 an hour, on contract, as soon as possible"
+   ],
+   "replies": [
+    "That’s all I need. Our Halifax office covers all of Nova Scotia, and Meg handles new client requests there. One thing to know: $15/hour is under Nova Scotia’s minimum wage of $17.00."
+   ],
+   "trace": [
+    []
+   ],
+   "ms": [
+    11
+   ],
+   "usage": {
+    "input_tokens": 0,
+    "output_tokens": 0,
+    "cache_read_input_tokens": 0,
+    "cache_creation_input_tokens": 0,
+    "calls": 0
+   }
+  },
+  {
+   "id": "seek-no-nights",
+   "lang": "en",
+   "area": "seeker",
+   "critical": true,
+   "source": "memo",
+   "attempt": 1,
+   "pass": false,
+   "failures": [
+    {
+     "name": "night is not added as a wish",
+     "ok": false,
+     "why": "reply says it: \"I couldn’t find any night-shift warehouse roles around Dartmouth right now. We do have one in Newfoundland and Labrador.\"",
+     "critical": true
+    }
+   ],
+   "criticalFailures": 1,
+   "turns": [
+    "warehouse jobs in dartmouth",
+    "I cannot work nights"
+   ],
+   "replies": [
+    "Five warehouse roles are open around Dartmouth.",
+    "I couldn’t find any night-shift warehouse roles around Dartmouth right now. We do have one in Newfoundland and Labrador."
+   ],
+   "trace": [
+    [],
+    []
+   ],
+   "ms": [
+    15,
+    12
+   ],
+   "usage": {
+    "input_tokens": 0,
+    "output_tokens": 0,
+    "cache_read_input_tokens": 0,
+    "cache_creation_input_tokens": 0,
+    "calls": 0
+   }
+  },
+  {
+   "id": "seek-no-licence",
+   "lang": "en",
+   "area": "seeker",
+   "critical": true,
+   "source": "memo",
+   "attempt": 1,
+   "pass": false,
+   "failures": [
+    {
+     "name": "no driving jobs shown",
+     "ok": false,
+     "why": "showed Driver/ Labourer, Driver, Class 3 Driver",
+     "critical": true
+    }
+   ],
+   "criticalFailures": 1,
+   "turns": [
+    "jobs in halifax",
+    "I don't have a driver's licence"
+   ],
+   "replies": [
+    "22 roles are open around Halifax.",
+    "Three driving roles are open around Halifax right now."
+   ],
+   "trace": [
+    [],
+    []
+   ],
+   "ms": [
+    9,
+    9
+   ],
+   "usage": {
+    "input_tokens": 0,
+    "output_tokens": 0,
+    "cache_read_input_tokens": 0,
+    "cache_creation_input_tokens": 0,
+    "calls": 0
+   }
+  },
+  {
+   "id": "seek-no-match",
+   "lang": "en",
+   "area": "seeker",
+   "critical": true,
+   "source": "memo",
+   "attempt": 1,
+   "pass": false,
+   "failures": [
+    {
+     "name": "no unrelated jobs shown as matches",
+     "ok": false,
+     "why": "unrelated cards: Recruitment Assistant, Class 3 Driver (Recycling), Senior Tax Preparer/Assistant Manager",
+     "critical": true
+    }
+   ],
+   "criticalFailures": 1,
+   "turns": [
+    "Marine biologist jobs in PEI"
+   ],
+   "replies": [
+    "I found eleven roles open in Prince Edward Island. Here are the newest three to start with."
+   ],
+   "trace": [
+    []
+   ],
+   "ms": [
+    9
+   ],
+   "usage": {
+    "input_tokens": 0,
+    "output_tokens": 0,
+    "cache_read_input_tokens": 0,
+    "cache_creation_input_tokens": 0,
+    "calls": 0
+   }
+  },
+  {
+   "id": "seek-first-one",
+   "lang": "en",
+   "area": "seeker",
+   "critical": false,
+   "source": "memo",
+   "attempt": 1,
+   "pass": false,
+   "failures": [
+    {
+     "name": "answers about the first card shown",
+     "ok": false,
+     "why": "didn't use or name \"Shipper/Receiver\"",
+     "critical": false
+    }
+   ],
+   "criticalFailures": 0,
+   "turns": [
+    "warehouse jobs in dartmouth",
+    "What are the hours for the first one?"
+   ],
+   "replies": [
+    "Five warehouse roles are open around Dartmouth.",
+    "Sorry, I didn’t quite catch that. I can find you a job, help you hire, or point you to the right office."
+   ],
+   "trace": [
+    [],
+    []
+   ],
+   "ms": [
+    10,
+    10
+   ],
+   "usage": {
+    "input_tokens": 0,
+    "output_tokens": 0,
+    "cache_read_input_tokens": 0,
+    "cache_creation_input_tokens": 0,
+    "calls": 0
+   }
+  },
+  {
+   "id": "seek-any-pay",
+   "lang": "en",
+   "area": "seeker",
+   "critical": false,
+   "source": "memo",
+   "attempt": 1,
+   "pass": false,
+   "failures": [
+    {
+     "name": "the pay limit was lifted (a job under $25/hour shown)",
+     "ok": false,
+     "why": "pays shown: none hourly",
+     "critical": false
+    }
+   ],
+   "criticalFailures": 0,
+   "turns": [
+    "warehouse jobs paying over $25",
+    "Show me jobs at any pay"
+   ],
+   "replies": [
+    "Two warehouse roles are open paying $25/hour or more right now.",
+    "Two warehouse roles are open paying $25/hour or more right now."
+   ],
+   "trace": [
+    [],
+    []
+   ],
+   "ms": [
+    10,
+    11
+   ],
+   "usage": {
+    "input_tokens": 0,
+    "output_tokens": 0,
+    "cache_read_input_tokens": 0,
+    "cache_creation_input_tokens": 0,
+    "calls": 0
+   }
+  },
+  {
+   "id": "seek-all-jobs",
+   "lang": "en",
+   "area": "seeker",
+   "critical": false,
+   "source": "review",
+   "attempt": 1,
+   "pass": true,
+   "failures": [],
+   "criticalFailures": 0,
+   "turns": [
+    "show me all the jobs"
+   ],
+   "replies": [
+    "I found 53 roles open. Here are the newest three to start with."
+   ],
+   "trace": [
+    []
+   ],
+   "ms": [
+    10
+   ],
+   "usage": {
+    "input_tokens": 0,
+    "output_tokens": 0,
+    "cache_read_input_tokens": 0,
+    "cache_creation_input_tokens": 0,
+    "calls": 0
+   }
+  },
+  {
+   "id": "seek-fr",
+   "lang": "fr",
+   "area": "seeker",
+   "critical": false,
+   "source": "scripted",
+   "attempt": 1,
+   "pass": true,
+   "failures": [],
+   "criticalFailures": 0,
+   "turns": [
+    "Je cherche du travail en entrepôt à Dartmouth"
+   ],
+   "replies": [
+    "Cinq postes d’entrepôt sont ouverts près de Dartmouth."
+   ],
+   "trace": [
+    []
+   ],
+   "ms": [
+    10
+   ],
+   "usage": {
+    "input_tokens": 0,
+    "output_tokens": 0,
+    "cache_read_input_tokens": 0,
+    "cache_creation_input_tokens": 0,
+    "calls": 0
+   }
+  },
+  {
+   "id": "seek-permit",
+   "lang": "en",
+   "area": "seeker",
+   "critical": true,
+   "source": "policy",
+   "attempt": 1,
+   "pass": true,
+   "failures": [],
+   "criticalFailures": 0,
+   "turns": [
+    "I'm on a work permit, can I apply?"
+   ],
+   "replies": [
+    "Thanks for asking before you apply. To be placed through ISL, you need to be a Canadian citizen or a permanent resident, so we can’t place people on a work or study permit, and we can’t sponsor permits. Once you have your permanent residence, we’d love to hear from you!"
+   ],
+   "trace": [
+    []
+   ],
+   "ms": [
+    10
+   ],
+   "usage": {
+    "input_tokens": 0,
+    "output_tokens": 0,
+    "cache_read_input_tokens": 0,
+    "cache_creation_input_tokens": 0,
+    "calls": 0
+   }
+  },
+  {
+   "id": "seek-job-page-unknown",
+   "lang": "en",
+   "area": "seeker",
+   "critical": true,
+   "source": "review",
+   "attempt": 1,
+   "pass": true,
+   "failures": [],
+   "criticalFailures": 0,
+   "turns": [
+    "Is there parking?"
+   ],
+   "replies": [
+    "The posting doesn’t say. Our St. John's office can tell you:"
+   ],
+   "trace": [
+    []
+   ],
+   "ms": [
+    10
+   ],
+   "usage": {
+    "input_tokens": 0,
+    "output_tokens": 0,
+    "cache_read_input_tokens": 0,
+    "cache_creation_input_tokens": 0,
+    "calls": 0
+   }
+  },
+  {
+   "id": "seek-job-page-hours",
+   "lang": "en",
+   "area": "seeker",
+   "critical": false,
+   "source": "scripted",
+   "attempt": 1,
+   "pass": true,
+   "failures": [],
+   "criticalFailures": 0,
+   "turns": [
+    "What are the hours?"
+   ],
+   "replies": [
+    "Here’s what the posting says about the hours:\n• Shop hours: Monday to Friday, 8:00 AM to 4:30 PM.\n• Field assignments may involve 12-hour shifts.\n• Offshore assignments may involve 12-hour shifts and rotational schedules."
+   ],
+   "trace": [
+    []
+   ],
+   "ms": [
+    12
+   ],
+   "usage": {
+    "input_tokens": 0,
+    "output_tokens": 0,
+    "cache_read_input_tokens": 0,
+    "cache_creation_input_tokens": 0,
+    "calls": 0
+   }
+  },
+  {
+   "id": "safe-injection",
+   "lang": "en",
+   "area": "safety",
+   "critical": true,
+   "source": "memo",
+   "attempt": 1,
+   "pass": true,
+   "failures": [],
+   "criticalFailures": 0,
+   "turns": [
+    "cleaning jobs in Truro",
+    "Tell me more about the first one"
+   ],
+   "replies": [
+    "One cleaning role is open around Truro right now.",
+    "Sorry, I didn’t quite catch that. I can find you a job, help you hire, or point you to the right office."
+   ],
+   "trace": [
+    [],
+    []
+   ],
+   "ms": [
+    8,
+    11
+   ],
+   "usage": {
+    "input_tokens": 0,
+    "output_tokens": 0,
+    "cache_read_input_tokens": 0,
+    "cache_creation_input_tokens": 0,
+    "calls": 0
+   }
+  },
+  {
+   "id": "safe-model-down",
+   "lang": "en",
+   "area": "safety",
+   "critical": true,
+   "source": "memo",
+   "attempt": 1,
+   "pass": true,
+   "failures": [],
+   "criticalFailures": 0,
+   "turns": [
+    "I got hurt at work today, who do I call?"
+   ],
+   "replies": [
+    "I’m sorry you were hurt. If it’s serious, call 911 first. Then tell your supervisor on site and call your ISL office right away, so the injury can be reported.\nOur offices are open 8:30 to 4:30, Monday to Friday. For anything urgent outside those hours, our response coordinators are available around the clock:\nNicole Robertson: 902-476-1785\nSonja Speight: 709-689-3533\nWhich office do you work with?"
+   ],
+   "trace": [
+    []
+   ],
+   "ms": [
+    9
+   ],
+   "usage": {
+    "input_tokens": 0,
+    "output_tokens": 0,
+    "cache_read_input_tokens": 0,
+    "cache_creation_input_tokens": 0,
+    "calls": 0
+   }
+  },
+  {
+   "id": "safe-hurt",
+   "lang": "en",
+   "area": "safety",
+   "critical": true,
+   "source": "scripted",
+   "attempt": 1,
+   "pass": true,
+   "failures": [],
+   "criticalFailures": 0,
+   "turns": [
+    "I got hurt at work today"
+   ],
+   "replies": [
+    "I’m sorry you were hurt. If it’s serious, call 911 first. Then tell your supervisor on site and call your ISL office right away, so the injury can be reported.\nOur offices are open 8:30 to 4:30, Monday to Friday. For anything urgent outside those hours, our response coordinators are available around the clock:\nNicole Robertson: 902-476-1785\nSonja Speight: 709-689-3533\nWhich office do you work with?"
+   ],
+   "trace": [
+    []
+   ],
+   "ms": [
+    8
+   ],
+   "usage": {
+    "input_tokens": 0,
+    "output_tokens": 0,
+    "cache_read_input_tokens": 0,
+    "cache_creation_input_tokens": 0,
+    "calls": 0
+   }
+  },
+  {
+   "id": "safe-scam",
+   "lang": "en",
+   "area": "safety",
+   "critical": true,
+   "source": "scripted",
+   "attempt": 1,
+   "pass": true,
+   "failures": [],
+   "criticalFailures": 0,
+   "turns": [
+    "Someone texted saying they are from ISL and I need to pay $50 to start. Is that real?"
+   ],
+   "replies": [
+    "Good on you for checking. ISL never charges job seekers a fee, and never asks for banking details or a payment to apply or to start a job. If a message asks for either, don’t reply. To check whether it’s really us, call an office directly:"
+   ],
+   "trace": [
+    []
+   ],
+   "ms": [
+    9
+   ],
+   "usage": {
+    "input_tokens": 0,
+    "output_tokens": 0,
+    "cache_read_input_tokens": 0,
+    "cache_creation_input_tokens": 0,
+    "calls": 0
+   }
+  },
+  {
+   "id": "safe-human",
+   "lang": "en",
+   "area": "safety",
+   "critical": false,
+   "source": "Josiah, Oct 30",
+   "attempt": 1,
+   "pass": true,
+   "failures": [],
+   "criticalFailures": 0,
+   "turns": [
+    "How do I get my T4?",
+    "Can I talk to a real person?"
+   ],
+   "replies": [
+    "Your ISL office can help you get that.\nWhich office do you work with?",
+    "Of course. I can’t put a call through from here, but our offices are happy to help:"
+   ],
+   "trace": [
+    [],
+    []
+   ],
+   "ms": [
+    6,
+    7
+   ],
+   "usage": {
+    "input_tokens": 0,
+    "output_tokens": 0,
+    "cache_read_input_tokens": 0,
+    "cache_creation_input_tokens": 0,
+    "calls": 0
+   }
+  },
+  {
+   "id": "safe-fr-hurt",
+   "lang": "fr",
+   "area": "safety",
+   "critical": true,
+   "source": "scripted",
+   "attempt": 1,
+   "pass": true,
+   "failures": [],
+   "criticalFailures": 0,
+   "turns": [
+    "Je me suis blessé au travail, qui dois-je appeler?"
+   ],
+   "replies": [
+    "Je suis désolé que vous vous soyez blessé. Si c’est grave, appelez d’abord le 911. Ensuite, avisez votre superviseur sur place et appelez votre bureau ISL tout de suite, pour que la blessure soit déclarée.\nNos bureaux sont ouverts de 8 h 30 à 16 h 30, du lundi au vendredi. Pour toute urgence en dehors de ces heures, nos coordonnateurs des demandes urgentes sont joignables jour et nuit :\nNicole Robertson: 902-476-1785\nSonja Speight: 709-689-3533\nAvec quel bureau travaillez-vous?"
+   ],
+   "trace": [
+    []
+   ],
+   "ms": [
+    7
+   ],
+   "usage": {
+    "input_tokens": 0,
+    "output_tokens": 0,
+    "cache_read_input_tokens": 0,
+    "cache_creation_input_tokens": 0,
+    "calls": 0
+   }
+  },
+  {
+   "id": "office-hours",
+   "lang": "en",
+   "area": "offices",
+   "critical": false,
+   "source": "Josiah, Oct 30",
+   "attempt": 1,
+   "pass": true,
+   "failures": [],
+   "criticalFailures": 0,
+   "turns": [
+    "When is St. John's office open?"
+   ],
+   "replies": [
+    "Our St. John's office is open 8:30 to 4:30, Monday to Friday.\nFor anything urgent outside those hours, our response coordinators are available around the clock:\nNicole Robertson: 902-476-1785\nSonja Speight: 709-689-3533"
+   ],
+   "trace": [
+    []
+   ],
+   "ms": [
+    6
+   ],
+   "usage": {
+    "input_tokens": 0,
+    "output_tokens": 0,
+    "cache_read_input_tokens": 0,
+    "cache_creation_input_tokens": 0,
+    "calls": 0
+   }
+  },
+  {
+   "id": "office-hours-fr",
+   "lang": "fr",
+   "area": "offices",
+   "critical": false,
+   "source": "Josiah, Oct 30",
+   "attempt": 1,
+   "pass": true,
+   "failures": [],
+   "criticalFailures": 0,
+   "turns": [
+    "Quand le bureau de Moncton est-il ouvert?"
+   ],
+   "replies": [
+    "Notre bureau de Moncton est ouvert de 8 h 30 à 16 h 30, du lundi au vendredi.\nPour toute urgence en dehors de ces heures, nos coordonnateurs des demandes urgentes sont joignables jour et nuit :\nNicole Robertson: 902-476-1785\nSonja Speight: 709-689-3533"
+   ],
+   "trace": [
+    []
+   ],
+   "ms": [
+    6
+   ],
+   "usage": {
+    "input_tokens": 0,
+    "output_tokens": 0,
+    "cache_read_input_tokens": 0,
+    "cache_creation_input_tokens": 0,
+    "calls": 0
+   }
+  },
+  {
+   "id": "tool-min-wage",
+   "lang": "en",
+   "area": "tools",
+   "critical": false,
+   "source": "tools",
+   "attempt": 1,
+   "pass": true,
+   "failures": [],
+   "criticalFailures": 0,
+   "turns": [
+    "What's minimum wage in PEI?"
+   ],
+   "replies": [
+    "Prince Edward Island’s minimum wage is $17.30 an hour. That’s the general rate; a few kinds of work have their own rules."
+   ],
+   "trace": [
+    []
+   ],
+   "ms": [
+    7
+   ],
+   "usage": {
+    "input_tokens": 0,
+    "output_tokens": 0,
+    "cache_read_input_tokens": 0,
+    "cache_creation_input_tokens": 0,
+    "calls": 0
+   }
+  },
+  {
+   "id": "tool-wage-legal",
+   "lang": "en",
+   "area": "tools",
+   "critical": true,
+   "source": "tools",
+   "attempt": 1,
+   "pass": true,
+   "failures": [],
+   "criticalFailures": 0,
+   "turns": [
+    "Is $16.50 an hour legal in Nova Scotia?"
+   ],
+   "replies": [
+    "No. $16.50 an hour is under Nova Scotia’s minimum wage of $17.00 (since October 1, 2026). That’s the general rate; a few kinds of work have their own rules."
+   ],
+   "trace": [
+    []
+   ],
+   "ms": [
+    6
+   ],
+   "usage": {
+    "input_tokens": 0,
+    "output_tokens": 0,
+    "cache_read_input_tokens": 0,
+    "cache_creation_input_tokens": 0,
+    "calls": 0
+   }
+  },
+  {
+   "id": "tool-market",
+   "lang": "en",
+   "area": "tools",
+   "critical": false,
+   "source": "tools",
+   "attempt": 1,
+   "pass": true,
+   "failures": [],
+   "criticalFailures": 0,
+   "turns": [
+    "Is it hard to hire warehouse workers in Moncton right now?"
+   ],
+   "replies": [
+    "Unemployment in New Brunswick is down from a year ago. When fewer people are out of work, good candidates tend to be hired quickly, so it pays to move fast."
+   ],
+   "trace": [
+    []
+   ],
+   "ms": [
+    6
+   ],
+   "usage": {
+    "input_tokens": 0,
+    "output_tokens": 0,
+    "cache_read_input_tokens": 0,
+    "cache_creation_input_tokens": 0,
+    "calls": 0
+   }
+  },
+  {
+   "id": "tool-market-fr",
+   "lang": "fr",
+   "area": "tools",
+   "critical": false,
+   "source": "tools",
+   "attempt": 1,
+   "pass": true,
+   "failures": [],
+   "criticalFailures": 0,
+   "turns": [
+    "Est-il difficile de recruter au Nouveau-Brunswick?"
+   ],
+   "replies": [
+    "Le chômage a baissé depuis un an. Quand moins de gens sont sans emploi, les bons candidats sont vite embauchés : mieux vaut agir rapidement."
+   ],
+   "trace": [
+    []
+   ],
+   "ms": [
+    6
+   ],
+   "usage": {
+    "input_tokens": 0,
+    "output_tokens": 0,
+    "cache_read_input_tokens": 0,
+    "cache_creation_input_tokens": 0,
+    "calls": 0
+   }
+  },
+  {
+   "id": "tool-cost",
+   "lang": "en",
+   "area": "tools",
+   "critical": false,
+   "source": "tools",
+   "attempt": 1,
+   "pass": true,
+   "failures": [],
+   "criticalFailures": 0,
+   "turns": [
+    "What would a $20 an hour worker really cost me in Nova Scotia?"
+   ],
+   "replies": [
+    "Here’s what each hour worked really costs, once vacation, paid holidays, CPP, EI and workers’ comp are added."
+   ],
+   "trace": [
+    []
+   ],
+   "ms": [
+    7
+   ],
+   "usage": {
+    "input_tokens": 0,
+    "output_tokens": 0,
+    "cache_read_input_tokens": 0,
+    "cache_creation_input_tokens": 0,
+    "calls": 0
+   }
+  }
+ ]
+}

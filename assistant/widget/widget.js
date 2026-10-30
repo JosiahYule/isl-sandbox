@@ -626,7 +626,10 @@
       // backend knows which kind of visitor this page expects.
       const g = greetings()[state.greet] || greetings().ask;
       const messages = [{ role: "assistant", content: g.text, meta: { mode: state.greet === "ask" ? null : state.greet === "job" ? "seeker" : state.greet, lang: state.lang } }]
-        .concat(state.turns.filter((x) => (x.role === "user" || x.role === "assistant") && !x.local).map((x) => (x.role === "assistant" ? { role: x.role, content: x.content, meta: x.meta } : { role: x.role, content: x.content })));
+        .concat(state.turns.filter((x) => (x.role === "user" || x.role === "assistant") && !x.local).map((x) => (x.role === "assistant"
+          // What was on screen with each reply, so "the first one" or "make that 5" can be understood
+          ? { role: x.role, content: x.content, meta: { ...(x.meta || {}), shown: (x.jobs || []).map((j) => j.id).slice(0, 6), ...(x.summary?.length ? { summary: x.summary } : {}) } }
+          : { role: x.role, content: x.content })));
       let turn;
       const langBefore = state.lang;
       try {
