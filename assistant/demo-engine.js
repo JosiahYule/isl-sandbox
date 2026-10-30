@@ -58,6 +58,7 @@ const W = (src, flags = 'gu') => new RegExp(src.replace(/</g, String.raw`(?<![\p
 const FRENCH_RE = W("<(je|j'ai|j'|vous|nous|suis|êtes|avez|est-ce|est|pour|avec|dans|une|des|les|du|bonjour|bonsoir|salut|allo|merci|emplois?|travail|travailler|cherche|recherche|besoin|oui|quel|quelle|quels|où|qui|comment|combien|mon|ma|mes|votre|vos|embauche|embaucher|embauchez|entrepôt|journaliers?|chauffeurs?|poste|postes|permis|postuler|salaire|heures|bureau|personnel|aide|svp|s'il|plaît|français|ailleurs|autre|autres|recommencer|seulement|voir|montrez|joindre|ça|c'est|n'est|pas)>", 'iu');
 const ENGLISH_RE = /\b(the|i|i'm|im|we|we're|need|looking|job|jobs|work|hiring|hire|what|how|where|who|can|could|do|does|is|are|my|you|your|any|have|please|hi|hello|hey|thanks|thank|yes|want|show|more|only|other|about|someone|there|this|that|get|find|english)\b/i;
 const FRENCH = [
+  ['<(emplois?|postes?|travail|offres?) de bureau>|<travail de bureau>', 'office jobs'], // office work, not our office
   ['<alertes? (d.)?emplois?>|<alertes? emploi>|<(m|nous).(envoyer|écrire) (des|les) (emplois|offres|postes)>', 'email me openings'],
   // People already working through ISL
   ["<je suis (malade|souffrante?)>", "i'm sick"], ["<je ne (peux|pourrai|vais) pas (venir|travailler|rentrer|être là|me présenter|y aller)>", "can't make it"],
@@ -71,6 +72,7 @@ const FRENCH = [
   ["<je travaille (avec|pour|chez|par l'entremise d'?) ?(isl|vous|integrated|integrated staffing|accountant staffing|administrative staffing)>|<je suis placée? par (isl|vous|accountant staffing|administrative staffing)>", 'i work with isl'],
   // Offices, people, scams
   ['<numéros? de téléphone>|<votre numéro>', 'phone number'], ["<heures d'ouverture>|<heures de bureau>|<êtes-vous ouverts?>|<quand êtes-vous ouverts?>", 'office hours'],
+  ['<(est-il |est-elle |sont-ils |est )?(ouverte?s?)>', 'open'], ['<(est-il |est )?fermée?s?>', 'closed'],
   ["<en dehors des heures( de bureau)?>|<après les heures>|<la nuit>|<24 ?h(eures)? sur 24>|<jour et nuit>", 'after hours'],
   ['<où (est|sont|se trouve|se trouvent) (votre|vos|le|les) bureaux?>|<adresses?>', 'where is your office'], ['<bureau le plus (proche|près)>', 'closest office'],
   ["<parler (à|avec) (quelqu'un|une personne|un humain|une vraie personne|un agent|une agente|un recruteur|une recruteuse|un représentant)>", 'talk to a person'], ['<(appelez|rappelez)-moi>', 'call me'], ['<parler (à|avec)>', 'talk to'], ['<joindre>|<rejoindre>', 'reach'], ['<courriel>', 'email'], ['<appeler>', 'call'],
@@ -606,7 +608,7 @@ const FAQ = [
   ['bot', /\bare you (a |an )?(bot|robot|real|human|ai|person|actual|live)\b|\bis this (a )?(bot|robot|real person|human|ai|live chat)\b|\bam i (talking|speaking|chatting) (to|with) (a )?(bot|robot|real|human|person|ai)\b/],
   ['human', /\b(real|actual|live) (person|human|people)\b|\b(talk|speak|chat) (to|with) (a |an )?(someone|somebody|person|human|recruiter|agent|rep|representative|manager)\b|\b(call|phone|ring) me\b|\bhuman\b|\brepresentative\b/],
   ['afterhours', /\bafter[- ]hours\b|\bon[- ]call\b|\b(24\/7|24 hours|around the clock)\b|\b(is|are) (anyone|someone|somebody) (there|available|working)( now| tonight| right now| this weekend| on weekends)?\b|\b(emergency|urgent) (contact|number|line)\b|\bweekend (number|contact|line)\b/],
-  ['officehours', /\b(office|opening|business|store) hours\b|\bwhen (are|is) (you|the office) open\b|\bwhat time (do|does) (you|the office|it) (open|close)\b|\bare you open\b/],
+  ['officehours', /\b(office|opening|business|store) hours\b|\bwhen (are|is) (you|the office) open\b|\bwhat time (do|does) (you|the office|it) (open|close)\b|\bare you open\b|\boffices?\b[^?.!]*\b(open|opens|opening|close|closes|closing|closed|hours)\b|\b(hours|opening times|open|close|closes)\b[^?.!]*\boffices?\b|\bwhat time (do|does) (you|it|\w+(?: \w+)? office) (open|close)\b|\bare you (open|closed)\b/],
   ['officewhere', /\bwhere (is|are) (your|the|you)( \w+)? (office|offices|located|location)\b|\bwhere are you( guys)?( located| based)?\b|\b(office )?address(es)?\b|\b(closest|nearest) office\b|\boffice (near|close to|in)\b|\bdrop (by|in)\b|\bvisit (you|your office|the office)\b/],
   ['contact', /\b(phone number|your number|contact (info|information|details|number|you)|call you|email address|your email|reach you|get in touch)\b/],
   // Employers' questions
@@ -708,6 +710,17 @@ function dataQuestion(text, asked, context) {
 // ---------- Reading the conversation ----------
 // Walks every visitor message in order and builds up what we know.
 const freshSeek = () => ({ terms: null, unknownWork: '', all: false, attrs: [], minPay: null, place: null, employment: 'any', page: 0 });
+// Keyboard mashing ("asdasdasd", "qwerty", "jjjjj"): not an answer to anything
+function looksLikeNoise(t) {
+  const words = lower(t).replace(/[^a-z\s]/g, ' ').split(/\s+/).filter(Boolean);
+  if (!words.length) return /^[^\p{L}\p{N}]*$/u.test(t);
+  return words.every((w) => w.length >= 4 && (
+    !/[aeiouy]/.test(w) ||                                  // no vowels
+    /[bcdfghjklmnpqrstvwxz]{5,}/.test(w) ||                 // five consonants in a row
+    /^(.{1,4})\1{2,}/.test(w) ||                            // the same few letters over and over
+    /asdf|sdfg|dfgh|fghj|ghjk|hjkl|qwer|wert|erty|rtyu|tyui|yuio|uiop|zxcv|xcvb|cvbn|vbnm/.test(w)));
+}
+
 function readConversation(messages, context, vocab, directory) {
   const st = {
     mode: null,
@@ -754,6 +767,7 @@ function readConversation(messages, context, vocab, directory) {
     st.lastText = text;
     st.lastOriginal = original;
     st.understood = true;
+    st.hireMiss = false;
     if (faq === 'newcomer') st.newcomer = true;
 
     const place = /elsewhere in canada/.test(t) ? { province: '', city: '', rural: false, outside: true, label: 'outside Atlantic Canada' } : placeFrom(text);
@@ -776,6 +790,9 @@ function readConversation(messages, context, vocab, directory) {
 
     if (st.mode === 'employer' || (!st.mode && asked?.startsWith('hire-'))) {
       if (faq && faq.startsWith('e-')) continue; // a question about how it works, not new details
+      // Keyboard mashing, or an answer that tells us nothing new: say so and ask again, rather than "Perfect."
+      if (looksLikeNoise(t)) { st.hireMiss = true; continue; }
+      const before = JSON.stringify({ ...st.hire, said: null });
       const role = readRole(text);
       if (role && !(role.generic && st.hire.role && !st.hire.role.generic)) st.hire.role = { ...role, count: role.count ?? st.hire.role?.count ?? null };
       // They answered "who do you need?" in their own words: take those words as the role
@@ -801,6 +818,7 @@ function readConversation(messages, context, vocab, directory) {
       if (length) st.hire.length = length;
       // Keep what they typed in their own words (not tapped buttons), so the recruiter sees it as written
       if (!button && !Object.prototype.hasOwnProperty.call(BUTTONS_FR, typed.trim()) && typed.trim().length > 2) st.hire.said.push(typed.trim().replace(/\s+/g, ' '));
+      if (['hire-role', 'hire-place', 'hire-service'].includes(asked) && JSON.stringify({ ...st.hire, said: null }) === before && !faq) st.hireMiss = true;
       continue;
     }
 
@@ -1135,7 +1153,7 @@ export function createEngine({ loadJobs, siteUrl = (path) => SITE.base + path, b
     const r = st.langSwitch ? languageTurn(st) : await answer(st, asked, context, jobs, seed);
     // For the chat window: a message it couldn't understand (so it can be learned from), and a search
     // worth a job alert (ISL only, where the job feed is live)
-    if (r.meta && (r.meta.ask === 'unclear' || r.meta.ask === 'unclear2')) r.meta.miss = 'unclear';
+    if (r.meta && (r.meta.ask === 'unclear' || r.meta.ask === 'unclear2' || st.hireMiss)) r.meta.miss = 'unclear';
     const s = st.seek;
     const none = !r.jobs?.length && r.meta?.searchLabel && /couldn’t find|n’ai trouvé/.test(r.reply);
     if (brand === 'isl' && !context.job && (r.jobs?.length || none) && r.meta?.mode === 'seeker' && (hasTerms(s.terms) || s.place || s.attrs.length || s.minPay)) {
@@ -1355,11 +1373,14 @@ export function createEngine({ loadJobs, siteUrl = (path) => SITE.base + path, b
   function officeTurn(st, faq, asked) {
     const t = st.lastText.trim();
     const place = st.anyPlace && (faq !== 'human' || placeFrom(t)) ? st.anyPlace : null;
-    const hours = faq === 'officehours' || faq === 'afterhours' ? ' ' + hoursLine() + (urgentLine() ? '\n' + urgentLine() : '') : '';
     if (place && !place.outside) {
       const office = route({ audience: 'seeker', place }).office;
       const covers = place.city && !new RegExp(office.city, 'i').test(place.city) ? place.city : '';
-      return { reply: L(`Our ${office.city} office${covers ? ` covers ${covers}. It’s` : ' is'} at ${office.address}, and the number is ${office.phone}.`, `Notre bureau de ${office.city}${covers ? ` couvre ${covers}. Il se trouve au` : ' se trouve au'} ${office.address}, et le numéro est le ${office.phone}.`) + hours, contact: toContact({ person: null, office }), meta: { mode: st.mode } };
+      // "When is the St. John's office open?": the hours first; the card below has the address and number
+      if (faq === 'officehours' || faq === 'afterhours') {
+        return { reply: L(`Our ${office.city} office${covers ? `, which covers ${covers},` : ''} is open 8:30 to 4:30, Monday to Friday.`, `Notre bureau de ${office.city}${covers ? `, qui couvre ${covers},` : ''} est ouvert de 8 h 30 à 16 h 30, du lundi au vendredi.`) + (urgentLine() ? '\n' + urgentLine() : ''), contact: toContact({ person: null, office }), meta: { mode: st.mode } };
+      }
+      return { reply: L(`Our ${office.city} office${covers ? ` covers ${covers}. It’s` : ' is'} at ${office.address}, and the number is ${office.phone}.`, `Notre bureau de ${office.city}${covers ? ` couvre ${covers}. Il se trouve au` : ' se trouve au'} ${office.address}, et le numéro est le ${office.phone}.`), contact: toContact({ person: null, office }), meta: { mode: st.mode } };
     }
     const intro = faq === 'human' ? L('Of course. I can’t put a call through from here, but our offices are happy to help:', 'Bien sûr. Je ne peux pas transférer d’appel d’ici, mais nos bureaux seront heureux de vous aider :')
       : faq === 'officehours' || faq === 'afterhours' ? `${hoursLine()}${urgentLine() ? '\n' + urgentLine() : ''}\n${L('Our offices:', 'Nos bureaux :')}`
@@ -1725,7 +1746,8 @@ export function createEngine({ loadJobs, siteUrl = (path) => SITE.base + path, b
     // Say back what's new ("Three labourers in rural Nova Scotia, got it!"), or a short thanks
     // when they've just answered a question. The thanks rotates so it doesn't repeat.
     const shortThanks = pick(FR ? ['Parfait. ', 'Très bien. ', 'Merci. ', 'Super. '] : ['Perfect. ', 'Sounds good. ', 'Thanks. ', 'Great. '], seed);
-    const ack = asked === 'hire-service' && h.service === 'unsure' ? L('No problem, we can help you figure that out. ', 'Pas de problème, nous pouvons vous aider à y voir clair. ')
+    const ack = st.hireMiss ? L('Sorry, I didn’t catch that. ', 'Désolé, je n’ai pas compris. ')
+      : asked === 'hire-service' && h.service === 'unsure' ? L('No problem, we can help you figure that out. ', 'Pas de problème, nous pouvons vous aider à y voir clair. ')
       : asked === 'hire-place' && h.place?.unknown ? L('No problem, the office can sort that out with you. ', 'Pas de problème, le bureau verra cela avec vous. ')
       : known && known !== prevKnown && !(prevKnown && known.startsWith(prevKnown)) && asked !== 'hire-done' ? L(`${cap(known)}, got it. `, `${cap(known)}, c’est noté. `)
       : asked && asked.startsWith('hire-') && asked !== 'hire-role' && asked !== 'hire-done' ? shortThanks : '';
@@ -1749,7 +1771,8 @@ export function createEngine({ loadJobs, siteUrl = (path) => SITE.base + path, b
     // 1. The role
     if (!h.role || (h.role.generic && !h.role.count)) {
       return {
-        reply: asked === 'hire-role' ? L('No problem. What’s the job title, or the type of work?', 'Pas de problème. Quel est le titre du poste, ou le type de travail?')
+        reply: st.hireMiss ? L('Sorry, I didn’t catch that. What’s the job title, or the type of work?', 'Désolé, je n’ai pas compris. Quel est le titre du poste, ou le type de travail?')
+          : asked === 'hire-role' ? L('No problem. What’s the job title, or the type of work?', 'Pas de problème. Quel est le titre du poste, ou le type de travail?')
           : pick([L('Happy to help you find someone. Who do you need, and how many?', 'Avec plaisir. De qui avez-vous besoin, et combien de personnes?'), L('Let’s find you the right people. Who do you need, and how many?', 'Parfait, trouvons les bonnes personnes. De qui avez-vous besoin, et combien?')], seed),
         choices: P.hireRoles,
         meta: meta('hire-role'),

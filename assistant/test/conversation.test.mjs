@@ -185,6 +185,16 @@ await talk('Employer: until a month', ['need 2 cleaners in moncton on the 3rd of
   (r) => { expect(row(r, 'Start') === 'December 3', 'day of month'); expect(row(r, 'Length') === 'Until January', 'until'); });
 await talk('FR: employer date and length', ['J’ai besoin de 3 journaliers à Moncton lundi prochain pour 2 semaines'],
   (r) => { expect(r.summary.find(([k]) => k === 'Début')?.[1] === 'Lundi prochain', 'French start'); expect(r.summary.find(([k]) => k === 'Durée')?.[1] === '2 semaines', 'French length'); });
+// Josiah's test flows, October 30: nonsense mid-request, and an office's hours
+await talk('Employer: nonsense to a question', ["I'm hiring", 'warehouse workers', 'PEI', 'asdasdasdas'],
+  (r) => expect(/^Sorry, I didn’t catch that\. Is this for a set stretch/.test(r.reply) && r.meta.miss === 'unclear', 'says it missed, asks again'));
+await talk('Employer: nonsense as the role', ["I'm hiring", 'asdasdasd'], (r) => expect(/^Sorry, I didn’t catch that\./.test(r.reply), 'no "No problem."'));
+await talk('Employer: nonsense never reaches the request', ["I'm hiring", 'warehouse workers', 'jjjjjjj', 'PEI', 'contract', 'asap'],
+  (r) => expect(r.contact && !/jjjj/.test(r.contact.action.href), 'not in their words'));
+await talk('Office hours for a named office', ['When is St. John’s office open'], (r) => expect(/St\. John's office is open 8:30 to 4:30/.test(r.reply), 'hours, not just the address'));
+await talk('FR: office hours', ['Quand le bureau de Moncton est-il ouvert?'], (r) => expect(/ouvert de 8 h 30/.test(r.reply), 'French hours'));
+await talk('FR: office work is a job search', ['emplois de bureau à Moncton'], (r) => expect(!r.contact && /poste/.test(r.reply), 'jobs, not our office'));
+await talk('Seeker: what is open is still a search', ['whats open in moncton'], (r) => expect(/open around Moncton/.test(r.reply), 'not office hours'));
 // No broken echoes
 await talk('Seeker: all the jobs', ['show me all the jobs'], (r) => expect(r.jobs?.length === 3 && !/couldn/.test(r.reply), 'shows the newest'));
 await talk('Seeker: job alerts', ['can you email me jobs like this'], (r) => expect(/job alerts/.test(r.reply), 'answers the alerts question'));
