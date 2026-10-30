@@ -55,6 +55,8 @@ const sandboxSites = [{ key: 'isl', name: 'Integrated Staffing', href: '/isl-san
 
 <style>
   .footer { padding-block: var(--s8) var(--s6); }
+  /* Room under the last line for the chat button, which stays in the bottom corner */
+  @media (max-width: 600px) { .footer { padding-bottom: calc(var(--s6) + 64px); } }
   .footer a { text-decoration: none; }
   .footer a:hover { text-decoration: underline; }
 

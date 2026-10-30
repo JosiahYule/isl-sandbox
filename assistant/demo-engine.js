@@ -58,6 +58,7 @@ const W = (src, flags = 'gu') => new RegExp(src.replace(/</g, String.raw`(?<![\p
 const FRENCH_RE = W("<(je|j'ai|j'|vous|nous|suis|êtes|avez|est-ce|est|pour|avec|dans|une|des|les|du|bonjour|bonsoir|salut|allo|merci|emplois?|travail|travailler|cherche|recherche|besoin|oui|quel|quelle|quels|où|qui|comment|combien|mon|ma|mes|votre|vos|embauche|embaucher|embauchez|entrepôt|journaliers?|chauffeurs?|poste|postes|permis|postuler|salaire|heures|bureau|personnel|aide|svp|s'il|plaît|français|ailleurs|autre|autres|recommencer|seulement|voir|montrez|joindre|ça|c'est|n'est|pas)>", 'iu');
 const ENGLISH_RE = /\b(the|i|i'm|im|we|we're|need|looking|job|jobs|work|hiring|hire|what|how|where|who|can|could|do|does|is|are|my|you|your|any|have|please|hi|hello|hey|thanks|thank|yes|want|show|more|only|other|about|someone|there|this|that|get|find|english)\b/i;
 const FRENCH = [
+  ['<alertes? (d.)?emplois?>|<alertes? emploi>|<(m|nous).(envoyer|écrire) (des|les) (emplois|offres|postes)>', 'email me openings'],
   // People already working through ISL
   ["<je suis (malade|souffrante?)>", "i'm sick"], ["<je ne (peux|pourrai|vais) pas (venir|travailler|rentrer|être là|me présenter|y aller)>", "can't make it"],
   ["<(mon|ma) (quart|shift)( de travail)?>", 'my shift'], ['<quart de travail>', 'shift'],
@@ -90,12 +91,19 @@ const FRENCH = [
   ["<je viens d'arriver( au canada)?>|<nouvel(le)? arrivante?>|<nouveaux arrivants>|<immigrante?>", 'newcomer'],
   // Employers
   ["<nous embauchons>|<j'embauche>|<on embauche>", "i'm hiring"], ['<embauchez-vous>|<est-ce que vous embauchez>', 'are you hiring'],
-  ["<(j'ai|nous avons|on a|j'aurais|nous aurions) besoin d['e] ?", 'we need '], ['<(nous|on) cherch(ons|e)>', 'we need'], ['<(embaucher|recruter)>', 'hire'],
+  ["<(j'ai|nous avons|on a|j'aurais|nous aurions) besoin d['e] ?", 'we need '], ['<(nous|on) cherch(ons|e)>', 'we need'], ['<il (me|nous) faut>', 'we need'], ['<(embaucher|recruter)>', 'hire'],
   ["<manque de personnel>|<manque de main-d'(œ|oe)uvre>", 'short staffed'], ['<congé (de maternité|parental|de paternité)>', 'mat leave'], ['<(remplacer|remplacement)>', 'cover'],
   ['<combien (ça|cela) coûte>|<combien (chargez|facturez|demandez)-vous>|<vos (tarifs|prix|frais)>|<combien coûtez-vous>|<quels sont vos tarifs>', 'what do you charge'],
   ['<garantie>', 'guarantee'], ['<embauche directe>', 'direct hire'], ['<placement permanent>', 'permanent'],
   ['<le plus tôt possible>|<dès que possible>|<immédiatement>|<tout de suite>|<urgent>|<urgence>', 'asap'], ['<la semaine prochaine>', 'next week'], ['<le mois prochain>', 'next month'],
   ['<dans (quelques|les prochaines) semaines>', 'in a few weeks'], ['<pas pressée?>|<à l.avance>', 'planning ahead'],
+  // Days, dates and lengths, so "lundi prochain" and "pour 3 mois" reach the request as said
+  ['<aujourd.hui>', 'today'], ['<demain>', 'tomorrow'],
+  ['<(lundi|mardi|mercredi|jeudi|vendredi|samedi|dimanche) prochain>', (m, d) => `next ${{ lundi: 'monday', mardi: 'tuesday', mercredi: 'wednesday', jeudi: 'thursday', vendredi: 'friday', samedi: 'saturday', dimanche: 'sunday' }[d]}`],
+  ['<ce (lundi|mardi|mercredi|jeudi|vendredi|samedi|dimanche)>', (m, d) => `this ${{ lundi: 'monday', mardi: 'tuesday', mercredi: 'wednesday', jeudi: 'thursday', vendredi: 'friday', samedi: 'saturday', dimanche: 'sunday' }[d]}`],
+  ['<(?:le )?(1er|\\d{1,2}) (janvier|février|mars|avril|mai|juin|juillet|août|septembre|octobre|novembre|décembre)>', (m, n, mo) => `${n.replace('er', '')} ${{ janvier: 'january', février: 'february', mars: 'march', avril: 'april', mai: 'may', juin: 'june', juillet: 'july', août: 'august', septembre: 'september', octobre: 'october', novembre: 'november', décembre: 'december' }[mo]}`],
+  ['<pour (\\d{1,2}|un|une|deux|trois|quatre|cinq|six) (jours?|semaines?|mois|ans?)>', (m, n, u) => `for ${{ un: 1, une: 1, deux: 2, trois: 3, quatre: 4, cinq: 5, six: 6 }[n] ?? n} ${{ jour: 'day', jours: 'days', semaine: 'week', semaines: 'weeks', mois: 'months', an: 'year', ans: 'years' }[u]}`],
+  ["<pour l'été>|<pour l’été>", 'for the summer'], ['<pour les fêtes>', 'for the holidays'],
   ['<janvier>', 'january'], ['<février>', 'february'], ['<mars>', 'march'], ['<avril>', 'april'], ['<mai>', 'may'], ['<juin>', 'june'],
   ['<juillet>', 'july'], ['<août>', 'august'], ['<septembre>', 'september'], ['<octobre>', 'october'], ['<novembre>', 'november'], ['<décembre>', 'december'],
   // Questions about a job, pay and cost
@@ -138,7 +146,9 @@ const FRENCH = [
   ["<à l'extérieur du canada atlantique>|<hors du canada atlantique>", 'outside atlantic canada'], ['<saint-jean>|<st-jean>', 'saint john'], ['<régions? rurales?>|<rurale?>', 'rural'],
   // Everyday words
   ['<(bonjour|bonsoir|salut|allo|allô)>', 'hi'], ['<merci( beaucoup)?>', 'thanks'], ['<oui>', 'yes'], ["<d'accord>", 'okay'], ['<recommencer>', 'start over'],
-  ['<êtes-vous (un robot|une vraie personne|humain)>|<es-tu un robot>|<qui êtes-vous>', 'are you a bot'], ['<comment (ça va|allez-vous)>', 'how are you'],
+  ['<êtes-vous (un robot|une vraie personne|humain)>|<es-tu un robot>|<qui êtes-vous>', 'are you a bot'],
+  ['<(vous êtes|êtes-vous|es-tu|tu es) (un robot|une vraie personne|une personne|un humain|humain|une ia|un bot)>', 'are you a bot'],
+  ['<comment (ça va|allez-vous)>', 'how are you'],
   ['<deux>', 'two'], ['<trois>', 'three'], ['<quatre>', 'four'], ['<cinq>', 'five'], ['<sept>', 'seven'], ['<huit>', 'eight'], ['<neuf>', 'nine'],
   ['<dix>', 'ten'], ['<onze>', 'eleven'], ['<douze>', 'twelve'], ['<quinze>', 'fifteen'], ['<vingt>', 'twenty'], ['<quelques>|<plusieurs>', 'a few'],
   ['<(à|au|aux|en|dans)>', 'in'], ['<près de>', 'near'], ['<pour>', 'for'], ['<été>', 'summer'],
@@ -237,6 +247,10 @@ function correctSpelling(t, targets, known) {
 
 // ---------- Words about work ----------
 // Words that are never search terms on their own, even when a job title contains them.
+// Words that say how to ask, not what work: never echoed back as a kind of job
+const FILLER = new Set('show tell give send email e-mail text notify alert alerts let know like this these that those all every list see view browse latest newest recent today please can could will them it its but so too avez vous des les une un est ce que qui quoi de du la le'.split(' '));
+// "Show me all the jobs", "what's open?", "anything": the newest postings, no filter
+const ALL_RE = /\b(all|every|any|your)( of)?( the| your)?( current| open| available)? (jobs|openings|positions|postings|listings)\b|\bshow me (the |your |some )?jobs\b|\bwhat(?:'s| is| have you got| do you have) (open|available)\b|\b(latest|newest|recent) (jobs|openings|postings)\b|^(anything|any job|any work)[.! ]*$/;
 const STOP = new Set(("i im i'm am a an the and or but for to of in on at by with from near around any some looking look want wanting need needs " +
   'job jobs work working worker workers position positions role roles something anything find me my have has had experience experienced years year do does can ' +
   "could would like please hi hello hey there is are be what whats what's open opening openings available currently new get got also just really " +
@@ -499,8 +513,10 @@ function readRole(text) {
 function roleWords(t, place) {
   let r = ' ' + t + ' ';
   if (place) for (const w of [place.city, place.label, provinceName(place.province)].filter(Boolean)) r = r.replace(new RegExp(lower(w).replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g'), ' ');
-  r = r.replace(/\b(un|une|des|de|du|le|la|les|pour|avec|qui|en|nous|notre|nos|hi|hello|hey|please|thanks|i|we|we'?re|i'?m|our|my|need|needs|needed|want|wants|looking|look|for|hire|hiring|to|a|an|the|some|someone|somebody|who|can|could|you|help|us|me|in|at|on|near|around|by|from|rural|asap|as soon as possible|urgently|urgent|right away|immediately|next|this|week|month|start(ing)?|contract|temp(orary)?|permanent(ly)?|perm|full[- ]time|part[- ]time|direct hire|seasonal|short[- ]term|long[- ]term|days?|weeks?|months?|years?|\d+|one|two|three|four|five|six|seven|eight|nine|ten|few|several|couple|of|and|or|elsewhere|canada|province|area|is|are|be|do|does|have|has|get|find|recruit|fill|role|position|job|it|that|there|with|just|currently|also|more|extra|staff)\b/g, ' ');
+  r = r.replace(/\b(un|une|des|de|du|le|la|les|pour|avec|qui|en|nous|notre|nos|hi|hello|hey|please|thanks|i|we|we'?re|i'?m|our|my|need|needs|needed|want|wants|looking|look|for|hire|hiring|to|a|an|the|some|someone|somebody|who|can|could|you|help|us|me|in|at|on|near|around|by|from|rural|asap|as soon as possible|urgently|urgent|right away|immediately|next|this|week|month|start(ing)?|contract|temp(orary)?|permanent(ly)?|perm|full[- ]time|part[- ]time|direct hire|seasonal|short[- ]term|long[- ]term|days?|weeks?|months?|years?|\d+|one|two|three|four|five|six|seven|eight|nine|ten|few|several|couple|of|and|or|elsewhere|canada|province|area|is|are|be|do|does|have|has|get|find|recruit|fill|role|position|job|it|that|there|with|just|currently|also|more|extra|staff|but|so|too|really|work|working|jobs)\b/g, ' ');
   r = r.replace(/[^a-z' -]/g, ' ').replace(/\s+/g, ' ').trim();
+  // Only echo it back if something in it could be a job ("A but work, got it!" is worse than asking)
+  if (r.split(' ').every((w) => STOP.has(w) || FILLER.has(w))) return '';
   return r && r.split(' ').length <= 4 && /[a-z]{3}/.test(r) ? r : '';
 }
 function readCount(t) {
@@ -519,13 +535,53 @@ function readService(text, asked) {
   return null;
 }
 const MONTHS = ['january', 'february', 'march', 'april', 'may', 'june', 'july', 'august', 'september', 'october', 'november', 'december'];
+const WEEKDAYS = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+// "nov", "nov.", "sept" and full names, all pointing at the full month
+const MONTH_RE = String.raw`(january|february|march|april|may|june|july|august|september|october|november|december|jan|feb|mar|apr|jun|jul|aug|sept|sep|oct|nov|dec)\.?`;
+const fullMonth = (m) => MONTHS.find((x) => x.startsWith(m.replace('.', '').slice(0, 3)));
+const UNIT = String.raw`(day|week|month|year)s?`;
+const AMOUNT = String.raw`(\d{1,2}|a|an|one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|a few|a couple(?: of)?|couple(?: of)?)`;
+// How long the job lasts: "for 3 months", "a 2-week contract", "for the summer", "until December"
+const LENGTH_RE = new RegExp(String.raw`\bfor (?:about |around |roughly |approximately )?${AMOUNT}(?: or \d{1,2})? ${UNIT}\b|\b(\d{1,2})[- ](day|week|month|year)s? (contract|assignment|term|job|stint|project)\b|\bfor the (summer|winter|fall|spring|season|holidays?|christmas season)\b|\buntil (?:the end of )?${MONTH_RE}`, 'i');
+
+// When they want someone to start. Specific words ("next Monday", "November 15") are kept as they are,
+// so the recruiter gets the real date; only vague answers go into the three broad buckets.
 function readStart(text) {
-  const t = lower(text);
-  if (/\basap\b|as soon as|right away|immediately|urgent|tomorrow|today|tonight|this week|monday|tuesday|wednesday|thursday|friday|yesterday/.test(t)) return 'As soon as possible';
-  const month = MONTHS.find((m) => new RegExp(`\\b${m}\\b`).test(t) && !(m === 'may' && /\bmay (i|we|be|have|need)\b/.test(t)));
+  // Lengths ("for 2 weeks") aren't start dates
+  const t = lower(text).replace(new RegExp(LENGTH_RE.source, 'gi'), ' ');
+  if (/\btoday\b|\btonight\b/.test(t)) return 'Today';
+  if (/\btomorrow\b/.test(t)) return 'Tomorrow';
+  const day = WEEKDAYS.find((d) => new RegExp(`\\b${d}\\b`).test(t));
+  if (day) {
+    const which = t.match(new RegExp(`\\b(next|this|coming)\\s+${day}\\b`))?.[1];
+    return which === 'next' ? `Next ${cap(day)}` : which ? `This ${cap(day)}` : cap(day);
+  }
+  // "Nov 15", "November 15th", "15 November", "the 15th of November"
+  let m = t.match(new RegExp(String.raw`\b${MONTH_RE}\s+(\d{1,2})(?:st|nd|rd|th)?\b`));
+  if (m && Number(m[2]) <= 31) return `${cap(fullMonth(m[1]))} ${Number(m[2])}`;
+  m = t.match(new RegExp(String.raw`\b(\d{1,2})(?:st|nd|rd|th)?\s+(?:of\s+)?${MONTH_RE}(?![a-z])`));
+  if (m && Number(m[1]) <= 31) return `${cap(fullMonth(m[2]))} ${Number(m[1])}`;
+  if (/\basap\b|as soon as|right away|immediately|urgent|this week|yesterday|last week/.test(t)) return 'As soon as possible';
+  const month = MONTHS.find((x) => new RegExp(`\\b${x}\\b`).test(t) && !(x === 'may' && /\bmay (i|we|be|have|need)\b/.test(t)));
   if (month) return `In ${cap(month)}`;
-  if (/next week|few weeks|couple (of )?weeks|two weeks|\b\d+ weeks\b|next month|in a month/.test(t)) return 'In the next few weeks';
-  if (/planning|no rush|not urgent|later|down the road|ahead|in the (spring|summer|fall|winter)|for the (fall|spring|summer|winter)/.test(t)) return 'Planning ahead';
+  if (/\bnext week\b/.test(t)) return 'Next week';
+  if (/\bnext month\b|\bin a month\b/.test(t)) return 'Next month';
+  if (/few weeks|couple (of )?weeks|two weeks|\b\d+ weeks\b/.test(t)) return 'In the next few weeks';
+  if (/planning|no rush|not urgent|later|down the road|ahead|in the (spring|summer|fall|winter)/.test(t)) return 'Planning ahead';
+  return null;
+}
+function readLength(text) {
+  const m = lower(text).match(LENGTH_RE);
+  if (!m) return null;
+  if (m[1]) {
+    const word = m[1].replace(/ of$/, '');
+    const n = /^\d/.test(word) ? Number(word) : word === 'a' || word === 'an' ? 1 : NUM_WORDS.indexOf(word);
+    if (n > 0) return `${n} ${m[2]}${n === 1 ? '' : 's'}`;
+    return `${cap(word.replace(/^couple$/, 'a couple'))} ${m[2]}s`;
+  }
+  if (m[3]) return `${Number(m[3])} ${m[4]}${Number(m[3]) === 1 ? '' : 's'}`;
+  if (m[6]) return `The ${m[6].replace(/^holiday$/, 'holidays')}`;
+  if (m[7]) return `Until ${cap(fullMonth(m[7]))}`;
   return null;
 }
 
@@ -547,6 +603,7 @@ const FAQ = [
   // "Who's in charge of marketing?", "who do I talk to about partnerships?"
   ['who', /\bwho (is|are|'s|s) (the |your |isl'?s )?(ceo|president|owners?|boss|founders?|partners?|head|director|leader|leadership|manager|gm)\b|\bwho owns\b|\bwho\b.*\b(in charge|responsible|handles?|runs?|manages?|oversees?|looks after|leads?|deals with|takes care of|is the (head|director|manager|lead)|(do|should|can|would) i (talk|speak|reach out|go|write) to|(do|should|can|would) i (contact|email|call|ask)|to (talk|speak) to)\b|\b(in charge of|responsible for|head of|director of)\b|\b(contact|person|someone|somebody) (for|about|regarding|in charge of)\b/],
   // Reaching a person or an office
+  ['bot', /\bare you (a |an )?(bot|robot|real|human|ai|person|actual|live)\b|\bis this (a )?(bot|robot|real person|human|ai|live chat)\b|\bam i (talking|speaking|chatting) (to|with) (a )?(bot|robot|real|human|person|ai)\b/],
   ['human', /\b(real|actual|live) (person|human|people)\b|\b(talk|speak|chat) (to|with) (a |an )?(someone|somebody|person|human|recruiter|agent|rep|representative|manager)\b|\b(call|phone|ring) me\b|\bhuman\b|\brepresentative\b/],
   ['afterhours', /\bafter[- ]hours\b|\bon[- ]call\b|\b(24\/7|24 hours|around the clock)\b|\b(is|are) (anyone|someone|somebody) (there|available|working)( now| tonight| right now| this weekend| on weekends)?\b|\b(emergency|urgent) (contact|number|line)\b|\bweekend (number|contact|line)\b/],
   ['officehours', /\b(office|opening|business|store) hours\b|\bwhen (are|is) (you|the office) open\b|\bwhat time (do|does) (you|the office|it) (open|close)\b|\bare you open\b/],
@@ -563,6 +620,7 @@ const FAQ = [
   // Jobs on ISL's own team
   ['isljobs', /\b(jobs?|work(ing)?|careers?|positions?|openings?|employment) (at|for|with) (isl|integrated staffing|accountant staffing|administrative staffing|your (company|office|team|agency))( itself)?\b|\bjoin (your|the isl|isl'?s|the) team\b|\bwork for you guys\b|\bwork(ing)? at your (office|company)\b|\binternal (jobs|positions|openings)\b/],
   // Everyone
+  ['alerts', /\bjob alerts?\b|\b(email|e-mail|text|send|notify)( me| us)?\b.*\b(jobs?|openings?|postings?|listings?)\b|\blet me know (when|if)\b.*\b(jobs?|openings?|something)\b/],
   ['count', /\bhow many (jobs|openings|positions|postings|roles)\b/],
   ['apply', /\bhow (do|can) i apply\b|\bapply(ing)? (for|to)\b|\bapplication process\b|\bwhere (do|can) i apply\b/],
   ['status', /\b(status|heard back|hear back|update) (of|on|about)? ?(my )?(application|resume)|\bdid you (get|receive) my\b|\bapplied (last|a few|yesterday|on|for)\b|\bhaven'?t heard (back|anything)\b/],
@@ -646,12 +704,12 @@ function dataQuestion(text, asked, context) {
 
 // ---------- Reading the conversation ----------
 // Walks every visitor message in order and builds up what we know.
-const freshSeek = () => ({ terms: null, unknownWork: '', attrs: [], minPay: null, place: null, employment: 'any', page: 0 });
+const freshSeek = () => ({ terms: null, unknownWork: '', all: false, attrs: [], minPay: null, place: null, employment: 'any', page: 0 });
 function readConversation(messages, context, vocab, directory) {
   const st = {
     mode: null,
     seek: freshSeek(),
-    hire: { role: null, place: null, service: null, start: null },
+    hire: { role: null, place: null, service: null, start: null, length: null, said: [] },
     lastFaq: null,
     lastText: '',
     lastMeta: null,
@@ -700,7 +758,7 @@ function readConversation(messages, context, vocab, directory) {
 
     st.dataQ = dataQuestion(text, asked, context);
     if (st.dataQ) { st.dataPlace = place; continue; } // answered from data: doesn't change the search or the request
-    if (faq === 'restart') { st.mode = null; st.seek = freshSeek(); st.hire = { role: null, place: null, service: null, start: null }; continue; }
+    if (faq === 'restart') { st.mode = null; st.seek = freshSeek(); st.hire = { role: null, place: null, service: null, start: null, length: null, said: [] }; continue; }
     if (faq && faq.startsWith('w-')) { st.mode = st.mode === 'employer' ? st.mode : 'worker'; continue; }
     st.named = peopleNamed(lower(plain), directory).length ? peopleNamed(lower(plain), directory) : peopleNamed(lower(typed), directory);
     if (st.named.length || faq === 'who' || faq === 'isljobs') continue;
@@ -734,12 +792,16 @@ function readConversation(messages, context, vocab, directory) {
       if (/^for a set time$/.test(t.trim())) st.hire.service = 'contract';
       const start = readStart(text);
       if (start) st.hire.start = start;
+      const length = readLength(text);
+      if (length) st.hire.length = length;
+      // Keep what they typed in their own words (not tapped buttons), so the recruiter sees it as written
+      if (!button && !Object.prototype.hasOwnProperty.call(BUTTONS_FR, typed.trim()) && typed.trim().length > 2) st.hire.said.push(typed.trim().replace(/\s+/g, ' '));
       continue;
     }
 
     // Job seeker (or not yet known)
     if (faq === 'more') { st.seek.page += 1; continue; }
-    if (faq === 'otherwork') { st.seek.terms = null; st.seek.unknownWork = ''; st.seek.page = 0; continue; }
+    if (faq === 'otherwork') { st.seek.terms = null; st.seek.unknownWork = ''; st.seek.all = false; st.seek.page = 0; continue; }
     if (faq === 'otherplace') { st.mode = st.mode || 'seeker'; continue; }
     if (/^show me those$/.test(t.trim()) && st.lastMeta?.ask === 'seek-widen') { st.seek.place = null; st.seek.page = 0; continue; }
     const minPay = readMinPay(t);
@@ -749,15 +811,17 @@ function readConversation(messages, context, vocab, directory) {
     if (/\bonly permanent\b|\bpermanent\b/.test(t)) { st.seek.employment = 'permanent'; changed = true; }
     else if (/\bonly contract\b|\btemp(orary)?\b|\bcontract\b|\bcasual\b/.test(t)) { st.seek.employment = 'temporary'; changed = true; }
     else if (/\bany type\b|\beither\b|\bboth\b/.test(t)) { st.seek.employment = 'any'; changed = true; }
-    if (/\bany (type of |kind of )?(work|job)\b|^anything\b|\banything (is fine|works|at all)\b/.test(t)) { st.seek.terms = null; changed = true; }
+    if (/\bany (type of |kind of )?(work|job)\b|^anything\b|\banything (is fine|works|at all)\b/.test(t)) { st.seek.terms = null; st.seek.all = true; changed = true; }
     for (const [key, a] of Object.entries(ATTRS)) if (a.re.test(t) && !st.seek.attrs.includes(key)) { st.seek.attrs.push(key); changed = true; }
     if (minPay) { st.seek.minPay = minPay; changed = true; }
     const terms = jobTermsOf(t, original, vocab);
     if (hasTerms(terms)) { st.seek.terms = terms; st.seek.unknownWork = ''; changed = true; }
+    else if (ALL_RE.test(t)) { st.seek.terms = null; st.seek.unknownWork = ''; st.seek.all = true; st.mode = st.mode || 'seeker'; changed = true; }
     // "marine biologist jobs": clearly a job search, just not for work we have words for
     else if (!changed && /\b(jobs?|work|positions?|roles?|openings?|careers?|employment)\b/.test(t) && !SEEKER_RE.test(t)) {
       const what = t.replace(/\b(any|some|looking for|i'?m|i am|do you have|are there|jobs?|work|positions?|roles?|openings?|careers?|employment|in|near|around|for|a|an|the)\b/g, ' ').replace(/[^a-z' ]/g, ' ').replace(/\s+/g, ' ').trim();
-      if (what) { st.seek.unknownWork = what.slice(0, 40); st.seek.terms = null; st.mode = st.mode || 'seeker'; changed = true; }
+      const kept = what.split(' ').filter((w) => !STOP.has(w) && !FILLER.has(w)).join(' ');
+      if (kept) { st.seek.unknownWork = kept.slice(0, 40); st.seek.terms = null; st.mode = st.mode || 'seeker'; changed = true; }
     }
     if (changed) st.seek.page = 0;
     const modeSignal = SEEKER_RE.test(t) || /^(i'?m looking for work|find me a job|show me jobs)$/.test(t.trim());
@@ -1040,7 +1104,7 @@ export function createEngine({ loadJobs, siteUrl = (path) => SITE.base + path, b
     if (lang !== 'fr') return out;
     out.reply = String(r.reply || '').replace(/ ([:%])/g, ' $1');
     if (r.choices) out.choices = r.choices.map((c) => (typeof c === 'string' ? buttonFr(c) : { ...c, label: LINKS_FR[c.label] || c.label }));
-    if (r.summary) out.summary = r.summary.map(([k, v]) => [{ Role: 'Poste', Where: 'Lieu', Type: 'Type', Start: 'Début' }[k] || k, v]);
+    if (r.summary) out.summary = r.summary.map(([k, v]) => [{ Role: 'Poste', Where: 'Lieu', Type: 'Type', Start: 'Début', Length: 'Durée' }[k] || k, v]);
     if (r.contact) {
       const c = { ...r.contact };
       c.name = c.name.replace(/^(.+) office$/, 'Bureau de $1');
@@ -1115,7 +1179,9 @@ export function createEngine({ loadJobs, siteUrl = (path) => SITE.base + path, b
     if (faq === 'who') return whoTurn(st);
 
     // People already working through ISL
-    if ((faq && faq.startsWith('w-')) || asked === 'worker-office' || WORKER_RE.test(lower(st.lastText).trim())) return workerTurn(st, asked);
+    // Asking for a person or an office while we're waiting for their office: answer that instead
+    const offTopic = ['human', 'contact', 'officehours', 'officewhere', 'afterhours'].includes(faq);
+    if ((faq && faq.startsWith('w-')) || (asked === 'worker-office' && !offTopic) || WORKER_RE.test(lower(st.lastText).trim())) return workerTurn(st, asked);
     if (faq === 'scam') {
       return { reply: L(`Good on you for checking. ${P.us} never charges job seekers a fee, and never asks for banking details or a payment to apply or to start a job. If a message asks for either, don’t reply. To check whether it’s really us, call an office directly:\n${OFFICE_LINES}`,
         `Bonne idée de vérifier. ${P.us} ne demande jamais de frais aux chercheurs d’emploi, et ne demande jamais de coordonnées bancaires ni de paiement pour postuler ou commencer un emploi. Si un message demande l’un ou l’autre, n’y répondez pas. Pour vérifier si c’est vraiment nous, appelez directement un bureau :\n${OFFICE_LINES}`), choices: OFFICE_CHOICES, meta: meta({ ask: 'office-pick' }) };
@@ -1184,7 +1250,8 @@ export function createEngine({ loadJobs, siteUrl = (path) => SITE.base + path, b
     const afterHours = urgent && asked !== 'worker-office' ? '\n' + [hoursLine(), urgentLine()].filter(Boolean).join(' ') : '';
     const place = asked === 'worker-office' ? placeFrom(st.lastText) : st.anyPlace;
     if (!place || place.outside) {
-      return { reply: `${intro}${afterHours}\n${L('Which office do you work with?', 'Avec quel bureau travaillez-vous?')}`, choices: OFFICE_CHOICES, meta: { mode: 'worker', ask: 'worker-office', topic } };
+      const which = L('Which office do you work with?', 'Avec quel bureau travaillez-vous?');
+      return { reply: asked === 'worker-office' ? which : `${intro}${afterHours}\n${which}`, choices: OFFICE_CHOICES, meta: { mode: 'worker', ask: 'worker-office', topic } };
     }
     const office = route({ audience: 'seeker', place }).office;
     return { reply: asked === 'worker-office' ? intro : `${intro}${afterHours}\n${L(`Here’s your ${office.city} office:`, `Voici votre bureau de ${office.city} :`)}`, contact: toContact({ person: null, office }), choices: ['Start over'], meta: { mode: 'worker', topic } };
@@ -1350,6 +1417,8 @@ export function createEngine({ loadJobs, siteUrl = (path) => SITE.base + path, b
       case 'about':
         if (spec) return { reply: L(`We’re ${P.name}! Since ${P.since}, we’ve recruited ${P.field[0]} for temporary and permanent roles across Atlantic Canada, from offices in Halifax, Moncton and St. John's. What kind of work are you looking for?`, `Nous sommes ${P.name}! Depuis ${P.since}, nous recrutons ${P.field[1]} pour des postes temporaires et permanents dans tout le Canada atlantique, à partir de nos bureaux de Halifax, de Moncton et de St. John's. Quel type de travail recherchez-vous?`), choices: kinds, meta: { ...meta, ask: 'seek-work' } };
         return { reply: L('We’re Integrated Staffing! We place people in contract and permanent jobs, from five local offices across Atlantic Canada. What kind of work are you looking for?', 'Nous sommes Integrated Staffing! Nous plaçons des gens dans des emplois contractuels et permanents, à partir de cinq bureaux locaux dans le Canada atlantique. Quel type de travail recherchez-vous?'), choices: kinds, meta: { ...meta, ask: 'seek-work' } };
+      case 'alerts':
+        return { reply: L('I can’t send job alerts yet. The best way to hear about new roles is to send your resume once; a recruiter will reach out when one fits.', 'Je ne peux pas encore envoyer d’alertes d’emploi. Le meilleur moyen d’être informé des nouveaux postes est d’envoyer votre CV une fois; un recruteur vous contactera quand un poste correspondra.'), choices: [{ label: 'Send my resume', href: links.generalApply }, 'Show me jobs'], meta };
       case 'resume':
         return { reply: L('Good idea. Send your resume once, and a recruiter will reach out when a role fits.', 'Bonne idée. Envoyez votre CV une fois, et un recruteur vous contactera quand un poste correspondra.'), choices: [{ label: 'Send my resume', href: links.generalApply }, 'Show me jobs'], meta };
       default:
@@ -1367,7 +1436,7 @@ export function createEngine({ loadJobs, siteUrl = (path) => SITE.base + path, b
     if (s.unknownWork && !hasTerms(terms)) {
       return { reply: welcome + L(`I couldn’t find any ${s.unknownWork} jobs open right now, sorry! If you send your resume, a recruiter will reach out when something fits.`, `Je n’ai trouvé aucun emploi de type « ${s.unknownWork} » en ce moment, désolé! Si vous envoyez votre CV, un recruteur vous contactera quand quelque chose correspondra.`), choices: [resume, 'Other kinds of work', { label: 'All open jobs', href: links.findWork }], meta };
     }
-    if (st.lastFaq === 'otherwork' || (!hasTerms(terms) && !s.place && !s.attrs.length && !s.minPay)) {
+    if (st.lastFaq === 'otherwork' || (!hasTerms(terms) && !s.place && !s.attrs.length && !s.minPay && !s.all)) {
       return {
         reply: st.lastFaq === 'otherwork' ? L('Sure! What kind of work would you like?', 'Bien sûr! Quel type de travail aimeriez-vous?')
           : pick([L(`Love to help! We have ${jobs.length} open jobs right now. What kind of work are you looking for, and where?`, `Avec plaisir! Nous avons ${jobs.length} emplois ouverts en ce moment. Quel type de travail recherchez-vous, et où?`),
@@ -1679,7 +1748,18 @@ export function createEngine({ loadJobs, siteUrl = (path) => SITE.base + path, b
     const SERVICE = (spec
       ? { direct: ['Permanent', 'Permanent'], contract: ['Temporary', 'Temporaire'], 'temp-to-perm': ['Temporary, with the option to hire', 'Temporaire, avec possibilité d’embauche'], unsure: ['Not sure yet', 'Pas encore décidé'] }
       : { direct: ['Permanent (direct hire)', 'Permanent (embauche directe)'], contract: ['Contract', 'Contrat'], 'temp-to-perm': ['Contract, with the option to hire', 'Contrat, avec possibilité d’embauche'], unsure: ['Not sure yet', 'Pas encore décidé'] })[h.service];
-    const startFr = (s) => ({ 'As soon as possible': 'Dès que possible', 'In the next few weeks': 'Dans les prochaines semaines', 'Planning ahead': 'Planification à l’avance' }[s] || s.replace(/^In (\w+)$/, (m, mo) => `En ${MONTHS_FR[mo] || mo}`));
+    const DAYS_FR = { Monday: 'lundi', Tuesday: 'mardi', Wednesday: 'mercredi', Thursday: 'jeudi', Friday: 'vendredi', Saturday: 'samedi', Sunday: 'dimanche' };
+    const startFr = (s) => ({ 'As soon as possible': 'Dès que possible', 'In the next few weeks': 'Dans les prochaines semaines', 'Planning ahead': 'Planification à l’avance',
+      Today: 'Aujourd’hui', Tomorrow: 'Demain', 'Next week': 'La semaine prochaine', 'Next month': 'Le mois prochain' }[s]
+      || s.replace(/^In (\w+)$/, (m, mo) => `En ${MONTHS_FR[mo] || mo}`)
+        .replace(/^Next (\w+day)$/, (m, d) => cap(`${DAYS_FR[d]} prochain`)).replace(/^This (\w+day)$/, (m, d) => cap(`ce ${DAYS_FR[d]}`))
+        .replace(/^(\w+day)$/, (m, d) => cap(DAYS_FR[d] || d)).replace(/^([A-Z][a-z]+) (\d{1,2})$/, (m, mo, n) => `${n === '1' ? '1er' : n} ${MONTHS_FR[mo] || mo}`));
+    const UNITS_FR = { day: 'jour', week: 'semaine', month: 'mois', year: 'an' };
+    const lengthFr = (s) => s.replace(/^(\d+) (day|week|month|year)s?$/, (m, n, u) => `${n} ${UNITS_FR[u]}${n !== '1' && u !== 'month' ? 's' : ''}`)
+      .replace(/^A few (\w+?)s$/, (m, u) => `Quelques ${UNITS_FR[u]}s`).replace(/^A couple (\w+?)s$/, (m, u) => `Deux ou trois ${UNITS_FR[u]}${u === 'month' ? '' : 's'}`)
+      .replace(/^The summer$/, 'L’été').replace(/^The winter$/, 'L’hiver').replace(/^The fall$/, 'L’automne').replace(/^The spring$/, 'Le printemps')
+      .replace(/^The (season|holidays|christmas season)$/, (m, x) => ({ season: 'La saison', holidays: 'Les fêtes', 'christmas season': 'Le temps des fêtes' })[x])
+      .replace(/^Until (\w+)$/, (m, mo) => `Jusqu’en ${MONTHS_FR[mo] || mo}`);
     const placeLabel = h.place.outside ? (FR ? cap(whereFr(h.place).replace(/^(à l’|à |en |au |dans les )/, '').replace(/^extérieur/, 'Hors')) : cap(h.place.label))
       : h.place.city ? `${h.place.city}, ${FR ? provFr(h.place.province) : provinceName(h.place.province)}` : FR ? cap(h.place.rural ? whereFr(h.place).replace(/^en /, '') : provFr(h.place.province)) : cap(h.place.label);
     const summary = [
@@ -1687,12 +1767,16 @@ export function createEngine({ loadJobs, siteUrl = (path) => SITE.base + path, b
       ['Where', placeLabel],
       ['Type', L(...SERVICE)],
       ...(h.start && service !== 'direct' ? [['Start', FR ? startFr(h.start) : h.start]] : []),
+      ...(h.length && service !== 'direct' ? [['Length', FR ? lengthFr(h.length) : h.length]] : []),
     ].filter(([, v]) => v);
 
     // The request form's details stay in English: the form and the recruiter's inbox are in English
     const whoEn = !h.role ? '' : h.role.count === 'several' ? `a few ${h.role.many}` : h.role.count > 1 ? `${numberWord(h.role.count)} ${h.role.many}` : !h.role.count && h.role.plural ? h.role.many : `${/^[aeiou]/i.test(h.role.one) ? 'an' : 'a'} ${h.role.one}`;
     const whereEn = h.place.outside ? (/^outside/.test(h.place.label) ? h.place.label : `in ${h.place.label}`) : h.place.city ? `in ${h.place.city}` : `in ${h.place.label}`;
-    const details = `${cap(whoEn)} ${whereEn}. ${SERVICE[0]}.${h.start && service !== 'direct' ? ' Start: ' + h.start.toLowerCase() + '.' : ''}${FR ? ' (The visitor wrote in French.)' : ''}`;
+    const startEn = h.start && /^(As soon|In the next|Planning)/.test(h.start) ? h.start.toLowerCase() : h.start;
+    // Their own words go last, word for word, so nothing they said is lost in the summary
+    const said = h.said.join(' / ').slice(0, 400);
+    const details = `${cap(whoEn)} ${whereEn}. ${SERVICE[0]}.${h.start && service !== 'direct' ? ' Start: ' + startEn + '.' : ''}${h.length && service !== 'direct' ? ' Length: ' + h.length.toLowerCase().replace(/^until (\w)/, (m, c) => 'until ' + c.toUpperCase()) + '.' : ''}${said ? ` In their words: "${said}"` : ''}${FR ? ' (The visitor wrote in French.)' : ''}`;
     const hireParams = new URLSearchParams({ service: service === 'direct' ? 'direct' : 'contract', details });
     if (h.place.province) hireParams.set('where', provinceName(h.place.province));
     if (h.place.outside) hireParams.set('where', 'Elsewhere in Canada');

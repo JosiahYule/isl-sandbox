@@ -103,6 +103,7 @@ const schema = {
         <!-- Job seekers are the ones scammers target, and this is the page they read -->
         <p class="safe">Applying is free. We never ask for a fee or banking details.</p>
         {job.description && <a class="rc" href={url(`/learn/tools/resume-check/?job=${job.id}`)}>Check your resume against this job</a>}
+        {brand.assistant && <button type="button" class="share" data-open-assistant>Ask a question about this job</button>}
         <button type="button" class="share" data-share>Share this job</button>
         <p class="ask">Questions? <a href={ask.href}>{ask.name}</a> <a class="tel" href={tel(ask.phone)}>{ask.phone}</a></p>
       </aside>

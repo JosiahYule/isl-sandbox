@@ -59,7 +59,6 @@
     job: { text: "Hi there! Questions about this job? Ask me about the pay, the hours or what you need to apply.", choices: ["What are the hours?", "What do I need?", "Similar jobs"], placeholder: "Ask about this job" },
   };
   const LAUNCHER = { ask: "Ask ISL", seeker: "Find a job", employer: "Hiring? Ask us", job: "Ask about this job" };
-  const SUBTITLE = { ask: "Jobs and hiring", seeker: "Job search", employer: "Hiring help", job: "About this job" };
 
   // The same window in French. The conversation's language comes back from the assistant on every
   // reply (meta.lang), so the labels follow whatever language the visitor is writing in.
@@ -70,14 +69,13 @@
     job: { text: "Bonjour! Des questions sur cet emploi? Demandez-moi le salaire, les heures ou ce qu’il faut pour postuler.", choices: ["Quelles sont les heures?", "De quoi ai-je besoin?", "Emplois semblables"], placeholder: "Une question sur cet emploi" },
   };
   const LAUNCHER_FR = { ask: "Demandez à ISL", seeker: "Trouver un emploi", employer: "Vous embauchez?", job: "Questions sur cet emploi" };
-  const SUBTITLE_FR = { ask: "Emplois et embauche", seeker: "Recherche d’emploi", employer: "Aide à l’embauche", job: "À propos de cet emploi" };
   const UI = {
     en: { contract: "Contract", tempToPerm: "Temp to perm", view: "View job", apply: "Apply", request: "Your request", office: (c) => `About the ${c} office`, open: "Open the ISL assistant",
-      panel: "ISL assistant", reset: "Start over", resetLabel: "Start a new conversation", close: "Close", typing: "Typing", message: "Your message", send: "Send",
-      fine: "AI assistant. Check the full posting before you apply.", fallback: "Here's what I found.", error: "Something went wrong. Please try again.", other: "Français", otherLabel: "Continuer en français" },
+      panel: "ISL assistant", subtitle: "Automated assistant", reset: "Start over", resetLabel: "Start a new conversation", close: "Close", typing: "Typing", message: "Your message", send: "Send",
+      fine: "Automated assistant. Check the full posting before you apply.", fallback: "Here's what I found.", error: "Something went wrong. Please try again.", other: "Français", otherLabel: "Continuer en français" },
     fr: { contract: "Contrat", tempToPerm: "Temporaire à permanent", view: "Voir l’offre", apply: "Postuler", request: "Votre demande", office: (c) => `À propos du bureau de ${c}`, open: "Ouvrir l’assistant ISL",
-      panel: "Assistant ISL", reset: "Recommencer", resetLabel: "Commencer une nouvelle conversation", close: "Fermer", typing: "En train d’écrire", message: "Votre message", send: "Envoyer",
-      fine: "Assistant IA. Lisez l’offre complète avant de postuler.", fallback: "Voici ce que j’ai trouvé.", error: "Un problème est survenu. Veuillez réessayer.", other: "English", otherLabel: "Continue in English" },
+      panel: "Assistant ISL", subtitle: "Assistant automatisé", reset: "Recommencer", resetLabel: "Commencer une nouvelle conversation", close: "Fermer", typing: "En train d’écrire", message: "Votre message", send: "Envoyer",
+      fine: "Assistant automatisé. Lisez l’offre complète avant de postuler.", fallback: "Voici ce que j’ai trouvé.", error: "Un problème est survenu. Veuillez réessayer.", other: "English", otherLabel: "Continue in English" },
   };
 
   const CSS = `
@@ -109,7 +107,7 @@
     /* Only when it opens: the window is rebuilt on every message, and replaying this each time made it flash */
     .panel.opening { animation: open .28s cubic-bezier(.2,.7,.1,1); }
     @keyframes open { from { opacity: 0; transform: translateY(12px); } }
-    @media (max-width: 480px) { .panel { right: 0; bottom: 0; width: 100vw; height: 100%; border: 0; } }
+    @media (max-width: 480px) { .panel { right: 0; bottom: 0; width: 100vw; height: 100%; height: 100dvh; border: 0; } }
     .head { display: flex; align-items: center; gap: 12px; padding: 12px 10px 12px 16px; background: var(--dark); color: var(--white); border-bottom: 3px solid var(--edge); }
     .mark { width: 34px; height: 34px; flex: none; display: grid; place-items: center; background: var(--mark); color: var(--mark-ink); font-weight: 700; font-size: 12px; letter-spacing: .02em; }
     .head .t { flex: 1; min-width: 0; }
@@ -118,7 +116,9 @@
     .icon-btn { border: 0; background: transparent; color: inherit; cursor: pointer; width: 34px; height: 34px; display: grid; place-items: center; }
     .icon-btn:hover { background: rgba(255,255,255,.12); }
 
-    .log { flex: 1; overflow-y: auto; padding: 18px 16px 8px; display: flex; flex-direction: column; gap: 10px; background: var(--mist); scroll-behavior: smooth; }
+    .log { position: relative; flex: 1; overflow-y: auto; overscroll-behavior: contain; padding: 18px 16px 8px; display: flex; flex-direction: column; gap: 10px; background: var(--mist); scroll-behavior: smooth; }
+    .msg a { color: inherit; font-weight: 600; text-decoration: underline; text-underline-offset: .15em; }
+    .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
     .msg { max-width: 88%; padding: 10px 13px; white-space: pre-wrap; overflow-wrap: anywhere; }
     .bot { align-self: flex-start; background: var(--white); border: 1px solid var(--line); }
     .me { align-self: flex-end; background: var(--dark); color: var(--white); }
@@ -186,7 +186,7 @@
     .choices a::after { content: "↗"; font-size: 11px; }
 
     form { display: flex; gap: 8px; padding: 10px 12px; border-top: 1px solid var(--line); background: var(--white); }
-    textarea { flex: 1; min-width: 0; resize: none; border: 1.5px solid var(--line); padding: 10px 12px; font-family: inherit; font-size: 14px; line-height: 1.4; color: var(--ink); max-height: 120px; }
+    textarea { flex: 1; min-width: 0; resize: none; border: 1.5px solid var(--line); padding: 10px 12px; font-family: inherit; font-size: 16px; line-height: 1.4; color: var(--ink); max-height: 120px; } /* 16px: iPhones zoom the page into smaller boxes */
     textarea:focus { outline: none; border-color: var(--dark); }
     .send { border: 0; background: var(--blue); color: var(--white); width: 44px; display: grid; place-items: center; cursor: pointer; }
     .send:hover { background: var(--blue-deep); }
@@ -195,6 +195,8 @@
     .fine { margin: 0; padding: 7px 14px; font-size: 11.5px; color: var(--muted); background: var(--white); border-top: 1px solid var(--line); }
     .fine.demo { color: var(--ink); background: var(--blue-tint); }
 
+    /* Phones (after the base styles, so it wins): buttons big enough to tap without hitting the one next to them */
+    @media (pointer: coarse) { .choices button, .choices a { min-height: 44px; padding: 10px 13px; font-size: 13.5px; } .icon-btn { width: 44px; height: 44px; } }
     @media (prefers-reduced-motion: reduce) { .panel.opening, .new, .typing i { animation: none; } .log { scroll-behavior: auto; } }
   `;
 
@@ -230,38 +232,11 @@
     shadow.innerHTML = `<style>${CSS}</style><div class="root"></div>`;
     const root = shadow.querySelector(".root");
     for (const [k, v] of Object.entries(brand.colors || {})) root.style.setProperty("--" + k, v);
-    // Temporarily move the launcher out of the way of a form or application action.
-    // The chat remains available from inline links; an open conversation is never hidden.
-    let positionFrame = 0;
-    function placeLauncher() {
-      positionFrame = 0;
-      const launcher = root.querySelector('.launcher');
-      if (!launcher) return;
-      const box = launcher.getBoundingClientRect();
-      const editing = document.activeElement?.matches('input,textarea,select');
-      // Form fields, their labels and hints count too, so the button never sits on what someone is reading or filling in
-      const blocked = [...document.querySelectorAll('a.apply,a.btn,a[href^="tel:"],a[href^="mailto:"],button[type="submit"],.submit button,form label,form p,form input:not([type="hidden"]),form textarea,form select')].some((action) => {
-        if (!action.getClientRects().length) return false;
-        const rect = action.getBoundingClientRect();
-        return rect.right > box.left - 8 && rect.left < box.right + 8 && rect.bottom > box.top - 8 && rect.top < box.bottom + 8;
-      });
-      const hidden = editing || blocked;
-      launcher.style.visibility = hidden ? 'hidden' : '';
-      launcher.tabIndex = hidden ? -1 : 0;
-      launcher.setAttribute('aria-hidden', String(hidden));
-    }
-    const schedulePlacement = () => { if (!positionFrame) positionFrame = requestAnimationFrame(placeLauncher); };
-    window.addEventListener('scroll', schedulePlacement, { passive: true });
-    window.addEventListener('resize', schedulePlacement, { passive: true });
-    // Search/filter scripts and loaded images can move an Apply button without scrolling.
-    // Recheck after those layout changes as well as after direct user input.
-    if (typeof ResizeObserver !== 'undefined') new ResizeObserver(schedulePlacement).observe(document.body);
-    document.addEventListener('focusin', schedulePlacement);
-    document.addEventListener('focusout', schedulePlacement);
-    document.addEventListener('isl:menu', (event) => {
-      host.style.display = event.detail?.open ? 'none' : '';
-      schedulePlacement();
-    });
+    // The launcher always stays visible: a button that disappears while you scroll looks broken, and on a
+    // job page it hid the "Ask about this job" button on arrival. Sticky bars at the bottom of the page
+    // (the jobs ticker, the phone Apply bar) lift it above themselves with --isl-chat-lift instead.
+    // The one exception: the site's full-screen phone menu.
+    document.addEventListener('isl:menu', (event) => { host.style.display = event.detail?.open ? 'none' : ''; });
     // What the page tells the backend: on a job page, which job it is
     const context = opts.job ? { job: String(opts.job) } : {};
     const pageMode = context.job ? "job" : GREETINGS[opts.mode] ? opts.mode : "ask";
@@ -274,7 +249,6 @@
     const save = () => { try { sessionStorage.setItem(storeKey, JSON.stringify(state)); } catch {} };
     let busy = false;
     let opening = !!state.open; // animate the window in only on the render right after it opens
-    let fresh = -1; // index of the newest turn, so only it animates in
 
     const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
     // The brand's words: its name in the labels, what temporary jobs are called, its first examples
@@ -356,18 +330,96 @@
       return row;
     }
 
+    // Phone numbers and email addresses in a reply become links, so "call your office" is one tap on a phone
+    const LINKABLE = /(\b\d{3}[- .]\d{3}[- .]\d{4}\b)|([\w.+-]+@[\w-]+(?:\.[\w-]+)+)/g;
+    function richText(node, text) {
+      let last = 0;
+      for (const m of String(text).matchAll(LINKABLE)) {
+        if (m.index > last) node.append(text.slice(last, m.index));
+        const a = el("a", null, m[0]);
+        a.href = m[1] ? tel(m[1]) : "mailto:" + m[2];
+        node.append(a);
+        last = m.index + m[0].length;
+      }
+      if (last < text.length) node.append(text.slice(last));
+      return node;
+    }
+
+    // ---- Drawing ----
+    // The window is drawn once when it opens (render). After that, each message is ADDED to it
+    // (addTurn) instead of redrawing everything. That keeps what the visitor is typing, keeps
+    // the scroll position, and lets screen readers hear each new reply.
+    let view = null; // the open window's parts: { log, input, send, live }
+    let draft = "";  // what's in the message box, so a redraw never loses it
+    const pointerFine = () => typeof matchMedia === "function" && matchMedia("(pointer: fine)").matches;
+
+    function addTurn(turn, animate) {
+      const anim = animate ? " new" : "";
+      if (turn.role === "error") { const e = el("div", "msg err" + anim, turn.content); view.log.append(e); return e; }
+      const msg = el("div", "msg " + (turn.role === "user" ? "me" : "bot") + anim);
+      if (turn.role === "user") msg.textContent = turn.content; else richText(msg, turn.content);
+      if (turn.lang) msg.lang = turn.lang; // screen readers read French in a French voice
+      view.log.append(msg);
+      if (turn.summary?.length) view.log.append(summaryCard(turn.summary));
+      if (turn.insight?.figure) view.log.append(insightCard(turn.insight));
+      if (turn.contact) view.log.append(contactCard(turn.contact));
+      if (turn.jobs?.length) { const s = el("div", "stack"); turn.jobs.forEach((j) => s.append(jobCard(j))); view.log.append(s); }
+      return msg;
+    }
+    // Quick replies only ever sit under the newest reply
+    function showChoices() {
+      view.log.querySelector(".choices.live")?.remove();
+      const last = state.turns[state.turns.length - 1];
+      let row = null;
+      if (!state.turns.length) {
+        row = choiceRow(greetings()[state.greet || state.mode]?.choices || greetings().ask.choices);
+        // Switch language before the conversation starts (it isn't sent as a message)
+        const sw = el("button", "lang", ui().other); sw.type = "button"; sw.lang = fr() ? "en" : "fr";
+        sw.setAttribute("aria-label", ui().otherLabel);
+        sw.onclick = () => { state.lang = fr() ? "en" : "fr"; save(); render(); };
+        row.append(sw);
+      } else if (last.role === "assistant" && last.choices?.length && !busy) row = choiceRow(last.choices);
+      if (row) { row.classList.add("live"); view.log.append(row); }
+    }
+    function setBusy(on) {
+      busy = on;
+      view.send.disabled = on;
+      view.log.querySelector(".typing")?.remove();
+      if (on) { const ty = el("div", "msg bot typing"); ty.innerHTML = "<i></i><i></i><i></i>"; ty.setAttribute("aria-label", ui().typing); view.log.append(ty); }
+    }
+    // After a reply: show the visitor's question and the start of the answer. If the whole exchange
+    // doesn't fit, start at the top of the answer rather than the bottom of the cards under it.
+    function scrollToReply(question, answer) {
+      const log = view.log;
+      requestAnimationFrame(() => {
+        const top = (question || answer).offsetTop - 12;
+        if (log.scrollHeight - top <= log.clientHeight) log.scrollTop = log.scrollHeight;
+        else log.scrollTop = (log.scrollHeight - answer.offsetTop + 12 <= log.clientHeight) ? log.scrollHeight : answer.offsetTop - 12;
+      });
+    }
+    function announce(text) {
+      if (!view) return;
+      view.live.textContent = "";
+      setTimeout(() => { if (view) view.live.textContent = text; }, 60);
+    }
+
+    function close(returnFocus) {
+      state.open = false; save(); render();
+      if (returnFocus) root.querySelector(".launcher")?.focus();
+    }
+
     function render() {
       root.innerHTML = "";
+      view = null;
       if (!state.open) {
         const b = el("button", "launcher");
         b.type = "button";
-        const launch = { ...(state.lang === "fr" ? LAUNCHER_FR : LAUNCHER), ask: state.lang === "fr" ? brand.askFr : brand.ask };
+        const launch = { ...(fr() ? LAUNCHER_FR : LAUNCHER), ask: fr() ? brand.askFr : brand.ask };
         b.innerHTML = ICON.chat;
         b.append(el("span", null, launch[state.mode] || launch.ask));
         b.setAttribute("aria-label", ui().open);
         b.onclick = () => { state.open = true; opening = true; save(); render(); };
         root.append(b);
-        schedulePlacement();
         return;
       }
 
@@ -376,96 +428,98 @@
       opening = false;
       panel.setAttribute("role", "dialog");
       panel.setAttribute("aria-label", ui().panel);
-      panel.lang = state.lang === "fr" ? "fr" : "en";
-      panel.onkeydown = (e) => { if (e.key === "Escape") { state.open = false; save(); render(); } };
+      panel.lang = fr() ? "fr" : "en";
+      panel.onkeydown = (e) => { if (e.key === "Escape") close(true); };
 
       const head = el("div", "head");
       head.append(el("div", "mark", brand.mark));
       const t = el("div", "t");
-      const sub = state.lang === "fr" ? SUBTITLE_FR : SUBTITLE;
-      t.append(el("strong", null, brand.name), el("span", null, sub[state.mode] || sub.ask));
+      // Says plainly that it's automated, so nobody waits for a person to type back
+      t.append(el("strong", null, brand.name), el("span", null, ui().subtitle));
       const reset = el("button", "icon-btn"); reset.type = "button"; reset.innerHTML = ICON.reset; reset.title = ui().reset; reset.setAttribute("aria-label", ui().resetLabel);
       reset.onclick = () => { if (busy) return; state.turns = []; state.mode = pageMode; state.greet = null; save(); render(); }; // keeps the language they chose
-      const close = el("button", "icon-btn"); close.type = "button"; close.innerHTML = ICON.close; close.setAttribute("aria-label", ui().close);
-      close.onclick = () => { state.open = false; save(); render(); };
-      head.append(t, reset, close);
+      const closeBtn = el("button", "icon-btn"); closeBtn.type = "button"; closeBtn.innerHTML = ICON.close; closeBtn.setAttribute("aria-label", ui().close);
+      closeBtn.onclick = () => close(true);
+      head.append(t, reset, closeBtn);
 
       const log = el("div", "log");
-      log.setAttribute("aria-live", "polite");
-      log.append(el("div", "msg bot", g.text));
-      if (!state.turns.length) {
-        const row = choiceRow(g.choices);
-        // Switch language before the conversation starts (it isn't sent as a message)
-        const sw = el("button", "lang", ui().other); sw.type = "button"; sw.lang = state.lang === "fr" ? "en" : "fr";
-        sw.setAttribute("aria-label", ui().otherLabel);
-        sw.onclick = () => { state.lang = state.lang === "fr" ? "en" : "fr"; save(); render(); };
-        row.append(sw);
-        log.append(row);
-      }
-
-      const lastBot = state.turns.map((x) => x.role).lastIndexOf("assistant");
-      state.turns.forEach((turn, i) => {
-        const anim = i >= fresh && fresh >= 0 ? " new" : "";
-        if (turn.role === "error") { log.append(el("div", "msg err" + anim, turn.content)); return; }
-        const msg = el("div", "msg " + (turn.role === "user" ? "me" : "bot") + anim, turn.content);
-        if (turn.lang) msg.lang = turn.lang; // screen readers read French in a French voice
-        log.append(msg);
-        if (turn.summary?.length) log.append(summaryCard(turn.summary));
-        if (turn.insight?.figure) log.append(insightCard(turn.insight));
-        if (turn.contact) log.append(contactCard(turn.contact));
-        if (turn.jobs?.length) { const s = el("div", "stack"); turn.jobs.forEach((j) => s.append(jobCard(j))); log.append(s); }
-        if (i === lastBot && i === state.turns.length - 1 && turn.choices?.length && !busy) log.append(choiceRow(turn.choices));
-      });
-      if (busy) { const ty = el("div", "msg bot typing"); ty.innerHTML = "<i></i><i></i><i></i>"; ty.setAttribute("aria-label", ui().typing); log.append(ty); }
-
+      // Replies are read out from this separate quiet region: just the reply's words, once,
+      // rather than every card and button the log gains
+      const live = el("div", "sr"); live.setAttribute("aria-live", "polite");
       const form = el("form");
       const input = el("textarea"); input.rows = 1; input.placeholder = g.placeholder;
       input.setAttribute("aria-label", ui().message); input.maxLength = 1500;
+      input.value = draft;
+      input.oninput = () => { draft = input.value; };
       input.onkeydown = (e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); form.requestSubmit(); } };
-      const btn = el("button", "send"); btn.type = "submit"; btn.disabled = busy; btn.innerHTML = ICON.send; btn.setAttribute("aria-label", ui().send);
+      const btn = el("button", "send"); btn.type = "submit"; btn.innerHTML = ICON.send; btn.setAttribute("aria-label", ui().send);
       form.append(input, btn);
       form.onsubmit = (e) => { e.preventDefault(); const v = input.value.trim(); if (v && !busy) submit(v); };
+      view = { log, input, send: btn, live };
+
+      log.append(el("div", "msg bot", g.text));
+      state.turns.forEach((turn) => addTurn(turn, false));
+      showChoices();
+      if (busy) setBusy(true); else btn.disabled = false;
 
       // opts.fine === false: no small print under the chat box
-      const note = state.lang === "fr" ? opts.noteFr || opts.note : opts.note;
+      const note = fr() ? opts.noteFr || opts.note : opts.note;
       const fine = opts.fine === false ? null : note ? el("p", "fine demo", note) : el("p", "fine", ui().fine);
-      panel.append(head, log, form);
+      panel.append(head, log, live, form);
       if (fine) panel.append(fine);
       root.append(panel);
       requestAnimationFrame(() => { log.scrollTop = log.scrollHeight; });
-      if (!busy) input.focus({ preventScroll: true });
+      // On a computer, the cursor goes straight to the message box. On a phone that would pop the
+      // keyboard up over the conversation, so there it waits for a tap.
+      if (pointerFine()) input.focus({ preventScroll: true });
     }
 
     async function submit(text) {
-      if (busy) return;
+      if (busy || !view) return;
       if (!state.turns.length) state.greet = state.mode; // the greeting shown stays fixed for this conversation
+      const typedIt = view.input.value.trim() === text.trim();
+      if (typedIt) { view.input.value = ""; draft = ""; }
       state.turns.push({ role: "user", content: text });
-      fresh = state.turns.length - 1;
-      busy = true; save(); render();
+      save();
+      view.log.querySelector(".choices.live")?.remove();
+      const question = addTurn(state.turns[state.turns.length - 1], true);
+      setBusy(true);
+      view.log.scrollTop = view.log.scrollHeight;
       // Send the words (and the memo from each reply). The greeting goes first so the
       // backend knows which kind of visitor this page expects.
       const g = greetings()[state.greet] || greetings().ask;
       const messages = [{ role: "assistant", content: g.text, meta: { mode: state.greet === "ask" ? null : state.greet === "job" ? "seeker" : state.greet, lang: state.lang } }]
         .concat(state.turns.filter((x) => x.role === "user" || x.role === "assistant").map((x) => (x.role === "assistant" ? { role: x.role, content: x.content, meta: x.meta } : { role: x.role, content: x.content })));
+      let turn;
+      const langBefore = state.lang;
       try {
         const r = await send(messages, context);
-        // A short "typing" pause that grows with the reply, so it reads like someone answering, not a machine
+        // A short pause that grows with the reply, so a long answer doesn't land the instant you hit send
         await new Promise((ok) => setTimeout(ok, Math.min(400 + (r.reply || "").length * 6, 1200)));
-        if (r.meta?.mode && GREETINGS[r.meta.mode] && !(state.mode === "job" && r.meta.mode === "seeker")) state.mode = r.meta.mode; // header follows the conversation
+        if (r.meta?.mode && GREETINGS[r.meta.mode] && !(state.mode === "job" && r.meta.mode === "seeker")) state.mode = r.meta.mode;
         if (r.meta?.lang === "fr" || r.meta?.lang === "en") state.lang = r.meta.lang; // labels follow the conversation's language
-        state.turns.push({ role: "assistant", content: r.reply || ui().fallback, lang: r.meta?.lang || null, jobs: r.jobs || [], contact: r.contact || null, summary: r.summary || null, insight: r.insight || null, choices: r.choices || [], meta: r.meta || null });
+        turn = { role: "assistant", content: r.reply || ui().fallback, lang: r.meta?.lang || null, jobs: r.jobs || [], contact: r.contact || null, summary: r.summary || null, insight: r.insight || null, choices: r.choices || [], meta: r.meta || null };
       } catch (e) {
-        state.turns.push({ role: "error", content: e?.message || ui().error });
+        turn = { role: "error", content: e?.message || ui().error };
       }
-      fresh = state.turns.length - 1;
-      busy = false; save(); render();
+      state.turns.push(turn);
+      save();
+      if (!view) { busy = false; return; } // closed while waiting: the reply is there when it reopens
+      // A change of language relabels the whole window (the message box keeps what they were typing)
+      if (state.lang !== langBefore) { busy = false; render(); announce(turn.content); return; }
+      setBusy(false);
+      const answer = addTurn(turn, true);
+      showChoices();
+      scrollToReply(question, answer);
+      announce(turn.content);
+      if (typedIt && pointerFine()) view.input.focus({ preventScroll: true });
     }
 
     render();
     return {
       // open("employer") opens ready for an employer, if no conversation has started yet
       open(mode) { if (mode && GREETINGS[mode] && !state.turns.length) state.mode = mode; if (!state.open) opening = true; state.open = true; save(); render(); },
-      ask: submit,
+      ask(text) { this.open(); submit(text); },
     };
   }
 

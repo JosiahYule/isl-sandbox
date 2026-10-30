@@ -173,6 +173,25 @@ await talk('EN: stays English', ['warehouse jobs in halifax'], (r) => expect(r.m
 // They route to the office that covers the province, name their services "temporary" and
 // "permanent", and point work they don't do to the sister company that does.
 const sample = (b) => JSON.parse(readFileSync(new URL(`../../src/brands/jobs/${b}.json`, import.meta.url))).jobs;
+// Dates, lengths and their own words reach the request (October 2026 review)
+const row = (r, k) => r.summary?.find(([key]) => key === k)?.[1];
+const details = (r) => new URL(r.contact.action.href, 'http://x').searchParams.get('details');
+await talk('Employer: a weekday start is kept', ['3 labourers in truro next monday', 'contract'],
+  (r) => { expect(row(r, 'Start') === 'Next Monday', 'start is next Monday, not ASAP'); expect(/In their words: "3 labourers in truro next monday/.test(details(r)), 'their words in the request'); });
+await talk('Employer: answering the start question', ['3 labourers in truro', 'contract', 'next monday'], (r) => expect(row(r, 'Start') === 'Next Monday', 'their answer is kept'));
+await talk('Employer: a date and a length', ['I need a forklift driver in Halifax starting Nov 15 for 2 weeks'],
+  (r) => { expect(row(r, 'Start') === 'November 15', 'date'); expect(row(r, 'Length') === '2 weeks', 'length, not a start'); });
+await talk('Employer: until a month', ['need 2 cleaners in moncton on the 3rd of december until january', 'contract'],
+  (r) => { expect(row(r, 'Start') === 'December 3', 'day of month'); expect(row(r, 'Length') === 'Until January', 'until'); });
+await talk('FR: employer date and length', ['J’ai besoin de 3 journaliers à Moncton lundi prochain pour 2 semaines'],
+  (r) => { expect(r.summary.find(([k]) => k === 'Début')?.[1] === 'Lundi prochain', 'French start'); expect(r.summary.find(([k]) => k === 'Durée')?.[1] === '2 semaines', 'French length'); });
+// No broken echoes
+await talk('Seeker: all the jobs', ['show me all the jobs'], (r) => expect(r.jobs?.length === 3 && !/couldn/.test(r.reply), 'shows the newest'));
+await talk('Seeker: job alerts', ['can you email me jobs like this'], (r) => expect(/job alerts/.test(r.reply), 'answers the alerts question'));
+await talk('Mixed signals: no nonsense role', ['im hiring but also looking for work'], (r) => expect(!/but work/.test(r.reply), 'no "A but work"'));
+await talk('Bot: a real person?', ['are you a real person'], (r) => expect(/not a person/.test(r.reply), 'honest'));
+await talk('Worker: a person instead of an office', ['how do i get my t4', 'talk to a human'], (r) => expect(!/Here’s your office:/.test(r.reply) && /902-423-1919/.test(r.reply), 'offices with numbers'));
+
 respond = createEngine({ loadJobs: async () => sample('as'), siteUrl: (p) => '/isl-sandbox/as' + p, brand: 'as' });
 await talk('AS: bot says who it is', ['are you a bot?'], (r) => expect(/Accountant Staffing’s virtual assistant/.test(r.reply) && r.choices.includes("I'm looking for work"), 'names the brand'));
 await talk('AS: job search', ['bookkeeper jobs in st johns'], (r) => expect(r.jobs?.length && r.jobs.every((j) => /Bookkeeper/.test(j.title)), 'finds the bookkeeper jobs'));
