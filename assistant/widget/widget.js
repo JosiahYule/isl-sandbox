@@ -20,10 +20,11 @@
 //  - Every message sends the WHOLE conversation to the backend, which
 //    remembers nothing between messages. The backend answers with:
 //      reply     the text of the next message
-//      jobs      job cards (title, pay, View and Apply)
+//      jobs      job cards (title, pay, Apply; the card itself opens the job)
 //      contact   the right person to talk to (photo, phone, email, button)
 //      summary   what the visitor asked for, as label/value rows
 //      insight   a figure worked out from ISL's data (pay on open jobs, true cost): kicker, figure, sub, rows, link
+//      offices   the offices as a list: city, phone, address (shown with Call and Directions)
 //      choices   quick replies: strings are sent as messages, {label, href} are links
 //      meta      a memo the backend wants back next time (what it just asked)
 // =====================================================================
@@ -72,10 +73,22 @@
   const UI = {
     en: { contract: "Contract", tempToPerm: "Temp to perm", view: "View job", apply: "Apply", request: "Your request", office: (c) => `About the ${c} office`, open: "Open the ISL assistant",
       panel: "ISL assistant", subtitle: "Automated assistant", reset: "Start over", resetLabel: "Start a new conversation", close: "Close", typing: "Typing", message: "Your message", send: "Send",
-      fine: "Automated assistant. Check the full posting before you apply.", fallback: "Here's what I found.", error: "Something went wrong. Please try again.", other: "Français", otherLabel: "Continuer en français" },
+      fine: "Automated assistant. Check the full posting before you apply.", fallback: "Here's what I found.", error: "Something went wrong. Please try again.", other: "Français", otherLabel: "Continuer en français", undo: "Undo start over", call: "Call", directions: "Directions",
+      alertsKicker: "Job alerts", alertsLead: (what) => `New ${what} by email, at most once a day.`, email: "Your email",
+      consent: (b) => `Yes, email me new jobs from ${b} that match this search. I can unsubscribe at any time.`, signUp: "Email me new jobs", later: "Not now",
+      privacy: "How we use your email", badEmail: "Please check the email address.", needConsent: "Please tick the box so we can email you.",
+      alertsDone: "Almost done: check your inbox and confirm your email. After that, new matches arrive at most once a day.",
+      alertsPreview: "Preview only: nothing was sent. When job alerts are switched on, this sends a confirmation email.",
+      alertsFail: "That didn’t go through. Please try again in a minute." },
     fr: { contract: "Contrat", tempToPerm: "Temporaire à permanent", view: "Voir l’offre", apply: "Postuler", request: "Votre demande", office: (c) => `À propos du bureau de ${c}`, open: "Ouvrir l’assistant ISL",
       panel: "Assistant ISL", subtitle: "Assistant automatisé", reset: "Recommencer", resetLabel: "Commencer une nouvelle conversation", close: "Fermer", typing: "En train d’écrire", message: "Votre message", send: "Envoyer",
-      fine: "Assistant automatisé. Lisez l’offre complète avant de postuler.", fallback: "Voici ce que j’ai trouvé.", error: "Un problème est survenu. Veuillez réessayer.", other: "English", otherLabel: "Continue in English" },
+      fine: "Assistant automatisé. Lisez l’offre complète avant de postuler.", fallback: "Voici ce que j’ai trouvé.", error: "Un problème est survenu. Veuillez réessayer.", other: "English", otherLabel: "Continue in English", undo: "Annuler", call: "Appeler", directions: "Itinéraire",
+      alertsKicker: "Alertes emploi", alertsLead: (what) => `Les nouveaux ${what} par courriel, au plus une fois par jour.`, email: "Votre courriel",
+      consent: (b) => `Oui, envoyez-moi par courriel les nouveaux emplois d’${b} qui correspondent à cette recherche. Je peux me désabonner en tout temps.`, signUp: "M’envoyer les nouveaux emplois", later: "Pas maintenant",
+      privacy: "Comment nous utilisons votre courriel", badEmail: "Veuillez vérifier l’adresse courriel.", needConsent: "Veuillez cocher la case pour que nous puissions vous écrire.",
+      alertsDone: "Presque terminé : vérifiez votre boîte de réception et confirmez votre courriel. Ensuite, les nouveaux emplois arrivent au plus une fois par jour.",
+      alertsPreview: "Aperçu seulement : rien n’a été envoyé. Quand les alertes seront activées, ceci enverra un courriel de confirmation.",
+      alertsFail: "L’envoi n’a pas fonctionné. Veuillez réessayer dans une minute." },
   };
 
   const CSS = `
@@ -132,18 +145,22 @@
 
     /* Job cards: near-black edge for contract, ISL blue for permanent */
     .stack { display: flex; flex-direction: column; gap: 8px; align-self: stretch; }
-    .card { background: var(--white); border: 1px solid var(--line); border-left: 4px solid var(--dark); padding: 12px 14px; display: grid; gap: 6px; }
+    /* The whole card opens the job (the title's link stretches over it); Apply sits on the right */
+    .card { position: relative; background: var(--white); border: 1px solid var(--line); border-left: 4px solid var(--dark); padding: 11px 12px 11px 14px; display: grid; grid-template-columns: 1fr auto; column-gap: 12px; row-gap: 4px; align-items: center; }
+    .card > :not(.apply) { grid-column: 1; }
+    .card h4 a { color: inherit; text-decoration: none; }
+    .card h4 a::after { content: ""; position: absolute; inset: 0; }
+    .card:hover { background: #fafafa; }
+    .card:hover h4 a { text-decoration: underline; text-underline-offset: .15em; }
+    .card h4 a:focus-visible { outline: none; }
+    .card:has(h4 a:focus-visible) { outline: 2px solid var(--blue); outline-offset: 2px; }
     .card.perm { border-left-color: var(--perm); }
     .card h4 { margin: 0; font-size: 15px; font-weight: 700; letter-spacing: -.01em; }
     .meta { display: flex; flex-wrap: wrap; gap: 4px 10px; font-size: 12.5px; color: var(--muted); }
     .meta .kind { font-weight: 700; color: var(--ink); }
     .card.perm .meta .kind { color: var(--perm); }
     .why { margin: 0; font-size: 13px; color: var(--muted); }
-    .actions { display: flex; gap: 8px; margin-top: 4px; }
-    .actions a { flex: 1; text-align: center; text-decoration: none; font-weight: 600; font-size: 13px; padding: 8px 10px; }
-    .view { border: 1.5px solid var(--ink); color: var(--ink); }
-    .view:hover { background: var(--ink); color: var(--white); }
-    .apply { background: var(--blue); color: var(--white); border: 1.5px solid var(--blue); }
+    .apply { grid-column: 2; grid-row: 1 / span 3; position: relative; z-index: 1; text-decoration: none; font-weight: 600; font-size: 13px; padding: 9px 14px; background: var(--blue); color: var(--white); border: 1.5px solid var(--blue); }
     .apply:hover { background: var(--blue-deep); border-color: var(--blue-deep); }
 
     /* What the employer asked for */
@@ -168,6 +185,7 @@
     .contact { align-self: stretch; background: var(--white); border: 1.5px solid var(--dark); padding: 14px; display: grid; gap: 12px; }
     .who { display: flex; gap: 12px; align-items: center; }
     .face { width: 56px; height: 56px; flex: none; background: var(--mist); overflow: hidden; display: grid; place-items: center; font-weight: 700; color: var(--muted); }
+    .face.place svg { width: 26px; height: 26px; color: var(--blue); }
     .face img { width: 100%; height: 100%; object-fit: cover; object-position: center 20%; display: block; }
     .who strong { display: block; font-size: 15.5px; letter-spacing: -.01em; }
     .who span { display: block; font-size: 12.5px; color: var(--muted); }
@@ -178,6 +196,35 @@
     .go { display: block; text-align: center; text-decoration: none; font-weight: 600; font-size: 14px; padding: 11px 12px; background: var(--blue); color: var(--white); }
     .go:hover { background: var(--blue-deep); }
     .office-link { justify-self: center; font-size: 12.5px; font-weight: 600; color: var(--blue); }
+
+    /* Offices: one line each, with Call and Directions */
+    .offices { align-self: stretch; background: var(--white); border: 1px solid var(--line); }
+    .office { display: grid; grid-template-columns: 1fr auto auto; gap: 2px 14px; align-items: center; padding: 10px 14px; border-top: 1px solid var(--line); }
+    .office:first-child { border-top: 0; }
+    .office strong { grid-column: 1; grid-row: 1; font-size: 14px; }
+    .office span { grid-column: 1; grid-row: 2; font-size: 12.5px; color: var(--muted); }
+    .office a.call { grid-column: 2; }
+    .office a.map { grid-column: 3; }
+    .office a { grid-row: 1 / span 2; font-size: 13px; font-weight: 600; color: var(--blue); text-decoration: none; display: inline-flex; gap: 5px; align-items: center; min-height: 32px; }
+    .office a:hover { text-decoration: underline; }
+    .office a svg { width: 14px; height: 14px; }
+
+    /* Job alert sign-up */
+    .alertform { align-self: stretch; background: var(--white); border: 1px solid var(--line); border-top: 3px solid var(--blue); padding: 12px 14px 14px; display: grid; gap: 10px; }
+    .alertform .k { margin: 0; font-size: 11.5px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; color: var(--muted); }
+    .alertform p { margin: 0; font-size: 13.5px; }
+    .alertform input[type=email] { width: 100%; border: 1.5px solid var(--line); padding: 10px 12px; font: inherit; font-size: 16px; color: var(--ink); }
+    .alertform input[type=email]:focus { outline: none; border-color: var(--dark); }
+    .alertform .consent { display: flex; gap: 8px; align-items: flex-start; font-size: 12.5px; color: var(--muted); line-height: 1.45; }
+    .alertform .consent input { margin: 2px 0 0; width: 16px; height: 16px; flex: none; accent-color: var(--blue); }
+    .alertform .row { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+    .alertform button[type=submit] { border: 0; background: var(--blue); color: var(--white); font: inherit; font-weight: 600; font-size: 14px; padding: 10px 16px; cursor: pointer; }
+    .alertform button[type=submit]:hover { background: var(--blue-deep); }
+    .alertform button[type=submit]:disabled { opacity: .5; cursor: default; }
+    .alertform .later { border: 0; background: none; font: inherit; font-size: 13px; color: var(--muted); text-decoration: underline; cursor: pointer; padding: 0; }
+    .alertform .why { font-size: 12px; color: var(--muted); }
+    .alertform .why a { color: inherit; }
+    .alertform .bad { margin: 0; font-size: 12.5px; color: #8a2d1c; }
 
     /* Quick replies */
     .choices { display: flex; flex-wrap: wrap; gap: 6px; align-self: stretch; padding-top: 2px; }
@@ -206,6 +253,7 @@
     reset: '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg>',
     send: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>',
     phone: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.4 1.8.7 2.7a2 2 0 0 1-.5 2.1L8 9.8a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.7.7a2 2 0 0 1 1.7 2z"/></svg>',
+    pin: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg>',
     mail: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14"/><path d="M3 7l9 6 9-6"/></svg>',
   };
 
@@ -270,17 +318,16 @@
       const perm = job.employment === "Permanent";
       const c = el("div", "card" + (perm ? " perm" : ""));
       c.dataset.jobId = job.id;
-      c.append(el("h4", null, job.title));
+      const h = el("h4"); const title = el("a", null, job.title); title.href = job.viewUrl; h.append(title); c.append(h);
       const m = el("div", "meta");
       m.append(el("span", "kind", job.employment === "Temporary / contract" ? ui().contract : job.employment === "Temp to perm" ? ui().tempToPerm : job.employment));
       if (job.location) m.append(el("span", null, job.location));
       if (job.pay) m.append(el("span", null, job.pay));
       c.append(m);
       if (job.reason) c.append(el("p", "why", job.reason));
-      const a = el("div", "actions");
-      const view = el("a", "view", ui().view); view.href = job.viewUrl;
       const apply = el("a", "apply", ui().apply); apply.href = job.applyUrl;
-      a.append(view, apply); c.append(a);
+      apply.setAttribute("aria-label", `${ui().apply}: ${job.title}`);
+      c.append(apply);
       return c;
     }
 
@@ -308,6 +355,7 @@
       const who = el("div", "who");
       const face = el("div", "face");
       if (p.photo) { const img = el("img"); img.alt = ""; img.onerror = () => { img.remove(); face.textContent = initials(p.name); }; img.src = p.photo; face.append(img); }
+      else if (!p.email && /office$/i.test(p.name)) { face.innerHTML = ICON.pin; face.classList.add("place"); } // an office, not a person
       else face.textContent = initials(p.name);
       const t = el("div"); t.append(el("strong", null, p.name), el("span", null, p.handles));
       who.append(face, t);
@@ -321,10 +369,25 @@
     }
     const initials = (n) => String(n || "").split(/\s+/).map((w) => w[0]).join("").slice(0, 2).toUpperCase();
 
+    function officesCard(list) {
+      const box = el("div", "offices");
+      list.forEach((o) => {
+        const row = el("div", "office");
+        const call = el("a", "call"); call.href = tel(o.phone); call.innerHTML = ICON.phone; call.append(ui().call);
+        call.setAttribute("aria-label", `${ui().call} ${o.city}, ${o.phone}`);
+        const map = el("a", "map", ui().directions); map.href = "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(o.address);
+        map.target = "_blank"; map.rel = "noopener"; map.setAttribute("aria-label", `${ui().directions}: ${o.city}`);
+        row.append(el("strong", null, o.city), call, map, el("span", null, `${o.address} · ${o.phone}`));
+        box.append(row);
+      });
+      return box;
+    }
+
     function choiceRow(choices) {
       const row = el("div", "choices");
       choices.slice(0, 5).forEach((c) => {
         if (typeof c === "string") { const b = el("button", null, c); b.type = "button"; b.onclick = () => submit(c); row.append(b); }
+        else if (c && c.action === "alerts") { if (!opts.alerts) return; const b = el("button", null, c.label); b.type = "button"; b.onclick = () => alertForm(); row.append(b); }
         else if (c && c.href) { const a = el("a", null, c.label); a.href = c.href; row.append(a); }
       });
       return row;
@@ -351,6 +414,7 @@
     // the scroll position, and lets screen readers hear each new reply.
     let view = null; // the open window's parts: { log, input, send, live }
     let draft = "";  // what's in the message box, so a redraw never loses it
+    let undo = null; // the conversation before Start over
     const pointerFine = () => typeof matchMedia === "function" && matchMedia("(pointer: fine)").matches;
 
     function addTurn(turn, animate) {
@@ -363,6 +427,7 @@
       if (turn.summary?.length) view.log.append(summaryCard(turn.summary));
       if (turn.insight?.figure) view.log.append(insightCard(turn.insight));
       if (turn.contact) view.log.append(contactCard(turn.contact));
+      if (turn.offices?.length) view.log.append(officesCard(turn.offices));
       if (turn.jobs?.length) { const s = el("div", "stack"); turn.jobs.forEach((j) => s.append(jobCard(j))); view.log.append(s); }
       return msg;
     }
@@ -377,6 +442,11 @@
         const sw = el("button", "lang", ui().other); sw.type = "button"; sw.lang = fr() ? "en" : "fr";
         sw.setAttribute("aria-label", ui().otherLabel);
         sw.onclick = () => { state.lang = fr() ? "en" : "fr"; save(); render(); };
+        if (undo) {
+          const back = el("button", "lang", ui().undo); back.type = "button";
+          back.onclick = () => { Object.assign(state, undo); undo = null; save(); render(); };
+          row.prepend(back);
+        }
         row.append(sw);
       } else if (last.role === "assistant" && last.choices?.length && !busy) row = choiceRow(last.choices);
       if (row) { row.classList.add("live"); view.log.append(row); }
@@ -403,6 +473,67 @@
       setTimeout(() => { if (view) view.live.textContent = text; }, 60);
     }
 
+    // ---- Measuring (the site's analytics script decides what reaches Google Analytics, and only with consent) ----
+    const track = (name, params = {}) => document.dispatchEvent(new CustomEvent("isl:track", { detail: { name, params: { via: "assistant", ...params } } }));
+    const AUDIENCE = { seeker: "candidate", job: "candidate", worker: "general", employer: "employer", ask: "general" };
+    // A message the assistant couldn't understand is saved (without phone numbers or emails, which the
+    // function also strips) so the rules can learn from it. Nothing else from the conversation is kept.
+    function reportMiss(kind) {
+      const said = [...state.turns].reverse().find((x) => x.role === "user")?.content || "";
+      track("chat_fallback", { miss_kind: kind === "no-match" ? "no_match" : "unclear", audience: AUDIENCE[state.mode] });
+      if (!opts.missEndpoint || !said) return;
+      const text = said.replace(/[\w.+-]+@[\w-]+(\.[\w-]+)+/g, "[email]").replace(/\+?\d[\d\s().-]{6,}\d/g, "[number]").slice(0, 300);
+      try { fetch(opts.missEndpoint, { method: "POST", keepalive: true, headers: { "content-type": "application/json" }, body: JSON.stringify({ brand: opts.brand || "isl", lang: state.lang, kind, text, page: location.pathname }) }).catch(() => {}); } catch {}
+    }
+
+    // ---- Job alerts: a short sign-up inside the conversation ----
+    function alertForm() {
+      if (!view || view.log.querySelector(".alertform")) return;
+      const last = [...state.turns].reverse().find((x) => x.role === "assistant" && x.meta?.search);
+      if (!last) return;
+      const u = ui();
+      const f = el("form", "alertform"); f.noValidate = true;
+      f.append(el("p", "k", u.alertsKicker), el("p", null, u.alertsLead(last.meta.searchLabel || (fr() ? "emplois qui correspondent" : "matching jobs"))));
+      const email = el("input"); email.type = "email"; email.autocomplete = "email"; email.required = true; email.placeholder = u.email; email.setAttribute("aria-label", u.email);
+      const consent = el("label", "consent"); const box = el("input"); box.type = "checkbox"; box.required = true;
+      consent.append(box, el("span", null, u.consent(brand.name)));
+      const bad = el("p", "bad"); bad.setAttribute("role", "alert");
+      const row = el("div", "row"); const go = el("button", null, u.signUp); go.type = "submit";
+      const later = el("button", "later", u.later); later.type = "button"; later.onclick = () => f.remove();
+      row.append(go, later);
+      f.append(email, consent, bad, row);
+      if (opts.privacyUrl) { const w = el("p", "why"); const a = el("a", null, u.privacy); a.href = opts.privacyUrl; w.append(a); f.append(w); }
+      f.onsubmit = async (e) => {
+        e.preventDefault();
+        bad.textContent = "";
+        if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email.value.trim())) { bad.textContent = u.badEmail; email.focus(); return; }
+        if (!box.checked) { bad.textContent = u.needConsent; box.focus(); return; }
+        go.disabled = true;
+        let content = u.alertsPreview;
+        if (opts.alertsEndpoint) {
+          try {
+            const res = await fetch(opts.alertsEndpoint, { method: "POST", signal: AbortSignal.timeout(15000), headers: { "content-type": "application/json" },
+              body: JSON.stringify({ email: email.value.trim(), consent: true, consentText: u.consent(brand.name), search: last.meta.search, label: last.meta.searchLabel || "", brand: opts.brand || "isl", lang: state.lang, page: location.pathname }) });
+            const data = await res.json().catch(() => ({}));
+            if (!res.ok || data.ok !== true) throw new Error();
+            content = u.alertsDone;
+          } catch { go.disabled = false; bad.textContent = u.alertsFail; return; }
+        }
+        track("job_alert_signup", { audience: "candidate", preview: !opts.alertsEndpoint });
+        f.remove();
+        const turn = { role: "assistant", content, local: true, lang: state.lang };
+        state.turns.push(turn); save();
+        const msg = addTurn(turn, true);
+        showChoices();
+        scrollToReply(null, msg);
+        announce(content);
+      };
+      view.log.querySelector(".choices.live")?.remove();
+      view.log.append(f);
+      scrollToReply(null, f);
+      if (pointerFine()) email.focus({ preventScroll: true });
+    }
+
     function close(returnFocus) {
       state.open = false; save(); render();
       if (returnFocus) root.querySelector(".launcher")?.focus();
@@ -418,7 +549,7 @@
         b.innerHTML = ICON.chat;
         b.append(el("span", null, launch[state.mode] || launch.ask));
         b.setAttribute("aria-label", ui().open);
-        b.onclick = () => { state.open = true; opening = true; save(); render(); };
+        b.onclick = () => { state.open = true; opening = true; save(); render(); track("chat_open", { audience: AUDIENCE[state.mode] }); };
         root.append(b);
         return;
       }
@@ -437,7 +568,12 @@
       // Says plainly that it's automated, so nobody waits for a person to type back
       t.append(el("strong", null, brand.name), el("span", null, ui().subtitle));
       const reset = el("button", "icon-btn"); reset.type = "button"; reset.innerHTML = ICON.reset; reset.title = ui().reset; reset.setAttribute("aria-label", ui().resetLabel);
-      reset.onclick = () => { if (busy) return; state.turns = []; state.mode = pageMode; state.greet = null; save(); render(); }; // keeps the language they chose
+      reset.onclick = () => {
+        if (busy) return;
+        // Kept until they type again, so a mis-tap on Start over can be undone
+        if (state.turns.length) undo = { turns: state.turns, mode: state.mode, greet: state.greet };
+        state.turns = []; state.mode = pageMode; state.greet = null; state.intent = null; save(); render(); // keeps the language they chose
+      };
       const closeBtn = el("button", "icon-btn"); closeBtn.type = "button"; closeBtn.innerHTML = ICON.close; closeBtn.setAttribute("aria-label", ui().close);
       closeBtn.onclick = () => close(true);
       head.append(t, reset, closeBtn);
@@ -477,6 +613,7 @@
     async function submit(text) {
       if (busy || !view) return;
       if (!state.turns.length) state.greet = state.mode; // the greeting shown stays fixed for this conversation
+      undo = null;
       const typedIt = view.input.value.trim() === text.trim();
       if (typedIt) { view.input.value = ""; draft = ""; }
       state.turns.push({ role: "user", content: text });
@@ -489,7 +626,7 @@
       // backend knows which kind of visitor this page expects.
       const g = greetings()[state.greet] || greetings().ask;
       const messages = [{ role: "assistant", content: g.text, meta: { mode: state.greet === "ask" ? null : state.greet === "job" ? "seeker" : state.greet, lang: state.lang } }]
-        .concat(state.turns.filter((x) => x.role === "user" || x.role === "assistant").map((x) => (x.role === "assistant" ? { role: x.role, content: x.content, meta: x.meta } : { role: x.role, content: x.content })));
+        .concat(state.turns.filter((x) => (x.role === "user" || x.role === "assistant") && !x.local).map((x) => (x.role === "assistant" ? { role: x.role, content: x.content, meta: x.meta } : { role: x.role, content: x.content })));
       let turn;
       const langBefore = state.lang;
       try {
@@ -498,12 +635,16 @@
         await new Promise((ok) => setTimeout(ok, Math.min(400 + (r.reply || "").length * 6, 1200)));
         if (r.meta?.mode && GREETINGS[r.meta.mode] && !(state.mode === "job" && r.meta.mode === "seeker")) state.mode = r.meta.mode;
         if (r.meta?.lang === "fr" || r.meta?.lang === "en") state.lang = r.meta.lang; // labels follow the conversation's language
-        turn = { role: "assistant", content: r.reply || ui().fallback, lang: r.meta?.lang || null, jobs: r.jobs || [], contact: r.contact || null, summary: r.summary || null, insight: r.insight || null, choices: r.choices || [], meta: r.meta || null };
+        turn = { role: "assistant", content: r.reply || ui().fallback, lang: r.meta?.lang || null, jobs: r.jobs || [], contact: r.contact || null, summary: r.summary || null, insight: r.insight || null, offices: r.offices || null, choices: r.choices || [], meta: r.meta || null };
       } catch (e) {
         turn = { role: "error", content: e?.message || ui().error };
       }
       state.turns.push(turn);
       save();
+      const intent = turn.meta?.mode;
+      if (intent && intent !== state.intent && ["seeker", "employer", "worker"].includes(intent)) { state.intent = intent; save(); track("chat_intent", { intent, audience: AUDIENCE[intent] }); }
+      if (turn.meta?.miss) reportMiss(turn.meta.miss);
+      if (turn.summary?.length) track("chat_request_ready", { audience: "employer" });
       if (!view) { busy = false; return; } // closed while waiting: the reply is there when it reopens
       // A change of language relabels the whole window (the message box keeps what they were typing)
       if (state.lang !== langBefore) { busy = false; render(); announce(turn.content); return; }

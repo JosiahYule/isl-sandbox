@@ -1,0 +1,113 @@
+[
+ {
+  "id": "test-0",
+  "email": "test0@example.test",
+  "lang": "en",
+  "label": "warehouse roles around Dartmouth",
+  "search": {
+   "terms": {
+    "labels": [
+     "warehouse"
+    ],
+    "named": [
+     "warehouse"
+    ],
+    "kw": [
+     "warehouse",
+     "forklift",
+     "shipper",
+     "receiver",
+     "material handler",
+     "dock",
+     "inventory"
+    ],
+    "fam": [
+     "Warehouse and logistics"
+    ],
+    "rel": "",
+    "entry": false
+   },
+   "place": {
+    "province": "NS",
+    "city": "Dartmouth",
+    "rural": false,
+    "outside": false,
+    "label": "Dartmouth"
+   },
+   "employment": "any",
+   "attrs": [],
+   "minPay": null
+  },
+  "token": "00000000-0000-4000-8000-000000000000",
+  "confirmed_at": "2026-09-01T12:00:00Z",
+  "sent_ids": []
+ },
+ {
+  "id": "test-1",
+  "email": "test1@example.test",
+  "lang": "en",
+  "label": "roles in New Brunswick paying $20/hour or more",
+  "search": {
+   "terms": null,
+   "place": {
+    "province": "NB",
+    "city": "",
+    "rural": false,
+    "outside": false,
+    "label": "New Brunswick"
+   },
+   "employment": "any",
+   "attrs": [],
+   "minPay": {
+    "value": 20,
+    "unit": "hour"
+   }
+  },
+  "token": "00000000-0000-4000-8000-000000000001",
+  "confirmed_at": "2026-09-01T12:00:00Z",
+  "sent_ids": []
+ },
+ {
+  "id": "test-2",
+  "email": "test2@example.test",
+  "lang": "fr",
+  "label": "postes d’entrepôt près de Halifax",
+  "search": {
+   "terms": {
+    "labels": [
+     "warehouse"
+    ],
+    "named": [
+     "warehouse"
+    ],
+    "kw": [
+     "warehouse",
+     "forklift",
+     "shipper",
+     "receiver",
+     "material handler",
+     "dock",
+     "inventory"
+    ],
+    "fam": [
+     "Warehouse and logistics"
+    ],
+    "rel": "",
+    "entry": false
+   },
+   "place": {
+    "province": "NS",
+    "city": "Halifax",
+    "rural": false,
+    "outside": false,
+    "label": "Halifax"
+   },
+   "employment": "any",
+   "attrs": [],
+   "minPay": null
+  },
+  "token": "00000000-0000-4000-8000-000000000002",
+  "confirmed_at": "2026-09-01T12:00:00Z",
+  "sent_ids": []
+ }
+]

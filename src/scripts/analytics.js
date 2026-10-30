@@ -97,12 +97,14 @@ function initialise() {
     const job = anchor.closest('[data-job-id]')?.dataset.jobId || document.documentElement.dataset.assistantJob;
     const mode = document.documentElement.dataset.assistantMode;
     const audience = mode === 'employer' ? 'employer' : mode === 'seeker' || job ? 'candidate' : 'general';
-    if (url.protocol === 'tel:') send('phone_click', { audience });
-    else if (url.protocol === 'mailto:') send('email_click', { audience });
+    // Clicks inside the chat window are counted as the chat's, so it's clear whether it earns its place
+    const via = e.composedPath().some((node) => node instanceof Element && node.id === 'isl-job-chat') ? 'assistant' : 'page';
+    if (url.protocol === 'tel:') send('phone_click', { audience, via });
+    else if (url.protocol === 'mailto:') send('email_click', { audience, via });
     else if (/\/careers\/(?:general-apply|apply)(?:\/|$)/.test(url.pathname)) {
-      send('apply_click', { audience: 'candidate', job_id: job, application_kind: url.pathname.includes('general-apply') ? 'general' : 'specific' });
+      send('apply_click', { audience: 'candidate', job_id: job, application_kind: url.pathname.includes('general-apply') ? 'general' : 'specific', via });
     } else if (url.origin === location.origin && url.pathname === root + 'hire/') {
-      send('employer_cta_click', { audience: 'employer', service: url.searchParams.get('service'),
+      send('employer_cta_click', { audience: 'employer', service: url.searchParams.get('service'), via,
         cta_placement: anchor.dataset.ctaPlacement || (anchor.closest('header') ? 'header' : anchor.closest('footer') ? 'footer' : 'page') });
     }
   }, true);

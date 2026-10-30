@@ -47,6 +47,9 @@ jobs:
           PUBLIC_ISL_REQUEST_ENDPOINT: ${{ vars.ISL_REQUEST_ENDPOINT }}
           PUBLIC_AS_REQUEST_ENDPOINT: ${{ vars.AS_REQUEST_ENDPOINT }}
           PUBLIC_ADS_REQUEST_ENDPOINT: ${{ vars.ADS_REQUEST_ENDPOINT }}
+          # The chat's job alerts (ISL) and its log of messages it couldn't understand: empty = off
+          PUBLIC_ISL_ALERTS_ENDPOINT: ${{ vars.ISL_ALERTS_ENDPOINT }}
+          PUBLIC_CHAT_MISS_ENDPOINT: ${{ vars.CHAT_MISS_ENDPOINT }}
       # The Squarespace versions of the three sites (shared files, code blocks, fresh job lists),
       # published at /isl-sandbox/sq/<brand>/ for the Squarespace sites to load (scripts/export-squarespace.mjs)
       - run: node scripts/export-squarespace.mjs --publish

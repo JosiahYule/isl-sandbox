@@ -100,7 +100,9 @@ export const analytics = { ga4: '' };
 // Empty = the request form shows its confirmation but sends nothing (the sandbox preview).
 // requestEndpoint: the request form's sending function. referralEndpoint: where the referral form posts
 // (a Formspree form address, https://formspree.io/f/<id>, or any endpoint that takes JSON). Empty: preview only.
-export const forms = { requestEndpoint: '', referralEndpoint: '' };
+// alertsEndpoint: the job-alerts function (assistant/supabase/functions/job-alerts); chatMissEndpoint: where the chat
+// saves messages it couldn't understand (chat-miss). Empty = off; the chat then runs job alerts as a preview.
+export const forms = { requestEndpoint: '', referralEndpoint: '', alertsEndpoint: '', chatMissEndpoint: '' };
 
 // The request form (/hire/)
 export const hire = {

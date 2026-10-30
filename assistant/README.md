@@ -23,6 +23,9 @@ Both can also ask what a role pays ("what do forklift operators make in NB?", an
 | `demo-mode.js` | Starts the widget in demo mode on the website. |
 | `widget/widget.js` | The chat bubble that goes on the website. |
 | `test/` | Tests you can run with Node. `conversation.test.mjs` plays scripted chats through the demo engine. |
+| `supabase/functions/chat-miss/` | Saves a message the chat couldn't understand (contact details stripped by `_shared/redact.js`), so its rules can learn. |
+| `supabase/functions/job-alerts/` | Job-alert sign-ups from the chat: saves them, emails a confirmation link, handles confirm and unsubscribe. Words and emails in `_shared/alerts.js`. |
+| `supabase/migrations/` | The two tables those functions use (`chat_misses`, `job_alerts`). Run once in Supabase. |
 | `demo/` | Builds the preview page (`node demo/build.mjs data/feed.json`). |
 
 ## Accountant Staffing and Administrative Staffing
@@ -89,6 +92,44 @@ numbers, taken from the team data (anyone whose title is Response Coordinator), 
 ```
 
 Rules are read top to bottom and the first match wins.
+
+## Learning from what it misses
+
+The chat runs on rules, so it only gets better when someone sees what it didn't understand.
+
+- **Counting (Google Analytics, only with the visitor's consent):** `chat_open`, `chat_intent` (job seeker, employer or
+  someone already working through us), `chat_fallback` (it didn't understand), `chat_request_ready` (an employer request
+  is ready to send) and `job_alert_signup`. Apply, phone, email and request clicks made inside the chat carry
+  `via: assistant`, so you can see what the chat itself brings in. Only these labels are sent, never what anyone typed
+  (`src/lib/tracking.js` decides what may reach Google).
+- **The misses themselves:** when the chat can't understand a message, the window sends that one message to the
+  `chat-miss` function, which removes email addresses, phone numbers, long numbers and postal codes, then saves it.
+  They're kept 180 days. Once a month run `node scripts/chat-misses.mjs` (with `SUPABASE_URL` and
+  `SUPABASE_SERVICE_ROLE_KEY` set) for the list, most common first, and teach the engine the words:
+  `SYNONYMS` for kinds of work, `FRENCH` for French phrases, `FAQ` for questions. Add a scripted test for each.
+- **Switching it on:** run the migration, deploy `chat-miss`, then set the repo variable `CHAT_MISS_ENDPOINT` to its URL
+  (Settings > Secrets and variables > Actions > Variables). Until then nothing is sent; the counting still works.
+
+## Job alerts (Integrated Staffing)
+
+Under search results the chat offers "Email me jobs like these" ("Email me when one opens" when nothing matches yet).
+The visitor gives their email and ticks a consent box, and the search they just ran is saved.
+
+1. `job-alerts` saves the sign-up as pending and emails a confirmation link (double opt-in, so nobody can sign up
+   someone else, and the confirmation is the consent record CASL asks for).
+2. Every morning `.github/workflows/job-alerts.yml` refreshes the jobs and runs `scripts/send-job-alerts.mjs`, which runs
+   each confirmed search through the chat's own search (`rankJobs` in `demo-engine.js`) and emails only jobs that are new
+   and not sent before. Every email names the sender with its mailing address and has an unsubscribe link plus the
+   one-click unsubscribe header. Unsubscribing deletes the email address and the search.
+3. Without the set-up below, the sign-up runs as a preview in the chat ("Preview only: nothing was sent"), like the request form.
+
+Only Integrated Staffing offers alerts, because its job feed is live. Accountant Staffing and Administrative Staffing
+can get them once their Tracker RMS feeds are connected.
+
+To switch it on: run the migration; deploy `job-alerts` with the secrets `RESEND_API_KEY` and `ALERTS_FROM`; set the repo
+variable `ISL_ALERTS_ENDPOINT` to its URL; add the repo secrets `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`,
+`RESEND_API_KEY` and `ALERTS_FROM` for the morning email. Try the morning email without sending anything:
+`node scripts/send-job-alerts.mjs --dry-run test/fixtures/alerts.json`.
 
 ## The moving parts
 

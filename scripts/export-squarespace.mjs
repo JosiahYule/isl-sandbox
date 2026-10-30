@@ -157,6 +157,7 @@ function exportBrand(brand) {
     .replace('__COMMON__', JSON.stringify(common))
     .replace('__ASSISTANT__', JSON.stringify(assistantDir))
     .replace('__BRAND__', JSON.stringify(brand))
+    .replace('__CHAT__', JSON.stringify({ alerts: htmlEl.dataset.chatAlerts || '', misses: htmlEl.dataset.chatMisses || '' })) // the chat's job alerts and miss log, when switched on
     .replace('__HAS_LEARN__', JSON.stringify(BLOG_BRANDS.includes(brand)))); // the Learn page lists the blog posts
 
   // ---------- Header and footer (Code Injection) ----------

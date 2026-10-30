@@ -82,6 +82,6 @@ export const toolsBase = {
 export const applyPortal = 'https://evoportalus.tracker-rms.com/AccountingStaffingAndAdministrativeStaffing/apply';
 
 export const analytics = { ga4: '' };
-export const forms = { requestEndpoint: '' };
+export const forms = { requestEndpoint: '', chatMissEndpoint: '' }; // chatMissEndpoint: see src/brands/isl.js
 export const stats = [];
 export const testimonials = []; // TODO: client quotes for each brand (none on the live sites)

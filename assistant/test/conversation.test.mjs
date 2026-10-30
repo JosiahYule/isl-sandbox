@@ -89,14 +89,14 @@ await talk('Job page: a normal search still works', ['warehouse jobs in Halifax'
 // ---- Understanding: only search for real work words ----
 const noCards = (r) => !r.jobs?.length;
 await talk('Unclear: no pretend search', ['asdfgh'], (r) => expect(noCards(r) && r.meta.ask === 'unclear' && r.choices.includes('Contact an office'), 'honest fallback with options'));
-await talk('Unclear twice: offices listed', ['asdfgh', 'qwerty'], (r) => expect(noCards(r) && /902-423-1919/.test(r.reply), 'second miss lists the offices'));
+await talk('Unclear twice: offices listed', ['asdfgh', 'qwerty'], (r) => expect(!r.jobs?.length && r.offices?.some((o) => o.phone === '902-423-1919'), 'second miss lists the offices'));
 await talk('Off topic', ["what's the weather like"], (r) => expect(noCards(r), 'no job cards'));
 await talk('Typos fixed', ['warehose jobs in halifx'], (r) => expect(r.jobs?.length && /warehouse/.test(r.reply) && /Halifax/.test(r.reply), 'warehouse in Halifax'));
 await talk('Everyday words: chef', ['chef positions'], (r) => expect(r.jobs?.some((j) => /cook/i.test(j.title)), 'chef finds cooks'));
 await talk('No match: no random jobs', ['electrician'], (r) => expect(!r.jobs?.length || r.jobs.every((j) => /technician|erector|installation|carpenter|millwright|assembler|foreman|inspector|welder|mechanic|plumb/i.test(j.title)), 'only related trades'));
 await talk('Pay filter', ['jobs that pay over $25 an hour'], (r) => expect(r.jobs?.length && /\$25\/hour or more/.test(r.reply), 'filters by pay'));
 await talk('Nothing nearby: offer elsewhere', ['warehouse jobs in moncton', 'Show me those'], (r) => expect(r.jobs?.length, 'shows the jobs elsewhere'));
-await talk('French employer, answered in French', ["J'ai besoin de 3 journaliers à Dieppe"], (r) => expect(/^Trois journaliers à Dieppe, c’est noté!/.test(r.reply) && r.meta.lang === 'fr' && r.choices.includes('Pour une période déterminée'), 'French reply and French buttons'));
+await talk('French employer, answered in French', ["J'ai besoin de 3 journaliers à Dieppe"], (r) => expect(/^Trois journaliers à Dieppe, c’est noté\./.test(r.reply) && r.meta.lang === 'fr' && r.choices.includes('Pour une période déterminée'), 'French reply and French buttons'));
 
 // ---- People already working through ISL ----
 await talk('Worker: T4, then office', ['I need my T4', 'Moncton'], (r) => expect(r.contact?.name === 'Moncton office' && noCards(r), 'Moncton office card'));
@@ -105,7 +105,7 @@ await talk('Worker: sick, place given', ["I'm sick and can't make my shift tomor
 
 // ---- Offices, people, scams ----
 await talk('Office: closest to a town', ['what is the closest office to truro'], (r) => expect(r.contact?.name === 'Halifax office' && /Truro/.test(r.reply), 'Halifax covers Truro'));
-await talk('Office: talk to a person', ['can i talk to a real person'], (r) => expect(/709-800-2454/.test(r.reply) && noCards(r), 'all five lines'));
+await talk('Office: talk to a person', ['can i talk to a real person'], (r) => expect(r.offices?.length === 5 && r.offices.some((o) => o.phone === '709-800-2454') && !r.jobs?.length, 'all five offices'));
 await talk('Scam check', ['someone texted me offering a job from integrated staffing is that real?'], (r) => expect(/never charges/.test(r.reply) && /banking/.test(r.reply), 'scam advice'));
 
 // ---- Who ISL can place: citizens and permanent residents ----
@@ -165,9 +165,9 @@ await talk('FR: employer, full flow', ['nous embauchons', 'des caristes', 'Nouve
 await talk('FR: employer own words', ['un architecte principal en Alberta', 'Permanent'], (r) => expect(fr(r) && r.contact?.name === 'Zowie Tucker' && r.summary.some(([k, v]) => k === 'Poste' && v === 'Architecte principal'), 'keeps their words'), 'employer');
 await talk('FR: pay card', ['combien gagnent les chauffeurs en Nouvelle-Écosse?'], (r) => expect(fr(r) && /\$\/heure/.test(r.insight?.figure) && /Nouvelle-Écosse/.test(r.insight.kicker), 'French figures'));
 await talk('FR: job page', ['Quel est le salaire?'], (r) => expect(fr(r) && /^Le salaire est de 19 \$\/heure/.test(r.reply), 'French pay answer'), 'seeker', ctx);
-await talk('FR: switch and back', ['Français', 'English'], (r) => expect(r.meta.lang === 'en' && /^Sure!/.test(r.reply), 'switches back to English'));
+await talk('FR: switch and back', ['Français', 'English'], (r) => expect(r.meta.lang === 'en' && /^Sure\./.test(r.reply), 'switches back to English'));
 await talk('FR: greeting language carries', ['asdfgh'], (r) => expect(fr(r) && /^(Désolé|Hmm, je)/.test(r.reply), 'French from the greeting'), null, {});
-await talk('EN: stays English', ['warehouse jobs in halifax'], (r) => expect(r.meta.lang === 'en' && /^Good news/.test(r.reply), 'English unchanged'));
+await talk('EN: stays English', ['warehouse jobs in halifax'], (r) => expect(r.meta.lang === 'en' && /^Five warehouse roles are open around Halifax/.test(r.reply), 'English unchanged'));
 
 // ---- Accountant Staffing and Administrative Staffing: the same assistant, their own brand ----
 // They route to the office that covers the province, name their services "temporary" and
@@ -190,7 +190,7 @@ await talk('Seeker: all the jobs', ['show me all the jobs'], (r) => expect(r.job
 await talk('Seeker: job alerts', ['can you email me jobs like this'], (r) => expect(/job alerts/.test(r.reply), 'answers the alerts question'));
 await talk('Mixed signals: no nonsense role', ['im hiring but also looking for work'], (r) => expect(!/but work/.test(r.reply), 'no "A but work"'));
 await talk('Bot: a real person?', ['are you a real person'], (r) => expect(/not a person/.test(r.reply), 'honest'));
-await talk('Worker: a person instead of an office', ['how do i get my t4', 'talk to a human'], (r) => expect(!/Here’s your office:/.test(r.reply) && /902-423-1919/.test(r.reply), 'offices with numbers'));
+await talk('Worker: a person instead of an office', ['how do i get my t4', 'talk to a human'], (r) => expect(!/Here’s your office:/.test(r.reply) && r.offices?.some((o) => o.phone === '902-423-1919'), 'offices with numbers'));
 
 respond = createEngine({ loadJobs: async () => sample('as'), siteUrl: (p) => '/isl-sandbox/as' + p, brand: 'as' });
 await talk('AS: bot says who it is', ['are you a bot?'], (r) => expect(/Accountant Staffing’s virtual assistant/.test(r.reply) && r.choices.includes("I'm looking for work"), 'names the brand'));
@@ -202,11 +202,11 @@ await talk('AS: reception goes to ADS', ['receptionist jobs in Moncton'], (r) =>
 await talk('AS: employer, full flow', ["I'm hiring", 'A controller', 'New Brunswick', 'Permanent'],
   (r) => expect(r.contact?.name === 'Moncton office' && r.contact.phone === '506-800-0074' && r.summary.some(([k, v]) => k === 'Type' && v === 'Permanent') && r.choices[0].label === 'How permanent recruitment works', 'Moncton office, permanent'));
 await talk('AS: employer, PEI goes to Halifax', ['we need a temporary accountant in Charlottetown asap'],
-  (r) => expect(r.contact?.name === 'Halifax office' && /we cover Charlottetown! Our Halifax office covers Prince Edward Island/.test(r.reply) && r.summary.some(([k, v]) => k === 'Type' && v === 'Temporary'), 'Halifax covers PEI'));
+  (r) => expect(r.contact?.name === 'Halifax office' && /We cover Charlottetown\. Our Halifax office covers Prince Edward Island/.test(r.reply) && r.summary.some(([k, v]) => k === 'Type' && v === 'Temporary'), 'Halifax covers PEI'));
 await talk('AS: employer, labourers go to ISL', ['I need 3 labourers in Truro'], (r) => expect(/Integrated Staffing, our sister company/.test(r.reply) && r.contact?.name === 'Meg Antonick', 'ISL’s recruiter for Nova Scotia'));
 await talk('AS: fees', ['how much do you charge?'], (r) => expect(/no upfront fees/.test(r.reply) && /first-year compensation/.test(r.reply), 'the brand’s own terms'));
 await talk('AS: guarantee', ["I'm hiring", 'does it come with a guarantee?'], (r) => expect(/six months/.test(r.reply) && !/90 days/.test(r.reply), 'six months, not ISL’s 90 days'));
-await talk('AS: offices', ['where are your offices?'], (r) => expect(/three offices/.test(r.reply) && r.choices.length === 3 && /902-491-1301/.test(r.reply), 'its three offices'));
+await talk('AS: offices', ['where are your offices?'], (r) => expect(/three offices/.test(r.reply) && r.offices?.length === 3 && r.offices.some((o) => o.phone === '902-491-1301'), 'its three offices'));
 await talk('AS: worker', ['I work with Accountant Staffing', 'Moncton'], (r) => expect(r.contact?.name === 'Moncton office', 'their office'));
 await talk('AS: worker hurt', ['I got hurt at work'], (r) => expect(/your Accountant Staffing office/.test(r.reply) && !/response coordinators/.test(r.reply), 'own office, no ISL numbers'));
 await talk('AS: payroll widens to accounting', ['payroll jobs'], (r) => expect(/accounting and finance roles are close/.test(r.reply) && r.jobs?.length, 'accounting roles, not office ones'));

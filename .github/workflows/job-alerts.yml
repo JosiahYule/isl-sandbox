@@ -1,0 +1,42 @@
+# JOB ALERTS: every morning, email each confirmed job alert its new matching jobs.
+# scripts/send-job-alerts.mjs does the work; it skips quietly until the secrets below exist
+# (repo Settings > Secrets and variables > Actions):
+#   AVIONTE_FEED_URL            the job feed (the same secret the deploy uses)
+#   SUPABASE_URL                the Supabase project the job-alerts function runs in
+#   SUPABASE_SERVICE_ROLE_KEY   that project's service role key (Settings > API in Supabase)
+#   RESEND_API_KEY              the Resend key
+#   ALERTS_FROM                 the sender, e.g. "Integrated Staffing jobs <jobs@integratedstaffing.ca>"
+name: Send job alerts
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '17 12 * * *'   # 12:17 UTC: 9:17 am Atlantic in summer, 8:17 am in winter
+
+permissions:
+  contents: read
+
+concurrency:
+  group: job-alerts
+  cancel-in-progress: false
+
+jobs:
+  send:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .node-version
+          cache: npm
+      - run: npm ci
+      - run: node scripts/fetch-jobs.mjs
+        env:
+          AVIONTE_FEED_URL: ${{ secrets.AVIONTE_FEED_URL }}
+      - run: node scripts/send-job-alerts.mjs
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+          ALERTS_FROM: ${{ secrets.ALERTS_FROM }}

@@ -55,6 +55,12 @@ function start() {
     mode: document.documentElement.dataset.assistantMode,
     job: document.documentElement.dataset.assistantJob,
     fine: false, // no small print under the chat box
+    // Job alerts (ISL) and the log of messages it couldn't understand: on when the page gives their addresses.
+    // Without an alerts address the sign-up runs as a preview and says nothing was sent.
+    alerts: brand === 'isl',
+    alertsEndpoint: document.documentElement.dataset.chatAlerts || '',
+    missEndpoint: document.documentElement.dataset.chatMisses || '',
+    privacyUrl: brand === 'isl' ? (sqRoot ? '/privacy' : new URL('privacy/', site).pathname) : '',
   });
   document.addEventListener('click', (e) => {
     const t = e.target.closest('[data-open-assistant]');

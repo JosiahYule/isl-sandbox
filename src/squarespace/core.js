@@ -15,6 +15,7 @@ const ROOT = new URL('.', import.meta.url).href; // https://josiahyule.github.io
 const COMMON = __COMMON__;                        // shared scripts every page runs (c/*.js)
 const ASSISTANT = __ASSISTANT__;                  // the assistant's folder, or '' when it's off for this brand
 const BRAND = __BRAND__;                          // 'isl', 'as' or 'ads': the chat assistant speaks for this brand
+const CHAT = __CHAT__;                            // the chat's job-alert and miss-log addresses ('' = off)
 
 const html = document.documentElement;
 const header = document.getElementById('isl-header');
@@ -27,6 +28,8 @@ if (header && document.body.firstElementChild !== header) document.body.prepend(
 html.classList.add('isl-site');
 html.dataset.siteRoot = '/'; // pages are on this domain (the chat assistant reads this for its links)
 html.dataset.brand = BRAND;
+if (CHAT.alerts) html.dataset.chatAlerts = CHAT.alerts;
+if (CHAT.misses) html.dataset.chatMisses = CHAT.misses;
 
 // 2. Current page and page settings
 if (header) {
