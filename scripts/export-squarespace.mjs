@@ -27,6 +27,8 @@ import { join, relative, dirname } from 'node:path';
 import { createHash } from 'node:crypto';
 import { JSDOM } from 'jsdom';
 
+// Brands whose blog lives at /learn on the live site (src/data/posts.js lists their articles)
+const BLOG_BRANDS = ['isl', 'as'];
 const BRANDS = process.argv.slice(2).filter((b) => ['isl', 'as', 'ads'].includes(b));
 const PUBLISH = process.argv.includes('--publish');
 const NAMES = { isl: 'Integrated Staffing', as: 'Accountant Staffing', ads: 'Administrative Staffing' };
@@ -155,7 +157,7 @@ function exportBrand(brand) {
     .replace('__COMMON__', JSON.stringify(common))
     .replace('__ASSISTANT__', JSON.stringify(assistantDir))
     .replace('__BRAND__', JSON.stringify(brand))
-    .replace('__HAS_LEARN__', JSON.stringify(brand === 'isl'))); // ISL's Learn page lists the blog posts
+    .replace('__HAS_LEARN__', JSON.stringify(BLOG_BRANDS.includes(brand)))); // the Learn page lists the blog posts
 
   // ---------- Header and footer (Code Injection) ----------
   // Taken from the 404 page, where no menu item is current; isl.js marks the current page.
@@ -280,8 +282,8 @@ function exportBrand(brand) {
   const mappings = readFileSync(`${OUT}/_redirects`, 'utf8').split('\n')
     .map((l) => l.trim().split(/\s+/)).filter((t) => t.length === 3 && t[0].startsWith('/') && !t.some((x) => x.includes('=')) && t[0] !== TEMPLATES.job.path)
     .map(([from, to, code]) => `${from} -> ${pageLink(to)} ${code}`);
-  // ISL's blog moved from /learn to /blog (the new Learn page took /learn): forward every old post
-  if (brand === 'isl') mappings.push('/learn/[name] -> /blog/[name] 301');
+  // The blog moved from /learn to /blog (the new Learn page took /learn): forward every old post
+  if (BLOG_BRANDS.includes(brand)) mappings.push('/learn/[name] -> /blog/[name] 301');
   writeFileSync(`${OUT}/url-mappings.txt`, mappings.join('\n') + '\n');
   for (const f of ['sitemap.xml', 'robots.txt', '_headers', '_redirects', 'favicon.svg']) rmSync(`${OUT}/${f}`, { force: true });
   if (PUBLISH) cpSync(OUT, `dist/sq/${brand}`, { recursive: true });

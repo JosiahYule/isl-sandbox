@@ -1,15 +1,77 @@
 ---
 // LEARN  →  /learn/   (Accountant Staffing and Administrative Staffing)
 // The tools the brand has (src/brands/specialist.js: tools.list), the same ones as on ISL's
-// site, in this brand's colours. ISL's Learn also lists its articles; these brands have none yet.
+// site, in this brand's colours, then the brand's articles (src/data/posts.js), newest first.
+// Articles stay on the live site's blog; on Squarespace they move to /blog, as ISL's did.
 import Base from '../../../layouts/Base.astro';
 import PageHero from '../../../components/PageHero.astro';
 import ToolCards from '../../../components/ToolCards.astro';
 import { field } from '../../../data/site.js';
+import { posts } from '../../../data/posts.js';
+
+const fmt = (d) => new Date(d + 'T12:00:00').toLocaleDateString('en-CA', { month: 'long', day: 'numeric', year: 'numeric' });
+const audienceLabel = { employers: 'For employers', 'job seekers': 'For job seekers', everyone: 'Market insights' };
+const [featured, ...rest] = posts;
 ---
-<Base title="Learn" description={`Free tools for employers hiring and people looking for ${field.short} work in Atlantic Canada.`}>
-  <PageHero title="Tools for both sides of the hire." lead="Free, quick, and nothing you type leaves your browser." />
+<Base title="Learn" description={`Free tools and articles for employers hiring and people looking for ${field.short} work in Atlantic Canada.`}>
+  <PageHero title={posts.length ? 'Tools, guides and hiring advice.' : 'Tools for both sides of the hire.'} lead={posts.length ? 'Built by our team from what we see across Atlantic Canada.' : 'Free, quick, and nothing you type leaves your browser.'} />
   <section class="section section--rule">
     <div class="wrap"><h2 class="visually-hidden">Tools</h2><ToolCards /></div>
   </section>
+
+  {featured && (
+    <section class="section section--tint posts">
+      <div class="wrap">
+        <h2 class="visually-hidden">Articles</h2>
+        <a class="featured" href={featured.url} data-reveal>
+          <span class="eyebrow"><span class="aud">{audienceLabel[featured.audience]}</span><time datetime={featured.date}>{fmt(featured.date)}</time></span>
+          <span class="f-title">{featured.title}</span>
+          <span class="read">Read the article <span aria-hidden="true">→</span></span>
+        </a>
+        {rest.length > 0 && (
+          <ul class="list">
+            {rest.map((p) => (
+              <li>
+                <a href={p.url}>
+                  <time datetime={p.date}>{fmt(p.date)}</time>
+                  <span class="title">{p.title}</span>
+                  <span class="aud">{audienceLabel[p.audience]}</span>
+                  <span class="arrow" aria-hidden="true">→</span>
+                </a>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+    </section>
+  )}
 </Base>
+
+<style>
+  /* The same layout as ISL's Learn page: the newest article set large, the rest as a dated list */
+  .featured { display: grid; gap: var(--s4); justify-items: start; padding-bottom: var(--s7); color: var(--ink); text-decoration: none; }
+  .featured:hover .f-title { text-decoration: underline; text-decoration-thickness: 2px; }
+  .eyebrow { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s2) var(--s4); font-size: var(--fs-small); }
+  .featured .aud { color: var(--accent); font-weight: var(--fw-bold); }
+  .f-title { font-weight: var(--fw-bold); letter-spacing: -0.025em; line-height: 1.05; font-size: var(--fs-h2); max-width: 20ch; }
+  .read { font-weight: var(--fw-bold); color: var(--accent); }
+  .read span { display: inline-block; transition: transform 0.3s var(--ease); }
+  .featured:hover .read span { transform: translateX(4px); }
+  .list { list-style: none; margin: 0; padding: 0; border-top: 1.5px solid var(--ink); }
+  .list a {
+    display: grid; grid-template-columns: 11rem 1fr 10rem 1.5rem; gap: var(--s5); align-items: baseline;
+    padding-block: var(--s5); border-bottom: 1px solid var(--line); color: var(--ink); text-decoration: none;
+  }
+  .list a:hover .title { text-decoration: underline; text-decoration-thickness: 2px; }
+  .arrow { color: var(--accent); font-weight: var(--fw-bold); opacity: 0; transform: translateX(-8px); transition: opacity 0.25s, transform 0.3s var(--ease); }
+  .list a:hover .arrow, .list a:focus-visible .arrow { opacity: 1; transform: none; }
+  time { font-size: var(--fs-small); color: var(--ink-soft); font-variant-numeric: tabular-nums; }
+  .title { font-weight: var(--fw-bold); font-size: var(--fs-h3); letter-spacing: -0.01em; line-height: 1.25; }
+  .aud { font-size: var(--fs-small); font-weight: var(--fw-text); color: var(--ink-soft); }
+  .list .aud { text-align: right; }
+  @media (max-width: 760px) {
+    .list a { grid-template-columns: 1fr; gap: var(--s1); }
+    .list .aud { text-align: left; }
+    .arrow { display: none; }
+  }
+</style>
