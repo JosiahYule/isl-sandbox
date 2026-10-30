@@ -35,6 +35,7 @@ import { placeFrom, route, toContact, provinceName, OFFICES, TOWN_NAMES, DUTIES,
 import { DIRECTORY, DIRECTORY_AS, DIRECTORY_ADS } from './directory.js';
 import { payFor, payInsight, costFor, costInsight, jobAnswer } from './insights.js';
 import { familyOf } from './pay.js';
+import { minWageFor, minWageInsight, underMinimum, marketInsight, marketReading, placeName } from './market.js';
 import { resolveCompensation, compensationRates } from './compensation.js';
 
 // ---------- Small helpers ----------
@@ -58,6 +59,10 @@ const W = (src, flags = 'gu') => new RegExp(src.replace(/</g, String.raw`(?<![\p
 const FRENCH_RE = W("<(je|j'ai|j'|vous|nous|suis|êtes|avez|est-ce|est|pour|avec|dans|une|des|les|du|bonjour|bonsoir|salut|allo|merci|emplois?|travail|travailler|cherche|recherche|besoin|oui|quel|quelle|quels|où|qui|comment|combien|mon|ma|mes|votre|vos|embauche|embaucher|embauchez|entrepôt|journaliers?|chauffeurs?|poste|postes|permis|postuler|salaire|heures|bureau|personnel|aide|svp|s'il|plaît|français|ailleurs|autre|autres|recommencer|seulement|voir|montrez|joindre|ça|c'est|n'est|pas)>", 'iu');
 const ENGLISH_RE = /\b(the|i|i'm|im|we|we're|need|looking|job|jobs|work|hiring|hire|what|how|where|who|can|could|do|does|is|are|my|you|your|any|have|please|hi|hello|hey|thanks|thank|yes|want|show|more|only|other|about|someone|there|this|that|get|find|english)\b/i;
 const FRENCH = [
+  ['<salaire minimum>', 'min wage'], ['<légale?s?>', 'legal'], ['<taux de chômage>|<chômage>', 'unemployment'], ['<marché du travail>|<marché de l.emploi>', 'job market'],
+  ['<pénurie de (main-d.œuvre|personnel|travailleurs)>', 'labour shortage'],
+  ['<(difficile|dur) de (recruter|trouver du personnel|trouver des employés|trouver des travailleurs|embaucher)>', 'hard to hire'],
+  ['<(difficile|dur) de trouver (un emploi|du travail)>', 'hard to find a job'],
   ['<(emplois?|postes?|travail|offres?) de bureau>|<travail de bureau>', 'office jobs'], // office work, not our office
   ['<alertes? (d.)?emplois?>|<alertes? emploi>|<(m|nous).(envoyer|écrire) (des|les) (emplois|offres|postes)>', 'email me openings'],
   // People already working through ISL
@@ -167,7 +172,7 @@ const toEnglish = (t) => FRENCH.reduce((x, [re, en]) => x.replace(re, en), t
 // and read back to English when a French button is tapped.
 const BUTTONS_FR = {
   "I'm looking for work": 'Je cherche du travail', "I'm hiring": "J'embauche", 'I work with ISL': 'Je travaille avec ISL', 'Contact an office': 'Joindre un bureau',
-  'Start over': 'Recommencer', 'What does it cost?': 'Combien ça coûte?', 'Show more': 'Voir plus', 'Only permanent': 'Seulement permanent', 'Only contract': 'Seulement contrat',
+  'Start over': 'Recommencer', 'What do you charge?': 'Quels sont vos tarifs?', 'What would they really cost?': 'Combien me coûteraient-ils vraiment?', 'Show more': 'Voir plus', 'Only permanent': 'Seulement permanent', 'Only contract': 'Seulement contrat',
   'Somewhere else': 'Ailleurs', 'Other': 'Autre', 'Other kinds of work': 'Autres types de travail', 'Show me those': 'Montrez-les-moi',
   'Show me jobs': 'Montrez-moi des emplois', 'Find me a job': 'Trouvez-moi un emploi', 'Back to my request': 'Retour à ma demande',
   'For a set time': 'Pour une période déterminée', 'Permanent': 'Permanent', 'Try them first, then hire': "Les essayer, puis embaucher", 'Not sure yet': 'Pas encore sûr',
@@ -659,6 +664,10 @@ const faqOf = (text) => (FAQ.find(([, re]) => re.test(lower(text).trim())) || []
 // ---------- Questions the data can answer ----------
 // "What do forklift operators make?", "What would one cost me?", and on a job page,
 // "What are the hours?". These are answered from data, not by searching.
+// "What's minimum wage in PEI?", "is $16.50 legal in Nova Scotia?"
+const MINWAGE_Q = /\bmin(imum)? ?wage\b|\bminimum (pay|rate)\b|\b(is|are|isn'?t) \$?\d{1,2}(?:\.\d{1,2})?\s*(?:\/ ?h(?:ou)?r|an hour|per hour|a hour|\/hour)?\s*(legal|allowed|ok|okay|enough)\b|\blowest (legal )?(pay|wage)\b|\blegal (minimum|wage)\b|\$?\d{1,2}(?:\.\d{1,2})?\b[^.?!]{0,24}\b(legal|allowed)\b/;
+// "What's unemployment like in New Brunswick?", "is it hard to hire in Halifax right now?"
+const MARKET_Q = /\bunemployment\b|\b(job|labou?r|employment|hiring) market\b|\bjobless\b|\blabou?r shortage\b|\bshortage of (workers|staff|labou?r|people)\b|\b(hard|tough|difficult|easy|easier|harder) to (hire|recruit|find (staff|workers|people|employees|candidates|good people|help|a job|work|jobs))\b|\bhow many people (are )?(working|employed|out of work)\b|\bstate of the (economy|job market)\b|\baverage (wage|pay|hourly wage|salary) in (nova scotia|new brunswick|pei|prince edward island|newfoundland|atlantic canada|the province)\b/;
 const PAY_Q = /\b(what|how much)\b.*\b(pay|pays|paid|make|makes|earn|earns|wages?|salary|salaries|rate)\b|\b(pay|wages?|salary|salaries) (for|of|on)\b|\bwhat (do|does|would|should) (i|we) (offer|pay)\b/;
 const COST_Q = /\btrue cost\b|\bcost to (employ|have|keep)\b|\bwhat (would|does|will) (one|they|a worker|an employee|each one|someone|a hire)( really)? cost\b|\bemployer (costs?|contributions?|share)\b|\bpayroll (costs?|burden)\b|\bcpp\b|\bei premium|\bworkers'? comp\b|\bactually cost\b|\breally cost\b/;
 const WAGE_RE = /\$\s?(\d{1,3}(?:\.\d{1,2})?)|\b(\d{1,3}(?:\.\d{1,2})?)\s*(?:dollars?\s*)?(?:an|a|per|\/)\s*(?:hour|hr)\b/i;
@@ -693,6 +702,8 @@ function dataQuestion(text, asked, context) {
   if (COST_Q.test(t) || (readWage(text) && /\b(cost|employ|hire|hiring|pay(ing)? (someone|them|a worker|staff))\b/.test(t))) return { kind: 'cost' };
   const faq = faqOf(text);
   if (faq && (faq.startsWith('w-') || ['fees', 'status', 'permit', 'recruiter', 'scam', 'e-payrolling', 'e-existing', 'eligible-no', 'eligible-ask', 'eligible-yes'].includes(faq))) return null;
+  if (MINWAGE_Q.test(t)) return { kind: 'minwage' };
+  if (MARKET_Q.test(t)) return { kind: 'market' };
   if (readMinPay(t)) return null; // "jobs that pay over $25" is a search
   if (context?.job) {
     const role = readRole(text);
@@ -1155,6 +1166,19 @@ export function createEngine({ loadJobs, siteUrl = (path) => SITE.base + path, b
     // worth a job alert (ISL only, where the job feed is live)
     if (r.meta && (r.meta.ask === 'unclear' || r.meta.ask === 'unclear2' || st.hireMiss)) r.meta.miss = 'unclear';
     const s = st.seek;
+    if (r.meta?.ask === 'hire-done' && st.hire.role && st.hire.service !== 'direct') {
+      const province = st.hire.place?.province || '';
+      // A wage they mentioned that's under the province's minimum: better said now than at the quote
+      const offered = readWage(st.hire.said.join(' '));
+      const floor = offered && province ? underMinimum(offered, province)[0] : null;
+      if (floor) r.reply += L(` One thing to know: $${offered}/hour is under ${placeName(province)}’s minimum wage of $${floor.rate.toFixed(2)}.`, ` À noter : ${frMoney('$' + offered)}/heure est sous le salaire minimum (${placeName(province, 'fr')} : ${frMoney('$' + floor.rate.toFixed(2))}).`);
+      // What the hire would really cost, worked out from what we pay for the role (Pay tool, True cost)
+      const pay = P.payData ? payFor(jobs, { role: st.hire.role.many, province }) : null;
+      if (pay && pay.unit === 'hour' && pay.hourly) {
+        r.meta = { ...r.meta, wage: Math.round(pay.hourly * 4) / 4, province: pay.province || province };
+        r.choices = [r.choices[0], 'What would they really cost?', ...r.choices.slice(1)].filter(Boolean);
+      }
+    }
     const none = !r.jobs?.length && r.meta?.searchLabel && /couldn’t find|n’ai trouvé/.test(r.reply);
     if (brand === 'isl' && !context.job && (r.jobs?.length || none) && r.meta?.mode === 'seeker' && (hasTerms(s.terms) || s.place || s.attrs.length || s.minPay)) {
       r.meta = { ...r.meta, search: { terms: s.terms, place: s.place, employment: s.employment, attrs: s.attrs, minPay: s.minPay } };
@@ -1177,7 +1201,7 @@ export function createEngine({ loadJobs, siteUrl = (path) => SITE.base + path, b
       if (c.action) c.action = { ...c.action, label: c.action.label.replace(/^Send my request to (Halifax|Moncton|Saint John|Charlottetown|St\. John's)$/, 'Envoyer ma demande au bureau de $1').replace(/^Send my request to /, 'Envoyer ma demande à ') };
       out.contact = c;
     }
-    if (r.insight) out.insight = insightFr(r.insight);
+    if (r.insight && !r.insight.localized) out.insight = insightFr(r.insight);
     if (r.jobs) out.jobs = r.jobs.map((j) => ({ ...j, pay: j.pay === 'Confirm pay with recruiter' ? 'Salaire à confirmer avec le recruteur' : frMoney(j.pay) }));
     return out;
   }
@@ -1255,6 +1279,8 @@ export function createEngine({ loadJobs, siteUrl = (path) => SITE.base + path, b
     if (['human', 'contact', 'officehours', 'officewhere', 'afterhours'].includes(faq) || (asked === 'office-pick' && st.anyPlace) || /^contact an office$/i.test(st.lastText.trim())) return officeTurn(st, faq, asked);
 
     if (st.dataQ?.kind === 'job') { const job = jobs.find((j) => j.id === context.job); if (job) return jobTurn(job, st.dataQ.topic, st, jobs, seed); }
+    if (st.dataQ?.kind === 'minwage') return minWageTurn(st);
+    if (st.dataQ?.kind === 'market') return marketTurn(st);
     if (st.dataQ?.kind === 'cost') return costTurn(st, asked, context);
     if (st.dataQ?.kind === 'pay') return payTurn(st, context, seed);
     if (faq === 'resumecheck') return { reply: L('Our Resume check scores your resume, shows the fixes that matter most and lists the open jobs it fits. It runs in your browser, so your resume never leaves your device.', 'Notre outil de vérification du CV note votre CV, montre les corrections les plus importantes et liste les emplois ouverts qui lui correspondent. Il fonctionne dans votre navigateur, donc votre CV ne quitte jamais votre appareil.'), choices: [{ label: 'Check my resume', href: links.resumeCheck }, 'Show me jobs'], meta: { mode: 'seeker' } };
@@ -1716,13 +1742,77 @@ export function createEngine({ loadJobs, siteUrl = (path) => SITE.base + path, b
     const hoursM = lower(text).match(/\b(\d{1,2})\s*hours? (a|per) week\b/);
     const r = costFor({ wage, hours: hoursM ? Number(hoursM[1]) : 40, province });
     const w = wage.toFixed(2).replace(/\.00$/, '');
-    const used = fromPay ? L(` I used $${w}/hour, the middle pay on our open jobs.`, ` J’ai utilisé ${frMoney('$' + w)}/heure, le salaire médian de nos emplois ouverts.`) : '';
+    const used = !fromPay ? '' : st.lastMeta?.wageFrom === 'minwage'
+      ? L(` I used the minimum wage, $${w}/hour.`, ` J’ai utilisé le salaire minimum, ${frMoney('$' + w)}/heure.`)
+      : L(` I used $${w}/hour, the middle pay on our open jobs.`, ` J’ai utilisé ${frMoney('$' + w)}/heure, le salaire médian de nos emplois ouverts.`);
+    const floor = atlantic ? underMinimum(wage, province)[0] : null;
+    const under = floor ? L(` Note: $${w}/hour is under ${placeName(province)}’s minimum wage of $${floor.rate.toFixed(2)}.`, ` À noter : ${frMoney('$' + w)}/heure est sous le salaire minimum en vigueur (${placeName(province, 'fr')} : ${frMoney('$' + floor.rate.toFixed(2))}).`) : '';
     const where = !atlantic && asked2 ? L(' Our calculator covers the Atlantic provinces, so this uses Nova Scotia’s rates.', ' Notre calculateur couvre les provinces de l’Atlantique, alors ce calcul utilise les taux de la Nouvelle-Écosse.') : '';
     return {
-      reply: L('Here’s what each hour worked really costs, once vacation, paid holidays, CPP, EI and workers’ comp are added.', 'Voici ce que coûte vraiment chaque heure travaillée, une fois ajoutés les vacances, les congés fériés payés, le RPC, l’AE et l’indemnisation des accidentés du travail.') + used + where,
+      reply: L('Here’s what each hour worked really costs, once vacation, paid holidays, CPP, EI and workers’ comp are added.', 'Voici ce que coûte vraiment chaque heure travaillée, une fois ajoutés les vacances, les congés fériés payés, le RPC, l’AE et l’indemnisation des accidentés du travail.') + used + where + under,
       insight: costInsight(r, siteUrl),
       choices: mode === 'employer' && st.hire.role ? ['Back to my request'] : ["I'm hiring"],
       meta: { mode, ask: 'cost', province, wage },
+    };
+  }
+
+  // "What's minimum wage in PEI?", "is $16.50 legal in Nova Scotia?": the same rates the Pay tool uses
+  function minWageTurn(st) {
+    const lang = FR ? 'fr' : 'en';
+    const t = lower(st.lastText);
+    const place = st.dataPlace || (st.mode === 'employer' ? st.hire.place : st.seek.place) || null;
+    const province = place && !place.outside && minWageFor(place.province) ? place.province : '';
+    const bare = t.match(/(?:^|\s|\$)(\d{1,2}(?:[.,]\d{1,2})?)(?=\s*(?:\$|dollars?|\/|an hour|per hour|a hour|is|legal|ok|okay|enough|allowed|\?|$))/);
+    const wage = readWage(st.lastText) || (bare ? Number(bare[1].replace(',', '.')) : null);
+    const mode = st.mode || st.lastMeta?.mode || null;
+    const general = L(' That’s the general rate; a few kinds of work have their own rules.', ' C’est le taux général; quelques types de travail ont leurs propres règles.');
+    const outside = place?.outside ? L('I only have the Atlantic provinces’ rates. ', 'Je n’ai que les taux des provinces de l’Atlantique. ') : '';
+    const amt = (v) => (FR ? frMoney('$' + v.toFixed(2)) : '$' + v.toFixed(2)); // $17.00, as on the card
+    let reply;
+    if (wage) {
+      const under = underMinimum(wage, province || null);
+      if (province) {
+        const m = minWageFor(province);
+        reply = under.length
+          ? L(`No. ${amt(wage)} an hour is under ${placeName(province)}’s minimum wage of ${amt(m.rate)} (since ${m.since}).`, `Non. ${amt(wage)} de l’heure est sous le salaire minimum (${placeName(province, 'fr')} : ${amt(m.rate)}).`)
+          : L(`Yes. ${amt(wage)} an hour is at or above ${placeName(province)}’s minimum wage of ${amt(m.rate)}.`, `Oui. ${amt(wage)} de l’heure est égal ou supérieur au salaire minimum (${placeName(province, 'fr')} : ${amt(m.rate)}).`);
+      } else {
+        reply = !under.length
+          ? L(`${amt(wage)} an hour is at or above the minimum wage in all four Atlantic provinces.`, `${amt(wage)} de l’heure est égal ou supérieur au salaire minimum dans les quatre provinces de l’Atlantique.`)
+          : L(`${amt(wage)} an hour is under the minimum wage in ${under.map((m) => placeName(m.province)).join(' and ')}.`, `${amt(wage)} de l’heure est sous le salaire minimum : ${under.map((m) => placeName(m.province, 'fr')).join(', ')}.`);
+      }
+    } else {
+      reply = province ? L(`${placeName(province)}’s minimum wage is ${amt(minWageFor(province).rate)} an hour.`, `${cap(inProvFr(province))}, le salaire minimum est de ${amt(minWageFor(province).rate)} de l’heure.`)
+        : L('Here’s the minimum wage in each Atlantic province.', 'Voici le salaire minimum dans chaque province de l’Atlantique.');
+    }
+    const rate = province ? minWageFor(province).rate : null;
+    return {
+      reply: outside + reply + general,
+      insight: minWageInsight(province, lang),
+      choices: mode === 'employer' ? (rate ? ['What would one cost me?'] : []).concat(st.hire.role ? ['Back to my request'] : ["I'm hiring"]) : ['Show me jobs'],
+      meta: { mode, ask: 'minwage', province, ...(rate ? { wage: rate, wageFrom: 'minwage' } : {}) },
+    };
+  }
+
+  // "What's unemployment like in New Brunswick?", "is it hard to hire in Halifax?": the Atlantic jobs report's figures
+  function marketTurn(st) {
+    const lang = FR ? 'fr' : 'en';
+    const t = lower(st.lastText);
+    const place = st.dataPlace || (st.mode === 'employer' ? st.hire.place : st.seek.place) || null;
+    const code = place && !place.outside && ['NS', 'NB', 'PE', 'NL'].includes(place.province) ? place.province : 'ATL';
+    const mode = st.mode || st.lastMeta?.mode || null;
+    const employer = mode === 'employer' || (/\b(hire|hiring|recruit|staff|candidates|workers|employees|labou?r shortage|shortage of)\b/.test(t) && !/\bfind (a )?(job|work|jobs)\b/.test(t));
+    const named = readRole(st.lastText);
+    const role = named && !named.generic ? named.one : employer && st.hire.role && !st.hire.role.generic ? st.hire.role.one : '';
+    const link = brand === 'isl' ? { label: L('The full Atlantic jobs report', 'Le rapport complet sur l’emploi en Atlantique'), href: links.jobsReport } : null;
+    const insight = marketInsight(code, { lang, family: role ? familyOf(role) : null, link });
+    if (!insight) return { reply: L('The latest labour market figures aren’t available right now.', 'Les plus récents chiffres du marché du travail ne sont pas disponibles en ce moment.'), choices: link ? [link] : [], meta: { mode } };
+    const outside = place?.outside ? L('The survey figures I have are for Atlantic Canada. ', 'Les chiffres que j’ai portent sur le Canada atlantique. ') : '';
+    return {
+      reply: outside + marketReading(code, { employer, lang }),
+      insight,
+      choices: employer ? [st.hire.role ? 'Back to my request' : "I'm hiring"] : ['Show me jobs'],
+      meta: { mode: employer ? 'employer' : mode, ask: 'market', province: code === 'ATL' ? '' : code },
     };
   }
 
@@ -1874,7 +1964,7 @@ export function createEngine({ loadJobs, siteUrl = (path) => SITE.base + path, b
       reply: `${opener} ${reply}`,
       summary,
       contact: { ...toContact(r, action), officeUrl: P.officePages && r.office?.key && service !== 'direct' && !h.place.outside ? siteUrl(`/offices/${r.office.key}/`) : '' },
-      choices: [{ label: service === 'direct' ? P.howDirect : P.howTemp, href: service === 'direct' ? links.direct : links.contract }, 'What does it cost?'],
+      choices: [{ label: service === 'direct' ? P.howDirect : P.howTemp, href: service === 'direct' ? links.direct : links.contract }, 'What do you charge?'],
       meta: meta('hire-done'),
     };
   }

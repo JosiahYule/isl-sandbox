@@ -8,7 +8,7 @@
 // Two kinds of visitor:
 //   job seekers  -> search_jobs, get_job_details, recommend_jobs
 //   employers    -> find_contact (who at ISL handles their request), true_cost_of_employee
-// Both          -> pay_on_open_jobs, offer_choices (tap-to-answer buttons under the message)
+// Both          -> pay_on_open_jobs, minimum_wage, labour_market, offer_choices (tap-to-answer buttons under the message)
 //
 // On a job page the widget also says which posting the visitor is reading, so
 // "what are the hours?" is answered from that posting.
@@ -17,6 +17,8 @@
 import { SITE, searchJobs, getJobDetails, toCard } from "./jobs.js";
 import { placeFrom, route, toContact, provinceName } from "./routing.js";
 import { payFor, payInsight, costFor, costInsight } from "./insights.js";
+import { minWageFor, minWageInsight, underMinimum, marketFor, marketInsight } from "./market.js";
+import { familyOf } from "./pay.js";
 
 const siteUrl = (path) => SITE.base + path;
 // Pages the assistant may show as link buttons (offer_choices `links`). A fixed list, so it can't invent a URL.
@@ -69,6 +71,8 @@ EMPLOYERS: work out who at ISL should handle their request, then hand them to th
 - If an employer asks for help writing or fixing a job ad, offer what ISL does instead: we write the ad, post it, screen everyone who applies and send the people worth meeting. Then gather the role details as usual and call find_contact.
 - When anyone asks about the job market (unemployment, how many people are working, which industries are adding jobs, average wages in a province), point them to the Atlantic jobs report (offer_choices link jobs_report): Statistics Canada's latest monthly Labour Force Survey in charts. Never quote those figures yourself; they change every month.
 
+MINIMUM WAGE (both): for any question about the minimum wage, or whether a wage is legal or high enough, call minimum_wage. Give the answer in one sentence; the card shows the rate and the date. It's the general rate; a few kinds of work have their own rules. If an employer's wage is under the minimum, say so plainly and kindly.
+LABOUR MARKET (both): for questions about unemployment, the job market, or how hard it is to hire or find work in a province, call labour_market. Say what the figure means for the person asking in one sentence (employers: lower unemployment usually means good candidates are hired quickly; job seekers: how many more people are working than a year ago). Never predict, and never call it hard or easy on your own say-so. Offer the jobs_report link.
 PAY (both): when anyone asks what a role pays, or what to offer, call pay_on_open_jobs. It only knows ISL's own open postings, so say it's from our open jobs and how many, never "the market". If it returns nothing, say so and offer the pay tool (offer_choices link pay_tool). The card shows the figure and range, so don't repeat them; add one useful sentence instead.
 RESUMES: never ask anyone to paste a resume into this chat (it's full of personal details). The Resume check (offer_choices link resume_check) scores it, suggests fixes and lists the open jobs it fits, all inside their browser.
 
@@ -110,6 +114,30 @@ export const TOOLS = [
         province: { type: "string", enum: ["NS", "NB", "PE", "NL"], description: "Default NS." },
       },
       required: ["hourly_wage"],
+    },
+  },
+  {
+    name: "minimum_wage",
+    description:
+      "The general minimum wage in an Atlantic province (or all four), the date it started and the next increase, from the same table ISL's Pay tool uses, and shows it as a card. With hourly_wage, also says whether that wage is under the minimum.",
+    input_schema: {
+      type: "object",
+      properties: {
+        province: { type: "string", enum: ["NS", "NB", "PE", "NL"], description: "Leave out for all four provinces." },
+        hourly_wage: { type: "number", description: "A wage to check, if they gave one." },
+      },
+    },
+  },
+  {
+    name: "labour_market",
+    description:
+      "The latest Statistics Canada Labour Force Survey figures for an Atlantic province, or Atlantic Canada as a whole: unemployment (and Canada's for comparison), the change from a year ago, people working, average hourly wage and youth unemployment, as a card. With a role, adds jobs in that role's industry. The same figures as ISL's Atlantic jobs report.",
+    input_schema: {
+      type: "object",
+      properties: {
+        province: { type: "string", enum: ["NS", "NB", "PE", "NL"], description: "Leave out for Atlantic Canada as a whole." },
+        role: { type: "string", description: "The kind of work, if they named one, e.g. 'warehouse workers'." },
+      },
     },
   },
   {
@@ -191,6 +219,23 @@ export function runTool(name, input, jobs, state) {
     if (!r) throw new Error("hourly_wage must be a number above 0.");
     state.insight = costInsight(r, siteUrl);
     return { ...r, note: "The visitor can see a card with the cost per hour worked and a link to the full breakdown. Don't repeat the numbers; one short sentence." };
+  }
+  if (name === "minimum_wage") {
+    const province = ["NS", "NB", "PE", "NL"].includes(input?.province) ? input.province : "";
+    state.insight = minWageInsight(province);
+    const wage = Number(input?.hourly_wage) || null;
+    return {
+      rates: province ? [minWageFor(province)] : ["NS", "NB", "PE", "NL"].map(minWageFor),
+      ...(wage ? { wage, under_minimum_in: underMinimum(wage, province || null).map((m) => m.province) } : {}),
+      note: "The visitor can see a card with the rate. Answer in one sentence; don't repeat the card.",
+    };
+  }
+  if (name === "labour_market") {
+    const code = ["NS", "NB", "PE", "NL"].includes(input?.province) ? input.province : "ATL";
+    const m = marketFor(code);
+    if (!m) return { result: null, note: "The figures aren't available right now. Say so and offer the jobs_report link." };
+    state.insight = marketInsight(code, { family: input?.role ? familyOf(input.role) : null, link: LINKS.jobs_report });
+    return { ...m, note: "Unemployment and rates are percentages; employment is thousands of people. The visitor can see a card with these figures; say what they mean in one sentence." };
   }
   if (name === "get_job_details") return getJobDetails(jobs, input?.job_id);
   if (name === "recommend_jobs") {

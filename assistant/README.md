@@ -93,6 +93,27 @@ numbers, taken from the team data (anyone whose title is Response Coordinator), 
 
 Rules are read top to bottom and the first match wins.
 
+## The tools, in conversation
+
+The chat answers with the same figures as the website's tools, so the two never disagree:
+
+| Asked | Answer | Comes from |
+|---|---|---|
+| "What do forklift operators make in NB?" | Pay card | Pay on our open jobs (`_shared/insights.js`) |
+| "What would a $20/hour worker cost me?" | True cost card | True cost calculator (`_shared/payroll.js`) |
+| "What's minimum wage in PEI?", "is $16.50 legal in Nova Scotia?" | Minimum wage card | `src/lib/minwage.js` |
+| "What's unemployment like in NB?", "is it hard to hire in Moncton?" | Labour market card, with a link to the Atlantic jobs report | `src/data/lfs/latest.json` |
+
+They chain on what the visitor already said. After an employer's request, "What would they really cost?"
+works out the cost from what we pay for that role in that province. After a minimum wage answer, "What would one
+cost me?" uses that rate. A wage under the province's minimum is pointed out in a cost answer and after a request.
+
+`scripts/sync-assistant.mjs` copies the minimum wages and the latest survey figures into
+`_shared/market-data.js` (the chat and the AI backend both read it; `_shared/market.js` turns it into answers).
+The jobs report workflow refreshes it when Statistics Canada releases a new month. When the minimum wages change
+(April and October), update `src/lib/minwage.js`, including `MIN_WAGE_CHECKED`, and the chat follows.
+The AI backend has the same two as tools: `minimum_wage` and `labour_market`.
+
 ## Learning from what it misses
 
 The chat runs on rules, so it only gets better when someone sees what it didn't understand.

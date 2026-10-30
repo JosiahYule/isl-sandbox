@@ -32,16 +32,18 @@ jobs:
         with:
           node-version-file: .node-version
       - run: node scripts/fetch-lfs.mjs
+      # The chat quotes the same figures (assistant/supabase/functions/_shared/market-data.js)
+      - run: node scripts/sync-assistant.mjs
       - name: Commit and deploy new or revised figures
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           # status, not diff: diff ignores a file git hasn't seen before (the very first one)
-          if [ -z "$(git status --porcelain -- src/data/lfs)" ]; then echo "No change."; exit 0; fi
+          if [ -z "$(git status --porcelain -- src/data/lfs assistant/supabase/functions/_shared/market-data.js)" ]; then echo "No change."; exit 0; fi
           month=$(node -p "require('./src/data/lfs/latest.json').month")
           git config user.name "github-actions[bot]"
           git config user.email "41898699+github-actions[bot]@users.noreply.github.com"
-          git add src/data/lfs
+          git add src/data/lfs assistant/supabase/functions/_shared/market-data.js
           git commit -m "Labour Force Survey: $month figures and revisions"
           git pull --rebase origin main
           git push

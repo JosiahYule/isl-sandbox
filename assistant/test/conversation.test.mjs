@@ -195,6 +195,20 @@ await talk('Office hours for a named office', ['When is St. John’s office open
 await talk('FR: office hours', ['Quand le bureau de Moncton est-il ouvert?'], (r) => expect(/ouvert de 8 h 30/.test(r.reply), 'French hours'));
 await talk('FR: office work is a job search', ['emplois de bureau à Moncton'], (r) => expect(!r.contact && /poste/.test(r.reply), 'jobs, not our office'));
 await talk('Seeker: what is open is still a search', ['whats open in moncton'], (r) => expect(/open around Moncton/.test(r.reply), 'not office hours'));
+// The tools in conversation: minimum wage, the labour market, and the real cost of a request (October 30)
+await talk('Minimum wage in a province', ['whats minimum wage in PEI?'], (r) => expect(/\$17\.30/.test(r.reply) && r.insight?.figure === '$17.30/hour', 'PEI rate and card'));
+await talk('Is a wage legal', ['is $16.50 legal in nova scotia?'], (r) => expect(/^No\. \$16\.50 an hour is under Nova Scotia’s minimum wage/.test(r.reply), 'under the floor'));
+await talk('A wage against all four provinces', ['is 16.50 an hour ok'], (r) => expect(/under the minimum wage in Nova Scotia and Prince Edward Island/.test(r.reply), 'which provinces'));
+await talk('FR: minimum wage', ['Quel est le salaire minimum à l’Île-du-Prince-Édouard?'], (r) => expect(/17,30 \$/.test(r.reply), 'French rate'));
+await talk('Labour market, job seeker', ['is it hard to find a job in halifax'], (r) => expect(/more people are working in Nova Scotia/.test(r.reply) && /^Unemployment rate, Nova Scotia/.test(r.insight?.kicker), 'Nova Scotia figures'));
+await talk('Labour market, employer, with the role’s industry', ['is it hard to hire warehouse workers in moncton?'],
+  (r) => expect(/^Unemployment in New Brunswick/.test(r.reply) && r.insight.rows.some(([k]) => /transportation and warehousing/.test(k)) && r.meta.mode === 'employer', 'NB, warehousing jobs, employer'));
+await talk('Labour market, Atlantic Canada', ['how is the job market'], (r) => expect(/Atlantic Canada/.test(r.insight?.kicker) && r.insight.rows.length >= 5, 'all four provinces'));
+await talk('After a request: what would they really cost', ['3 forklift operators in moncton next monday', 'contract', 'What would they really cost?'],
+  (r) => expect(/the middle pay on our open jobs/.test(r.reply) && /New Brunswick/.test(r.insight?.kicker), 'carried role and province'));
+await talk('A request with a wage under the minimum', ['I need 2 cleaners in halifax at $15 an hour', 'contract', 'asap'], (r) => expect(/\$15\/hour is under Nova Scotia’s minimum wage/.test(r.reply), 'flagged'));
+await talk('Cost of a wage under the minimum', ['what would a $15/hour worker cost me in NS?'], (r) => expect(/Note: \$15\/hour is under Nova Scotia’s minimum wage/.test(r.reply), 'flagged'));
+await talk('Minimum wage, then its cost', ["I'm hiring", 'what is minimum wage in NB?', 'What would one cost me?'], (r) => expect(/I used the minimum wage, \$15\.90/.test(r.reply), 'carried the rate'));
 // No broken echoes
 await talk('Seeker: all the jobs', ['show me all the jobs'], (r) => expect(r.jobs?.length === 3 && !/couldn/.test(r.reply), 'shows the newest'));
 await talk('Seeker: job alerts', ['can you email me jobs like this'], (r) => expect(/job alerts/.test(r.reply), 'answers the alerts question'));

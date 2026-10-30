@@ -2,6 +2,8 @@
 // Used by the Atlantic jobs report and Pay on our open jobs to compare pay with the floor.
 // UPDATE: Nova Scotia and PEI change in April and October, New Brunswick and NL in April.
 // Checked October 21, 2026 against each province's announcement.
+// The chat assistant quotes these too (via scripts/sync-assistant.mjs): update MIN_WAGE_CHECKED with the rates.
+export const MIN_WAGE_CHECKED = 'October 21, 2026';
 export const MIN_WAGE = {
   NS: { rate: 17.0, since: 'October 1, 2026', source: ['Nova Scotia government', 'https://news.novascotia.ca/en/2025/12/02/minimum-wage-increase-twice-2026-reaching-17-october'] },
   NB: { rate: 15.9, since: 'April 1, 2026', source: ['Canadian HR Reporter', 'https://www.hrreporter.com/focus-areas/payroll/province-announces-boost-to-minimum-wage-in-april/394065'] },
