@@ -1,10 +1,10 @@
-// ACCOUNTANT STAFFING: THE WORDS ON EACH PAGE, from accountantstaffing.ca (read October 21, 2026).
+// ACCOUNTANT STAFFING: THE WORDS ON EACH PAGE, from accountantstaffing.ca.
 //
-// The live site's wording is the default. Marked in each block:
-//   EXACT    copied word for word from the live page
-//   CLOSE    the live page's points in the same order, with its own phrases where possible.
-//            The tool that read these pages wouldn't return them word for word.
-//            TODO: paste the exact text over these (Squarespace: Settings > Advanced > Import/Export).
+// Word for word from the live pages (read in the browser, October 30, 2026), with three kinds of change:
+//   - headings, menu labels and buttons in sentence case, as on ISL's site
+//   - curly quotes and apostrophes
+//   - the two em dashes on the live FAQ pages became a colon and a full stop
+// An FAQ answer can be a string, or a list of paragraphs where a nested list is a bulleted list.
 
 export const copy = {
   // Homepage  (EXACT, except the search label and "Request talent", which are the new site's)
@@ -69,68 +69,110 @@ export const copy = {
     ],
   },
 
-  // Permanent Recruitment FAQ  (questions EXACT, answers CLOSE)
+  // Permanent Recruitment FAQ  (questions and answers EXACT)
   permanent: {
     title: 'Permanent recruitment FAQ',
     faq: [
-      ['How long does it take to fill a position?', 'As a local accounting recruiter, we meet and register candidates at all levels on an ongoing basis, so we often have suitable candidates in our network already. When we don’t, we run a full search: placing recruitment ads, interviewing candidates on an ongoing basis and contacting relevant industry associations. We can help quickly and within your timeline.'],
-      ['How could your search results differ from my own?', 'Time. Reach. Longevity. Recruiting on your own usually means a job ad, which can miss top candidates who aren’t browsing ads, working candidates who avoid ads for confidentiality reasons, and applicants who don’t plan to stay long-term. Our consultants meet people for general career conversations to learn their motivations, dream roles and long-term goals, then suggest the candidates most likely to thrive in your role.'],
-      ['Are there any upfront fees?', 'No. We work only on a contingency basis for both contract and permanent searches. You pay only if you hire one of our candidates.'],
-      ['How much does the service cost?', 'Permanent recruitment carries a one-time professional fee based on the candidate’s first-year compensation.'],
-      ['What happens if the employee does not work out as planned?', 'Permanent searches include a six-month guarantee. If the hire resigns or is dismissed within six months of their start date, we will find a suitable replacement at no additional cost.'],
+      ['How long does it take to fill a position?', [
+        'As a local firm specializing in accounting recruitment, we meet with and register candidates at all levels on an ongoing basis. The result is a strong network of contacts in our industry and the ability to assist employers with their recruitment needs quickly and within their timeline.',
+        'While we are often able to find the perfect candidates for your position in our current network, we also perform a full search to source additional candidates including development and placement of recruitment ads, ongoing interviews with prospective candidates, and reaching out to industry associations relevant to your business.',
+      ]],
+      ['How could your search results differ from my own?', [
+        'Time. Reach. Longevity.',
+        'When an employer needs an employee they want to find the absolute best person for their company. When recruiting on their own, employers typically place an ad and rely on that ad to attract the candidates they need. Unfortunately, all the top candidates may not be looking at employment ads on an ongoing basis. Working candidates may not reply to general ads due to confidentiality concerns or non-working people may be applying to positions where they know they will not be staying for the long-term.',
+        'Our consultants meet with people at all levels for general meetings that allow us to get a true sense of where that person wants to be in their career. What motivates the candidate, what is their dream job and where they see themselves long-term are topics explored. With this information, we are able to make informed suggestions of people who we think will be happy and thrive in your role. It’s a win-win.',
+      ]],
+      ['Are there any upfront fees?', 'No. We work only on a contingency basis. Whether you require a contract accountant or would like to engage our services to complete a permanent search, you pay a fee only if you hire one of our candidates.'],
+      ['How much does the service cost?', 'For permanent recruitment, we charge a one-time professional fee based on the candidate’s first-year compensation.'],
+      ['What happens if the employee does not work out as planned?', 'Occasionally an employee does not work out or decides to move on to another position. For permanent searches we provide a six month guarantee so that should the individual resign or be dismissed within six months of the start date of employment, we will find a suitable replacement at no additional cost.'],
     ],
   },
 
-  // Temporary Recruitment FAQ  (questions EXACT, answers CLOSE; two phrases EXACT)
+  // Temporary Recruitment FAQ  (questions and answers EXACT)
   temporary: {
     title: 'Temporary recruitment FAQ',
     faq: [
-      ['What types of temporary roles do you fill?', 'Temporary staffing allows you to meet your immediate staffing needs quickly and flexibly: special projects, parental leaves, peak periods, sudden vacancies, vacation coverage and employee leaves of absence. It’s also a way to evaluate a contractor as a possible permanent hire.'],
-      ['How long does it take to fill a position?', 'Every candidate goes through skills testing, an in-depth interview and reference checks before registering with us, so our contractors are ready to go at a moment’s notice.'],
-      ['Can I determine the length of a contract?', 'Yes. An approximate length helps at the outset, but you can end the contract at any time without penalty, or extend it if the contractor is still available.'],
-      ['Do contract employees ever become permanent?', 'Often. Clients regularly hire contractors permanently during or after the contract, once they’ve seen how they fit.'],
-      ['Are there any upfront fees?', 'No. Our services are contingency based, so you pay a fee only if you hire one of our candidates.'],
-      ['How much does the service cost?', 'The fee is included in an all-inclusive hourly rate that covers the contractor’s salary, employer EI and CPP contributions, payroll processing and staffing fees. The rate depends on the level of the position and the contractor’s experience and skills.'],
-      ['What happens if the contractor does not work out?', 'We will source replacement candidates, or you can end the contract.'],
+      ['What types of temporary roles do you fill?', [
+        'Employers may require temporary assistance for a variety of reasons. Here are just a few:',
+        ['Special projects', 'Parental leaves', 'Peak work periods', 'Sudden position vacancies', 'Vacation coverage', 'Employee leaves of absence'],
+        'Temporary staffing allows you to meet your immediate staffing needs quickly and flexibly. Additionally, employers may want to evaluate a contract candidate as a potential permanent employee.',
+      ]],
+      ['How long does it take to fill a position?', 'As part of the registration process, candidates must pass a thorough pre-screening process including skills testing, a comprehensive interview and reference checking. Consequently, our contractors are ready to go at a moment’s notice and we are able to fill temporary positions very quickly.'],
+      ['Can I determine the length of a contract?', 'Absolutely. Our contracts are designed to ensure you have complete flexibility in your staffing needs. While it helps the process to know the approximate length at the start of the contract, you are free to terminate the contract at any time, without penalty, should your needs change or extend the contract should the person continue to be available.'],
+      ['Do contract employees ever become permanent?', 'Yes. In a significant number of our assignments, the contract employee is hired permanently by our client either during the contract or following its completion. In fact, many employers view the contract option as a good way of seeing if the person is a good long-term fit before making the decision to hire permanently.'],
+      ['Are there any upfront fees?', 'No. We work only on a contingency basis. Whether you require a contract accountant or would like to engage our services to complete a permanent search, you pay a fee only if you hire one of our candidates.'],
+      ['How much does the service cost?', 'On a temporary staffing basis, our fee is built into an hourly rate which includes all costs: the contractor’s salary, employer EI and CPP benefits, payroll processing costs and contract staffing fees. The hourly rate depends on the level of position and the individual contractor’s experience and skills.'],
+      ['What happens if the contractor does not work out?', 'Occasionally a contractor does not work out or decides to move on to another position. If this happens, we will source new contractor candidates to consider as replacements. Alternatively, you may choose to end the contract.'],
     ],
   },
 
-  // Job Seekers  (headings and questions EXACT, text CLOSE)
+  // Job Seekers  (EXACT; the meeting paragraphs are split into steps, in the live order)
   seekers: {
     title: 'Job placement solutions for workers.',
     intro: [
-      'Accountant Staffing focuses solely on recruiting accounting and finance professionals across Atlantic Canada, for permanent roles and temporary assignments.',
-      'We use database technology to match candidates to opportunities, and we also get to know each candidate’s experience, education, preferences and goals. Registered candidates get confidential access to accounting and finance roles, and guidance on market demand, in-demand skills, salary levels and professional accounting programs.',
+      'At Accountant Staffing, our sole focus is the recruitment and placement of talented accounting and finance professionals throughout Atlantic Canada.',
+      'Whether you are looking for a permanent career change or the flexibility and experience that can be gained from temporary assignments, we can help.',
+      'We use sophisticated database technology to track and match candidates to opportunities. But technology can only go so far. We get to know you personally – your experience and education, as well as your preferences and career goals.',
+      'By registering with us you will have confidential access to some of the best accounting and finance assignments and positions available. Our experience in this specialized market enables us to provide guidance with respect to current market demands, the skills employers are seeking, salary levels and professional accounting programs.',
     ],
-    findTitle: 'Find your next job.',
+    findTitle: 'Find your next job!',
     findText: 'Visit our job opportunities to see current openings.',
     meetTitle: 'Meeting with us',
-    meet: [
-      ['A meeting with a consultant', 'If your background fits our current openings, a consultant invites you to meet and talk about your career goals, working style and preferences.'],
-      ['A skills test', 'Candidates without a professional accounting designation take an electronic skills test of about 30 minutes.'],
-      ['References and details', 'We also collect your references, software experience and salary expectations.'],
-      ['Your resume on file', 'If there’s no match right now, we keep your resume on file and contact you when there is.'],
+    meetIntro: [
+      'If your experience and background is a good match for the types of positions we are currently recruiting for, we will contact you to come in and meet with one of our consultants.',
+      'Our meetings are designed to gain insight into your personal and professional aspirations. Where have you been and where do you want to go? What sort of working style do you prefer? Are you interested in large companies with a lot of opportunity for advancement or do you work best in an entrepreneurial environment that allows you to influence operational decisions? Do you thrive on details or prefer to focus on the big picture?',
     ],
+    meet: [
+      ['A skills test', 'If you have not completed a professional accounting designation, we will assess your level of accounting knowledge using an electronic test that takes approximately 30 minutes.'],
+      ['References and details', 'We will also gather important administrative information – references, software experience, salary expectations and the like. We want to be sure we have everything we need to help you put your strengths to work in the advancement of your career.'],
+      ['When a role fits', 'Based upon the information we have gathered, if a position becomes available where your experience and goals match the specific details requested by the employer, we will contact you to see if the position may be of interest.'],
+      ['Your resume on file', 'We will review your information and if there may be a suitable role available right away or likely to become available in the near future, we will schedule an immediate meeting. Otherwise, we will keep your resume on file and contact you should we require further information.'],
+    ],
+    meetNote: 'If you have any questions about registering with us or want to find out more about accounting opportunities or careers, please contact us by calling one of our local offices.',
     faq: [
-      ['What is the difference between temporary and permanent recruitment?', 'Temporary staffing covers needs like leaves, peak periods and special projects. Permanent recruitment is a more in-depth search for a direct hire. Some contract roles lead to permanent hires: about 25% of our assignments.'],
-      ['What are the benefits of temporary vs permanent employment?', 'Contract work builds your software and industry experience and your contacts. It moves faster, offers flexibility, and lets you “test-drive” a company.'],
-      ['How much experience do employers require for junior level roles?', 'Roughly 6 to 12 months of accounting support or data entry experience may be enough.'],
-      ['I am currently working and my employer is not aware of my job search. How will you ensure confidentiality?', 'We never share your resume or career goals with an employer without your approval.'],
-      ['Once I am registered with Accountant Staffing, how long will it take to be placed?', 'It depends on the roles available. It may be immediate, or it may take some time.'],
-      ['Will it cost me anything to register with Accountant Staffing?', 'No. Our service is free for candidates. Employers pay all fees.'],
-      ['I would like to relocate to Nova Scotia in the near future. Can I contact your organization to discuss my career interests prior to my arrival?', 'Yes. Email your resume and a short summary to apply@accountantstaffing.com, or call 902-491-1301.'],
-      ['What sets Accountant Staffing apart from other recruitment firms?', 'We specialize in accounting and finance, and we take a personal approach that goes beyond job descriptions and resumes.'],
+      ['What is the difference between temporary and permanent recruitment?', [
+        'Temporary staffing generally refers to temporary assistance that may be required by a company for a variety of reasons including:',
+        ['Special projects', 'Parental leaves', 'Peak work periods', 'Sudden position vacancies', 'Vacation coverage', 'Employee leaves of absence'],
+        'Temporary staffing allows an employer to meet their immediate staffing needs quickly and flexibly. Additionally, employers may want to consider candidates as potential permanent employees by hiring them on contract first.',
+        'In contrast, permanent recruitment refers to a more in-depth search process for a candidate who will be hired directly by the employer on a permanent basis.',
+      ]],
+      ['What are the benefits of temporary vs permanent employment?', [
+        'While many job seekers are looking for the stability that comes with permanent employment, contract employment offers several advantages as well.',
+        ['Contract assignments are a great way to expand on your software and industry experience, as well as broaden your professional contacts', 'The hiring process is much quicker', 'Some candidates prefer the flexibility and variety provided by contract employment', 'Should there be potential for permanent, it can be an opportunity to test-drive a company, to see whether it makes sense to accept permanent employment should the company make an offer', 'In approximately 25% of our assignments, the contract employee is hired permanently by the company'],
+      ]],
+      ['How much experience do employers require for junior level roles?', 'We are always interested in speaking with candidates at all levels who have had the opportunity to gain accounting experience. For junior level roles, this accounting support or data entry experience may only be 6-12 months, but it has given you the opportunity to work in an office setting and gain hands-on experience.'],
+      ['I am currently working and my employer is not aware of my job search. How will you ensure confidentiality?', 'We will not present your resume or discuss your career goals with any potential employer without your prior approval. The entire placement process has been designed with a view towards protecting the confidentiality of job candidates. You can depend on our integrity to help maintain yours.'],
+      ['Once I am registered with Accountant Staffing, how long will it take to be placed?', [
+        'When an employer calls us with a staffing requirement, we place all our efforts towards finding candidates that will be a great fit for the role and company. Whether it is a one week assignment or a permanent role, we strive to facilitate situations where the candidate and the employer are both happy.',
+        'Consequently, we may have the ideal opportunity for you immediately, or it may be some time before the position that’s just right for you becomes available. If any of your file details change after your registration, we encourage you to update us whenever possible.',
+      ]],
+      ['Will it cost me anything to register with Accountant Staffing?', 'No. All of our fees are paid for by the employer. There is no charge to candidates.'],
+      ['I would like to relocate to Nova Scotia in the near future. Can I contact your organization to discuss my career interests prior to my arrival?', 'Yes. If you are an accounting or finance professional looking for a new career opportunity in Nova Scotia, we would be pleased to hear from you. Please send your resume to apply@accountantstaffing.com. Include a brief summary outlining what you are looking for, your availability, your minimum salary expectations and any other preliminary information that you consider important. If you would like to speak with a recruitment specialist, please call us at 902.491.1301. We would be happy to provide more information.'],
+      ['What sets Accountant Staffing apart from other recruitment firms?', [
+        'First and foremost, we are a specialist firm. Businesses know what we do. Candidates know what we do. By focusing on our area of expertise, we are able to give you access to some of the best accounting and financing positions in the marketplace.',
+        'Secondly, we are committed to a personal approach. We use sophisticated technology to track and match candidates to opportunities. However, we believe technology can only go so far. We listen. We get to know our candidates and clients well beyond job descriptions and resumes. We will pay close attention to your personal and professional aspirations and refer you to positions that are suitable should they become available.',
+      ]],
     ],
   },
 
-  // About Us  (headline EXACT, text CLOSE)
+  // About Us  (EXACT)
   about: {
     title: 'The only financial recruitment specialists.',
     text: [
-      'Accountant Staffing is the only specialist recruitment firm in Atlantic Canada focused on accounting and finance. We help Atlantic Canadian employers fill junior to senior roles, temporary and permanent, from junior accounting clerk to CFO.',
-      'Founded in 2002 and headquartered in Halifax, Nova Scotia, we serve Nova Scotia, New Brunswick, and Newfoundland & Labrador. Our consultants know the regional accounting market and have relationships with professionals across the region and beyond.',
-      'In 2006 we added Administrative Staffing, a division for general office hiring, so our clients have one place for all their administrative staffing needs.',
-      'Our business is people. We listen to employers and candidates, and match skills, experience and goals with what employers need. We call it fit.',
+      'Accountant Staffing is the only specialist recruitment firm in Atlantic Canada focusing on accounting and finance positions.',
+      'We assist Atlantic Canadian employers with junior to senior level and temporary or permanent staffing requirements. So whatever your staffing requirements from Junior Accounting Clerk to CFO – we are here to help.',
+      'Established in 2002, Accountant Staffing is headquartered in Halifax, Nova Scotia and offers recruitment services throughout Nova Scotia, New Brunswick, and Newfoundland & Labrador. Our Consultants have current knowledge in every aspect of the accounting market in Atlantic Canada and have developed relationships with accounting professionals throughout our region and beyond.',
+      'Over time, we recognized the need for an administrative staffing division that held the same, high standards of service and a specialized focus. Therefore, in 2006, we began Administrative Staffing. This division of recruitment is a wonderful complement to Accountant Staffing and offers our clients one place to get assistance with all their office hiring.',
+      'Our business is people. We listen carefully to employers and candidates to understand their needs so that we can match the skills, experience and goals of our candidates with the exact requirements of the employer. It’s all about “fit”.',
+    ],
+  },
+
+  // Job opportunities  (EXACT: the live page's statement above the listings)
+  jobs: {
+    inclusion: [
+      'Accountant Staffing is committed to promoting diversity and inclusion in the workplace. We believe that it is essential for workforces to reflect the communities they serve, where everyone feels included and valued. We promote environments that value and respect all individuals, regardless of their race, ethnicity, gender, sexual orientation, age, ability, religion, or any other personal characteristic.',
+      'We encourage applications from underrepresented groups including African Canadians, Indigenous/Aboriginal People, Racially Visible Persons, Women, Persons with Disabilities, and 2SLGBTQ+ Persons.',
+      'Self-identification is encouraged but not required during the application process and accommodations can be requested during the recruitment process. If accommodations are needed during the assessment process, such as an interview or testing, please let us know and we will make arrangements to meet your needs.',
     ],
   },
 };

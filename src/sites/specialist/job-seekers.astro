@@ -26,7 +26,9 @@ const c = copy.seekers;
   <section class="section section--tint">
     <div class="wrap">
       <div class="section-head"><h2>{c.meetTitle}</h2></div>
+      {c.meetIntro && <div class="meet-intro">{c.meetIntro.map((p) => <p>{p}</p>)}</div>}
       <Steps steps={c.meet} tone="direct" />
+      {c.meetNote && <p class="meet-note">{c.meetNote}</p>}
     </div>
   </section>
 
@@ -57,6 +59,10 @@ const c = copy.seekers;
 
 <style>
   .intro .lead { max-width: 60ch; }
+  .meet-intro { max-width: 64ch; margin-bottom: var(--s6); }
+  .meet-intro p { margin: 0; }
+  .meet-intro p + p { margin-top: var(--s3); color: var(--ink-soft); }
+  .meet-note { max-width: 64ch; margin: var(--s6) 0 0; color: var(--ink-soft); }
   .find { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: end; gap: var(--s5); }
   .find .lead { margin-top: var(--s3); }
 </style>

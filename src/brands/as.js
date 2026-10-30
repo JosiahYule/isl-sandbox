@@ -20,7 +20,7 @@ export const brand = {
   logoSize: [361, 85],
   favicon: '/brands/as-favicon.svg',
   siteUrl: 'https://www.accountantstaffing.ca',
-  email: '', // TODO: a general inquiries address, if there is one
+  email: 'info@accountantstaffing.com', // the address the live privacy policy gives (read October 30, 2026)
   resumeEmail: 'apply@accountantstaffing.com',
   mainPhone: '902-491-1301',
   footerAbout: 'Atlantic Canada’s specialist recruitment firm for accounting and finance professionals. Locally owned and operated.', // the live footer, word for word

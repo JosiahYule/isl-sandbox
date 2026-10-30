@@ -13,6 +13,8 @@ const moved = [
   ['/our-team', '/team/'],
   ['/about-us', '/about/'],
   ['/contact-us', '/contact/'],
+  ['/privacy-policy', '/privacy/'], // AS's live address (read October 30, 2026)
+  ['/employers1', '/employers/'],   // an unlisted copy of the Employers page on AS's live site
 ];
 
 export function GET() {
