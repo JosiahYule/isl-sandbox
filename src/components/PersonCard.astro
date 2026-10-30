@@ -5,7 +5,7 @@
 import { sized } from '../lib/img.js';
 import { url } from '../lib/url.js';
 const { person: p, size = 'lg' } = Astro.props;
-const initials = p.name.split(' ').map((x) => x[0]).join('');
+const initials = p.name.split(',')[0].split(' ').map((x) => x[0]).join(''); // "Troy Yeo, CPA, CA" -> TY
 ---
 <a class:list={['pc', `pc--${size}`]} href={url(`/team/${p.slug}/`)}>
   <span class:list={['shot', !p.photo && 'none']}>

@@ -7,6 +7,7 @@
 // Titles, provinces, contact details and bios come from src/data/bios.js (merged in below).
 
 import { bios } from './bios.js';
+import { asTeam } from './team-as.js';
 import { BRAND } from './site.js';
 
 const cdn = (path) => `https://images.squarespace-cdn.com/content/v1/691490c94119776708e69bbe/${path}`;
@@ -45,7 +46,7 @@ const people = [
 ];
 
 // Each person, with their title, province, contact details and bio from bios.js.
-// These are ISL's people. AS and ADS have their own team (TODO: their names, titles and photos),
-// so their sites show an empty team for now.
+// These are ISL's people. Accountant Staffing's are in team-as.js (with their bios).
+// TODO: Administrative Staffing's team, which shows an empty team (the offices) until then.
 const islTeam = people.map((p) => ({ ...p, ...(bios[p.slug] || {}), role: bios[p.slug]?.title || p.role }));
-export const team = BRAND === 'isl' ? islTeam : [];
+export const team = { isl: islTeam, as: asTeam }[BRAND] || [];

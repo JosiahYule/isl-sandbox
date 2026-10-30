@@ -7,6 +7,7 @@
 // Old job links look like /job-details?jobcode=JOB-18557. Netlify can match that ?jobcode= and send
 // each one to the job's own page; anything else goes to the job board.
 import { jobs } from '../../data/jobs.js';
+import { team } from '../../data/team.js';
 
 const moved = [
   ['/job-opportunities', '/find-work/'], // the live sites' menu labels, kept as the new pages' names
@@ -21,6 +22,8 @@ export function GET() {
   const lines = [
     '# Old addresses -> new pages (see src/sites/specialist/redirects.txt.js)',
     ...moved.map(([from, to]) => `${from}  ${to}  301`),
+    // Each team profile's old address (/team-member/<slug>) -> its page here
+    ...team.map((p) => `/team-member/${p.slug}  /team/${p.slug}/  301`),
     '',
     "# Each open job's old link -> its own page (Netlify)",
     ...jobs.map((j) => `/job-details  jobcode=${j.id}  /find-work/${j.slug}/  301`),

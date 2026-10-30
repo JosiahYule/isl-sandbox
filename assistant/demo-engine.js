@@ -32,7 +32,7 @@
 import { toCard, SITE, stemText, placesFor, provinceCode } from './jobs.js';
 const PROVINCE_CODES = new Set(['NS', 'NB', 'PE', 'NL', 'QC', 'ON', 'MB', 'SK', 'AB', 'BC', 'YT', 'NT', 'NU']);
 import { placeFrom, route, toContact, provinceName, OFFICES, TOWN_NAMES, DUTIES, officeFor, SPECIALIST_OFFICES, specialistOffice, routeSpecialist } from './routing.js';
-import { DIRECTORY } from './directory.js';
+import { DIRECTORY, DIRECTORY_AS } from './directory.js';
 import { payFor, payInsight, costFor, costInsight, jobAnswer } from './insights.js';
 import { familyOf } from './pay.js';
 import { resolveCompensation, compensationRates } from './compensation.js';
@@ -905,6 +905,12 @@ const ISL_ROLES = new Set(['labourer', 'demolition labourer', 'forklift operator
   'carpenter', 'electrician', 'millwright', 'technician', 'cook', 'dishwasher', 'event and banquet staff member', 'cleaner', 'security guard', 'landscaper', 'farm worker', 'mover']);
 const SPECIALIST_LABELS = { as: new Set(['accounting and finance', 'payroll', 'tax', 'bookkeeping', 'accountant']), ads: new Set(['office and admin', 'receptionist', 'customer service', 'HR and recruitment']) };
 
+// Who looks after what at Accountant Staffing (from the titles on its team page)
+const AS_DUTIES = {
+  'the company': ['troy-yeo-cpa-ca', 'gillian-pendlebury', 'greg-white', 'ross-argante'], // the partners
+  finance: ['michaila-doiron'], operations: ['gillian-pendlebury'], 'the front desk': ['amber-antle'],
+};
+
 function profileFor(key) {
   if (key !== 'as' && key !== 'ads') {
     return {
@@ -935,11 +941,14 @@ function profileFor(key) {
     officeChoices: ['Halifax', 'Moncton', "St. John's"],
     officeCities: ['halifax', 'dartmouth', 'bedford', 'sackville', 'lower sackville', 'burnside', 'cole harbour', 'timberlea', 'moncton', 'dieppe', 'riverview',
       "st. john's", 'mount pearl', 'paradise', 'conception bay south', 'torbay'],
-    // Josiah looks after marketing for all three brands. Everything else goes to the office for now:
-    // the team pages for these two brands aren't up yet.
-    // His AS/ADS address for queries about these two brands; the phone is the same.
-    directory: DIRECTORY.filter((p) => p.slug === 'josiah-yule').map((p) => ({ ...p, email: 'josiah@accountantstaffing.com' })),
-    duties: DUTIES.filter((d) => ['marketing', 'clients', 'jobs'].includes(d.topic)), teamPage: false, urgent: '',
+    // Accountant Staffing: its own team (src/data/team-as.js, via directory.js), and who looks after
+    // what, from the titles on its team page. Administrative Staffing's team page isn't built yet, so
+    // there only Josiah (marketing for all three brands, at his AS/ADS address) is named; anything
+    // else goes to the Halifax office.
+    directory: as ? DIRECTORY_AS : DIRECTORY.filter((p) => p.slug === 'josiah-yule').map((p) => ({ ...p, email: 'josiah@accountantstaffing.com' })),
+    duties: DUTIES.filter((d) => ['marketing', 'clients', 'jobs', ...(as ? ['the company', 'finance', 'operations', 'the front desk'] : [])].includes(d.topic))
+      .map((d) => (as && AS_DUTIES[d.topic] ? { ...d, people: AS_DUTIES[d.topic] } : d)),
+    teamPage: as, urgent: '',
     temp: ['temporary', 'temporaire', 'temporaires'], tempTitle: ['Temporary', 'Temporaire'], onlyTemp: 'Only temporary', workerButton: `I work with ${name}`,
     paths: { contract: '/temporary-recruitment/', direct: '/permanent-recruitment/' }, tempName: 'Temporary recruitment', directName: 'Permanent recruitment',
     howTemp: 'How temporary recruitment works', howDirect: 'How permanent recruitment works', findWorkLabel: 'Job opportunities',
@@ -1196,7 +1205,8 @@ export function createEngine({ loadJobs, siteUrl = (path) => SITE.base + path, b
     // "Who runs ADS?" is about the company, not about ads (marketing)
     const t0 = lower(st.lastPlain || st.lastText);
     const t = P.key === 'ads' ? t0.replace(/\bads\b/g, 'the company') : t0;
-    const duty = DUTIES.find((d) => d.words.test(t));
+    // "Who owns/runs the company?" names no topic word, so it reads as a question about the company
+    const duty = DUTIES.find((d) => d.words.test(t)) || (/\bwho (owns|runs)\b/.test(t) ? DUTIES.find((d) => d.topic === 'the company') : null);
     const teamChoice = P.teamPage ? [{ label: 'Our team', href: links.team }] : [];
     const place = st.anyPlace;
     if (duty?.topic === 'clients' || (duty?.topic === 'the company' && /\bhir(e|ing)\b/.test(t))) {
@@ -1216,6 +1226,11 @@ export function createEngine({ loadJobs, siteUrl = (path) => SITE.base + path, b
     if (!people.length) {
       if (!P.teamPage) return { reply: L('I’m not sure who looks after that, but our Halifax office can point you to the right person.', 'Je ne sais pas qui s’occupe de cela, mais notre bureau de Halifax peut vous diriger vers la bonne personne.'), contact: toContact({ person: null, office: OFFICES.halifax }), meta: { mode: st.mode } };
       return { reply: L('I’m not sure who looks after that. Our team page lists everyone with their role, or our Halifax office can point you to the right person.', 'Je ne sais pas qui s’occupe de cela. Notre page Équipe présente tout le monde avec son rôle, ou notre bureau de Halifax peut vous diriger vers la bonne personne.'), contact: toContact({ person: null, office: OFFICES.halifax }), choices: [{ label: 'Our team', href: links.team }], meta: { mode: st.mode } };
+    }
+    if (people.length > 1 && P.key !== 'isl') {
+      const names = people.map((x) => x.name);
+      return { reply: L(`${P.name} is led by its ${nw(people.length)} partners: ${list(names)}. Here’s how to reach ${people[0].first}:`, `${P.name} est dirigée par ses ${nw(people.length)} associés : ${listFr(names)}. Voici comment joindre ${people[0].first} :`),
+        contact: personCard(people[0]), choices: [...people.slice(1, 3).map((x) => `How do I reach ${x.first}?`), { label: 'Our team', href: links.team }], meta: { mode: st.mode } };
     }
     if (people.length > 1) {
       return { reply: L(`ISL is led by its two Partners, ${people[0].name} and ${people[1].name}. Here’s how to reach ${people[0].first}:`, `ISL est dirigée par ses deux associés, ${people[0].name} et ${people[1].name}. Voici comment joindre ${people[0].first} :`), contact: personCard(people[0]), choices: [`How do I reach ${people[1].first}?`, { label: 'Our team', href: links.team }], meta: { mode: st.mode } };

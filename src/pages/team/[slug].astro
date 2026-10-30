@@ -21,11 +21,12 @@ export function getStaticPaths() {
 const { slug } = Astro.params;
 const p = team.find((x) => x.slug === slug);
 const first = p.name.split(' ')[0];
-const initials = p.name.split(' ').map((x) => x[0]).join('');
-// The office page for their province (New Brunswick has two offices; Moncton is listed first)
+const initials = p.name.split(',')[0].split(' ').map((x) => x[0]).join('');
+// The office page for their province (New Brunswick has two offices; Moncton is listed first).
+// AS and ADS have no office pages, so their people show the province only.
 const OFFICE = { NS: ['halifax', 'Halifax office'], NB: ['moncton', 'Moncton and Saint John offices'], PE: ['charlottetown', 'Charlottetown office'], NL: ['st-johns', 'St. John’s office'] };
-const [officeKey, officeLabel] = OFFICE[p.province] || [];
-const contact = Object.values(PEOPLE).find((x) => x.slug === slug); // are employers routed to them?
+const [officeKey, officeLabel] = brand.officePages ? OFFICE[p.province] || [] : [];
+const contact = brand.key === 'isl' ? Object.values(PEOPLE).find((x) => x.slug === slug) : null; // are employers routed to them?
 const isDirect = p.team === 'Direct Hire';
 const sameProvince = team.filter((x) => x.province === p.province && x.slug !== slug);
 const colleagues = sameProvince.slice(0, 7);
@@ -46,7 +47,7 @@ const hireHref = isDirect || slug === 'zowie-tucker'
         <a class="back" href={url('/team/')}>← Our team</a>
         <h1>{p.name}</h1>
         <p class="role">{p.role}</p>
-        {officeKey && <p class="where">Based in {provinceName(p.province)} · <a href={url(`/offices/${officeKey}/`)}>{officeLabel}</a></p>}
+        {officeKey ? <p class="where">Based in {provinceName(p.province)} · <a href={url(`/offices/${officeKey}/`)}>{officeLabel}</a></p> : p.province && <p class="where">Based in {provinceName(p.province)}</p>}
 
         <ul class="reach">
           {p.phone && <li><a href={tel(p.phone)}>{p.phone}</a></li>}
