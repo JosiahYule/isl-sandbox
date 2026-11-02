@@ -9,10 +9,11 @@
 // An FAQ answer can be a string, or a list of paragraphs where a nested list is a bulleted list.
 
 export const copy = {
-  // Homepage  (EXACT, except the search label and "Request talent", which are the new site's)
+  // Homepage  (EXACT, except the search label, "Request talent" and the shortened lead, which are the new site's)
   home: {
     h1: ['Focused on staffing', 'administrative positions.'],
-    lead: 'We are a specialist recruitment firm based in Atlantic Canada catering to the needs of a broad spectrum of clients throughout the Atlantic Provinces. Focusing on a wide variety of administrative positions, we assist employers with the candidate search process and meet with qualified candidates looking for that next great opportunity.',
+    // Shortened from the live site's 55-word paragraph (November 2026), which filled the hero on a phone
+    lead: 'Temporary and permanent administrative staff for employers across Atlantic Canada, junior to senior.',
     findJob: 'Find your next job!',
     whyTitle: 'Why choose Administrative Staffing?',
     why: [
