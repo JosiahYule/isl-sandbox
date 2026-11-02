@@ -40,7 +40,7 @@ const hasAside = Astro.slots.has('aside');
   .intro--compact h1 { font-size: var(--fs-h1); max-width: none; }
   .intro--compact .actions { margin-top: var(--s4); }
   .lead { margin-top: var(--s5); }
-  .actions { display: flex; flex-wrap: wrap; gap: var(--s3); margin-top: var(--s6); }
+  .actions { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s3) var(--s5); margin-top: var(--s6); } /* a text link beside a button sits on its centre line */
 
   /* With a photo: the text takes the left half and the photo fills the right,
      from the top of the section to the bottom, ending at the window edge. */

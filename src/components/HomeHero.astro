@@ -104,8 +104,8 @@ const near = [...new Set(jobs.map((j) => j.province).filter(Boolean))]
   .search-bar { display: flex; background: #fff; }
   .search-bar input { flex: 1; min-width: 0; width: 0; /* width 0: the box's built-in 20-character width otherwise sets a minimum */ font: inherit; font-size: var(--fs-body); padding: 1rem 1.15rem; border: 0; background: transparent; color: var(--ink); }
   .search-bar input:focus { outline: 2px solid var(--accent); outline-offset: -2px; }
-  .search-bar button { font: inherit; font-weight: var(--fw-bold); cursor: pointer; padding: 0 1.6rem; border: 0; background: var(--accent); color: #fff; }
-  .search-bar button:hover { background: var(--accent-deep); }
+  .search-bar button { font: inherit; font-weight: var(--fw-bold); cursor: pointer; padding: 0 1.6rem; border: 0; background: var(--photo-btn, var(--accent)); color: #fff; }
+  .search-bar button:hover { background: var(--photo-btn-deep, var(--accent-deep)); }
   .near { display: flex; flex-wrap: wrap; align-items: baseline; gap: var(--s2) var(--s4); margin: var(--s3) 0 0; width: max-content; max-width: min(100%, 44rem); max-width: min(calc(100vw - 2 * var(--gutter)), 44rem); /* may run a little wider than the search, so the four provinces fit on one line */ font-size: var(--fs-small); color: rgb(255 255 255 / 0.72); }
   .near a { color: #fff; text-decoration: underline; text-underline-offset: 0.25em; text-decoration-color: rgb(255 255 255 / 0.4); }
   .near a:hover { text-decoration-color: #fff; }

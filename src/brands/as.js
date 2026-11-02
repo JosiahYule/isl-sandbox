@@ -28,21 +28,21 @@ export const brand = {
   //   navy   hsl(215 69% 19%) #0f2b52  links, buttons, headings
   //   blue   hsl(201 63% 55%) #44a2d5  borders and highlights
   //   orange hsl(23 65% 54%)  #d6783d  the logo's single dot
-  // AS and ADS share one scheme (their live heroes pair a blue "For employers" button with an orange
-  // "For job seekers" one), each in its own shades:
-  //   navy   buttons, links, text and the dark sections
-  //   blue   permanent work, the big figures, the maps; deepened to #1d78ae on white for text (4.8:1)
-  //   orange temporary work, the closing band and the job seekers' button; deepened to #b4561c on
-  //          white for text (4.9:1); the band is a lighter #e8853f with navy text (5.3:1)
+  // AS and ADS share one restrained scheme (November 2026): navy and cool neutrals carry the page,
+  // the brand's blue is the one accent, and orange appears only as a small mark for temporary work
+  // (a card's top edge, the square beside a contract job), the way the logo uses its one orange dot.
+  //   navy    buttons, links, text, the dark sections and the closing band
+  //   blue    permanent work, the big figures, the maps, the hero's search button; #1d78ae on white (4.8:1)
+  //   orange  the temporary marks only, never text or a background
+  //   mist    cool grey-blue panels, so blue never sits on a warm cream
   colors: {
-    accent: '#0f2b52', 'accent-deep': '#081a33', 'accent-tint': '#e6f1f9', 'accent-on-dark': '#44a2d5',
-    direct: '#1d78ae', 'map-land': '#44a2d5',
-    contract: '#b4561c', 'contract-on-dark': '#e8853f', bright: '#e8853f', 'bright-ink': '#0f2b52',
+    accent: '#0f2b52', 'accent-deep': '#081a33', 'accent-tint': '#e8f2f9', 'accent-on-dark': '#44a2d5',
+    direct: '#1d78ae', 'map-land': '#44a2d5', 'photo-btn': '#1d78ae', 'photo-btn-deep': '#16618d',
+    contract: '#c96a2e', 'contract-on-dark': '#e8853f',
     dark: '#0f2b52', 'dark-raised': '#173a66', 'line-dark': '#2a4670', 'on-dark-soft': '#b8c4d6', // the hero photo's wash is ISL's near-black (tokens.css), on all three sites
     ink: '#14233a', 'line-strong': '#14233a', 'ink-soft': '#556070',
-    mist: '#f1f6fa', 'mist-deep': '#e4edf5',
+    mist: '#f2f6fa', 'mist-deep': '#e5edf5',
   },
-  ctaTone: 'bright', // the closing band in orange, as on ADS
   assistant: false, // the job assistant chat: PAUSED (see src/brands/isl.js)
   officePages: false,
 };

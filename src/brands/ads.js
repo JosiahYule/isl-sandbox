@@ -29,20 +29,17 @@ export const brand = {
   //   orange     hsl(29 87% 54%)  #f08624  section backgrounds, button text
   //   navy       hsl(224 54% 28%) #21356e  links, buttons, headings
   //   dark navy  hsl(224 53% 14%) #111b37
-  // Navy does the work ISL's blue does (buttons, links); dark navy the dark sections and text.
-  // Orange marks permanent work and the big figures; on white it's deepened to #b84f00 so text
-  // passes contrast (5.1:1). The site's own orange fills the closing band, with dark navy text (6.6:1).
+  // The same restrained scheme as AS (see src/brands/as.js): navy and cool neutrals, ADS's own blue
+  // (a lighter royal blue from its navy, 6.2:1 on white) as the one accent, and orange only as the
+  // small temporary marks. The closing band is navy, as on ISL.
   colors: {
-    accent: '#21356e', 'accent-deep': '#152452', 'accent-tint': '#fdf1e6', 'accent-on-dark': '#f08624',
-    // The same scheme as AS (see src/brands/as.js): blue for permanent (the live site's button blue,
-    // 5.0:1 on white), orange for temporary (#b84f00 for text, 5.1:1) and the closing band
-    direct: '#0070ca', 'map-land': '#21356e', bright: '#f08624', 'bright-ink': '#111b37',
-    contract: '#b84f00', 'contract-on-dark': '#f08624',
+    accent: '#21356e', 'accent-deep': '#152452', 'accent-tint': '#eaeff8', 'accent-on-dark': '#8fb0e8',
+    direct: '#2f5fb3', 'map-land': '#2f5fb3', 'photo-btn': '#2f5fb3', 'photo-btn-deep': '#244b92',
+    contract: '#d06a1f', 'contract-on-dark': '#f08624',
     dark: '#111b37', 'dark-raised': '#1b2950', 'line-dark': '#2a3866', 'on-dark-soft': '#b9c0d4', // the hero photo's wash is ISL's near-black (tokens.css), on all three sites
     ink: '#111b37', 'line-strong': '#111b37', 'ink-soft': '#585e6e',
-    mist: '#fcf5ee', 'mist-deep': '#f8e8d8',
+    mist: '#f3f5f9', 'mist-deep': '#e7ebf3',
   },
-  ctaTone: 'bright', // the closing band in the site's orange
   logoHeight: 55, // the wordmark is small inside this logo, so it's shown a little taller than ISL's
   assistant: false, // the job assistant chat: PAUSED (see src/brands/isl.js)
   officePages: false,
