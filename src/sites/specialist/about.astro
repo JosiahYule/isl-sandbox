@@ -3,7 +3,6 @@
 // The same shape as ISL's About page: the promise, the key figures, then the firm itself,
 // in the live About page's words (src/brands/copy/), and the family of firms it belongs to.
 import Base from '../../layouts/Base.astro';
-import Button from '../../components/Button.astro';
 import PageHero from '../../components/PageHero.astro';
 import Facts from '../../components/Facts.astro';
 import CtaBand from '../../components/CtaBand.astro';
@@ -24,10 +23,7 @@ const family = [
 ];
 ---
 <Base title="About us" description={c.text[0]}>
-  <PageHero title={c.title} lead={c.text[0]}>
-    <Button href="/employers/">For employers</Button>
-    <Button href="/job-seekers/" variant="outline">For job seekers</Button>
-  </PageHero>
+  <PageHero title={c.title} lead={c.text[0]} />
 
   <Facts facts={facts} />
 

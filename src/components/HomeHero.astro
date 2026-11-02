@@ -158,5 +158,7 @@ const near = [...new Set(jobs.map((j) => j.province).filter(Boolean))]
     .hero-lead { margin-top: var(--s5); }
     .search { margin-top: var(--s6); }
     .employer { margin-top: var(--s6); }
+    /* AS and ADS: their lead restates the headline in four to nine lines on a phone */
+    .hero--long .hero-lead { display: none; }
   }
 </style>

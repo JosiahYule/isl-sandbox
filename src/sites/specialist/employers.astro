@@ -8,7 +8,6 @@ import PageHero from '../../components/PageHero.astro';
 import ServiceBlocks from '../../components/ServiceBlocks.astro';
 import CtaBand from '../../components/CtaBand.astro';
 import { field, services, terms, copy } from '../../data/site.js';
-import { url } from '../../lib/url.js';
 
 const c = copy.employers;
 const svcs = [
@@ -58,10 +57,6 @@ const svcs = [
           </li>
         ))}
       </ol>
-      <p class="faqs">
-        <a href={url(services.direct.href)}>Permanent recruitment FAQ</a>
-        <a href={url(services.contract.href)}>Temporary recruitment FAQ</a>
-      </p>
     </div>
   </section>
 
@@ -86,7 +81,6 @@ const svcs = [
   .num { font-size: var(--fs-figure); color: var(--direct); line-height: 1; }
   .process h3 { font-size: var(--fs-h3); }
   .process p { color: var(--ink-soft); max-width: 62ch; }
-  .faqs { display: flex; flex-wrap: wrap; gap: var(--s3) var(--s6); margin-top: var(--s6); font-weight: var(--fw-bold); }
 
   @media (max-width: 900px) {
     .approach { grid-template-columns: 1fr; }

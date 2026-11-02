@@ -6,7 +6,6 @@ import Base from '../../layouts/Base.astro';
 import Button from '../../components/Button.astro';
 import PageHero from '../../components/PageHero.astro';
 import Steps from '../../components/Steps.astro';
-import RolesByLevel from '../../components/RolesByLevel.astro';
 import Faq from '../../components/Faq.astro';
 import { field, links, copy } from '../../data/site.js';
 import { jobs } from '../../data/jobs.js';
@@ -29,13 +28,6 @@ const c = copy.seekers;
       {c.meetIntro && <div class="meet-intro">{c.meetIntro.map((p) => <p>{p}</p>)}</div>}
       <Steps steps={c.meet} tone="direct" />
       {c.meetNote && <p class="meet-note">{c.meetNote}</p>}
-    </div>
-  </section>
-
-  <section class="section">
-    <div class="wrap">
-      <div class="section-head"><h2>{copy.home.rolesTitle}</h2></div>
-      <RolesByLevel levels={field.levels} />
     </div>
   </section>
 

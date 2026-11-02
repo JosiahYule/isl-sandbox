@@ -14,6 +14,9 @@ import { brand, offices, social, images, field, services, terms, copy } from '..
 import { jobs } from '../../data/jobs.js';
 
 const c = copy.home;
+// "Contingency based" says what the service blocks right under it say ("No fees unless you hire one
+// of our candidates"), so the list keeps the other four reasons
+const why = c.why.filter(([t]) => !/contingency/i.test(t));
 const orgSchema = {
   '@context': 'https://schema.org', '@type': 'EmploymentAgency', name: brand.name, url: brand.siteUrl,
   telephone: '+1-' + brand.mainPhone, foundingDate: String(brand.since), areaServed: 'Atlantic Canada',
@@ -40,7 +43,7 @@ const svcs = [
     <div class="wrap">
       <div class="section-head"><h2>{c.whyTitle}</h2></div>
       <ul class="items why" data-stagger>
-        {c.why.map(([t, d]) => <li class="item"><h3>{t}</h3><p>{d}</p></li>)}
+        {why.map(([t, d]) => <li class="item"><h3>{t}</h3><p>{d}</p></li>)}
       </ul>
     </div>
     <div class="wrap"><ServiceBlocks services={svcs} /></div>
@@ -49,9 +52,11 @@ const svcs = [
   <!-- 3. WHAT OUR CLIENTS ARE LOOKING FOR: the roles at each level -->
   <section class="section section--rule">
     <div class="wrap">
-      <div class="section-head section-head--split roles-head">
+      <!-- The live site's two paragraphs here described the process (that's on Employers) and the
+           three levels (the columns say it), so one line stands in for them -->
+      <div class="section-head section-head--split">
         <h2>{c.rolesTitle}</h2>
-        <div class="roles-text">{c.rolesText.map((p) => <p>{p}</p>)}</div>
+        <p class="lead">Some of the roles we fill, junior to senior, temporary or permanent.</p>
       </div>
       <RolesByLevel levels={field.levels} />
     </div>
@@ -75,10 +80,6 @@ const svcs = [
 </Base>
 
 <style>
-  /* Five reasons: three across, then two */
-  .why { grid-template-columns: repeat(auto-fit, minmax(min(100%, 18rem), 1fr)); }
-  /* Two paragraphs beside the heading: line them up with its top, not its bottom */
-  .roles-head { align-items: start; }
-  .roles-text p { color: var(--ink-soft); max-width: 60ch; }
-  .roles-text p + p { margin-top: var(--s3); }
+  /* Four reasons: one row on wide screens, two by two on tablets */
+  .why { grid-template-columns: repeat(auto-fit, minmax(min(100%, 14rem), 1fr)); }
 </style>
