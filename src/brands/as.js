@@ -34,14 +34,14 @@ export const brand = {
   //   navy    buttons, links, text, the dark sections and the closing band
   //   blue    permanent work, the big figures, the maps, the hero's search button; #1d78ae on white (4.8:1)
   //   orange  the temporary marks only, never text or a background
-  //   mist    cool grey-blue panels, so blue never sits on a warm cream
+  //   panels  ISL's neutral light grey, so neither blue nor orange tints the page
   colors: {
     accent: '#0f2b52', 'accent-deep': '#081a33', 'accent-tint': '#e8f2f9', 'accent-on-dark': '#44a2d5',
     direct: '#1d78ae', 'map-land': '#44a2d5', 'photo-btn': '#1d78ae', 'photo-btn-deep': '#16618d',
     contract: '#c96a2e', 'contract-on-dark': '#e8853f',
     dark: '#0f2b52', 'dark-raised': '#173a66', 'line-dark': '#2a4670', 'on-dark-soft': '#b8c4d6', // the hero photo's wash is ISL's near-black (tokens.css), on all three sites
     ink: '#14233a', 'line-strong': '#14233a', 'ink-soft': '#556070',
-    mist: '#f2f6fa', 'mist-deep': '#e5edf5',
+    // panels (the map's section, light bands) use ISL's neutral grey (tokens.css), not a blue tint
   },
   assistant: false, // the job assistant chat: PAUSED (see src/brands/isl.js)
   officePages: false,

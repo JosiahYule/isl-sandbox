@@ -29,7 +29,7 @@ export const brand = {
   //   orange     hsl(29 87% 54%)  #f08624  section backgrounds, button text
   //   navy       hsl(224 54% 28%) #21356e  links, buttons, headings
   //   dark navy  hsl(224 53% 14%) #111b37
-  // The same restrained scheme as AS (see src/brands/as.js): navy and cool neutrals, ADS's own blue
+  // The same restrained scheme as AS (see src/brands/as.js): navy and neutral greys, ADS's own blue
   // (a lighter royal blue from its navy, 6.2:1 on white) as the one accent, and orange only as the
   // small temporary marks. The closing band is navy, as on ISL.
   colors: {
@@ -38,7 +38,7 @@ export const brand = {
     contract: '#d06a1f', 'contract-on-dark': '#f08624',
     dark: '#111b37', 'dark-raised': '#1b2950', 'line-dark': '#2a3866', 'on-dark-soft': '#b9c0d4', // the hero photo's wash is ISL's near-black (tokens.css), on all three sites
     ink: '#111b37', 'line-strong': '#111b37', 'ink-soft': '#585e6e',
-    mist: '#f3f5f9', 'mist-deep': '#e7ebf3',
+    // panels (the map's section, light bands) use ISL's neutral grey (tokens.css), not a blue tint
   },
   logoHeight: 55, // the wordmark is small inside this logo, so it's shown a little taller than ISL's
   assistant: false, // the job assistant chat: PAUSED (see src/brands/isl.js)

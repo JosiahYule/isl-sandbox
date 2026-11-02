@@ -1,7 +1,8 @@
 ---
 // ABOUT US  →  /about/   (Accountant Staffing and Administrative Staffing)
 // The same shape as ISL's About page: the promise, the key figures, then the firm itself,
-// in the live About page's words (src/brands/copy/), and the family of firms it belongs to.
+// in the live About page's words (src/brands/copy/). The three sister firms are in every footer
+// ("Three brands. One network."), so this page doesn't repeat them.
 import Base from '../../layouts/Base.astro';
 import PageHero from '../../components/PageHero.astro';
 import Facts from '../../components/Facts.astro';
@@ -15,12 +16,6 @@ const facts = [
   ['6 months', 'guarantee on permanent hires', 'direct'],
   [terms.tempToPerm, 'contracts become permanent', 'direct'],
 ];
-// The three sister firms
-const family = [
-  { name: 'Accountant Staffing', what: 'Accounting and finance professionals', href: 'https://www.accountantstaffing.ca' },
-  { name: 'Administrative Staffing', what: 'Administrative professionals', href: 'https://www.administrativestaffing.ca' },
-  { name: 'Integrated Staffing', what: 'Contract and permanent staffing in every industry', href: 'https://www.integratedstaffing.ca' },
-];
 ---
 <Base title="About us" description={c.text[0]}>
   <PageHero title={c.title} lead={c.text[0]} />
@@ -33,29 +28,10 @@ const family = [
     </div>
   </section>
 
-  <section class="section section--rule">
-    <div class="wrap">
-      <div class="section-head section-head--split">
-        <h2>Three firms, one family</h2>
-        <p class="lead">Locally owned and operated in Atlantic Canada.</p>
-      </div>
-      <ul class="items family">
-        {family.map((f) => (
-          <li class:list={['item', f.name === brand.name && 'item--blue']}>
-            <h3>{f.name}</h3>
-            <p>{f.what}</p>
-            {f.name === brand.name ? <span class="here">You’re here</span> : <a class="more" href={f.href}>Visit {f.name}</a>}
-          </li>
-        ))}
-      </ul>
-    </div>
-  </section>
-
   <CtaBand />
 </Base>
 
 <style>
   .story { display: grid; gap: var(--s5); max-width: 62ch; }
   .story p { font-size: var(--fs-lead); font-weight: var(--fw-light); line-height: 1.55; }
-  .here { display: inline-block; margin-top: var(--s3); font-weight: var(--fw-bold); color: var(--direct); }
 </style>
