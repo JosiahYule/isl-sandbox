@@ -236,6 +236,8 @@ const schema = {
 
   .applybar { display: none; }
   @media (max-width: 900px) {
+    /* Phones: the Apply bar covers the end of the posting, so the closing Apply block would be a third Apply */
+    .end { display: none; }
     .applybar { position: fixed; left: 0; right: 0; bottom: 0; z-index: 70; display: flex; align-items: center; gap: var(--s4);
       padding: var(--s3) var(--s4) calc(var(--s3) + env(safe-area-inset-bottom)); background: var(--paper); border-top: 1px solid var(--line);
       transform: translateY(110%); transition: transform 0.25s var(--ease); }

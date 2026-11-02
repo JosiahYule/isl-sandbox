@@ -1,20 +1,13 @@
 ---
 // WE RECRUIT. IT'S THAT SIMPLE.
-// The live site's signature line, kept simple: the heading, and three short lines beside it
-// (where we are, what we recruit for, how we match). One thing moves: the rolling word.
-// Under it, the two services, each with the two figures that back up "simple" and a link.
-// ISL's words are the defaults; AS and ADS pass their own (src/sites/specialist/index.astro).
+// The live site's signature line, then the two services, each with the two figures that back up
+// "simple" and a link into that service's page. (The three short lines that sat beside the heading
+// repeated the hero and the offices map, so they came out in the November 2026 tidy-up.)
 //
-// <WeRecruit title={['One field.', 'Every level.']} before="Placing" words={[...]} lines={[first, last]} services={[...]} />
-//
-// Accessibility: the rolling word is decoration (aria-hidden). Screen readers get the
-// full sentence with every word instead. With reduced motion the word stays put.
+// <WeRecruit title={['One field.', 'Every level.']} services={[...]} />
 import ServiceBlocks from './ServiceBlocks.astro';
 const {
   title = ['We recruit.', 'It’s that simple.'],
-  lines = ['Based in Halifax, with offices across Atlantic Canada.', 'People matched to work that fits their skills and goals.'],
-  before = 'Specializing in',
-  words: industries = ['construction', 'logistics', 'manufacturing', 'oil and gas', 'skilled trades', 'hospitality', 'administration'],
   // What "simple" means, by service: each block is the way into that service's page.
   // Contract in near-black, direct hire in the brand colour (the site's colour key).
   services = [
@@ -24,66 +17,16 @@ const {
       figs: [['47 days', 'average search, brief to hire'], ['90 days', 'replacement guarantee']] },
   ],
 } = Astro.props;
-const list = industries.slice(0, -1).join(', ') + ' and ' + industries.at(-1);
 ---
-<section class="section we" data-we>
-  <div class="wrap we-grid">
+<section class="section we">
+  <div class="wrap">
     <h2 class="we-title" data-reveal><span class="line we-blue">{title[0]}</span> <span class="line">{title[1]}</span></h2>
-
-    <ul class="we-lines" data-stagger>
-      <li>{lines[0]}</li>
-      <li>
-        <span class="visually-hidden">{before} {list}.</span>
-        <span aria-hidden="true">{before} <span class="roll">{industries.map((w, i) => <span class:list={['word', i === 0 && 'on']}>{w}.</span>)}</span></span>
-      </li>
-      <li>{lines[1]}</li>
-    </ul>
+    <ServiceBlocks services={services} />
   </div>
-  <div class="wrap"><ServiceBlocks services={services} /></div>
 </section>
 
-<script>
-  // Swap the industry word every couple of seconds, only while it's on screen
-  // and only when the visitor's device allows motion.
-  const roll = document.querySelector<HTMLElement>('[data-we] .roll');
-  if (roll && document.documentElement.classList.contains('motion')) {
-    const words = [...roll.querySelectorAll<HTMLElement>('.word')];
-    let i = 0;
-    let timer: number | undefined;
-    const step = () => {
-      const prev = words[i];
-      prev.classList.replace('on', 'out');
-      setTimeout(() => prev.classList.remove('out'), 600);
-      i = (i + 1) % words.length;
-      words[i].classList.add('on');
-    };
-    new IntersectionObserver(([e]) => {
-      if (e.isIntersecting && !timer) timer = window.setInterval(step, 2200);
-      if (!e.isIntersecting && timer) { clearInterval(timer); timer = undefined; }
-    }).observe(roll);
-  }
-</script>
-
 <style>
-  .we-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: var(--s6) var(--s8); align-items: center; }
   .we-title { font-weight: var(--fw-light); font-size: var(--fs-h1); letter-spacing: -0.035em; line-height: 1.02; margin: 0; }
+  .we-title .line { display: block; }
   .we-blue { color: var(--direct); }
-
-  /* Three lines between hairlines, the same rhythm as the site's other lists */
-  .we-lines { list-style: none; margin: 0; padding: 0; border-top: 1.5px solid var(--ink); }
-  .we-lines li { padding-block: var(--s5); border-bottom: 1px solid var(--line); font-size: var(--fs-lead); line-height: 1.4; }
-
-  /* The rolling word: every word sits in the same grid cell, so the box is as wide as the
-     longest one and nothing around it shifts. Each word carries its own full stop, so a short
-     word never leaves a gap before the period. The current word is in place; the next waits
-     below, the last slides out above. */
-  .roll { display: inline-grid; vertical-align: bottom; overflow: hidden; color: var(--direct); font-weight: var(--fw-bold); }
-  .word { grid-area: 1 / 1; white-space: nowrap; opacity: 0; transform: translateY(100%); }
-  .word.on { opacity: 1; transform: none; }
-  :global(.motion) .word { transition: transform 0.55s var(--ease), opacity 0.4s; }
-  :global(.motion) .word.out { opacity: 0; transform: translateY(-100%); }
-
-  @media (max-width: 900px) {
-    .we-grid { grid-template-columns: 1fr; }
-  }
 </style>

@@ -54,7 +54,7 @@ test('job-board role+city matching, shareable filters, reload and clear all', as
     assert.equal(doc.querySelector('[data-count]').textContent, String(rows.length));
     assert.equal(doc.querySelector('[data-reset]').hidden, true);
     assert.equal(rows.filter((row) => !row.hidden).length, Math.min(15, rows.length));
-    assert(doc.querySelector('[data-result-summary]').textContent.startsWith(`Showing ${Math.min(15, rows.length)} of ${rows.length}`));
+    assert.equal(doc.querySelector('[data-result-summary]').hidden, true, 'no filter line once the filters are cleared');
     if (rows.length > 15) {
       doc.querySelector('[data-more]').click();
       assert.equal(rows.filter((row) => !row.hidden).length, rows.length);

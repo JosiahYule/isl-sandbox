@@ -3,7 +3,6 @@
 import Base from '../../layouts/Base.astro';
 import Button from '../../components/Button.astro';
 import PageHero from '../../components/PageHero.astro';
-import IndustryMatrix from '../../components/IndustryMatrix.astro';
 import CanadaMap from '../../components/CanadaMap.astro';
 import CtaBand from '../../components/CtaBand.astro';
 import Steps from '../../components/Steps.astro';
@@ -55,8 +54,8 @@ const terms = [
             <h2>Hires that last.</h2>
             <p class="lead">Of every 100 people we place permanently, {retentionN} stay.</p>
           </div>
+          <!-- The 90-day guarantee is step 05 above; the time to hire is said here only -->
           <ul class="figs" data-stagger>
-            <li><span class="figure" data-countup>90</span>days of replacement guarantee</li>
             <li><span class="figure" data-countup>47</span>days, on average, from brief to hire</li>
           </ul>
         </div>
@@ -79,16 +78,6 @@ const terms = [
   </section>
 
   <Proof index={0} tint />
-
-  <section class="section">
-    <div class="wrap">
-      <div class="section-head section-head--split">
-        <h2>Specialties</h2>
-        <p class="lead">From agriculture to executive search.</p>
-      </div>
-      <IndustryMatrix only="direct" />
-    </div>
-  </section>
 
   <CtaBand title="Start your next key hire." text="Tell us about the role. A direct hire recruiter will set up a call within one business day." href="/hire/?service=direct" label="Start a search" service="direct" />
 </Base>

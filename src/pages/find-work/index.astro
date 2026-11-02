@@ -61,7 +61,8 @@ const count = { contract: jobs.filter((j) => j.type === 'contract').length, dire
       <div class="results-heading">
         <div aria-live="polite" aria-atomic="true">
           <p class="count"><strong data-count>{jobs.length}</strong> <span data-count-label>open roles</span></p>
-          <p class="result-summary" data-result-summary>{jobs.length} roles available</p>
+          <!-- Only while searching or filtering: what the count above is filtered by -->
+          <p class="result-summary" data-result-summary hidden></p>
         </div>
         <button class="reset" type="button" data-reset hidden>Clear search and filters</button>
       </div>
@@ -146,11 +147,13 @@ const count = { contract: jobs.filter((j) => j.type === 'contract').length, dire
     labelEl.textContent = shown === 1 ? 'open role' : 'open roles';
     empty.hidden = shown > 0;
     reset.hidden = !filtering;
-    const visible = filtering || expanded ? shown : Math.min(PAGE, shown);
     const filters = [term ? `“${term}”` : '', prov.value ? prov.selectedOptions[0].textContent : '',
       ind?.value ? ind.selectedOptions[0].textContent : '', type ? typeButtons.find((b) => b.dataset.type === type)?.firstChild?.textContent?.trim() : '',
       area ? `near ${areaLinks.find((a) => a.dataset.area === area)?.firstChild?.textContent?.trim()}` : ''].filter(Boolean);
-    summary.textContent = `Showing ${visible} of ${shown} ${shown === 1 ? 'role' : 'roles'}${filters.length ? ' · ' + filters.join(' · ') : ''}`;
+    // One count line: the number of roles (above), and under it only what it's filtered by. How many
+    // of them are on screen is on the "Show all" button.
+    summary.textContent = filters.join(' · ');
+    summary.hidden = !filters.length;
     if (sync) syncUrl();
     const context = resultsContext(location.search);
     rows.forEach((row) => {

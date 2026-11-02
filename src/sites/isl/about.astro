@@ -1,7 +1,6 @@
 ---
 // ABOUT  →  /about/
 import Base from '../../layouts/Base.astro';
-import Button from '../../components/Button.astro';
 import PageHero from '../../components/PageHero.astro';
 import Facts from '../../components/Facts.astro';
 import CtaBand from '../../components/CtaBand.astro';
@@ -13,12 +12,10 @@ import { brand, images, offices, stats } from '../../data/site.js';
 import { team } from '../../data/team.js';
 
 const years = new Date().getFullYear() - brand.since;
-const provinces = new Set(offices.map((o) => o.province)).size;
 const reviews = stats.find((s) => s.label.includes('reviews'))?.value ?? '200+';
 const facts = [
   [String(years), 'years in Atlantic Canada'],
   [String(offices.length), 'local offices'],
-  [String(provinces), 'Atlantic provinces'],
   [String(team.length), 'recruiters and staff'],
   [reviews, 'five-star Google reviews'],
 ];
@@ -38,10 +35,7 @@ const gallery = [
 ];
 ---
 <Base title="About" description="Locally owned and operated recruiting and staffing in Atlantic Canada since 2013.">
-  <PageHero title="The right fit, for both sides of the hire." lead="We match Atlantic Canadian employers with the people they need, on contract and permanently.">
-    <Button href="/hire/">I'm hiring</Button>
-    <Button href="/find-work/" variant="outline">I'm looking for work</Button>
-  </PageHero>
+  <PageHero title="The right fit, for both sides of the hire." lead="We match Atlantic Canadian employers with the people they need, on contract and permanently." />
 
   <div class="wrap team-photo" data-reveal>
     <Photo src={photos.teamTogether.src} alt={photos.teamTogether.alt} ratio="21/9" sizes="(max-width: 1280px) 100vw, 1200px" position="center 85%" eager />
@@ -76,6 +70,7 @@ const gallery = [
       <ul class="items recognition">
         <li class="item rec">
           <img src={asset(images.badgeBestPlaces)} alt="" width="56" height="56" loading="lazy" onerror="this.remove()" />
+          <!-- TODO: one line on the award (which list, which year), like COR's beside it -->
           <div><h3>Best Places to Work</h3></div>
         </li>
         <li class="item rec">

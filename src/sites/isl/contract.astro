@@ -8,16 +8,6 @@ import CtaBand from '../../components/CtaBand.astro';
 import Photo from '../../components/Photo.astro';
 import Proof from '../../components/Proof.astro';
 import AtlanticMap from '../../components/AtlanticMap.astro';
-import { jobs } from '../../data/jobs.js';
-import { areas } from '../../data/areas.js';
-import { places } from '../../data/places.js';
-
-// Proof that we staff well beyond the offices: towns with open contract roles right now
-// that aren't in any office's own area (from the live job snapshot, so it updates with the feed).
-const officeTowns = new Set(areas.flatMap((a) => a.towns));
-const beyond = [...new Set(jobs.filter((j) => j.type === 'contract' && j.city && !officeTowns.has(j.city.toLowerCase())).map((j) => j.city.replace(' - ', '-')))];
-const townDots = beyond.map((name) => ({ name, ll: places[name.toLowerCase()] || places[name.toLowerCase().replace('-', ' - ')] }))
-  .filter((t) => t.ll).map((t) => ({ name: t.name, lon: t.ll[0], lat: t.ll[1] }));
 import { stock } from '../../data/photos.js';
 import { route, provinceName } from '../../../assistant/supabase/functions/_shared/routing.js';
 import { url } from '../../lib/url.js';
@@ -58,23 +48,15 @@ const covered = [
   </section>
 
   <!-- Coverage: each office covers its whole province -->
-  <section class="section section--tint coverage" data-isl-live="coverage">
+  <section class="section section--tint coverage">
     <div class="wrap cov-grid">
       <div class="cov-copy">
         <div class="section-head">
           <h2>Wherever the work is.</h2>
           <p class="lead">Our five offices cover Atlantic Canada, and we place contract workers anywhere in the country.</p>
         </div>
-        {beyond.length > 0 && (
-          <div class="now">
-            <p class="now-label">Contract roles open right now in</p>
-            <ul class="now-list" data-stagger>{beyond.map((t) => <li>{t}</li>)}</ul>
-          </div>
-        )}
-        <p class="key"><span class="k-office">Our offices</span><span class="k-town">Open roles beyond them</span></p>
-        <a class="more" href="#local">Find your provincial contact</a>
       </div>
-      <AtlanticMap id="coverage-map" card={false} navigate towns={townDots} />
+      <AtlanticMap id="coverage-map" card={false} navigate />
     </div>
   </section>
 
@@ -145,16 +127,6 @@ const covered = [
   .local .item > * { margin-bottom: 0; }
   .local .item > p:not(.l-prov) { margin-bottom: var(--s2); }
   .cov-grid { display: grid; grid-template-columns: 5fr 6fr; gap: clamp(2rem, 6vw, 6rem); align-items: center; }
-  .now { border-top: 1.5px solid var(--ink); padding-top: var(--s4); }
-  .now-label { font-size: var(--fs-small); font-weight: var(--fw-bold); color: var(--ink-soft); margin-bottom: var(--s3); }
-  .now-list { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: var(--s2); }
-  .now-list li { background: var(--paper); border: 1.5px solid var(--line); padding: 0.4rem 0.8rem; font-weight: var(--fw-bold); font-size: var(--fs-small); }
-  .key { display: flex; flex-wrap: wrap; gap: var(--s2) var(--s5); margin-top: var(--s5); font-size: var(--fs-small); color: var(--ink-soft); }
-  .key span { display: inline-flex; align-items: center; gap: var(--s2); }
-  .key span::before { content: ''; width: 12px; height: 12px; border-radius: 50%; }
-  .k-office::before { background: #fff; border: 3px solid var(--ink); }
-  .k-town::before { background: var(--ink); border: 2px solid #fff; outline: 1px solid var(--ink); }
-  .coverage .more { display: inline-block; margin-top: var(--s5); font-weight: var(--fw-bold); }
   @media (max-width: 900px) { .cov-grid { grid-template-columns: 1fr; } }
   .rate-grid { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(2rem, 6vw, 6rem); align-items: start; }
   .rate-copy .section-head { margin-bottom: var(--s6); }

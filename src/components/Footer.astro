@@ -1,6 +1,8 @@
 ---
 // SITE FOOTER
 // The offices row is the most useful thing in a staffing footer: a direct line to each office.
+// Just the city and its phone: the addresses are on the office pages and Contact, and the jobs near
+// each office are in the Find work menu.
 import { brand, nav, offices, social, images, links } from '../data/site.js';
 import { url } from '../lib/url.js';
 import { asset } from '../lib/img.js';
@@ -20,8 +22,6 @@ const sandboxSites = [{ key: 'isl', name: 'Integrated Staffing', href: '/isl-san
         <div class="office">
           {officeKey(o.city) ? <a class="city" href={url(`/offices/${officeKey(o.city)}/`)}>{o.city}<span>{o.province}</span></a> : <p class="city">{o.city}<span>{o.province}</span></p>}
           <a class="phone" href={tel(o.phone)}>{o.phone}</a>
-          <p class="addr">{o.address.replace(/,\s*(NS|NB|PE|NL)\s.*$/, '')}</p>
-          {areaKey(o.city) && <a class="near" href={url(`/find-work/?area=${areaKey(o.city)}`)}>Jobs near {o.city}</a>}
         </div>
       ))}
     </div>}
@@ -64,15 +64,13 @@ const sandboxSites = [{ key: 'isl', name: 'Integrated Staffing', href: '/isl-san
     display: grid; grid-template-columns: repeat(var(--n), 1fr);
     border-top: 1px solid var(--line-dark);
   }
-  .office { display: flex; flex-direction: column; align-items: flex-start; padding: var(--s5) var(--s4) var(--s5) 0; }
+  .office { display: flex; flex-direction: column; align-items: flex-start; gap: var(--s1); padding: var(--s5) var(--s4) var(--s5) 0; }
   .office + .office { padding-left: var(--s4); border-left: 1px solid var(--line-dark); }
-  .city { font-weight: var(--fw-bold);
-    font-size: var(--fs-h3); letter-spacing: -0.01em; margin-bottom: var(--s2);
-  }
+  .city { font-weight: var(--fw-bold); font-size: var(--fs-body); letter-spacing: -0.01em; margin: 0; }
   a.city { color: #fff; display: block; }
   .city span { margin-left: 0.4em; color: var(--on-dark-soft); font-weight: var(--fw-text); font-size: var(--fs-small); }
-  .phone { font-weight: var(--fw-bold); color: #fff; font-variant-numeric: tabular-nums; }
-  .addr { color: var(--on-dark-soft); font-size: var(--fs-small); margin-top: var(--s2); line-height: 1.45; }
+  .phone { color: var(--on-dark-soft); font-variant-numeric: tabular-nums; }
+  .phone:hover { color: #fff; }
 
   .lower {
     display: grid; grid-template-columns: 1.4fr 1fr; gap: var(--s7);
@@ -92,8 +90,6 @@ const sandboxSites = [{ key: 'isl', name: 'Integrated Staffing', href: '/isl-san
   .badges img { height: 56px; width: auto; }
   nav { display: grid; grid-template-columns: 1fr 1fr; gap: var(--s5); }
   ul { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--s2); align-content: start; }
-  .near { display: inline-block; margin-top: auto; padding-top: var(--s3); font-size: var(--fs-small); text-decoration: underline !important; text-underline-offset: 0.2em; color: var(--on-dark-soft); }
-  .near:hover { color: #fff; }
   .scam { margin-top: var(--s7); padding-top: var(--s4); border-top: 1px solid var(--line-dark); font-size: var(--fs-small); color: var(--on-dark-soft); }
   .scam strong { color: #fff; font-weight: var(--fw-bold); }
   .legal { margin-top: var(--s4); font-size: var(--fs-tiny); color: var(--on-dark-soft); }
@@ -103,15 +99,10 @@ const sandboxSites = [{ key: 'isl', name: 'Integrated Staffing', href: '/isl-san
   .sandbox span { margin-left: var(--s4); color: #fff; }
 
   @media (max-width: 900px) {
-    /* Phones: one row per office, city and phone on one line, the address and jobs link under them,
-       so the offices take about half the height of a two-column grid and every row lines up */
-    .offices { grid-template-columns: 1fr; }
-    .office, .office + .office { display: grid; grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: 'city phone' 'addr near'; column-gap: var(--s4);
-      padding: var(--s4) 0; border-left: 0; border-bottom: 1px solid var(--line-dark); }
-    .city { grid-area: city; margin-bottom: 0; }
-    .phone { grid-area: phone; align-self: baseline; }
-    .addr { grid-area: addr; margin-top: var(--s1); }
-    .near { grid-area: near; justify-self: end; align-self: end; margin-top: 0; padding-top: 0; white-space: nowrap; }
+    /* Phones: two offices a row, city over phone */
+    .offices { grid-template-columns: 1fr 1fr; }
+    .office, .office + .office { padding: var(--s4) var(--s4) var(--s4) 0; border-left: 0; border-bottom: 1px solid var(--line-dark); }
+    .office:nth-child(even) { padding-left: var(--s4); border-left: 1px solid var(--line-dark); }
     .lower { grid-template-columns: 1fr; gap: var(--s6); }
   }
 </style>

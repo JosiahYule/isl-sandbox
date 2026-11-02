@@ -18,6 +18,9 @@ import { CHECKS } from '../lib/resume.js';
 import { PAY_LAW } from '../lib/jobad.js';
 import { tools as brandTools } from '../data/site.js';
 import { lfs, GEOS, SHORT, at, monthName } from '../lib/lfs.js';
+// compact: on phones, each tool is just who it's for, its name and its link (the homepage, where
+// four tall cards made one of the longest stretches on a phone). The Learn pages keep the full cards.
+const { compact = false } = Astro.props;
 
 const dollars = (v) => perHour(v).replace('/hour', '');
 const list = (xs) => (xs.length > 1 ? `${xs.slice(0, -1).join(', ')} and ${xs.at(-1)}` : xs[0]);
@@ -59,7 +62,7 @@ const previews = {
     bar: areas.map((a) => ({ w: a.n, k: 'ink' })) },
 };
 ---
-<ul class:list={['tools', tools.length === 3 && 'tools--3']} style={`--n:${tools.length}`} data-isl-live="tools">
+<ul class:list={['tools', tools.length === 3 && 'tools--3', compact && 'tools--compact']} style={`--n:${tools.length}`} data-isl-live="tools">
   {tools.map((t, i) => (
     <li style={`--i:${i}`}>
       <a class="card" href={t.url}>
@@ -123,4 +126,14 @@ const previews = {
   :global(.motion) .is-in .v-bar { clip-path: inset(-6px 0 -6px 0); }
 
   @media (max-width: 700px) { .tools { grid-template-columns: 1fr; } .vis { height: auto; } .v-bar { margin-top: var(--s5); } } /* stacked: no row to line up with */
+  @media (max-width: 700px) {
+    .tools--compact { gap: 0; border-top: 1.5px solid var(--ink); }
+    .tools--compact > li { border-bottom: 1px solid var(--line); }
+    .tools--compact .vis, .tools--compact .d { display: none; }
+    .tools--compact .card { padding-block: var(--s4); }
+    .tools--compact h3 { margin-bottom: var(--s1); }
+    .tools--compact .more { padding-top: var(--s1); }
+    /* the previews are what trigger the rise-in, and they're hidden here */
+    :global(.motion) .tools--compact > li { opacity: 1; transform: none; }
+  }
 </style>
