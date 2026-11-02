@@ -15,7 +15,15 @@ document.querySelectorAll('.has-drop').forEach((d) => {
 });
 document.addEventListener('click', (e) => { if (!e.target.closest('.has-drop')) document.querySelectorAll('.drop-btn').forEach((b) => b.setAttribute('aria-expanded', 'false')); });
 
-const mobileMenu = document.querySelector<HTMLDetailsElement>('[data-mobile-menu]')!;
+// Homepage: the header sits clear over the hero photo until the page scrolls (Header.astro)
+const markScrolled = () => {
+  const scrolled = scrollY > 8;
+  if (document.documentElement.hasAttribute('data-scrolled') !== scrolled) document.documentElement.toggleAttribute('data-scrolled', scrolled);
+};
+markScrolled();
+addEventListener('scroll', markScrolled, { passive: true });
+
+const mobileMenu =document.querySelector<HTMLDetailsElement>('[data-mobile-menu]')!;
 const menuSummary = mobileMenu.querySelector('summary')!;
 const toggles = [...mobileMenu.querySelectorAll<HTMLButtonElement>('.sub-toggle')];
 const closeGroups = () => toggles.forEach((b) => {

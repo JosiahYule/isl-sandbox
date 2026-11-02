@@ -11,6 +11,10 @@
 /* 2. Our header is fixed to the top of the window. (Code Injection can only add it at the end of the
       page; fixing it to the top means it shows in the right place before the script moves it.) */
 body { padding-top: 72px !important; }
+/* The homepage photo runs up under the header instead (HomeHero.astro, data-hero-under) */
+body:has(#isl-page [data-hero-under]) { padding-top: 0 !important; }
+#isl-page [data-hero-under] { margin-top: 0 !important; }
+body:has(#isl-page [data-hero-under]) #isl-header { background: transparent !important; } /* the header bar keeps its own white once scrolled */
 /* Its layer sits above anything Squarespace puts on the page (just under the chat window), so no
    invisible Squarespace layer can sit on top of it and swallow clicks */
 #isl-header { position: fixed; top: 0; left: 0; right: 0; z-index: 2147482000; pointer-events: auto; }

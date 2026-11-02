@@ -123,6 +123,29 @@ const onHire = isCurrent('/hire/'); // on the request form itself, the phone hea
   }
   .bar { display: flex; align-items: center; gap: var(--s5); min-height: 72px; }
 
+  /* Over the homepage photo (a hero marked data-hero-under slides up under the header): clear,
+     with a white logo, menu and button, until the page scrolls (header.ts sets data-scrolled) or the
+     phone menu opens. Plain CSS, so the first paint is already right. The dropdowns keep their
+     white panels. */
+  .header { transition: background-color 0.25s var(--ease), border-color 0.25s var(--ease), backdrop-filter 0.25s var(--ease); }
+  :global(html:has([data-hero-under]):not([data-scrolled], [data-menu-open])) .header { background: transparent; border-bottom-color: transparent; backdrop-filter: none; }
+  :global(html:has([data-hero-under]):not([data-scrolled], [data-menu-open])) .logo img { filter: brightness(0) invert(1); }
+  :global(html:has([data-hero-under]):not([data-scrolled], [data-menu-open])) .logo,
+  :global(html:has([data-hero-under]):not([data-scrolled], [data-menu-open])) .primary > a,
+  :global(html:has([data-hero-under]):not([data-scrolled], [data-menu-open])) .has-drop > a,
+  :global(html:has([data-hero-under]):not([data-scrolled], [data-menu-open])) .call-m,
+  :global(html:has([data-hero-under]):not([data-scrolled], [data-menu-open])) .call-m svg { color: #fff; }
+  :global(html:has([data-hero-under]):not([data-scrolled], [data-menu-open])) .primary > a::after,
+  :global(html:has([data-hero-under]):not([data-scrolled], [data-menu-open])) .has-drop > a::after { background: #fff; }
+  :global(html:has([data-hero-under]):not([data-scrolled], [data-menu-open])) .drop-btn,
+  :global(html:has([data-hero-under]):not([data-scrolled], [data-menu-open])) .login { color: rgb(255 255 255 / 0.82); }
+  :global(html:has([data-hero-under]):not([data-scrolled], [data-menu-open])) .login:hover { color: #fff; }
+  :global(html:has([data-hero-under]):not([data-scrolled], [data-menu-open])) .tools :global(.btn),
+  :global(html:has([data-hero-under]):not([data-scrolled], [data-menu-open])) .hire-m { background: #fff; color: var(--dark); }
+  :global(html:has([data-hero-under]):not([data-scrolled], [data-menu-open])) .tools :global(.btn:hover),
+  :global(html:has([data-hero-under]):not([data-scrolled], [data-menu-open])) .hire-m:hover { background: var(--accent-tint); color: var(--dark); }
+  :global(html:has([data-hero-under]):not([data-scrolled], [data-menu-open])) .mobile summary { border-color: #fff; color: #fff; }
+
   /* The logo image loads from Squarespace. The wordmark is a fallback that only shows if it fails. */
   .logo { position: relative; display: block; flex-shrink: 0; color: var(--ink); text-decoration: none; }
   .logo img { height: var(--logo-h, 46px); width: auto; }

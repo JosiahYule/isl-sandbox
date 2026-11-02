@@ -302,7 +302,8 @@ function esc(s) { return String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<
 // Every selector gets #isl-header / #isl-page / #isl-footer in front of it, so these styles can't
 // touch the rest of a Squarespace page, and win over Squarespace's own styles inside our areas.
 //   :root, body    our areas themselves (the colours and fonts the whole page inherits)
-//   html ...       left as is (page-wide settings)
+//   html           left as is (page-wide settings)
+//   html... .x     our areas go after the html part: html:has(...) .header -> html:has(...) #isl-header .header
 //   .motion ...    the class isl.js's entrance-effects script puts on <html>
 //   view transitions are dropped: Squarespace pages load in full each time.
 function scopeCss(css) {
@@ -370,9 +371,25 @@ function splitList(s) {
   return parts.map((p) => p.trim()).filter(Boolean);
 }
 
+// "html:has(a b) .x .y" -> ["html:has(a b)", ".x .y"]: the first space outside brackets
+function splitDescendant(sel) {
+  let depth = 0;
+  for (let j = 0; j < sel.length; j++) {
+    const c = sel[j];
+    if (c === '(' || c === '[') depth++;
+    else if (c === ')' || c === ']') depth--;
+    else if (depth === 0 && /[\s>~+]/.test(c)) return [sel.slice(0, j).trim(), sel.slice(j).trim()];
+  }
+  return null;
+}
+
 function scopeSelector(sel) {
   if (sel.startsWith('::view-transition')) return null;
-  if (/^html(?![\w-])/.test(sel)) return sel;
+  if (/^html(?![\w-])/.test(sel)) {
+    // html[...] .x: a page-wide condition on one of our parts, so the part still gets our areas in front
+    const split = splitDescendant(sel);
+    return split ? `${split[0]} ${ROOTS} ${split[1]}` : sel;
+  }
   if (/^(:root|body)(?![\w-])/.test(sel)) return sel.replace(/^(:root|body)/, ROOTS);
   if (/^\.motion(?![\w-])/.test(sel)) return `html.motion ${ROOTS}${sel.slice('.motion'.length)}`;
   return `${ROOTS} ${sel}`;

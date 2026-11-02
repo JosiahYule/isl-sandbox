@@ -22,7 +22,7 @@ const near = [...new Set(jobs.map((j) => j.province).filter(Boolean))]
   .map((code) => ({ code, label: ({ PE: 'PEI' })[code] || provinces[code] || code, n: jobs.filter((j) => j.province === code).length }))
   .sort((a, b) => b.n - a.n);
 ---
-  <section class:list={['hero', long && 'hero--long']}>
+  <section class:list={['hero', long && 'hero--long']} data-hero-under>
     <div class="hero-bg" data-animate>
       <Photo src={photo.src} alt="" ratio="16/9" sizes="100vw" position={photo.position} eager />
     </div>
@@ -75,15 +75,18 @@ const near = [...new Set(jobs.map((j) => j.province).filter(Boolean))]
 <style>
   /* ---------- 1. Hero ---------- */
   /* The photo fills the hero; a dark wash from the left keeps the white text readable */
-  .hero { position: relative; isolation: isolate; color: #fff; background: var(--dark); min-height: min(calc(100svh - 72px), 880px); display: flex; flex-direction: column; overflow: hidden; }
+  /* The hero slides up under the header (data-hero-under), which stays clear over the photo until
+     the page scrolls (Header.astro). --header-h: the header's height, 72px plus its 1px line. */
+  .hero { --header-h: 73px; position: relative; isolation: isolate; color: #fff; background: var(--dark); margin-top: calc(-1 * var(--header-h)); min-height: min(100svh, calc(880px + var(--header-h))); display: flex; flex-direction: column; overflow: hidden; }
   .hero-bg { position: absolute; inset: 0; z-index: -1; }
   .hero-bg :global(.photo), .hero-bg :global(.frame) { height: 100%; margin: 0; }
   .hero-bg :global(.frame) { aspect-ratio: auto !important; }
   .hero-bg::after { content: ''; position: absolute; inset: 0;
     background:
       linear-gradient(90deg, color-mix(in srgb, var(--wash) 90%, transparent) 0%, color-mix(in srgb, var(--wash) 72%, transparent) 38%, color-mix(in srgb, var(--wash) 20%, transparent) 75%, color-mix(in srgb, var(--wash) 5%, transparent) 100%),
-      linear-gradient(0deg, color-mix(in srgb, var(--wash) 85%, transparent) 0%, color-mix(in srgb, var(--wash) 0%, transparent) 30%); }
-  .hero-inner { flex: 1; display: flex; align-items: center; padding-block: var(--s8) var(--s7); }
+      linear-gradient(0deg, color-mix(in srgb, var(--wash) 85%, transparent) 0%, color-mix(in srgb, var(--wash) 0%, transparent) 30%),
+      linear-gradient(180deg, color-mix(in srgb, var(--wash) 55%, transparent) 0%, color-mix(in srgb, var(--wash) 0%, transparent) 180px); /* keeps the white menu readable */ }
+  .hero-inner { flex: 1; display: flex; align-items: center; padding-block: calc(var(--s8) + var(--header-h)) var(--s7); }
   .hero-copy { max-width: 660px; }
 
   .hero-title { font-size: var(--fs-hero); font-weight: var(--fw-bold); letter-spacing: -0.03em; line-height: 1; color: #fff; }
@@ -136,8 +139,8 @@ const near = [...new Set(jobs.map((j) => j.province).filter(Boolean))]
 
   @media (max-width: 900px) {
     .hero { min-height: 0; }
-    .hero-bg::after { background: linear-gradient(0deg, color-mix(in srgb, var(--wash) 92%, transparent) 0%, color-mix(in srgb, var(--wash) 70%, transparent) 55%, color-mix(in srgb, var(--wash) 45%, transparent) 100%); }
-    .hero-inner { padding-block: var(--s8) var(--s7); }
+    .hero-bg::after { background: linear-gradient(0deg, color-mix(in srgb, var(--wash) 92%, transparent) 0%, color-mix(in srgb, var(--wash) 70%, transparent) 55%, color-mix(in srgb, var(--wash) 55%, transparent) 100%); }
+    .hero-inner { padding-block: calc(var(--s7) + var(--header-h)) var(--s7); }
     .search-bar button { padding: 0 1.1rem; }
     /* Phones: the label, two openings one under the other, then the link */
     .latest-inner { grid-template-columns: 1fr auto; gap: var(--s3) var(--s4); padding-block: var(--s5); }
