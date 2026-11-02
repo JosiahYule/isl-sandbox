@@ -98,10 +98,8 @@ export const testimonials = [
 // profile, in the reviewers' own words (quote: the featured size; short: beside it). Trims are at the
 // end of a sentence only. People appear as first name and last initial unless they signed with more.
 //   who: Employer or Job seeker, when the review makes it clear; '' shows just "Google review"
-//   url: where "Read them on Google" goes (TODO: the profile's own reviews link)
 export const reviews = {
   count: '200+',
-  url: 'https://www.google.com/maps/search/?api=1&query=Integrated%20Staffing%20Limited',
   items: [
     {
       name: 'Michelle, Charlottetown Bottle & Metal', who: 'Employer',
