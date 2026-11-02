@@ -62,8 +62,11 @@ const tel = `tel:+1${brand.mainPhone.replaceAll('-', '')}`;
   .actions { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s5); margin-top: var(--s5); }
   .phone { font-weight: var(--fw-bold); }
   .candidate { font-weight: var(--fw-bold); text-underline-offset: 0.2em; }
-  /* ADS: the band in the brand's bright colour, with dark text */
-  .cta--bright { background: var(--bright); color: var(--bright-ink); border-bottom: 0; }
-  .cta--bright h2, .cta--bright .side p, .cta--bright .phone, .cta--bright .candidate { color: var(--bright-ink); }
+  /* A brand with ctaTone 'bright' (none today): the band in its bright colour, with dark text.
+     Without a bright colour it falls back to the dark band, so a Squarespace code block pasted while
+     AS and ADS had an orange band (it keeps the cta--bright class) still shows navy with white text. */
+  .cta--bright { background: var(--bright, var(--dark)); color: var(--bright-ink, var(--on-dark)); border-bottom: 0; }
+  .cta--bright h2, .cta--bright .phone, .cta--bright .candidate { color: var(--bright-ink, var(--on-dark)); }
+  .cta--bright .side p { color: var(--bright-ink, var(--on-dark-soft)); }
   @media (max-width: 860px) { .inner { grid-template-columns: 1fr; } }
 </style>
