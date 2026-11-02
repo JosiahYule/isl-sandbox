@@ -49,6 +49,11 @@ body:has(#isl-page [data-hero-under]) #isl-header { background: transparent !imp
 /* The hidden attribute: undoing everything above would undo it too (browsers treat it the same way) */
 :is(#isl-header, #isl-page, #isl-footer) :where([hidden]:not([hidden="until-found" i])) { display: none; }
 :is(#isl-header, #isl-page, #isl-footer) { text-align: left; letter-spacing: normal; word-spacing: normal; text-transform: none; font-style: normal; pointer-events: auto; visibility: visible; }
+/* The typeface, made to hold: a site's own font rule marked !important (Administrative Staffing's
+   Squarespace site has one, which set our text in Arial) beats everything above, because the text in
+   our areas only inherits its font. The same weight here, with our areas' IDs in front, wins inside
+   them and nowhere else. SVG text keeps whatever its drawing sets. */
+:is(#isl-header, #isl-page, #isl-footer), :is(#isl-header, #isl-page, #isl-footer) :not(svg, svg *) { font-family: var(--font, 'DM Sans Variable', 'DM Sans', system-ui, sans-serif) !important; }
 
 /* 5. Blog posts. The posts stay Squarespace blog posts (written and edited in Squarespace, their bodies
       built as code blocks with their own styles). These rules restyle only what Squarespace draws around
