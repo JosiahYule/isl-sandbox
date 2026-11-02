@@ -14,7 +14,7 @@ const tel = (n) => `tel:+1${n.replaceAll('-', '')}`;
 const areaKey = (city) => areas.find((a) => a.label === city)?.key;
 const officeKey = (city) => brand.officePages && areaKey(city); // only ISL has a page per office
 // THREE BRANDS, ONE NETWORK: the three sister firms side by side, each logo linking to its site (the
-// sandbox previews here, the real sites in a live or Squarespace build). The one you're on is marked.
+// sandbox previews here, the real sites in a live or Squarespace build). The one you're on has a brighter outline.
 // Always in the same order on all three sites, so the family reads the same everywhere.
 const sandboxHref = { isl: '/isl-sandbox/', as: '/isl-sandbox/as/', ads: '/isl-sandbox/ads/' };
 const network = [
@@ -37,13 +37,11 @@ const network = [
               <div class="net-card" aria-current="true">
                 <img class:list={[n.invert && 'invert']} src={n.logo} alt={n.name} style={`--net-h:${n.h}px`} loading="lazy" />
                 <span class="net-what">{n.what}</span>
-                <span class="net-here">You’re here</span>
               </div>
             ) : (
               <a class="net-card" href={n.href}>
                 <img class:list={[n.invert && 'invert']} src={n.logo} alt={n.name} style={`--net-h:${n.h}px`} loading="lazy" />
                 <span class="net-what">{n.what}</span>
-                <span class="net-go">Visit <span class="visually-hidden">{n.name}</span> site <span aria-hidden="true">→</span></span>
               </a>
             )}
           </li>
@@ -92,16 +90,12 @@ const network = [
   .net-title { margin: 0; font-size: var(--fs-h3); font-weight: var(--fw-bold); line-height: 1.2; letter-spacing: -0.01em; color: #fff; }
   .net-title span { display: block; color: var(--on-dark-soft); font-weight: var(--fw-text); }
   .net-list { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--s4); }
-  .net-card { display: grid; grid-template-rows: 56px auto 1fr; gap: var(--s3); height: 100%; box-sizing: border-box; padding: var(--s5); border: 1px solid var(--line-dark); color: var(--on-dark-soft); text-decoration: none !important; transition: border-color 0.2s var(--ease), background-color 0.2s var(--ease); }
+  .net-card { display: grid; grid-template-rows: 56px auto; gap: var(--s3); height: 100%; box-sizing: border-box; padding: var(--s5); border: 1px solid var(--line-dark); color: var(--on-dark-soft); text-decoration: none !important; transition: border-color 0.2s var(--ease), background-color 0.2s var(--ease); }
   a.net-card:hover { border-color: rgb(255 255 255 / 0.5); background: rgb(255 255 255 / 0.04); }
   .here .net-card { border-color: rgb(255 255 255 / 0.5); }
   .net-card img { align-self: center; height: var(--net-h); width: auto; max-width: 100%; object-fit: contain; object-position: left center; }
   .net-card img.invert { filter: brightness(0) invert(1); }
   .net-what { font-size: var(--fs-small); line-height: 1.45; }
-  .net-go, .net-here { align-self: end; font-size: var(--fs-small); font-weight: var(--fw-bold); color: #fff; }
-  .net-go span[aria-hidden] { display: inline-block; transition: transform 0.2s var(--ease); }
-  a.net-card:hover .net-go span[aria-hidden] { transform: translateX(3px); }
-  .net-here { color: var(--on-dark-soft); font-weight: var(--fw-text); }
 
   .offices {
     display: grid; grid-template-columns: repeat(var(--n), 1fr);
@@ -141,8 +135,7 @@ const network = [
     .network { grid-template-columns: 1fr; }
     .net-list { grid-template-columns: 1fr; gap: var(--s3); }
     /* Phones: logo on the left, the line and the link beside it */
-    .net-card { grid-template-columns: 7.5rem 1fr; grid-template-rows: auto auto; align-items: center; gap: var(--s1) var(--s4); padding: var(--s4); }
-    .net-card img { grid-row: 1 / 3; height: calc(var(--net-h) * 0.75); }
-    .net-go, .net-here { align-self: start; }
+    .net-card { grid-template-columns: 7.5rem 1fr; grid-template-rows: auto; align-items: center; gap: var(--s1) var(--s4); padding: var(--s4); }
+    .net-card img { height: calc(var(--net-h) * 0.75); }
   }
 </style>
