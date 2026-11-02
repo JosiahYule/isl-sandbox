@@ -3,20 +3,54 @@
 // The offices row is the most useful thing in a staffing footer: a direct line to each office.
 // Just the city and its phone: the addresses are on the office pages and Contact, and the jobs near
 // each office are in the Find work menu.
-import { brand, nav, offices, social, images, links } from '../data/site.js';
+import { brand, nav, offices, social, images } from '../data/site.js';
 import { url } from '../lib/url.js';
 import { asset } from '../lib/img.js';
 import { areas } from '../data/areas.js';
+import { brands } from '../brands/index.js';
 const { offices: showOffices = true } = Astro.props;
 const year = new Date().getFullYear(); // never goes stale
 const tel = (n) => `tel:+1${n.replaceAll('-', '')}`;
 const areaKey = (city) => areas.find((a) => a.label === city)?.key;
 const officeKey = (city) => brand.officePages && areaKey(city); // only ISL has a page per office
-const [logoW, logoH] = brand.logoSize ?? [190, 46];
-const sandboxSites = [{ key: 'isl', name: 'Integrated Staffing', href: '/isl-sandbox/' }, { key: 'as', name: 'Accountant Staffing', href: '/isl-sandbox/as/' }, { key: 'ads', name: 'Administrative Staffing', href: '/isl-sandbox/ads/' }];
+// THREE BRANDS, ONE NETWORK: the three sister firms side by side, each logo linking to its site (the
+// sandbox previews here, the real sites in a live or Squarespace build). The one you're on is marked.
+// Always in the same order on all three sites, so the family reads the same everywhere.
+const sandboxHref = { isl: '/isl-sandbox/', as: '/isl-sandbox/as/', ads: '/isl-sandbox/ads/' };
+const network = [
+  { key: 'isl', what: 'Contract and permanent staffing, every industry', h: 48 },
+  { key: 'as', what: 'Accounting and finance professionals', h: 34 },
+  { key: 'ads', what: 'Office and administrative professionals', h: 46 },
+].map((n) => {
+  const b = brands[n.key].brand;
+  return { ...n, name: b.name, href: __LIVE__ ? b.siteUrl : sandboxHref[n.key], logo: asset(b.logoWhite ?? b.logo), invert: !b.logoWhite, here: n.key === brand.key };
+});
 ---
 <footer class="footer on-dark">
   <div class="wrap">
+    <section class="network" aria-labelledby="network-title">
+      <h2 id="network-title" class="net-title">Three brands. <span>One network.</span></h2>
+      <ul class="net-list">
+        {network.map((n) => (
+          <li class:list={[n.here && 'here']}>
+            {n.here ? (
+              <div class="net-card" aria-current="true">
+                <img class:list={[n.invert && 'invert']} src={n.logo} alt={n.name} style={`--net-h:${n.h}px`} loading="lazy" />
+                <span class="net-what">{n.what}</span>
+                <span class="net-here">You’re here</span>
+              </div>
+            ) : (
+              <a class="net-card" href={n.href}>
+                <img class:list={[n.invert && 'invert']} src={n.logo} alt={n.name} style={`--net-h:${n.h}px`} loading="lazy" />
+                <span class="net-what">{n.what}</span>
+                <span class="net-go">Visit <span class="visually-hidden">{n.name}</span> site <span aria-hidden="true">→</span></span>
+              </a>
+            )}
+          </li>
+        ))}
+      </ul>
+    </section>
+
     {showOffices && <div class="offices" style={`--n:${offices.length}`}>
       {offices.map((o) => (
         <div class="office">
@@ -28,16 +62,11 @@ const sandboxSites = [{ key: 'isl', name: 'Integrated Staffing', href: '/isl-san
 
     <div class:list={['lower', !showOffices && 'lower--top']}>
       <div class="about">
-        <a class="flogo" href={url('/')} aria-label={`${brand.name} home`}>
-          <img class:list={[!brand.logoWhite && 'invert']} src={asset(brand.logoWhite ?? brand.logo)} alt="" width={logoW} height={logoH} loading="lazy" style={brand.footerLogoHeight ? `--flogo-h:${brand.footerLogoHeight}px` : undefined} onerror="this.parentElement.classList.add('no-img'); this.remove();" />
-          <span class="fword" aria-hidden="true">{brand.wordmark[0]}<br />{brand.wordmark[1]}</span>
-        </a>
         <p>{brand.footerAbout ?? `${brand.name} has connected employers and job seekers since ${brand.since}. Locally owned and operated.`}</p>
         {images.badgeBestPlaces && <div class="badges">
           <img src={asset(images.badgeBestPlaces)} alt="Best Places to Work" width="64" height="64" loading="lazy" onerror="this.remove()" />
           <img src={asset(images.badgeCor)} alt="COR certified" width="64" height="64" loading="lazy" onerror="this.remove()" />
         </div>}
-        {links.sister && <p class="sister">Hiring for {links.sister.what}? <a href={links.sister.href}>{links.sister.name}</a></p>}
       </div>
       <nav aria-label="Footer">
         <ul>{nav.map((i) => <li><a href={url(i.href)}>{i.label}</a></li>)}</ul>
@@ -48,8 +77,6 @@ const sandboxSites = [{ key: 'isl', name: 'Integrated Staffing', href: '/isl-san
     <!-- TODO: confirm this wording with ISL before going live -->
     <p class="scam"><strong>Recruitment scam alert.</strong> {brand.name} never charges job seekers a fee and never asks for banking details to apply. If someone claiming to be us does, call your nearest office.</p>
     <p class="legal">© <span data-isl-year>{year}</span> {brand.name}. All rights reserved. <a href={url(brand.key === 'isl' ? '/privacy/' : '/privacy-policy/')}>Privacy</a> <a href={url('/terms/')}>Terms</a> <a href={url('/accessibility/')}>Accessibility</a></p>
-    <!-- Sandbox only: jump between the three brands' previews. A live build leaves this out. -->
-    {!__LIVE__ && <p class="legal sandbox">Sandbox previews: {sandboxSites.map((b) => b.key === brand.key ? <span aria-current="page">{b.name}</span> : <a href={b.href}>{b.name}</a>)}</p>}
   </div>
 </footer>
 
@@ -59,6 +86,22 @@ const sandboxSites = [{ key: 'isl', name: 'Integrated Staffing', href: '/isl-san
   @media (max-width: 600px) { .footer { padding-bottom: calc(var(--s6) + 64px); } }
   .footer a { text-decoration: none; }
   .footer a:hover { text-decoration: underline; }
+
+  /* Three brands, one network: a quiet band at the top of the footer, three cards between hairlines */
+  .network { display: grid; grid-template-columns: minmax(12rem, 1fr) 3fr; gap: var(--s5) var(--s7); align-items: start; padding-bottom: var(--s7); } /* the offices row (or the lower row) below draws the dividing line */
+  .net-title { margin: 0; font-size: var(--fs-h3); font-weight: var(--fw-bold); line-height: 1.2; letter-spacing: -0.01em; color: #fff; }
+  .net-title span { display: block; color: var(--on-dark-soft); font-weight: var(--fw-text); }
+  .net-list { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--s4); }
+  .net-card { display: grid; grid-template-rows: 56px auto 1fr; gap: var(--s3); height: 100%; box-sizing: border-box; padding: var(--s5); border: 1px solid var(--line-dark); color: var(--on-dark-soft); text-decoration: none !important; transition: border-color 0.2s var(--ease), background-color 0.2s var(--ease); }
+  a.net-card:hover { border-color: rgb(255 255 255 / 0.5); background: rgb(255 255 255 / 0.04); }
+  .here .net-card { border-color: rgb(255 255 255 / 0.5); }
+  .net-card img { align-self: center; height: var(--net-h); width: auto; max-width: 100%; object-fit: contain; object-position: left center; }
+  .net-card img.invert { filter: brightness(0) invert(1); }
+  .net-what { font-size: var(--fs-small); line-height: 1.45; }
+  .net-go, .net-here { align-self: end; font-size: var(--fs-small); font-weight: var(--fw-bold); color: #fff; }
+  .net-go span[aria-hidden] { display: inline-block; transition: transform 0.2s var(--ease); }
+  a.net-card:hover .net-go span[aria-hidden] { transform: translateX(3px); }
+  .net-here { color: var(--on-dark-soft); font-weight: var(--fw-text); }
 
   .offices {
     display: grid; grid-template-columns: repeat(var(--n), 1fr);
@@ -76,16 +119,9 @@ const sandboxSites = [{ key: 'isl', name: 'Integrated Staffing', href: '/isl-san
     display: grid; grid-template-columns: 1.4fr 1fr; gap: var(--s7);
     margin-top: var(--s7); padding-top: var(--s6); border-top: 1px solid var(--line-dark);
   }
+  .about > p:first-child { margin-top: 0; }
   .lower--top { margin-top: 0; }
-  /* The logo file is dark; brightness(0) + invert(1) turns every colour in it to white for the dark footer */
-  .flogo { display: inline-block; margin-bottom: var(--s4); color: #fff; }
-  .flogo img { height: var(--flogo-h, 40px); width: auto; }
-  .flogo img.invert { filter: brightness(0) invert(1); }
-  .fword { display: none; font-weight: var(--fw-bold); font-size: var(--fs-h3); line-height: 1; letter-spacing: -0.01em; }
-  .flogo:global(.no-img) .fword { display: block; }
   .about p { color: var(--on-dark-soft); max-width: 42ch; }
-  .sister { margin-top: var(--s4); }
-  .sister a { color: #fff; font-weight: var(--fw-bold); text-decoration: underline !important; text-underline-offset: 0.2em; }
   .badges { display: flex; gap: var(--s4); margin-top: var(--s5); }
   .badges img { height: 56px; width: auto; }
   nav { display: grid; grid-template-columns: 1fr 1fr; gap: var(--s5); }
@@ -95,8 +131,6 @@ const sandboxSites = [{ key: 'isl', name: 'Integrated Staffing', href: '/isl-san
   .legal { margin-top: var(--s4); font-size: var(--fs-tiny); color: var(--on-dark-soft); }
   .legal a { color: var(--on-dark-soft); margin-left: var(--s4); text-decoration: underline !important; text-underline-offset: 0.2em; }
   .legal a:hover { color: #fff; }
-  .sandbox { margin-top: var(--s2); }
-  .sandbox span { margin-left: var(--s4); color: #fff; }
 
   @media (max-width: 900px) {
     /* Phones: two offices a row, city over phone */
@@ -104,5 +138,11 @@ const sandboxSites = [{ key: 'isl', name: 'Integrated Staffing', href: '/isl-san
     .office, .office + .office { padding: var(--s4) var(--s4) var(--s4) 0; border-left: 0; border-bottom: 1px solid var(--line-dark); }
     .office:nth-child(even) { padding-left: var(--s4); border-left: 1px solid var(--line-dark); }
     .lower { grid-template-columns: 1fr; gap: var(--s6); }
+    .network { grid-template-columns: 1fr; }
+    .net-list { grid-template-columns: 1fr; gap: var(--s3); }
+    /* Phones: logo on the left, the line and the link beside it */
+    .net-card { grid-template-columns: 7.5rem 1fr; grid-template-rows: auto auto; align-items: center; gap: var(--s1) var(--s4); padding: var(--s4); }
+    .net-card img { grid-row: 1 / 3; height: calc(var(--net-h) * 0.75); }
+    .net-go, .net-here { align-self: start; }
   }
 </style>
