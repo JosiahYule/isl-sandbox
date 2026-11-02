@@ -1,7 +1,6 @@
 // ACCOUNTANT STAFFING: the facts and words this brand's site is built from.
 // What it shares with Administrative Staffing (offices, terms, process) is in specialist.js.
 import { url } from '../lib/url.js';
-import { stock } from '../data/photos.js';
 import * as shared from './specialist.js';
 import { copy } from './copy/as.js';
 
@@ -29,16 +28,21 @@ export const brand = {
   //   navy   hsl(215 69% 19%) #0f2b52  links, buttons, headings
   //   blue   hsl(201 63% 55%) #44a2d5  borders and highlights
   //   orange hsl(23 65% 54%)  #d6783d  the logo's single dot
-  // Navy does the work ISL's near-black and blue do: buttons, links and the dark sections.
-  // Blue marks permanent work and the big figures; on white it's deepened to #1d78ae so text
-  // passes contrast (4.8:1), and the site's own blue is used on navy, where it reads (5.0:1).
+  // AS and ADS share one scheme (their live heroes pair a blue "For employers" button with an orange
+  // "For job seekers" one), each in its own shades:
+  //   navy   buttons, links, text and the dark sections
+  //   blue   permanent work, the big figures, the maps; deepened to #1d78ae on white for text (4.8:1)
+  //   orange temporary work, the closing band and the job seekers' button; deepened to #b4561c on
+  //          white for text (4.9:1); the band is a lighter #e8853f with navy text (5.3:1)
   colors: {
     accent: '#0f2b52', 'accent-deep': '#081a33', 'accent-tint': '#e6f1f9', 'accent-on-dark': '#44a2d5',
     direct: '#1d78ae', 'map-land': '#44a2d5',
+    contract: '#b4561c', 'contract-on-dark': '#e8853f', bright: '#e8853f', 'bright-ink': '#0f2b52',
     dark: '#0f2b52', 'dark-raised': '#173a66', 'line-dark': '#2a4670', 'on-dark-soft': '#b8c4d6', wash: 'rgb(9 26 50)',
     ink: '#14233a', 'line-strong': '#14233a', 'ink-soft': '#556070',
     mist: '#f1f6fa', 'mist-deep': '#e4edf5',
   },
+  ctaTone: 'bright', // the closing band in orange, as on ADS
   assistant: false, // the job assistant chat: PAUSED (see src/brands/isl.js)
   officePages: false,
 };
@@ -51,7 +55,8 @@ export const field = {
 };
 
 export const images = {
-  hero: { ...stock.interview, position: 'center 40%' }, // TODO: AS's own photography
+  // The live homepage's own hero photo (accountantstaffing.ca, read November 2, 2026), framed the same way
+  hero: { src: 'https://images.squarespace-cdn.com/content/v1/69777a61171eae1f3b4946ce/f04bdf57-5a8e-4344-9ffe-b445f1aacab4/as-banner-home2.jpg', position: '68% 56%' },
 };
 
 export const links = {

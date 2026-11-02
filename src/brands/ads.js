@@ -1,7 +1,6 @@
 // ADMINISTRATIVE STAFFING: the facts and words this brand's site is built from.
 // What it shares with Accountant Staffing (offices, terms, process) is in specialist.js.
 import { url } from '../lib/url.js';
-import { stock } from '../data/photos.js';
 import * as shared from './specialist.js';
 import { copy } from './copy/ads.js';
 
@@ -35,7 +34,10 @@ export const brand = {
   // passes contrast (5.1:1). The site's own orange fills the closing band, with dark navy text (6.6:1).
   colors: {
     accent: '#21356e', 'accent-deep': '#152452', 'accent-tint': '#fdf1e6', 'accent-on-dark': '#f08624',
-    direct: '#b84f00', 'map-land': '#21356e', bright: '#f08624', 'bright-ink': '#111b37',
+    // The same scheme as AS (see src/brands/as.js): blue for permanent (the live site's button blue,
+    // 5.0:1 on white), orange for temporary (#b84f00 for text, 5.1:1) and the closing band
+    direct: '#0070ca', 'map-land': '#21356e', bright: '#f08624', 'bright-ink': '#111b37',
+    contract: '#b84f00', 'contract-on-dark': '#f08624',
     dark: '#111b37', 'dark-raised': '#1b2950', 'line-dark': '#2a3866', 'on-dark-soft': '#b9c0d4', wash: 'rgb(12 19 40)',
     ink: '#111b37', 'line-strong': '#111b37', 'ink-soft': '#585e6e',
     mist: '#fcf5ee', 'mist-deep': '#f8e8d8',
@@ -55,7 +57,8 @@ export const field = {
 };
 
 export const images = {
-  hero: { ...stock.halifax, position: 'center 55%' }, // TODO: ADS's own photography
+  // The live homepage's own hero photo (administrativestaffing.ca, read November 2, 2026), framed the same way
+  hero: { src: 'https://images.squarespace-cdn.com/content/v1/698340e14c39497eab947c09/a4137e47-6b79-47d0-b899-a4a4fe05a98e/ADS-banner-home.jpg', position: '68% 26%' },
 };
 
 export const links = {

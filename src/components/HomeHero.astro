@@ -9,10 +9,13 @@
 //           none leaves the row out
 //   long:   a longer headline (AS and ADS keep their live sites' wording): a size smaller, and it wraps
 //   findJob: the label over the job search (default: "Looking for work? Search N open jobs")
+//   ctas:   in place of the search, two buttons, one per audience (AS and ADS, as on their live heroes):
+//           [{ label, href, tone: 'blue' | 'orange' }]. The headline's first line is then light and the
+//           second bold, as the live sites set it, and the lead can be left out.
 import Photo from './Photo.astro';
 import { jobs, provinces } from '../data/jobs.js';
 import { url } from '../lib/url.js';
-const { photo, lines, lead, latest = [], long = false, findJob } = Astro.props;
+const { photo, lines, lead, latest = [], long = false, findJob, ctas } = Astro.props;
 // Postings often carry the client or a code after a dash ("Construction Manager - NB Power",
 // "... Representative – Efficiency Group –CD"): the row shows the job, the posting has the rest
 const shortTitle = (t) => String(t).split(/\s+[-–—]\s*|\s*[-–—]\s+/)[0].replace(/\s*\/\s*/g, ' / ').trim();
@@ -22,7 +25,7 @@ const near = [...new Set(jobs.map((j) => j.province).filter(Boolean))]
   .map((code) => ({ code, label: ({ PE: 'PEI' })[code] || provinces[code] || code, n: jobs.filter((j) => j.province === code).length }))
   .sort((a, b) => b.n - a.n);
 ---
-  <section class:list={['hero', long && 'hero--long']} data-hero-under>
+  <section class:list={['hero', long && 'hero--long', ctas && 'hero--ctas']} data-hero-under>
     <div class="hero-bg" data-animate>
       <Photo src={photo.src} alt="" ratio="16/9" sizes="100vw" position={photo.position} eager />
     </div>
@@ -31,7 +34,10 @@ const near = [...new Set(jobs.map((j) => j.province).filter(Boolean))]
         <h1 class="hero-title">
           {lines.map((l, i) => <>{i > 0 && " "}<span class="line">{l}</span></>)}
         </h1>
-        <p class="hero-lead">{lead}</p>
+        {lead && <p class="hero-lead">{lead}</p>}
+        {ctas ? (
+          <p class="ctas">{ctas.map((c) => <a class:list={['cta-btn', `cta-btn--${c.tone}`]} href={url(c.href)}>{c.label}</a>)}</p>
+        ) : (<>
         <form class="search" action={url('/find-work/')} method="get" role="search" data-isl-live="search">
           <label for="hero-q">{findJob ? `${findJob} Search ${jobs.length} open jobs` : `Looking for work? Search ${jobs.length} open jobs`}</label>
           <div class="search-bar">
@@ -41,6 +47,7 @@ const near = [...new Set(jobs.map((j) => j.province).filter(Boolean))]
           {near.length > 1 && <p class="near">Or browse {near.map((a, i) => <>{i > 0 && ' '}<a href={url(`/find-work/?province=${a.code}`)}>{a.label} <span>{a.n}</span></a></>)}</p>}
         </form>
         <p class="employer">Hiring? <a class="employer-go" href={url('/hire/')} data-cta-placement="home_hero">Request talent <span aria-hidden="true">→</span></a></p>
+        </>)}
       </div>
     </div>
 
@@ -115,6 +122,20 @@ const near = [...new Set(jobs.map((j) => j.province).filter(Boolean))]
   .employer-go span { display: inline-block; transition: transform 0.2s var(--ease); }
   .employer-go:hover span { transform: translateX(3px); }
 
+  /* AS and ADS: the live sites' headline, a light first line and a bold second, and a button for each
+     audience: blue for employers, orange for job seekers (the two colours both brands share) */
+  .hero--ctas { min-height: min(88svh, calc(820px + var(--header-h))); }
+  .hero--ctas .hero-copy { max-width: 900px; }
+  .hero--ctas .hero-title { font-size: clamp(2.4rem, 1.2rem + 3.6vw, 4.6rem); line-height: 1.05; letter-spacing: -0.03em; }
+  .hero--ctas .line { display: block; white-space: normal; }
+  .hero--ctas .line:first-child { font-weight: var(--fw-light); }
+  .ctas { display: flex; flex-wrap: wrap; gap: var(--s3); margin: var(--s7) 0 0; }
+  .cta-btn { display: inline-flex; align-items: center; min-height: 52px; padding: 0 1.6rem; font-weight: var(--fw-bold); text-decoration: none; transition: filter 0.2s var(--ease), transform 0.2s var(--ease); }
+  .cta-btn:hover { filter: brightness(1.08); transform: translateY(-1px); }
+  .cta-btn:focus-visible { outline: 2px solid #fff; outline-offset: 3px; }
+  .cta-btn--blue { background: var(--direct); color: #fff; }
+  .cta-btn--orange { background: var(--bright, var(--accent)); color: var(--bright-ink, #fff); }
+
   /* The photo settles slowly from slightly enlarged */
   :global(.motion) .hero-bg :global(img) { transform: scale(1.08); transition: transform 2.6s var(--ease); }
   :global(.motion) .hero-bg.is-in :global(img) { transform: none; }
@@ -160,5 +181,8 @@ const near = [...new Set(jobs.map((j) => j.province).filter(Boolean))]
     .employer { margin-top: var(--s6); }
     /* AS and ADS: their lead restates the headline in four to nine lines on a phone */
     .hero--long .hero-lead { display: none; }
+    .hero--ctas { min-height: min(100svh, 700px); }
+    .ctas { flex-direction: column; align-items: stretch; }
+    .cta-btn { justify-content: center; }
   }
 </style>
