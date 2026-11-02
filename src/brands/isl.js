@@ -94,6 +94,38 @@ export const testimonials = [
   },
 ];
 
+// GOOGLE REVIEWS on the homepage (src/components/Reviews.astro): real reviews from ISL's Google
+// profile, in the reviewers' own words (quote: the featured size; short: beside it). Trims are at the
+// end of a sentence only. People appear as first name and last initial unless they signed with more.
+//   who: Employer or Job seeker, when the review makes it clear; '' shows just "Google review"
+//   url: where "Read them on Google" goes (TODO: the profile's own reviews link)
+export const reviews = {
+  count: '200+',
+  url: 'https://www.google.com/maps/search/?api=1&query=Integrated%20Staffing%20Limited',
+  items: [
+    {
+      name: 'Michelle, Charlottetown Bottle & Metal', who: 'Employer',
+      quote: 'On several occasions, they have been able to supply qualified team members the very same day, helping us meet our staffing needs quickly and efficiently. The staff at Integrated Staffing are professional, responsive, and easy to work with.',
+      short: 'On several occasions, they have been able to supply qualified team members the very same day, helping us meet our staffing needs quickly and efficiently.',
+    },
+    {
+      name: 'Katie M.', who: 'Job seeker',
+      quote: 'Very happy and impressed with Integrated Staffing. Very professional through the entire process and lovely to work with. They supported me from the first contact after submitting my resume, right up to being hired.',
+      short: 'Very happy and impressed with Integrated Staffing. Very professional through the entire process and lovely to work with.',
+    },
+    {
+      name: 'Justin P.', who: 'Employer',
+      quote: 'Integrated Staffing has been great to deal with. They understand your needs and find you the help needed to get the job done.',
+      short: 'Integrated Staffing has been great to deal with. They understand your needs and find you the help needed to get the job done.',
+    },
+    {
+      name: 'Mathieu M.', who: '',
+      quote: 'Great experience working with Zowie, Lisa & Steven! Professional, results oriented and experts in their field! Highly recommended!',
+      short: 'Great experience working with Zowie, Lisa & Steven! Professional, results oriented and experts in their field!',
+    },
+  ],
+};
+
 // Analytics: paste the Google Analytics 4 measurement ID here (e.g. 'G-XXXXXXX') to switch on
 // analytics and the consent banner (src/components/Analytics.astro). Empty = off, no cookies.
 export const analytics = { ga4: '' };

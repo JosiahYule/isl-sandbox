@@ -7,7 +7,7 @@ import HomeHero from '../../components/HomeHero.astro';
 import OfficesSection from '../../components/OfficesSection.astro';
 import CtaBand from '../../components/CtaBand.astro';
 import ToolCards from '../../components/ToolCards.astro';
-import Proof from '../../components/Proof.astro';
+import Reviews from '../../components/Reviews.astro';
 import WeRecruit from '../../components/WeRecruit.astro';
 import { photos } from '../../data/photos.js';
 import { brand, offices, social } from '../../data/site.js';
@@ -34,8 +34,8 @@ const latest = jobs.slice(0, 3);
   <!-- 3. WHERE WE ARE -->
   <OfficesSection lines={['Five offices,', 'covering Atlantic Canada.']} lead="Each office covers its whole province. Select one for its address and phone number." />
 
-  <!-- 4. PROOF: one client quote, with the review count beside it -->
-  <Proof index={1} />
+  <!-- 4. PROOF: real Google reviews, one featured, with the review count and two more beside it -->
+  <Reviews />
 
   <!-- 5. RECRUITMENT INTELLIGENCE: ISL's own tools (src/data/tools.js) -->
   <section class="section section--rule tools">
@@ -52,7 +52,7 @@ const latest = jobs.slice(0, 3);
 </Base>
 
 <style>
-  /* ---------- 4. Proof: see Proof.astro ---------- */
+  /* ---------- 4. Proof: see Reviews.astro ---------- */
 
   /* ---------- 5. Tools: see ToolCards.astro ---------- */
   @media (max-width: 860px) { .jobs-intro { justify-self: start; } }

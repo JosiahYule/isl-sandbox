@@ -12,6 +12,7 @@ export const links = current.links;
 export const images = current.images;
 export const stats = current.stats ?? [];
 export const testimonials = current.testimonials ?? [];
+export const reviews = current.reviews ?? null; // Google reviews (ISL; see Reviews.astro)
 export const social = current.social ?? [];
 // Public deployment settings can be supplied per brand without editing source or sharing secrets.
 const ga4 = { isl: import.meta.env.PUBLIC_ISL_GA4_ID, as: import.meta.env.PUBLIC_AS_GA4_ID, ads: import.meta.env.PUBLIC_ADS_GA4_ID };

@@ -1,0 +1,115 @@
+---
+// GOOGLE REVIEWS: one review large, two short ones beside it under the review count, and arrows that
+// step through them all. Real reviews from the brand's Google profile (src/brands/isl.js, reviews).
+// Without a script it shows the first three; with one, the arrows move the set along by one, so the
+// two beside the featured review are always the next two, never a repeat of it.
+//
+// <Reviews />   shown only for a brand with reviews (ISL today)
+import { reviews } from '../data/site.js';
+const items = reviews?.items ?? [];
+const label = (r) => (r.who ? `${r.who} · Google review` : 'Google review');
+const side = (r) => (r.who ? r.who : 'Google review');
+const at = (i) => items[i % items.length];
+const many = items.length > 3;
+---
+{items.length >= 3 && <section class="section reviews" aria-labelledby="reviews-title" data-reviews>
+  <h2 id="reviews-title" class="visually-hidden">Google reviews</h2>
+  <div class="wrap reviews-grid">
+    <figure class="featured" aria-live="polite" data-slot="0">
+      <p class="stars" role="img" aria-label="5 out of 5 stars">{[0, 1, 2, 3, 4].map(() => <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.5l2.9 6.1 6.6.8-4.9 4.6 1.3 6.6L12 17.3l-5.9 3.3 1.3-6.6-4.9-4.6 6.6-.8z" /></svg>)}</p>
+      <blockquote data-r="quote">“{at(0).quote}”</blockquote>
+      <figcaption>
+        <span class="initial" aria-hidden="true" data-r="initial">{at(0).name[0]}</span>
+        <span><strong data-r="name">{at(0).name}</strong><span class="who" data-r="label">{label(at(0))}</span></span>
+      </figcaption>
+      {many && <div class="pager">
+        <button type="button" class="arrow" aria-label="Previous review" data-step="-1"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M10 3 5 8l5 5" /></svg></button>
+        <button type="button" class="arrow" aria-label="Next review" data-step="1"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="m6 3 5 5-5 5" /></svg></button>
+        <span class="count" data-count>1 of {items.length}</span>
+      </div>}
+    </figure>
+
+    <aside class="side">
+      <div class="total">
+        <p class="figure total-n">{reviews.count}</p>
+        <p>five-star reviews on Google from clients and candidates.</p>
+        <a href={reviews.url} target="_blank" rel="noopener">Read them on Google <span aria-hidden="true">→</span></a>
+      </div>
+      {[1, 2].map((n) => (
+        <figure class="mini" data-slot={n}>
+          <blockquote data-r="short">“{at(n).short}”</blockquote>
+          <figcaption><strong data-r="name">{at(n).name}</strong> · <span data-r="side">{side(at(n))}</span></figcaption>
+        </figure>
+      ))}
+    </aside>
+  </div>
+  {many && <script type="application/json" data-reviews-list set:html={JSON.stringify(items.map((r) => ({ ...r, label: label(r), side: side(r) })))} />}
+</section>}
+
+<script>
+  // The arrows: move the whole set along by one (the featured review, then the next two beside it)
+  const box = document.querySelector<HTMLElement>('[data-reviews]');
+  const data = box?.querySelector('[data-reviews-list]');
+  if (box && data) {
+    const list = JSON.parse(data.textContent || '[]');
+    let at = 0;
+    const fill = (slot: Element, r: Record<string, string>) => {
+      slot.querySelectorAll<HTMLElement>('[data-r]').forEach((el) => {
+        const key = el.dataset.r!;
+        el.textContent = key === 'quote' || key === 'short' ? `“${r[key]}”` : key === 'initial' ? r.name[0] : r[key];
+      });
+    };
+    const show = () => {
+      box.querySelectorAll('[data-slot]').forEach((slot) => fill(slot, list[(at + Number((slot as HTMLElement).dataset.slot)) % list.length]));
+      box.querySelector('[data-count]')!.textContent = `${at + 1} of ${list.length}`;
+    };
+    box.querySelectorAll<HTMLButtonElement>('[data-step]').forEach((b) => b.addEventListener('click', () => {
+      at = (at + Number(b.dataset.step) + list.length) % list.length;
+      box.classList.add('is-turning');
+      // a short fade between reviews (none when the visitor prefers less motion)
+      const wait = matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 160;
+      setTimeout(() => { show(); box.classList.remove('is-turning'); }, wait);
+    }));
+  }
+</script>
+
+<style>
+  .reviews-grid { display: grid; grid-template-columns: 7fr 4fr; gap: clamp(2.5rem, 6vw, 5rem); align-items: stretch; }
+
+  /* The featured review: the light, large voice the old quote had, now with a name behind it */
+  .featured { margin: 0; display: flex; flex-direction: column; gap: var(--s6); }
+  .stars { display: flex; gap: 4px; margin: 0; }
+  .stars svg { width: 22px; height: 22px; fill: var(--accent); }
+  .featured blockquote { margin: 0; font-size: clamp(1.4rem, 1rem + 1.4vw, 2.1rem); font-weight: var(--fw-light); line-height: 1.35; letter-spacing: -0.015em; text-indent: -0.4em; max-width: 30em; }
+  .featured figcaption { display: flex; align-items: center; gap: var(--s4); }
+  .featured figcaption > span:last-child { display: grid; gap: 2px; }
+  .featured strong { font-weight: var(--fw-bold); }
+  .initial { flex: none; width: 52px; height: 52px; border-radius: 50%; display: grid; place-items: center; background: var(--accent-tint); color: var(--accent); font-weight: var(--fw-bold); font-size: 1.1rem; }
+  .who { color: var(--ink-soft); font-size: var(--fs-small); }
+
+  .pager { margin-top: auto; display: flex; align-items: center; gap: var(--s3); padding-top: var(--s2); }
+  .arrow { display: grid; place-items: center; width: 44px; height: 44px; padding: 0; border: 1.5px solid var(--ink); background: transparent; color: var(--ink); cursor: pointer; transition: background-color 0.2s var(--ease), color 0.2s var(--ease); }
+  .arrow:hover { background: var(--ink); color: #fff; }
+  .arrow svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.8; }
+  .count { margin-left: var(--s2); color: var(--ink-soft); font-size: var(--fs-small); font-variant-numeric: tabular-nums; }
+
+  /* Beside it: the review count, then the next two reviews, short */
+  .side { display: flex; flex-direction: column; gap: var(--s6); }
+  .total { border-top: 1.5px solid var(--ink); padding-top: var(--s4); display: grid; gap: var(--s2); color: var(--ink-soft); }
+  .total p { margin: 0; }
+  .total-n { color: var(--accent); font-size: var(--fs-figure-lg); }
+  .total a { justify-self: start; margin-top: var(--s2); font-weight: var(--fw-bold); font-size: var(--fs-small); color: var(--accent); text-decoration: underline; text-underline-offset: 0.25em; }
+  .mini { margin: 0; border-top: 1px solid var(--line); padding-top: var(--s4); display: grid; gap: var(--s3); }
+  .mini blockquote { margin: 0; font-weight: var(--fw-light); line-height: 1.5; }
+  .mini figcaption { font-size: var(--fs-small); color: var(--ink-soft); }
+  .mini strong { color: var(--ink); font-weight: var(--fw-bold); }
+
+  /* Turning to the next review: a quick fade */
+  .reviews :is(blockquote, figcaption) { transition: opacity 0.16s var(--ease); }
+  .reviews.is-turning :is(blockquote, figcaption) { opacity: 0; }
+
+  @media (max-width: 900px) {
+    .reviews-grid { grid-template-columns: 1fr; }
+    .pager { margin-top: 0; }
+  }
+</style>
