@@ -148,4 +148,15 @@ const near = [...new Set(jobs.map((j) => j.province).filter(Boolean))]
     .latest-all { grid-column: 2; grid-row: 1; }
     .latest-list { grid-column: 1 / -1; grid-template-columns: 1fr; gap: var(--s3); }
   }
+  /* Phones: just the headline, the line under it, the search and the way in for employers. The
+     province shortcuts and the latest openings are one tap away on Find work, and stacked here
+     they pushed the search to the middle of a crowded screen. */
+  @media (max-width: 600px) {
+    .near, .latest { display: none; }
+    .hero { min-height: min(100svh, 760px); }
+    .hero-inner { align-items: flex-end; padding-bottom: var(--s8); }
+    .hero-lead { margin-top: var(--s5); }
+    .search { margin-top: var(--s6); }
+    .employer { margin-top: var(--s6); }
+  }
 </style>
