@@ -38,7 +38,7 @@ export const brand = {
     accent: '#0f2b52', 'accent-deep': '#081a33', 'accent-tint': '#e6f1f9', 'accent-on-dark': '#44a2d5',
     direct: '#1d78ae', 'map-land': '#44a2d5',
     contract: '#b4561c', 'contract-on-dark': '#e8853f', bright: '#e8853f', 'bright-ink': '#0f2b52',
-    dark: '#0f2b52', 'dark-raised': '#173a66', 'line-dark': '#2a4670', 'on-dark-soft': '#b8c4d6', wash: 'rgb(9 26 50)',
+    dark: '#0f2b52', 'dark-raised': '#173a66', 'line-dark': '#2a4670', 'on-dark-soft': '#b8c4d6', // the hero photo's wash is ISL's near-black (tokens.css), on all three sites
     ink: '#14233a', 'line-strong': '#14233a', 'ink-soft': '#556070',
     mist: '#f1f6fa', 'mist-deep': '#e4edf5',
   },

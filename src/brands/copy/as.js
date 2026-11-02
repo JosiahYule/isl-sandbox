@@ -7,10 +7,11 @@
 // An FAQ answer can be a string, or a list of paragraphs where a nested list is a bulleted list.
 
 export const copy = {
-  // Homepage  (EXACT, except the search label and "Request talent", which are the new site's)
+  // Homepage  (EXACT, except the search label, "Request talent" and the shortened lead, which are the new site's)
   home: {
     h1: ['Specializing in the placement of', 'accounting and finance professionals.'],
-    lead: 'We are Atlantic Canada’s only recruitment firm specializing in the placement of Accounting and Finance professionals. Junior to senior level, temporary or permanent opportunities, we are here to help.',
+    // Shortened from the live site's paragraph (November 2026), to match ADS
+    lead: 'Temporary and permanent accounting and finance professionals for employers across Atlantic Canada, junior to senior.',
     findJob: 'Find your next job!',
     whyTitle: 'Why choose Accountant Staffing?',
     why: [

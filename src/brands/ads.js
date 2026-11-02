@@ -38,7 +38,7 @@ export const brand = {
     // 5.0:1 on white), orange for temporary (#b84f00 for text, 5.1:1) and the closing band
     direct: '#0070ca', 'map-land': '#21356e', bright: '#f08624', 'bright-ink': '#111b37',
     contract: '#b84f00', 'contract-on-dark': '#f08624',
-    dark: '#111b37', 'dark-raised': '#1b2950', 'line-dark': '#2a3866', 'on-dark-soft': '#b9c0d4', wash: 'rgb(12 19 40)',
+    dark: '#111b37', 'dark-raised': '#1b2950', 'line-dark': '#2a3866', 'on-dark-soft': '#b9c0d4', // the hero photo's wash is ISL's near-black (tokens.css), on all three sites
     ink: '#111b37', 'line-strong': '#111b37', 'ink-soft': '#585e6e',
     mist: '#fcf5ee', 'mist-deep': '#f8e8d8',
   },
