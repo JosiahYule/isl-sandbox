@@ -172,7 +172,9 @@ await talk('EN: stays English', ['warehouse jobs in halifax'], (r) => expect(r.m
 // ---- Accountant Staffing and Administrative Staffing: the same assistant, their own brand ----
 // They route to the office that covers the province, name their services "temporary" and
 // "permanent", and point work they don't do to the sister company that does.
-const sample = (b) => JSON.parse(readFileSync(new URL(`../../src/brands/jobs/${b}.json`, import.meta.url))).jobs;
+// A fixed copy of the AS and ADS jobs (saved October 20, 2026): the live Tracker feed changes daily,
+// so these conversations test against postings that don't.
+const sample = (b) => JSON.parse(readFileSync(new URL(`../../test/fixtures/jobs-${b}.json`, import.meta.url))).jobs;
 // Dates, lengths and their own words reach the request (October 2026 review)
 const row = (r, k) => r.summary?.find(([key]) => key === k)?.[1];
 const details = (r) => new URL(r.contact.action.href, 'http://x').searchParams.get('details');

@@ -1,6 +1,6 @@
 // JOBS for the brand being built.
-// ISL: real jobs from the Avionte feed (below). AS and ADS: a saved sample of recent postings
-// (src/brands/jobs/as.json, ads.json) until the board reads Tracker RMS.
+// ISL: real jobs from the Avionte feed (below). AS and ADS: their shared Tracker RMS feed, which
+// scripts/fetch-tracker.mjs saves to src/brands/jobs/as.json and ads.json before every build.
 //
 // ISL's jobs come from its Avionte feed.
 // One file feeds both the website and the job assistant: assistant/data/jobs-snapshot.json.
@@ -69,7 +69,7 @@ export const jobs = snapshot
       industry: BRAND === 'isl' ? industryOf(j.title) : '', // '' when it's none of ISL's six industry pages
       type: j.employment === 'Permanent' ? 'direct' : 'contract',
       typeLabel: j.employment === 'Permanent' ? services.direct.jobLabel : j.employment === 'Temp to perm' ? 'Temp to perm' : services.contract.jobLabel,
-      snippet: jobSummary(j.description, j.title) || `${j.note ? `${j.note} ` : ''}${j.employment === 'Permanent' ? 'permanent' : 'temporary'} role in ${j.city}, ${j.province}.`.replace(/^./, (c) => c.toUpperCase()),
+      snippet: jobSummary(j.description, j.title) || `${j.note ? `${j.note} ` : ''}${j.employment === 'Permanent' ? 'permanent' : 'temporary'} role in ${[j.city, j.province].filter(Boolean).join(', ')}.`.replace(/^./, (c) => c.toUpperCase()),
     };
   })
   // Newest first
