@@ -35,6 +35,8 @@ const blocks = !fromText ? parsed : parsed
   .map((b) => (b.type === 'details' ? { ...b, items: b.items.filter((i) => !PAY_LABEL.test(i.label)) } : b))
   .filter((b) => b.type !== 'details' || b.items.length);
 const where = [job.city, job.province].filter(Boolean).join(', ');
+// AS and ADS: no pay line unless the posting has one (Tracker postings don't carry pay yet)
+const payText = pay || job.payLabel || (brand.key === 'isl' ? 'Discussed at interview' : '');
 const longDate = (d) => new Date(d + 'T12:00:00').toLocaleDateString('en-CA', { month: 'long', day: 'numeric', year: 'numeric' });
 const area = areas.find((a) => a.key === job.area);
 
@@ -95,7 +97,7 @@ const schema = {
     <div class="wrap jp-grid">
       <aside class:list={['card', `card--${job.type}`]} aria-label="Job summary">
         <dl class="facts">
-          <div><dt>Pay</dt><dd>{pay || job.payLabel || 'Discussed at interview'}</dd></div>
+          {payText && <div><dt>Pay</dt><dd>{payText}</dd></div>}
           <div><dt>Type</dt><dd>{job.typeLabel}</dd></div>
           {job.posted && <div><dt>Posted</dt><dd><time datetime={job.posted}>{longDate(job.posted)}</time></dd></div>}
         </dl>
@@ -132,7 +134,7 @@ const schema = {
 
   <!-- Phones: once the summary's Apply button scrolls away, a bar keeps Apply one tap away -->
   <div class="applybar" data-applybar aria-hidden="true">
-    <p><span class="ab-title">{job.title}</span><span class="ab-pay">{pay || job.payLabel || 'Pay discussed at interview'}</span></p>
+    <p><span class="ab-title">{job.title}</span>{payText && <span class="ab-pay">{payText === 'Discussed at interview' ? 'Pay discussed at interview' : payText}</span>}</p>
     <a class="ab-go" href={job.applyUrl} tabindex="-1">Apply</a>
   </div>
 
