@@ -35,8 +35,8 @@ const svcs = [
 ];
 ---
 <Base description={`${c.lead}`} schema={orgSchema}>
-  <!-- 1. HERO -->
-  <HomeHero photo={images.hero} lines={c.h1} lead={c.lead} latest={latest} findJob={c.findJob} long />
+  <!-- 1. HERO (a short two-line tagline, like AS's, sets at ISL's size; a longer headline, like ADS's, a size smaller) -->
+  <HomeHero photo={images.hero} lines={c.h1} lead={c.lead} latest={latest} findJob={c.findJob} long={c.h1.join(' ').length > 40} />
 
   <!-- 2. WHY CHOOSE US, then the two services -->
   <section class="section">
