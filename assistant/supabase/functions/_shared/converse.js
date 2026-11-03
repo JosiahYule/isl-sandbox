@@ -88,7 +88,7 @@ export async function converse({ messages, context = {}, jobs, callModel, today 
   const usage = { input_tokens: 0, output_tokens: 0, cache_read_input_tokens: 0, cache_creation_input_tokens: 0, calls: 0 };
   const turn = [...conversation];
   let reply = "";
-  let said = ""; // the last words the model wrote, in case it ends on a tool call with nothing more to say
+  const said = []; // everything the model wrote this turn: words before a tool call ("Call 911 first") belong in the reply too
   try {
     for (let round = 0; round < MAX_TOOL_ROUNDS; round++) {
       const result = await callModel({ system: systemPrompt(today, pageMode, job), tools: TOOLS, messages: turn });
@@ -96,8 +96,8 @@ export async function converse({ messages, context = {}, jobs, callModel, today 
       for (const k of Object.keys(usage)) if (k !== "calls" && Number.isFinite(result?.usage?.[k])) usage[k] += result.usage[k];
       if (!Array.isArray(result?.content)) throw new Error("Invalid model response");
       const text = result.content.filter((b) => b.type === "text").map((b) => b.text).join("\n").trim();
-      if (text) said = text;
-      if (result.stop_reason !== "tool_use") { reply = text || said; break; }
+      if (text && !said.includes(text)) said.push(text);
+      if (result.stop_reason !== "tool_use") { reply = said.join("\n\n"); break; }
       turn.push({ role: "assistant", content: result.content });
       const toolResults = result.content.filter((b) => b.type === "tool_use").map((b) => {
         trace.push({ tool: b.name, input: b.input });
@@ -108,7 +108,7 @@ export async function converse({ messages, context = {}, jobs, callModel, today 
         }
       });
       turn.push({ role: "user", content: toolResults });
-      if (round === MAX_TOOL_ROUNDS - 1) reply = text || (lang === "fr" ? "Désolé, je n’ai pas réussi. Pouvez-vous reformuler?" : "Sorry, I got stuck there. Could you say that another way?");
+      if (round === MAX_TOOL_ROUNDS - 1) reply = said.join("\n\n") || (lang === "fr" ? "Désolé, je n’ai pas réussi. Pouvez-vous reformuler?" : "Sorry, I got stuck there. Could you say that another way?");
     }
   } catch {
     // No model, no reply: the offices instead, never an empty error
