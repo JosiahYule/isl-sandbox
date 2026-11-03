@@ -206,7 +206,7 @@ export const TOOLS = [
   },
   {
     name: "list_offices",
-    description: "Show every ISL office with its phone number and address as a card, with Call and Directions buttons. Use when someone needs a person and you don't know which office (an injury, a pay or T4 question, 'can I talk to someone'), or asks where the offices are.",
+    description: "Show every ISL office with its phone number and address as a card, with Call and Directions buttons. Use when someone needs a person and you don't know which office (an injury, a pay or T4 question, 'can I talk to someone'), or asks where the offices are. If they named a place, or are an employer, use find_contact instead: a named person beats a switchboard.",
     input_schema: { type: "object", properties: {} },
   },
   {
