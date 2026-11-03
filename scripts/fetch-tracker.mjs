@@ -21,6 +21,16 @@ import { stripHtml } from '../assistant/supabase/functions/_shared/jobs.js';
 const FIELDS = 'reference,title,location,city,state,worktype,sector,publishdate,description,salaryfrom,salaryto,salaryper,joblink';
 export const TRACKER_URL = `https://evoportalus.tracker-rms.com/AccountingStaffingAndAdministrativeStaffing/jobs?output=json&limit=500&fields=${FIELDS}`;
 
+const REGISTER = 'https://evoportalus.tracker-rms.com/Resource/Register/?db=AccountingStaffingAndAdministrativeStaffing&jobcode=';
+
+// Tracker sends a description either as text or wrapped as { "#cdata-section": "<p>...</p>" }
+export function descriptionOf(d) {
+  if (!d) return '';
+  if (typeof d === 'string') return d;
+  if (typeof d === 'object') return String(d['#cdata-section'] ?? d['#text'] ?? Object.values(d).find((v) => typeof v === 'string') ?? '');
+  return '';
+}
+
 const SITES = { as: 'https://www.accountantstaffing.ca', ads: 'https://www.administrativestaffing.ca' };
 const PROVINCES = { NS: 'Nova Scotia', NB: 'New Brunswick', PE: 'Prince Edward Island', NL: 'Newfoundland and Labrador',
   QC: 'Quebec', ON: 'Ontario', MB: 'Manitoba', SK: 'Saskatchewan', AB: 'Alberta', BC: 'British Columbia', YT: 'Yukon', NT: 'Northwest Territories', NU: 'Nunavut' };
@@ -87,8 +97,10 @@ export function toJob(raw) {
   const id = String(raw.reference || '').trim();
   const place = placeOf(raw.location, raw.city, raw.state);
   const kind = kindOf(raw.worktype);
-  // Always the brand's own job page (the live sites' Tracker job page), never Tracker's portal link
+  // The brand's own job page (what the live sites link to), and Tracker's application form, which
+  // takes the job's number without "JOB-" (the same link the live job pages' Apply button uses)
   const link = `${SITES[brand]}/job-details?jobcode=${encodeURIComponent(id)}`;
+  const apply = `${REGISTER}${encodeURIComponent(id.replace(/^JOB-/i, ''))}`;
   return {
     brand,
     job: {
@@ -103,9 +115,9 @@ export function toJob(raw) {
       office: '',
       pay: payOf(raw),
       posted: dateOf(raw.publishdate),
-      description: raw.description ? stripHtml(raw.description) : '',
+      description: stripHtml(descriptionOf(raw.description)),
       viewUrl: link,
-      applyUrl: link,
+      applyUrl: apply,
       note: [kind.note, place.note].filter(Boolean).join(', '),
     },
   };

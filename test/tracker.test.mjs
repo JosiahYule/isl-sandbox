@@ -1,7 +1,7 @@
 // The AS/ADS Tracker RMS feed: its wrapping, its places, and which brand each job goes to.
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { rowsIn, toJob, placeOf, dateOf, payOf, brandOf } from '../scripts/fetch-tracker.mjs';
+import { rowsIn, toJob, placeOf, dateOf, payOf, brandOf, descriptionOf } from '../scripts/fetch-tracker.mjs';
 
 test('finds the jobs inside Tracker\'s { Jobs: { Job: [...] } } wrapping, including a single job', () => {
   assert.equal(rowsIn({ Jobs: { Job: [{ title: 'A', reference: '1' }, { title: 'B', reference: '2' }] } }).length, 2);
@@ -32,4 +32,14 @@ test('dates, pay and job types', () => {
   assert.equal(job.employment, 'Temporary / contract');
   assert.equal(job.note, 'Fixed term');
   assert.equal(job.viewUrl, 'https://www.administrativestaffing.ca/job-details?jobcode=JOB-1');
+  assert.equal(job.applyUrl, 'https://evoportalus.tracker-rms.com/Resource/Register/?db=AccountingStaffingAndAdministrativeStaffing&jobcode=1');
+});
+
+test('descriptions arrive as text or wrapped in #cdata-section, never as [object Object]', () => {
+  assert.equal(descriptionOf({ '#cdata-section': '<p>Hi</p>' }), '<p>Hi</p>');
+  assert.equal(descriptionOf('<p>Hi</p>'), '<p>Hi</p>');
+  assert.equal(descriptionOf(undefined), '');
+  const { job } = toJob({ reference: 'JOB-2', title: 'Controller', location: 'Halifax, NS', sector: 'Accountancy', description: { '#cdata-section': '<p><strong>About the role</strong></p><ul><li>Lead month-end</li></ul>' } });
+  assert.match(job.description, /About the role/);
+  assert.doesNotMatch(job.description, /object Object|<p>/);
 });
