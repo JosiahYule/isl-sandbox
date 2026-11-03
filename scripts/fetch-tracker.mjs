@@ -110,11 +110,21 @@ export function toJob(raw) {
   };
 }
 
+// Tracker wraps the list as { Jobs: { Job: [ ... ] } } (converted from its XML), and a single job
+// may come as one object, not a list of one. Find the job rows whatever the wrapping.
+export function rowsIn(data) {
+  if (Array.isArray(data)) return data.filter((x) => x && typeof x === 'object');
+  if (!data || typeof data !== 'object') return [];
+  if ('reference' in data || 'title' in data) return [data];
+  for (const v of Object.values(data)) { const found = rowsIn(v); if (found.length) return found; }
+  return [];
+}
+
 export async function refreshTracker({ url = TRACKER_URL, out = { as: 'src/brands/jobs/as.json', ads: 'src/brands/jobs/ads.json' }, fetchFeed = fetch } = {}) {
   const res = await fetchFeed(url, { signal: AbortSignal.timeout(30000) });
   if (!res.ok) throw new Error(`feed answered ${res.status}`);
   const data = await res.json();
-  const rows = Array.isArray(data) ? data : data.jobs || data.Jobs || data.data || [];
+  const rows = rowsIn(data);
   const jobs = rows.map(toJob).filter(({ job }) => job.id && job.title);
   if (!jobs.length) throw new Error('feed returned no jobs');
   const fields = [...new Set(rows.flatMap((r) => Object.keys(r || {})))];
