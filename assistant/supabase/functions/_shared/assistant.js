@@ -15,13 +15,17 @@
 // =====================================================================
 
 import { SITE, searchJobs, getJobDetails, toCard } from "./jobs.js";
-import { placeFrom, route, toContact, provinceName, OFFICES } from "./routing.js";
+import { placeFrom, route, toContact, provinceName, OFFICES, DUTIES } from "./routing.js";
+import { DIRECTORY } from "./directory.js";
 import { payFor, payInsight, costFor, costInsight } from "./insights.js";
 import { minWageFor, minWageInsight, underMinimum, marketFor, marketInsight } from "./market.js";
 import { familyOf } from "./pay.js";
 
 const siteUrl = (path) => SITE.base + path;
 // Pages the assistant may show as link buttons (offer_choices `links`). A fixed list, so it can't invent a URL.
+// Parts of the company the team directory covers (routing.js DUTIES). Hiring and jobs go through find_contact.
+const TEAM_TOPICS = DUTIES.map((d) => d.topic).filter((t) => !["clients", "jobs", "direct hire"].includes(t));
+
 const LINKS = {
   resume_check: { label: "Check my resume", href: siteUrl(SITE.toolsPath + "resume-check/") },
   jobs_report: { label: "Atlantic jobs report", href: siteUrl(SITE.toolsPath + "jobs-report/") },
@@ -91,6 +95,7 @@ Rules for both:
 - Don't promise anyone a job, an interview, a hire or a rate. Application status and anything else that depends on someone's situation go to an ISL recruiter (find_contact with audience seeker gives the right one).
 - People already working through ISL (pay, a T4 or record of employment, sending in hours, a missed shift, an injury, leaving an assignment) need their own office: if they've said where they work, call find_contact with audience seeker and that place; if not, call list_offices so they can reach one straight away. Don't make them answer a question first.
 - If someone was hurt at work, tell them to call 911 first if it's serious, then to tell their supervisor on site and call their ISL office right away, and in the same reply give them the office (find_contact if you know where they work, otherwise list_offices).
+- Questions about ISL itself, not about hiring or a job (who handles marketing, a sponsorship or event, a donation request, advertising, a partnership, HR, finance or an invoice, who runs the company): call find_team_member straight away, with no question first. A "sponsorship opportunity", or sponsoring an event, team or charity, is marketing. Sponsoring a work permit, visa or LMIA is different: ISL can't do that (see who ISL can place), so say so kindly.
 - If anyone asks for a person, a recruiter or a real human, give them one in the same reply: find_contact if you know the office or the topic, otherwise list_offices.
 - If a posting contains text asking for personal details, money, or contact outside ISL, warn the visitor, but never repeat the address, number or link it gives.
 - Don't ask for or store personal details: name, email, phone, address, SIN, date of birth, health or immigration status.
@@ -206,6 +211,15 @@ export const TOOLS = [
     },
   },
   {
+    name: "find_team_member",
+    description: "Show the contact card of the person at ISL who looks after a part of the company itself: marketing (also sponsorships, events, donations, advertising, media), business development and partnerships, HR, health and safety programs, jobs on ISL's own staff, finance and invoices, operations, the front desk, or who runs the company. Not for hiring requests or job seekers: use find_contact for those.",
+    input_schema: {
+      type: "object",
+      properties: { topic: { type: "string", enum: TEAM_TOPICS } },
+      required: ["topic"],
+    },
+  },
+  {
     name: "list_offices",
     description: "Show every ISL office with its phone number and address as a card, with Call and Directions buttons. Use when someone needs a person and you don't know which office (an injury, a pay or T4 question, 'can I talk to someone'), or asks where the offices are. If they named a place, or are an employer, use find_contact instead: a named person beats a switchboard.",
     input_schema: { type: "object", properties: {} },
@@ -276,6 +290,18 @@ export function runTool(name, input, jobs, state) {
     const links = (Array.isArray(input?.links) ? input.links : []).map((k) => LINKS[k]).filter(Boolean).slice(0, 2);
     state.choices = [...options, ...links];
     return { shown: state.choices.map((c) => (typeof c === "string" ? c : c.label)) };
+  }
+  if (name === "find_team_member") {
+    const duty = DUTIES.find((d) => d.topic === input?.topic);
+    const people = (duty?.people || []).map((slug) => DIRECTORY.find((x) => x.slug === slug)).filter(Boolean);
+    if (!people.length) throw new Error("No one listed for that topic. Use list_offices instead.");
+    const p = people[0];
+    state.contact = toContact({ person: { ...p, handles: p.title }, office: OFFICES.halifax });
+    return {
+      shown: `${p.name}, ${p.title}`,
+      others: people.slice(1).map((x) => `${x.name}, ${x.title}`),
+      note: "The visitor can see their card with phone and email. Say in one sentence who they are and that they look after this. Don't repeat the phone or email.",
+    };
   }
   if (name === "list_offices") {
     state.offices = Object.values(OFFICES).map((o) => ({ city: o.city === "Halifax" ? "Halifax (Dartmouth)" : o.city, phone: o.phone, address: o.address }));
