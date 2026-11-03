@@ -1,0 +1,74 @@
+# TEST THE AI CHAT: plays the 33 test conversations (assistant/evals/cases.mjs) against Claude and
+# scores them. Runs only when started by hand: repo > Actions > "Test the AI chat" > Run workflow.
+#
+# Needs one secret (repo Settings > Secrets and variables > Actions > New repository secret):
+#   ANTHROPIC_API_KEY   a key from the Claude Console, on an account with a spend limit set
+#
+# The key stays in GitHub: it's never printed, never committed, and never leaves this run except
+# to call the Claude API. The scores and the cost appear on the run's summary page, and the full
+# results (every reply) are saved as a download on the run (chat-test-results).
+name: Test the AI chat
+
+on:
+  workflow_dispatch:
+    inputs:
+      model:
+        description: Which model to test
+        type: choice
+        options: [claude-haiku-5-5, claude-sonnet-5-5]
+        default: claude-haiku-5-5
+      repeat:
+        description: Times to play each conversation (AI answers vary a little run to run)
+        type: choice
+        options: ['1', '2', '3']
+        default: '1'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: chat-test
+  cancel-in-progress: false
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .node-version
+      - name: Check the key is set
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          if [ -z "$ANTHROPIC_API_KEY" ]; then
+            echo "::error::Add the ANTHROPIC_API_KEY secret first (Settings > Secrets and variables > Actions)."
+            exit 1
+          fi
+      - name: Play the conversations
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          set -o pipefail
+          node assistant/evals/run.mjs --target ai --model "${{ inputs.model }}" --repeat "${{ inputs.repeat }}" | tee chat-test.txt
+      - name: Summary
+        if: always()
+        run: |
+          {
+            echo "## AI chat test: ${{ inputs.model }}"
+            echo '```'
+            # the totals at the end, then each conversation that failed
+            sed -n '/^AI (/,$p' chat-test.txt 2>/dev/null
+            echo
+            grep '^FAIL' chat-test.txt 2>/dev/null | cut -c1-400
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: chat-test-results
+          path: |
+            chat-test.txt
+            assistant/evals/results/
