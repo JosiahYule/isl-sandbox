@@ -32,7 +32,7 @@ const hasAside = Astro.slots.has('aside');
 </section>
 
 <style>
-  .intro { position: relative; padding-block: clamp(3rem, 7vw, 6rem) clamp(2.5rem, 5vw, 4rem); }
+  .intro { position: relative; padding-block: clamp(2.75rem, 6vw, 5rem) clamp(2.25rem, 4vw, 3.25rem); }
   .grid { display: grid; gap: var(--s7); }
   .intro--aside .grid { grid-template-columns: 1.15fr 1fr; align-items: center; }
   h1 { font-size: var(--fs-hero); letter-spacing: -0.025em; max-width: 14ch; }
@@ -44,7 +44,7 @@ const hasAside = Astro.slots.has('aside');
 
   /* With a photo: the text takes the left half and the photo fills the right,
      from the top of the section to the bottom, ending at the window edge. */
-  .intro--photo { padding-block: clamp(4rem, 9vw, 7.5rem); }
+  .intro--photo { padding-block: clamp(3.5rem, 8vw, 6.5rem); }
   .intro--photo .grid { min-height: min(62vh, 600px); align-items: center; }
   .intro--photo .copy { max-width: 600px; position: relative; z-index: 2; }
   .intro--photo h1 { font-size: var(--fs-h1); max-width: none; }

@@ -79,14 +79,14 @@ const network = [
 </footer>
 
 <style>
-  .footer { padding-block: var(--s8) var(--s6); }
+  .footer { padding-block: var(--s7) var(--s6); }
   /* Room under the last line for the chat button, which stays in the bottom corner */
   @media (max-width: 600px) { .footer { padding-bottom: calc(var(--s6) + 64px); } }
   .footer a { text-decoration: none; }
   .footer a:hover { text-decoration: underline; }
 
   /* Three brands, one network: a quiet band at the top of the footer, three cards between hairlines */
-  .network { display: grid; grid-template-columns: minmax(12rem, 1fr) 3fr; gap: var(--s5) var(--s7); align-items: start; padding-bottom: var(--s7); } /* the offices row (or the lower row) below draws the dividing line */
+  .network { display: grid; grid-template-columns: minmax(12rem, 1fr) 3fr; gap: var(--s5) var(--s7); align-items: start; padding-bottom: var(--s6); } /* the offices row (or the lower row) below draws the dividing line */
   .net-title { margin: 0; font-size: var(--fs-h3); font-weight: var(--fw-bold); line-height: 1.2; letter-spacing: -0.01em; color: #fff; }
   .net-title span { display: block; color: var(--on-dark-soft); font-weight: var(--fw-text); }
   .net-list { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--s4); }
@@ -111,7 +111,7 @@ const network = [
 
   .lower {
     display: grid; grid-template-columns: 1.4fr 1fr; gap: var(--s7);
-    margin-top: var(--s7); padding-top: var(--s6); border-top: 1px solid var(--line-dark);
+    margin-top: var(--s6); padding-top: var(--s6); border-top: 1px solid var(--line-dark);
   }
   .about > p:first-child { margin-top: 0; }
   .lower--top { margin-top: 0; }
@@ -120,7 +120,7 @@ const network = [
   .badges img { height: 56px; width: auto; }
   nav { display: grid; grid-template-columns: 1fr 1fr; gap: var(--s5); }
   ul { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--s2); align-content: start; }
-  .scam { margin-top: var(--s7); padding-top: var(--s4); border-top: 1px solid var(--line-dark); font-size: var(--fs-small); color: var(--on-dark-soft); }
+  .scam { margin-top: var(--s6); padding-top: var(--s4); border-top: 1px solid var(--line-dark); font-size: var(--fs-small); color: var(--on-dark-soft); }
   .scam strong { color: #fff; font-weight: var(--fw-bold); }
   .legal { margin-top: var(--s4); font-size: var(--fs-tiny); color: var(--on-dark-soft); }
   .legal a { color: var(--on-dark-soft); margin-left: var(--s4); text-decoration: underline !important; text-underline-offset: 0.2em; }

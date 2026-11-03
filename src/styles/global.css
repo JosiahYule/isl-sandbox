@@ -103,7 +103,7 @@ a[href^="tel:"] { white-space: nowrap; }
    .section-head  heading + optional lead, always top-left
    .items/.item   content in a row, each item opened by a rule (the brand's hairline structure, no boxes) */
 
-.section { padding-block: clamp(4rem, 8vw, 6.5rem); }
+.section { padding-block: clamp(3.5rem, 7vw, 5.5rem); } /* tightened November 2026 (was 4 to 6.5rem) */
 .section--tint { background: var(--mist); }
 .section--rule { border-top: 1px solid var(--line); }
 /* Two white sections back to back read as one big gap; a hairline marks the change of topic */
@@ -111,7 +111,7 @@ a[href^="tel:"] { white-space: nowrap; }
 
 /* <span class="line"> inside a heading: forces a break at a sentence, so headings never orphan a word */
 h1 .line, h2 .line { display: block; }
-.section-head { max-width: 46rem; margin-bottom: clamp(2rem, 4vw, 3.25rem); }
+.section-head { max-width: 46rem; margin-bottom: clamp(1.75rem, 3.5vw, 2.75rem); }
 .section-head .lead { margin-top: var(--s4); }
 .section-head--split { max-width: none; display: grid; grid-template-columns: 1fr 1fr; gap: var(--s4) var(--s7); align-items: end; }
 .section-head--split .lead { margin-top: 0; }
