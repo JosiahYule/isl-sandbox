@@ -17,6 +17,7 @@ export const brand = {
   logo: url('/brands/as-logo.png'),
   logoWhite: url('/brands/as-logo-white.png'), // for the dark footer
   logoSize: [361, 85],
+  logoHeight: 36, // the bold wordmark fills more of this logo than ISL's, so 46px read too large; 36px matches ISL's visual weight
   favicon: '/brands/as-favicon.svg',
   siteUrl: 'https://www.accountantstaffing.ca',
   email: 'info@accountantstaffing.com', // the address the live privacy policy gives (read October 30, 2026)
