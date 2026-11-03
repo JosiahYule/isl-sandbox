@@ -1,0 +1,63 @@
+# DEPLOY THE CHAT: puts the AI chat's backend (assistant/supabase/functions/isl-job-chat) on Supabase,
+# then sends it one test message to prove it answers. Runs only when started by hand:
+# repo > Actions > "Deploy the chat" > Run workflow. Run it again after any change to the chat.
+#
+# Needs one GitHub secret (repo Settings > Secrets and variables > Actions > New repository secret):
+#   SUPABASE_ACCESS_TOKEN   a personal access token from supabase.com/dashboard/account/tokens
+#
+# And three secrets in the Supabase project itself (Edge Functions > Secrets), which never pass through GitHub:
+#   ANTHROPIC_API_KEY   the Claude API key
+#   AVIONTE_FEED_URL    the job feed (the same address as the GitHub secret of that name)
+#   ALLOWED_ORIGINS     https://josiahyule.github.io   (the sandbox; add the live sites later)
+name: Deploy the chat
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: chat-deploy
+  cancel-in-progress: false
+
+env:
+  PROJECT_REF: hgwhpwgpulouzeqeqfei # the "chatbot" Supabase project
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check the token is set
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+        run: |
+          if [ -z "$SUPABASE_ACCESS_TOKEN" ]; then
+            echo "::error::Add the SUPABASE_ACCESS_TOKEN secret first (Settings > Secrets and variables > Actions)."
+            exit 1
+          fi
+      - uses: supabase/setup-cli@v1
+        with:
+          version: latest
+      - name: Deploy
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+        run: supabase functions deploy isl-job-chat --project-ref "$PROJECT_REF" --no-verify-jwt --use-api --workdir assistant
+      - name: Say hello to it
+        run: |
+          sleep 5
+          url="https://$PROJECT_REF.supabase.co/functions/v1/isl-job-chat"
+          code=$(curl -s -o reply.json -w '%{http_code}' -X POST "$url" \
+            -H 'content-type: application/json' -H 'origin: https://josiahyule.github.io' \
+            -d '{"messages":[{"role":"user","content":"Hi, I need 2 labourers in Halifax on contract starting Monday"}]}')
+          echo "HTTP $code"
+          if [ "$code" = "403" ]; then echo "::error::Origin refused. Set ALLOWED_ORIGINS in Supabase to https://josiahyule.github.io"; exit 1; fi
+          if [ "$code" != "200" ]; then echo "::error::The chat did not answer (HTTP $code)."; cat reply.json; exit 1; fi
+          node -e '
+            const r = JSON.parse(require("fs").readFileSync("reply.json", "utf8") || "{}");
+            console.log("Reply:", r.reply || r.error);
+            if (r.contact) console.log("Contact card:", r.contact.name || r.contact.office || "(shown)");
+            if (/^I can.t answer right now/.test(r.reply || "")) { console.log("::error::The function is up, but it is missing a setting or could not reach Claude or the job feed. Check ANTHROPIC_API_KEY and AVIONTE_FEED_URL in Supabase."); process.exit(1); }
+          '

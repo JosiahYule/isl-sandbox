@@ -208,6 +208,11 @@ The API key lives only in Supabase. The browser never sees it, which is why the 
 The sandbox currently uses the scripted demo engine. These functions must be deployed and
 configured before live chat or recruiter-email delivery is enabled.
 
+**The quick way (sandbox pilot):** the chat deploys to the "chatbot" Supabase project from GitHub:
+Actions > "Deploy the chat" > Run workflow (`.github/workflows/chat-deploy.yml` lists the secrets it needs).
+Testers then open any sandbox page with `?pilot` to get the AI version (`?pilot=off` to leave);
+everyone else sees no chat while it's paused.
+
 1. **Get a Claude API key** from console.anthropic.com. Set a monthly spend limit there while testing.
 2. **Create the function** in the Supabase project chosen for this website:
    ```

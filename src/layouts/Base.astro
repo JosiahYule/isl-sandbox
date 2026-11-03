@@ -24,9 +24,12 @@ import { resolve } from 'node:path';
 // schema: optional structured data (an object or a list) that search engines read, e.g. an office's address
 const { title, description = brand.scope, assistantMode, assistantJob, footerOffices = true, schema, live = false } = Astro.props;
 const assistant = (Astro.props.assistant ?? true) && brand.assistant;
+// While the chat is paused, the AI pilot still loads it for testers who open a page with ?pilot
+// (see assistant/demo-mode.js). Sandbox and ISL only; the public sandbox stays chat-free.
+const pilotOnly = !assistant && (Astro.props.assistant ?? true) && brand.key === 'isl' && !__LIVE__;
 // All assistant imports and its data share a content-versioned folder. This avoids mixing
 // newly published pages with an older cached widget or demo engine on GitHub Pages.
-const assistantVersion = assistant ? JSON.parse(readFileSync(resolve('public/assistant/version.json'), 'utf8')).version : '';
+const assistantVersion = assistant || pilotOnly ? JSON.parse(readFileSync(resolve('public/assistant/version.json'), 'utf8')).version : '';
 const assistantRoot = url(`/assistant/${assistantVersion}/`);
 const canonical = new URL(Astro.url.pathname, Astro.site).href;
 const heroSrc = typeof images.hero === 'string' ? images.hero : images.hero.src;
@@ -71,6 +74,21 @@ const colorVars = brand.colors ? Object.entries(brand.colors).map(([k, v]) => `-
     <!-- Job assistant: the chat widget, running in demo mode (see assistant/README.md and assistant/demo-mode.js) -->
     {assistant && <script is:inline defer src={`${assistantRoot}widget.js`}></script>}
     {assistant && <script is:inline type="module" src={`${assistantRoot}demo-mode.js`}></script>}
+    {pilotOnly && <script is:inline define:vars={{ root: assistantRoot }}>
+      (() => {
+        let on = false;
+        try {
+          const q = new URLSearchParams(location.search);
+          if (q.has('pilot')) q.get('pilot') === 'off' ? localStorage.removeItem('isl-chat-pilot') : localStorage.setItem('isl-chat-pilot', '1');
+          on = localStorage.getItem('isl-chat-pilot') === '1';
+        } catch { on = new URLSearchParams(location.search).has('pilot'); }
+        if (!on) return;
+        const w = document.createElement('script');
+        w.src = root + 'widget.js';
+        w.onload = () => { const m = document.createElement('script'); m.type = 'module'; m.src = root + 'demo-mode.js'; document.body.append(m); };
+        document.body.append(w);
+      })();
+    </script>}
   </body>
 </html>
 

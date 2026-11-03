@@ -22,7 +22,8 @@ const base = new URL('.', import.meta.url);      // .../assistant/
 // The site root (handles the /isl-sandbox/ prefix). On Squarespace the assistant's files are on GitHub
 // Pages but the pages are on the brand's domain: src/squarespace/core.js says so with data-site-root.
 const sqRoot = document.documentElement.dataset.siteRoot;
-const site = sqRoot ? new URL(sqRoot, location.href) : new URL('..', base);
+// The assistant's files sit in assistant/<version>/, so the site root is whatever comes before assistant/.
+const site = sqRoot ? new URL(sqRoot, location.href) : new URL(base.pathname.replace(/assistant\/.*$/, ''), location.origin);
 const brand = ['as', 'ads'].includes(document.documentElement.dataset.brand) ? document.documentElement.dataset.brand : 'isl';
 const jobsFile = brand === 'isl' ? 'jobs-snapshot.json' : `jobs-${brand}.json`;
 
@@ -48,9 +49,34 @@ const respond = async (messages, context) => {
   return (await enginePromise)(messages, context);
 };
 
+// PILOT: the AI version, for the people testing it. Opening any sandbox page with ?pilot switches this
+// browser to the AI (it stays on while they click around); ?pilot=off switches back. Everyone else
+// gets the scripted version above, so the public sandbox never spends API credit. ISL only for now.
+const PILOT_ENDPOINT = 'https://hgwhpwgpulouzeqeqfei.supabase.co/functions/v1/isl-job-chat';
+const pilot = (() => {
+  if (brand !== 'isl' || sqRoot) return false;
+  try {
+    const q = new URLSearchParams(location.search);
+    if (q.has('pilot')) q.get('pilot') === 'off' ? localStorage.removeItem('isl-chat-pilot') : localStorage.setItem('isl-chat-pilot', '1');
+    return localStorage.getItem('isl-chat-pilot') === '1';
+  } catch { return new URLSearchParams(location.search).has('pilot'); }
+})();
+// The AI's links point at integratedstaffing.ca, but the request form and the tools only exist on the
+// sandbox so far: send those two to the sandbox's pages.
+const SANDBOX_ONLY = ['hire/', 'learn/tools/'];
+async function pilotRespond(messages, context) {
+  const res = await fetch(PILOT_ENDPOINT, { method: 'POST', signal: AbortSignal.timeout(45000), headers: { 'content-type': 'application/json' }, body: JSON.stringify({ messages, context }) });
+  let text = await res.text();
+  for (const path of SANDBOX_ONLY) text = text.split(`https://www.integratedstaffing.ca/${path}`).join(new URL(path, site).href);
+  let data = {};
+  try { data = JSON.parse(text); } catch { /* handled below */ }
+  if (!res.ok) throw new Error(data.error || 'Something went wrong. Please try again.');
+  return data;
+}
+
 function start() {
   const chat = window.ISLJobChat.mount({
-    send: respond,
+    send: pilot ? pilotRespond : respond,
     brand,
     mode: document.documentElement.dataset.assistantMode,
     job: document.documentElement.dataset.assistantJob,

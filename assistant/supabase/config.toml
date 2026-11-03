@@ -1,0 +1,6 @@
+# Supabase CLI settings for the chat's backend. Deployed by .github/workflows/chat-deploy.yml.
+project_id = "isl-website"
+
+[functions.isl-job-chat]
+# Anonymous website visitors call it, so no login token. The function checks the site it's called from.
+verify_jwt = false
