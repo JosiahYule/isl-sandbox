@@ -88,6 +88,7 @@ export async function converse({ messages, context = {}, jobs, callModel, today 
   const usage = { input_tokens: 0, output_tokens: 0, cache_read_input_tokens: 0, cache_creation_input_tokens: 0, calls: 0 };
   const turn = [...conversation];
   let reply = "";
+  const ISL_DOMAINS = new Set(["integratedstaffing.ca", "accountantstaffing.com", "administrativestaffing.ca"]);
   const DISPLAY_ONLY = new Set(["offer_choices", "list_offices"]);
   const said = []; // everything the model wrote this turn: words before a tool call ("Call 911 first") belong in the reply too
   try {
@@ -119,6 +120,11 @@ export async function converse({ messages, context = {}, jobs, callModel, today 
     // No model, no reply: the offices instead, never an empty error
     return { ...fallbackReply(lang), trace, usage };
   }
+
+  // Only ISL's own email addresses ever appear in a reply. A posting with planted text ("email your SIN
+  // to ...") gets warned about, but its address is never repeated where someone could copy it.
+  reply = String(reply || "").replace(/[\w.+-]+@([\w-]+(?:\.[\w-]+)+)/g, (m, domain) =>
+    ISL_DOMAINS.has(domain.toLowerCase()) ? m : (lang === "fr" ? "une adresse externe" : "an outside address"));
 
   return {
     reply: reply || (lang === "fr" ? "Pouvez-vous reformuler, ou joindre votre bureau le plus proche?" : "Could you say that another way, or contact your nearest office?"),

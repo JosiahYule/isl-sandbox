@@ -170,8 +170,13 @@ export function placesFor(city) {
   return AREAS[c] || AREAS[c.replace(/^st\.? /, "st. ")] || [c];
 }
 
+// Postings mix Canadian and American spelling: "license" and "licence" must match, or
+// "no driver's licence" lets through a posting that asks for a "driver's license".
+const SPELLINGS = [[/licens/g, "licenc"], [/\blabor/g, "labour"], [/\bcenter/g, "centre"]];
 function norm(s) {
-  return String(s || "").toLowerCase().replace(/[^a-z0-9 ]+/g, " ");
+  let t = String(s || "").toLowerCase().replace(/[^a-z0-9 ]+/g, " ");
+  for (const [us, ca] of SPELLINGS) t = t.replace(us, ca);
+  return t;
 }
 
 // A tiny stemmer: chops common endings so word forms line up.
