@@ -88,6 +88,7 @@ export async function converse({ messages, context = {}, jobs, callModel, today 
   const usage = { input_tokens: 0, output_tokens: 0, cache_read_input_tokens: 0, cache_creation_input_tokens: 0, calls: 0 };
   const turn = [...conversation];
   let reply = "";
+  const DISPLAY_ONLY = new Set(["offer_choices", "list_offices"]);
   const said = []; // everything the model wrote this turn: words before a tool call ("Call 911 first") belong in the reply too
   try {
     for (let round = 0; round < MAX_TOOL_ROUNDS; round++) {
@@ -108,6 +109,10 @@ export async function converse({ messages, context = {}, jobs, callModel, today 
         }
       });
       turn.push({ role: "user", content: toolResults });
+      // Buttons and the office list only display something: if the model already wrote its message
+      // alongside them, that message is the reply. Asking again only made it say the same thing twice.
+      const calls = result.content.filter((b) => b.type === "tool_use");
+      if (text && calls.length && calls.every((b) => DISPLAY_ONLY.has(b.name))) { reply = said.join("\n\n"); break; }
       if (round === MAX_TOOL_ROUNDS - 1) reply = said.join("\n\n") || (lang === "fr" ? "Désolé, je n’ai pas réussi. Pouvez-vous reformuler?" : "Sorry, I got stuck there. Could you say that another way?");
     }
   } catch {
