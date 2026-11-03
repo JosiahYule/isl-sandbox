@@ -87,7 +87,8 @@ export function toJob(raw) {
   const id = String(raw.reference || '').trim();
   const place = placeOf(raw.location, raw.city, raw.state);
   const kind = kindOf(raw.worktype);
-  const link = /^https?:\/\//.test(raw.joblink || '') ? raw.joblink : `${SITES[brand]}/job-details?jobcode=${encodeURIComponent(id)}`;
+  // Always the brand's own job page (the live sites' Tracker job page), never Tracker's portal link
+  const link = `${SITES[brand]}/job-details?jobcode=${encodeURIComponent(id)}`;
   return {
     brand,
     job: {
