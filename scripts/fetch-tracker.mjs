@@ -152,6 +152,8 @@ export async function refreshTracker({ url = TRACKER_URL, out = { as: 'src/brand
     for (const [path, text] of files) writeFileSync(path + '.tmp', text);
     for (const [path] of files) renameSync(path + '.tmp', path);
   } finally { for (const [path] of files) rmSync(path + '.tmp', { force: true }); }
+  counts.described = jobs.filter((j) => j.job.description).length;
+  counts.paid = jobs.filter((j) => j.job.pay).length;
   return { counts, fields };
 }
 
@@ -161,7 +163,7 @@ if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.ur
   if (process.env.TRACKER_OFFLINE) notice('skipped, using the saved AS and ADS jobs.');
   else try {
     const { counts, fields } = await refreshTracker(process.env.TRACKER_FEED_URL ? { url: process.env.TRACKER_FEED_URL } : {});
-    notice(`${counts.as} Accountant Staffing and ${counts.ads} Administrative Staffing jobs from the live feed. Fields Tracker sent: ${fields.join(', ')}.`);
+    notice(`${counts.as} Accountant Staffing and ${counts.ads} Administrative Staffing jobs from the live feed; ${counts.described} with a description, ${counts.paid} with pay. Fields Tracker sent: ${fields.join(', ')}.`);
   } catch (e) {
     console.warn(`fetch-tracker: couldn't refresh (${e.message}), using the saved AS and ADS jobs.`);
     if (process.env.GITHUB_ACTIONS) console.log(`::warning title=Tracker feed::Couldn't reach Tracker RMS (${e.message}). The AS and ADS boards show the jobs saved last time.`);
