@@ -6,6 +6,7 @@
 //   ... --target ai --model claude-sonnet-5-5           another model
 //   ... --only emp-not-permanent,seek-no-nights          a few cases
 //   ... --repeat 3                                       each case 3 times (AI answers vary)
+//   ... --area purpose                                   only the employer tests built on the purpose doc
 //
 // The AI runs through _shared/converse.js, the same code as the website's function, against a
 // fixed set of postings (test/fixtures/jobs.json), so results can be compared run to run.
@@ -18,12 +19,15 @@
 // =====================================================================
 import { readFileSync, writeFileSync, mkdirSync } from 'node:fs';
 import { execSync } from 'node:child_process';
-import { CASES } from './cases.mjs';
+import { CASES as ORIGINAL } from './cases.mjs';
+import { EMPLOYER_CASES } from './employer-cases.mjs';
+const CASES = [...ORIGINAL, ...EMPLOYER_CASES];
 
 const arg = (name, fallback) => { const i = process.argv.indexOf(`--${name}`); return i > 0 ? process.argv[i + 1] : fallback; };
 const target = arg('target', 'rules');
 const model = arg('model', process.env.ANTHROPIC_MODEL || 'claude-haiku-5-5');
 const only = arg('only', '') ? new Set(arg('only').split(',')) : null;
+const area = arg('area', 'all'); // all, or one area (employer, seeker, safety, offices, tools, purpose)
 const repeat = Math.max(1, Number(arg('repeat', 1)) || 1);
 if (!['rules', 'ai'].includes(target)) { console.error('--target is rules or ai'); process.exit(2); }
 if (target === 'ai' && !process.env.ANTHROPIC_API_KEY) { console.error('Set ANTHROPIC_API_KEY to test the AI (a key from console.anthropic.com, with a spend limit set).'); process.exit(2); }
@@ -112,7 +116,7 @@ const cost = (u) => { const p = PRICES[model]; if (!p) return null; return (u.in
 
 // ---- Run ----
 const answer = target === 'ai' ? await aiModel() : await rulesEngine();
-const chosen = CASES.filter((c) => !only || only.has(c.id));
+const chosen = CASES.filter((c) => (!only || only.has(c.id)) && (area === 'all' || c.area === area));
 const report = [];
 for (const c of chosen) {
   for (let n = 0; n < repeat; n++) {

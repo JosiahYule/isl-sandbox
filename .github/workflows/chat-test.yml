@@ -1,4 +1,4 @@
-# TEST THE AI CHAT: plays the 33 test conversations (assistant/evals/cases.mjs) against Claude and
+# TEST THE AI CHAT: plays the test conversations (assistant/evals/cases.mjs and employer-cases.mjs) against Claude and
 # scores them. Runs only when started by hand: repo > Actions > "Test the AI chat" > Run workflow.
 #
 # Needs one secret (repo Settings > Secrets and variables > Actions > New repository secret):
@@ -17,6 +17,11 @@ on:
         type: choice
         options: [claude-haiku-5-5, claude-sonnet-5-5]
         default: claude-haiku-5-5
+      area:
+        description: Which conversations (purpose = the employer tests built on the purpose doc)
+        type: choice
+        options: [all, purpose, employer, seeker, safety, offices, tools]
+        default: all
       repeat:
         description: Times to play each conversation (AI answers vary a little run to run)
         type: choice
@@ -52,7 +57,7 @@ jobs:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
         run: |
           set -o pipefail
-          node assistant/evals/run.mjs --target ai --model "${{ inputs.model }}" --repeat "${{ inputs.repeat }}" | tee chat-test.txt
+          node assistant/evals/run.mjs --target ai --model "${{ inputs.model }}" --repeat "${{ inputs.repeat }}" --area "${{ inputs.area }}" | tee chat-test.txt
       - name: Summary
         if: always()
         run: |
