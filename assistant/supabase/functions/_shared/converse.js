@@ -25,7 +25,10 @@ export const MAX_TURNS_KEPT = 16;      // older messages are dropped to keep cal
 export const MAX_MESSAGE_CHARS = 2000; // one visitor message
 export const MAX_TOOL_ROUNDS = 5;      // safety stop for the tool loop
 
-const FRENCH = /\b(je|j'|vous|bonjour|merci|emplois?|travail|cherche|besoin|quel|quelle|où|est-ce|embauche|salaire|bureau|pour|avec)\b/i;
+// French: one of the telltale words, or two common ones ("Est-il difficile de recruter au Nouveau-Brunswick?")
+const FRENCH = /\b(je|j'|vous|nous|bonjour|merci|emplois?|travail|cherche|besoin|quel|quelle|où|est-ce|est-il|embauche|embaucher|recruter|salaire|bureau|qui|comment|combien|pourquoi|blessé|nouveau-brunswick|nouvelle-écosse|terre-neuve|île-du-prince-édouard)\b/i;
+const FRENCH_COMMON = /\b(le|la|les|des|du|au|aux|une?|est|pour|avec|dans|sur|mon|ma|mes|pas|il|elle)\b/gi;
+const isFrench = (t) => FRENCH.test(t) || (String(t).match(FRENCH_COMMON) || []).length >= 3;
 
 // What the window shows when the AI can't answer: every office with its number, in the visitor's language
 export function fallbackReply(lang = "en") {
@@ -70,7 +73,7 @@ export function cleanConversation(input, jobs = []) {
 // One visitor message in, one reply out
 export async function converse({ messages, context = {}, jobs, callModel, today }) {
   const lastUser = [...(messages || [])].reverse().find((m) => m?.role === "user")?.content || "";
-  const lang = FRENCH.test(String(lastUser)) ? "fr" : "en";
+  const lang = isFrench(String(lastUser)) ? "fr" : "en";
   const conversation = cleanConversation(messages, jobs);
   if (!conversation) return { error: "Send messages ending with a user message." };
 
@@ -85,6 +88,7 @@ export async function converse({ messages, context = {}, jobs, callModel, today 
   const usage = { input_tokens: 0, output_tokens: 0, cache_read_input_tokens: 0, cache_creation_input_tokens: 0, calls: 0 };
   const turn = [...conversation];
   let reply = "";
+  let said = ""; // the last words the model wrote, in case it ends on a tool call with nothing more to say
   try {
     for (let round = 0; round < MAX_TOOL_ROUNDS; round++) {
       const result = await callModel({ system: systemPrompt(today, pageMode, job), tools: TOOLS, messages: turn });
@@ -92,7 +96,8 @@ export async function converse({ messages, context = {}, jobs, callModel, today 
       for (const k of Object.keys(usage)) if (k !== "calls" && Number.isFinite(result?.usage?.[k])) usage[k] += result.usage[k];
       if (!Array.isArray(result?.content)) throw new Error("Invalid model response");
       const text = result.content.filter((b) => b.type === "text").map((b) => b.text).join("\n").trim();
-      if (result.stop_reason !== "tool_use") { reply = text; break; }
+      if (text) said = text;
+      if (result.stop_reason !== "tool_use") { reply = text || said; break; }
       turn.push({ role: "assistant", content: result.content });
       const toolResults = result.content.filter((b) => b.type === "tool_use").map((b) => {
         trace.push({ tool: b.name, input: b.input });
@@ -116,7 +121,7 @@ export async function converse({ messages, context = {}, jobs, callModel, today 
     contact: state.contact ?? null,
     summary: state.summary ?? null,
     insight: state.insight ?? null,
-    offices: null,
+    offices: state.offices ?? null,
     choices: state.choices ?? [],
     meta: { mode: state.contact && state.summary ? "employer" : state.cards ? "seeker" : pageMode, lang },
     trace,

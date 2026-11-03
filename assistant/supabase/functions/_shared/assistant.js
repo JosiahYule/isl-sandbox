@@ -15,7 +15,7 @@
 // =====================================================================
 
 import { SITE, searchJobs, getJobDetails, toCard } from "./jobs.js";
-import { placeFrom, route, toContact, provinceName } from "./routing.js";
+import { placeFrom, route, toContact, provinceName, OFFICES } from "./routing.js";
 import { payFor, payInsight, costFor, costInsight } from "./insights.js";
 import { minWageFor, minWageInsight, underMinimum, marketFor, marketInsight } from "./market.js";
 import { familyOf } from "./pay.js";
@@ -52,6 +52,7 @@ You help two kinds of visitor. If it isn't clear which one you're talking to, as
 JOB SEEKERS: help them find open ISL postings that fit, and get them to the Apply button.
 - If you know roughly what work they want or where, call search_jobs straight away. Don't interview them first.
 - If you know nothing useful yet, ask one short question (the kind of work and the area).
+- If they ask to see all the jobs, or what's open, call search_jobs with no keywords and recommend_jobs with the 4 newest, then say every opening is on the Find Work page.
 - Search with several related keywords, including plain-language versions (a "line cook" might fit "cook", "kitchen", "food").
 - Pick the 1 to 4 best fits and call recommend_jobs, with a short reason for each tied to what they told you. The cards show title, pay, location and the buttons, so don't repeat those in your message.
 - Remember what they said earlier. "What about Moncton?" keeps the kind of work they already asked for.
@@ -66,6 +67,7 @@ JOB SEEKERS: help them find open ISL postings that fit, and get them to the Appl
 EMPLOYERS: work out who at ISL should handle their request, then hand them to that person.
 - You need four things: the role (and how many people, if they know), where the work is, whether it's contract (a set stretch of time, including temp to perm) or permanent, and for contract, roughly when they need people to start.
 - Take whatever they've already told you. "3 labourers in rural Nova Scotia" already gives the role, the count and the place, so only ask what's missing.
+- When a message already gives the role, the place and contract or permanent ("10 cleaners in Toronto on contract, as soon as possible"), call find_contact in that same reply. Don't hold the card back to ask anything else; length and other details can follow.
 - Read negatives and corrections carefully. "Not permanent, just a two-week contract" is contract, for two weeks. "Actually make that 5", "not Halifax, Moncton" replace the earlier detail. When they correct something after you've called find_contact, call it again with every detail, corrected, so the summary they see is right.
 - Keep how long they need people (length) and anything else they said that matters (notes), in their own words. If they need people in more than one place, put every place and count in notes (e.g. "3 in Halifax, 2 in Moncton") and use the first place for place.
 - Ask one question at a time, with offer_choices for the likely answers. Never ask more than three questions in total.
@@ -84,7 +86,9 @@ RESUMES: never ask anyone to paste a resume into this chat (it's full of persona
 Rules for both:
 - Only mention jobs, pay, people and contact details that came back from your tools. Never invent a posting, a person, a phone number or an email.
 - Don't promise anyone a job, an interview, a hire or a rate. Application status and anything else that depends on someone's situation go to an ISL recruiter (find_contact with audience seeker gives the right one).
-- People already working through ISL (pay, a T4 or record of employment, sending in hours, a missed shift, an injury, leaving an assignment) need their own office: call find_contact with audience seeker and the office's place, or ask which office they work with. If someone was hurt at work, tell them to call 911 first if it's serious, then tell their supervisor on site and call their ISL office right away.
+- People already working through ISL (pay, a T4 or record of employment, sending in hours, a missed shift, an injury, leaving an assignment) need their own office: if they've said where they work, call find_contact with audience seeker and that place; if not, call list_offices so they can reach one straight away. Don't make them answer a question first.
+- If someone was hurt at work, tell them to call 911 first if it's serious, then to tell their supervisor on site and call their ISL office right away, and in the same reply give them the office (find_contact if you know where they work, otherwise list_offices).
+- If anyone asks for a person, a recruiter or a real human, give them one in the same reply: find_contact if you know the office or the topic, otherwise list_offices.
 - Don't ask for or store personal details: name, email, phone, address, SIN, date of birth, health or immigration status.
 - Stay on topic: jobs, hiring and working with ISL. Politely decline anything else.
 
@@ -197,6 +201,11 @@ export const TOOLS = [
     },
   },
   {
+    name: "list_offices",
+    description: "Show every ISL office with its phone number and address as a card, with Call and Directions buttons. Use when someone needs a person and you don't know which office (an injury, a pay or T4 question, 'can I talk to someone'), or asks where the offices are.",
+    input_schema: { type: "object", properties: {} },
+  },
+  {
     name: "offer_choices",
     description: "Show buttons under your message: up to 4 short tap-to-answer replies (`options`, each sent as the visitor's reply when tapped) and up to 2 links to ISL pages (`links`). Never write a URL in your message; use a link button.",
     input_schema: {
@@ -262,6 +271,10 @@ export function runTool(name, input, jobs, state) {
     const links = (Array.isArray(input?.links) ? input.links : []).map((k) => LINKS[k]).filter(Boolean).slice(0, 2);
     state.choices = [...options, ...links];
     return { shown: state.choices.map((c) => (typeof c === "string" ? c : c.label)) };
+  }
+  if (name === "list_offices") {
+    state.offices = Object.values(OFFICES).map((o) => ({ city: o.city === "Halifax" ? "Halifax (Dartmouth)" : o.city, phone: o.phone, address: o.address }));
+    return { shown: state.offices.map((o) => `${o.city} ${o.phone}`), note: "The visitor can see every office with its phone and address. Don't repeat the numbers." };
   }
   if (name === "find_contact") {
     const audience = input?.audience === "seeker" ? "seeker" : "employer";

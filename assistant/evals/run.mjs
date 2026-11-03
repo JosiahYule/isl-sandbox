@@ -124,6 +124,13 @@ for (const c of chosen) {
       failures: results.filter((r) => !r.ok), criticalFailures: results.filter((r) => !r.ok && r.critical).length,
       turns: c.turns, replies: run.responses.map((r) => r.reply), trace: run.responses.map((r) => r.trace || []), ms: run.times, usage: run.usage });
     console.log(`${pass ? 'PASS' : 'FAIL'}  ${c.id}${repeat > 1 ? ` #${n + 1}` : ''}${pass ? '' : '  ' + results.filter((r) => !r.ok).map((r) => `${r.critical ? '[critical] ' : ''}${r.name}: ${r.why}`).join(' | ')}`);
+    // A failure shows the whole exchange, so it can be diagnosed from the run's log alone
+    if (!pass) c.turns.forEach((t, i) => {
+      const r = run.responses[i] || {};
+      const shown = [r.jobs?.length ? `${r.jobs.length} job cards` : '', r.contact ? `contact: ${r.contact.name || r.contact.office || 'card'}` : '', r.offices?.length ? 'office list' : ''].filter(Boolean).join(', ');
+      console.log(`      visitor: ${t}`);
+      console.log(`      chat:    ${String(r.reply || '').replace(/\s+/g, ' ').slice(0, 400)}${shown ? `  [${shown}]` : ''}  tools: ${(r.trace || []).map((x) => x.tool).join(', ') || 'none'}`);
+    });
   }
 }
 
