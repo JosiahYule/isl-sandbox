@@ -69,6 +69,7 @@ EMPLOYERS: work out who at ISL should handle their request, then hand them to th
 - Take whatever they've already told you. "3 labourers in rural Nova Scotia" already gives the role, the count and the place, so only ask what's missing.
 - When a message already gives the role, the place and contract or permanent ("10 cleaners in Toronto on contract, as soon as possible"), call find_contact in that same reply. Don't hold the card back to ask anything else; length and other details can follow.
 - Read negatives and corrections carefully. "Not permanent, just a two-week contract" is contract, for two weeks. "Actually make that 5", "not Halifax, Moncton" replace the earlier detail. When they correct something after you've called find_contact, call it again with every detail, corrected, so the summary they see is right.
+- If they mention a wage, pass it to find_contact as hourly_wage too.
 - Keep how long they need people (length) and anything else they said that matters (notes), in their own words. If they need people in more than one place, put every place and count in notes (e.g. "3 in Halifax, 2 in Moncton") and use the first place for place.
 - Ask one question at a time, with offer_choices for the likely answers. Never ask more than three questions in total.
 - If an answer doesn't make sense ("asdasd", a reply to a different question), say you didn't catch that and ask the same question again with the choices. Don't call find_contact on a guess.
@@ -197,6 +198,7 @@ export const TOOLS = [
         start: { type: "string", description: "Employers (contract): when they need people, in plain words, e.g. 'as soon as possible', 'next Monday'." },
         length: { type: "string", description: "Employers (contract): how long they need people, in plain words, e.g. 'two weeks', 'until January'." },
         notes: { type: "string", description: "Employers: anything else that matters, in their words, e.g. more than one place ('3 in Halifax, 2 in Moncton'), shifts, a wage they mentioned." },
+        hourly_wage: { type: "number", description: "Employers: the hourly wage they mentioned, if any. It's checked against the province's minimum wage." },
       },
       required: ["audience"],
     },
@@ -298,11 +300,16 @@ export function runTool(name, input, jobs, state) {
       state.summary = [["Role", `${count}${role}`.trim()], ["Where", where], ["Type", SERVICE_LABEL[input?.service] || ""], ["Start", service === "direct" ? "" : clip(input?.start)], ["Length", service === "direct" ? "" : length], ["Notes", notes]].filter(([, v]) => v);
     }
     state.contact = toContact(r, action);
+    // A wage under the minimum is always pointed out, whether or not the model thought to check it
+    const under = audience === "employer" && place?.province ? underMinimum(Number(input?.hourly_wage), place.province)[0] : null;
     return {
       shown: true,
       person: r.person ? { name: r.person.name, handles: r.person.handles } : null,
       office: r.office?.city,
-      note: "The visitor can now see the contact card with phone, email and a send button. Write one short sentence; don't repeat the details.",
+      ...(under ? { minimum_wage: { province: provinceName(place.province), rate: under.rate, wage: Number(input.hourly_wage) } } : {}),
+      note: under
+        ? `The visitor can now see the contact card. Their wage ($${Number(input.hourly_wage).toFixed(2)}/hour) is under ${provinceName(place.province)}'s minimum wage ($${under.rate.toFixed(2)}/hour): say so plainly and kindly in one sentence, then one short sentence on who they'll be dealing with.`
+        : "The visitor can now see the contact card with phone, email and a send button. Write one short sentence; don't repeat the details.",
     };
   }
   throw new Error("Unknown tool: " + name);
