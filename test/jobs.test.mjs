@@ -26,11 +26,20 @@ test('part time and full time are searched as one term, however they are written
 });
 
 test('a job row can be found by its office area and its province name', () => {
+  // Whatever jobs the build has (the deploy uses the live feed): every row in an office area that's listed
+  // under another town (Dartmouth, Dieppe...) turns up when searching the area's name, and every row its province's
   const html = fs.readFileSync(new URL('../dist/find-work/index.html', import.meta.url), 'utf8');
-  const row = html.match(new RegExp(`data-job-id="${forklift.id}"[^>]*data-search="([^"]*)"`))?.[1] ?? '';
-  assert.equal(forklift.city, 'Dartmouth');
-  assert(matchesJobQuery(row, 'forklift Halifax'), 'a Dartmouth job turns up when searching Halifax');
-  assert(matchesJobQuery(row, 'nova scotia'));
+  const decode = (t) => t.replace(/&amp;/g, '&').replace(/&#39;|&#x27;/g, "'").replace(/&quot;/g, '"');
+  const rows = [...html.matchAll(/<article\b[^>]*>/g)].map((m) => m[0]).filter((tag) => tag.includes('data-search='))
+    .map((tag) => Object.fromEntries([...tag.matchAll(/data-(area|province|search)="([^"]*)"/g)].map(([, k, v]) => [k, decode(v)])));
+  assert(rows.length > 0, 'the board has rows');
+  const label = { halifax: 'Halifax', moncton: 'Moncton', 'saint-john': 'Saint John', charlottetown: 'Charlottetown', 'st-johns': "St. John's" };
+  const names = { NS: 'Nova Scotia', NB: 'New Brunswick', PE: 'Prince Edward Island', NL: 'Newfoundland and Labrador' };
+  for (const r of rows) {
+    if (r.area) assert(matchesJobQuery(r.search, label[r.area]), `a row in the ${r.area} area matches "${label[r.area]}"`);
+    if (names[r.province]) assert(matchesJobQuery(r.search, names[r.province]), `a ${r.province} row matches "${names[r.province]}"`);
+  }
+  assert(matchesJobQuery('Forklift Operator Dartmouth Halifax NS Nova Scotia', 'forklift Halifax'));
 });
 
 test('a conflicting rate is withheld across published copy, salary data and pay tools', () => {

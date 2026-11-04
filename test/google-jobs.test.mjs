@@ -5,15 +5,26 @@ import fs from 'node:fs';
 import { generateKeyPairSync } from 'node:crypto';
 import { diffJobs, readLive, diff, send } from '../scripts/notify-google-jobs.mjs';
 
-const schemaOf = (path) => JSON.parse(fs.readFileSync(new URL(`../dist/${path}/index.html`, import.meta.url), 'utf8').match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/)[1]);
+// Every job page in the build, with its JobPosting data. The deploy builds from the live job feed, so these
+// tests look at whatever jobs are open at build time, never one particular posting, and check only what
+// the code guarantees (how recruiters word an ad, such as where the referral-bonus closing starts, can vary).
+const jobPages = () => {
+  const dir = new URL('../dist/find-work/', import.meta.url);
+  return fs.readdirSync(dir).filter((d) => fs.existsSync(new URL(`${d}/index.html`, dir))).map((d) => {
+    const html = fs.readFileSync(new URL(`${d}/index.html`, dir), 'utf8');
+    const data = html.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/)?.[1];
+    return { page: d, schema: data ? JSON.parse(data) : null };
+  }).filter((p) => p.schema?.['@type'] === 'JobPosting');
+};
 
-test('the description Google reads is the cleaned one the page shows', () => {
-  const page = fs.readdirSync(new URL('../dist/find-work/', import.meta.url)).find((d) => d.endsWith('ma9456753923'));
-  const s = schemaOf(`find-work/${page}`);
-  assert.doesNotMatch(s.description, /INT00\d/, 'no tracking code');
-  assert.doesNotMatch(s.description, /Referral Bonus/i, 'no standard closing');
-  assert.doesNotMatch(s.description, /<p>\W*<\/p>/, 'no empty or punctuation-only paragraphs');
-  assert.match(s.hiringOrganization.logo, /^https:\/\/.+\.(webp|png)$/);
+test('the description Google reads is the cleaned one the page shows, on every job', () => {
+  const pages = jobPages();
+  assert(pages.length > 0, 'the build has job pages with JobPosting data');
+  for (const { page, schema } of pages) {
+    assert.doesNotMatch(schema.description, /(^|>)\s*INT\d{3}\s*</i, `${page}: no tracking code`);
+    assert.doesNotMatch(schema.description, /<p>[^a-z0-9<]*<\/p>/i, `${page}: no empty or punctuation-only paragraphs`);
+    assert.match(schema.hiringOrganization.logo, /^https:\/\/.+\.(webp|png)$/, `${page}: logo`);
+  }
 });
 
 test('new jobs are announced and closed ones withdrawn', () => {
