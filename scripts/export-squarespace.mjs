@@ -32,6 +32,7 @@ const BLOG_BRANDS = ['isl', 'as'];
 const BRANDS = process.argv.slice(2).filter((b) => ['isl', 'as', 'ads'].includes(b));
 const PUBLISH = process.argv.includes('--publish');
 const NAMES = { isl: 'Integrated Staffing', as: 'Accountant Staffing', ads: 'Administrative Staffing' };
+const DOMAINS = { isl: 'https://www.integratedstaffing.ca', as: 'https://www.accountantstaffing.ca', ads: 'https://www.administrativestaffing.ca' };
 const ROOTS = ':is(#isl-header,#isl-page,#isl-footer)';
 
 for (const brand of BRANDS.length ? BRANDS : ['isl', 'as', 'ads']) exportBrand(brand);
@@ -273,6 +274,10 @@ function exportBrand(brand) {
     kit.push({ key: kind, path: t.path, title: t.title, description: t.note, size: Buffer.byteLength(block) });
   }
   writeFileSync(`${OUT}/live/counts.json`, JSON.stringify(counts));
+  // Every open job's address on the brand's own site. scripts/notify-google-jobs.mjs compares this
+  // with the last published copy and tells Google which jobs are new and which have closed.
+  const jobUrls = pages.filter((p) => p.tpl?.kind === 'job').map((p) => ({ id: p.tpl.value, url: `${DOMAINS[brand]}${TEMPLATES.job.path}?${TEMPLATES.job.param}=${encodeURIComponent(p.tpl.value)}` }));
+  writeFileSync(`${OUT}/live/jobs.json`, JSON.stringify({ brand, jobs: jobUrls }, null, 1));
   writeFileSync(`${OUT}/kit.json`, JSON.stringify({ brand, name: NAMES[brand], generated: new Date().toISOString(), pages: kit }, null, 1));
   writeFileSync(`${OUT}/kit.html`, kitPage(brand, ASSETS));
   // The kit's own script must be valid JavaScript (a broken one leaves every Copy button dead)

@@ -9,6 +9,8 @@
 #   ANTHROPIC_API_KEY   the Claude API key
 #   AVIONTE_FEED_URL    the job feed (the same address as the GitHub secret of that name)
 #   ALLOWED_ORIGINS     https://josiahyule.github.io   (the sandbox; add the live sites later)
+# Optional: CHAT_DAILY_LIMIT (messages a day for everyone, default 2000) and CLIENT_IP_HEADER (see
+# assistant/supabase/functions/_shared/guard.js). Also set a monthly spend limit in the Claude Console.
 name: Deploy the chat
 
 on:
@@ -41,6 +43,18 @@ jobs:
       - uses: supabase/setup-cli@v1
         with:
           version: latest
+      # The table that rate limits are counted in, shared by every copy of the function
+      # (assistant/supabase/migrations/20261104120000_rate_limits.sql). Safe to run every time: it only
+      # creates what isn't there yet. Without it the chat still works, with limits kept in memory only.
+      - name: Set up the shared rate limits
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+        run: |
+          node -e 'process.stdout.write(JSON.stringify({ query: require("fs").readFileSync("assistant/supabase/migrations/20261104120000_rate_limits.sql", "utf8") }))' > sql.json
+          code=$(curl -s -o sql-reply.json -w '%{http_code}' -X POST "https://api.supabase.com/v1/projects/$PROJECT_REF/database/query" \
+            -H "Authorization: Bearer $SUPABASE_ACCESS_TOKEN" -H 'content-type: application/json' --data @sql.json)
+          echo "HTTP $code"
+          if [ "${code#2}" = "$code" ]; then echo "::error::Couldn't create the rate_limits table (HTTP $code)."; cat sql-reply.json; exit 1; fi
       - name: Deploy
         env:
           SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}

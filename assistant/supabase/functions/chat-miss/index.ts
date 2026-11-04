@@ -19,7 +19,8 @@
 
 import { redact } from "../_shared/redact.js";
 import { restClient } from "../_shared/db.js";
-import { readJson, rateLimiter, BodyError } from "../_shared/http.js";
+import { readJson, BodyError } from "../_shared/http.js";
+import { createGuard, guardEnv } from "../_shared/guard.js";
 import { pagePath } from "../_shared/lead-context.js";
 
 const rest = restClient(Deno.env.get("SUPABASE_URL") ?? "", Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "");
@@ -27,7 +28,9 @@ const ALLOWED = (Deno.env.get("ALLOWED_ORIGINS") ??
   "https://www.integratedstaffing.ca,https://integratedstaffing.ca,https://www.accountantstaffing.ca,https://accountantstaffing.ca,https://www.administrativestaffing.ca,https://administrativestaffing.ca,https://josiahyule.github.io")
   .split(",").map((s) => s.trim());
 
-const tooMany = rateLimiter(20, 10 * 60 * 1000); // a busy visitor misses a few times; a script misses hundreds
+// A busy visitor misses a few times; a script misses hundreds. 2000 a day in all keeps the table small
+// whatever happens (_shared/guard.js).
+const guard = createGuard({ name: "chat-miss", visitor: [20, 600], everyone: [2000, 86400], env: guardEnv((k) => Deno.env.get(k)) });
 
 Deno.serve(async (req) => {
   const origin = req.headers.get("origin");
@@ -48,8 +51,8 @@ Deno.serve(async (req) => {
   let body: Record<string, unknown>;
   try { body = await readJson(req, 4096); } catch (e) { return reply({ ok: false, error: e instanceof BodyError ? e.message : "json" }, e instanceof BodyError ? e.status : 400); }
   if (!body || typeof body !== "object" || Array.isArray(body)) return reply({ ok: false, error: "json" }, 400);
-  const ip = req.headers.get("x-forwarded-for")?.split(",")[0].trim() ?? "unknown";
-  if (tooMany(ip)) return reply({ ok: false, error: "rate" }, 429);
+  const limit = await guard(req);
+  if (limit) return reply({ ok: false, error: limit }, limit === "rate" ? 429 : 503);
 
   const text = redact(body.text);
   if (!text) return reply({ ok: false, error: "invalid" }, 400);

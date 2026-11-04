@@ -18,6 +18,7 @@ import { areas } from '../../data/areas.js';
 import { brand, offices, provinceOffice, field } from '../../data/site.js';
 import { jobBlocks, payFromBlocks, PAY_LABEL } from '../../lib/jobtext.js';
 import { url } from '../../lib/url.js';
+import { asset } from '../../lib/img.js';
 import { route, placeFrom } from '../../../assistant/supabase/functions/_shared/routing.js';
 
 export function getStaticPaths() {
@@ -72,20 +73,34 @@ function salary(pay) {
   if (m[3] === 'year' && min < 1000) return undefined; // a range like "$55 to $65,000" is a typo in the feed
   return { '@type': 'MonetaryAmount', currency: 'CAD', value: { '@type': 'QuantitativeValue', unitText: m[3].toUpperCase(), ...(max ? { minValue: min, maxValue: max } : { value: min }) } };
 }
+// The description Google shows is built from the same blocks as the page, so it leaves out what the
+// page leaves out: tracking codes ("INT001"), hashtags and the standard closing (the referral bonus).
+// Google accepts simple HTML here (paragraphs, lists, bold).
+const escHtml = (t) => String(t).replace(/[<>&]/g, (c) => ({ '<': '&lt;', '>': '&gt;', '&': '&amp;' }[c]));
+const schemaDescription = blocks.map((b) => (
+  b.type === 'heading' ? `<p><strong>${escHtml(b.text)}</strong></p>`
+  : b.type === 'list' ? `<ul>${b.items.map((i) => `<li>${escHtml(i)}</li>`).join('')}</ul>`
+  : b.type === 'details' ? b.items.map((i) => `<p><strong>${escHtml(i.label)}:</strong> ${escHtml(i.value)}</p>`).join('')
+  : `<p>${escHtml(b.text)}</p>`
+)).join('');
+// Part-time roles say so (Google lets job seekers filter by it). There's no closing date
+// (validThrough) because the feed has none: a closed job leaves the site, and Google is told
+// (scripts/notify-google-jobs.mjs).
+const partTime = /\bpart[\s-]*time\b/i.test(`${job.title} ${job.note || ''} ${job.employment || ''}`);
 const schema = {
   '@context': 'https://schema.org', '@type': 'JobPosting',
   title: job.title,
-  description: job.description.split('\n').map((l) => l.trim()).filter(Boolean).map((l) => `<p>${l.replace(/[<>&]/g, (c) => ({ '<': '&lt;', '>': '&gt;', '&': '&amp;' }[c]))}</p>`).join(''),
+  description: schemaDescription,
   identifier: { '@type': 'PropertyValue', name: brand.name, value: job.id },
   datePosted: job.posted,
-  employmentType: job.type === 'direct' ? 'FULL_TIME' : 'TEMPORARY',
-  hiringOrganization: { '@type': 'Organization', name: brand.name, sameAs: brand.siteUrl },
+  employmentType: job.type === 'direct' ? (partTime ? 'PART_TIME' : 'FULL_TIME') : (partTime ? ['TEMPORARY', 'PART_TIME'] : 'TEMPORARY'),
+  hiringOrganization: { '@type': 'Organization', name: brand.name, sameAs: brand.siteUrl, logo: new URL(asset(brand.logo), Astro.site).href },
   jobLocation: { '@type': 'Place', address: { '@type': 'PostalAddress', addressLocality: job.city, addressRegion: job.province, addressCountry: 'CA' } },
   baseSalary: salary(job.pay),
   directApply: false,
 };
 ---
-<Base title={`${job.title}, ${where}`} description={job.snippet} assistantMode="seeker" assistantJob={job.id} schema={job.description ? schema : undefined}>
+<Base title={`${job.title}, ${where}`} description={job.snippet} assistantMode="seeker" assistantJob={job.id} schema={blocks.length ? schema : undefined}>
   <article class="jp" data-job-id={job.id}>
     <header class="wrap jp-head">
       <a class="back" href={url('/find-work/')}>← All jobs</a>
@@ -97,7 +112,7 @@ const schema = {
     <div class="wrap jp-grid">
       <aside class:list={['card', `card--${job.type}`]} aria-label="Job summary">
         <dl class="facts">
-          {payText && <div><dt>Pay</dt><dd>{payText}</dd></div>}
+          {payText && <div><dt>Pay</dt><dd>{payText}{pay && job.payNote && <span class="pay-note">{job.payNote}</span>}</dd></div>}
           <div><dt>Type</dt><dd>{job.typeLabel}</dd></div>
           {job.posted && <div><dt>Posted</dt><dd><time datetime={job.posted}>{longDate(job.posted)}</time></dd></div>}
         </dl>
@@ -193,6 +208,7 @@ const schema = {
 </script>
 
 <style>
+  .pay-note { display: block; margin-top: 2px; font-size: var(--fs-small); color: var(--ink-soft); font-weight: var(--fw-text); }
   .jp { padding-block: clamp(2.5rem, 5vw, 4rem) clamp(3.5rem, 7vw, 6rem); }
   .back { display: inline-block; margin-bottom: var(--s6); font-size: var(--fs-small); font-weight: var(--fw-bold); text-decoration: none; }
   .back:hover { text-decoration: underline; }

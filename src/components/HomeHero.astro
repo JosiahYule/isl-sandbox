@@ -21,6 +21,12 @@ const shortTitle = (t) => String(t).split(/\s+[-–—]\s*|\s*[-–—]\s+/)[0].
 const near = [...new Set(jobs.map((j) => j.province).filter(Boolean))]
   .map((code) => ({ code, label: ({ PE: 'PEI' })[code] || provinces[code] || code, n: jobs.filter((j) => j.province === code).length }))
   .sort((a, b) => b.n - a.n);
+// The job count, said only when it's a number worth saying: "Search 3 open jobs" reads as an empty
+// board, so a short list says "our open jobs" instead. (The Squarespace copy refreshes the list hourly;
+// this choice is made at each build.)
+const SAY_COUNT_FROM = 10;
+const sayCount = jobs.length >= SAY_COUNT_FROM;
+const openJobs = sayCount ? `${jobs.length} open jobs` : 'our open jobs';
 ---
   <section class:list={['hero', long && 'hero--long']} data-hero-under>
     <div class="hero-bg" data-animate>
@@ -33,7 +39,7 @@ const near = [...new Set(jobs.map((j) => j.province).filter(Boolean))]
         </h1>
         <p class="hero-lead">{lead}</p>
         <form class="search" action={url('/find-work/')} method="get" role="search" data-isl-live="search">
-          <label for="hero-q">{findJob ? `${findJob} Search ${jobs.length} open jobs` : `Looking for work? Search ${jobs.length} open jobs`}</label>
+          <label for="hero-q">{findJob ? `${findJob} Search ${openJobs}` : `Looking for work? Search ${openJobs}`}</label>
           <div class="search-bar">
             <input id="hero-q" name="q" type="search" placeholder="Job title, skill or city" autocomplete="off" />
             <button type="submit">Search</button>
@@ -55,7 +61,7 @@ const near = [...new Set(jobs.map((j) => j.province).filter(Boolean))]
             <li><a href={j.url}><strong>{shortTitle(j.title)}</strong><span>{[[j.city, j.province].filter(Boolean).join(', '), j.pay || (j.payStatus === 'conflict' ? j.payLabel : '')].filter(Boolean).join(' · ')}</span></a></li>
           ))}
         </ul>
-        <a class="latest-all" href={url('/find-work/')}>All {jobs.length} jobs <span aria-hidden="true">→</span></a>
+        <a class="latest-all" href={url('/find-work/')}>{sayCount ? `All ${jobs.length} jobs` : 'All jobs'} <span aria-hidden="true">→</span></a>
       </div>
     </div>}
   </section>
@@ -94,7 +100,9 @@ const near = [...new Set(jobs.map((j) => j.province).filter(Boolean))]
   .line { display: block; }
   .hero--long .hero-copy { max-width: 820px; }
   .hero--long .hero-title { font-size: var(--fs-h1); letter-spacing: -0.025em; line-height: 1.05; }
-  .hero--long .line { display: inline; white-space: normal; }
+  /* Each line is a sentence ("From reception to executive assistant." / "Hires that run the office."), so each
+     starts on its own line; a long one may wrap within itself */
+  .hero--long .line { white-space: normal; }
 
   .hero-lead { margin-top: var(--s6); font-size: var(--fs-lead); font-weight: var(--fw-light); line-height: 1.55; color: rgb(255 255 255 / 0.86); max-width: 38ch; }
 

@@ -60,6 +60,7 @@ export function jobBlocks(description = '', title = '') {
   const blocks = [];
   for (const line of lines) {
     if (/^int\d+$/i.test(line) || /^(#\w+\s*)+$/.test(line)) continue; // tracking codes, hashtags
+    if (!/[a-z0-9]/i.test(line)) continue; // a stray full stop or dash on a line of its own
     if (CLOSING.test(line)) break; // the standard closing: stop here
     const bullet = line.match(/^[•·\-\*]\s*(.+)$/);
     if (bullet) {

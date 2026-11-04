@@ -2,16 +2,18 @@
 // SERVICE BLOCKS: the two services side by side, each with a coloured top edge (near-black for
 // contract or temporary, the brand colour for permanent), two figures and a link to its page.
 // Used under "We recruit." on ISL's homepage and under "Why Choose..." on AS and ADS's.
-// <ServiceBlocks services={[{ key: 'contract' | 'direct', name, href, go, figs: [[figure, what], ...] }]} />
+// <ServiceBlocks services={[{ key: 'contract' | 'direct', name, href, go, figs: [[figure, what, stat?], ...] }]} />
+//   stat: the figure's entry in the brand's stats, when it's one that needs confirming (adds the sandbox tag)
 import { url } from '../lib/url.js';
 const { services = [] } = Astro.props;
+import Unconfirmed from './Unconfirmed.astro';
 ---
 <ul class="svcs" data-stagger>
       {services.map((s) => (
         <li>
           <a class:list={['sb', `sb--${s.key}`]} href={url(s.href)}>
             <span class="sb-name">{s.name}</span>
-            <span class="sb-figs">{s.figs.map(([f, d]) => <span class="sb-fig"><span class="figure">{f}</span><span class="fd">{d}</span></span>)}</span>
+            <span class="sb-figs">{s.figs.map(([f, d, st]) => <span class="sb-fig"><span class="figure">{f}</span><span class="fd">{d}<Unconfirmed figure={st} /></span></span>)}</span>
             <span class="sb-go">{s.go} <span aria-hidden="true">→</span></span>
           </a>
         </li>

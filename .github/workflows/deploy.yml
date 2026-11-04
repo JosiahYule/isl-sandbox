@@ -31,6 +31,22 @@ jobs:
   build:
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    # Settings for every build in this job: the sandbox build in `npm test` AND the Squarespace builds
+    # (export-squarespace.mjs runs its own). Set only on one step, the Squarespace code blocks were
+    # built without them, so their forms would have sent nothing.
+    env:
+      AVIONTE_FEED_URL: ${{ secrets.AVIONTE_FEED_URL }}
+      PUBLIC_ISL_GA4_ID: ${{ vars.ISL_GA4_ID }}
+      PUBLIC_AS_GA4_ID: ${{ vars.AS_GA4_ID }}
+      PUBLIC_ADS_GA4_ID: ${{ vars.ADS_GA4_ID }}
+      PUBLIC_ISL_REQUEST_ENDPOINT: ${{ vars.ISL_REQUEST_ENDPOINT }}
+      PUBLIC_AS_REQUEST_ENDPOINT: ${{ vars.AS_REQUEST_ENDPOINT }}
+      PUBLIC_ADS_REQUEST_ENDPOINT: ${{ vars.ADS_REQUEST_ENDPOINT }}
+      # The chat's job alerts (ISL) and its log of messages it couldn't understand: empty = off
+      PUBLIC_ISL_ALERTS_ENDPOINT: ${{ vars.ISL_ALERTS_ENDPOINT }}
+      PUBLIC_CHAT_MISS_ENDPOINT: ${{ vars.CHAT_MISS_ENDPOINT }}
+      # Cloudflare Turnstile's site key for the request forms (the secret goes in Supabase as TURNSTILE_SECRET)
+      PUBLIC_TURNSTILE_SITE_KEY: ${{ vars.TURNSTILE_SITE_KEY }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -39,20 +55,19 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm test
-        env:
-          AVIONTE_FEED_URL: ${{ secrets.AVIONTE_FEED_URL }}
-          PUBLIC_ISL_GA4_ID: ${{ vars.ISL_GA4_ID }}
-          PUBLIC_AS_GA4_ID: ${{ vars.AS_GA4_ID }}
-          PUBLIC_ADS_GA4_ID: ${{ vars.ADS_GA4_ID }}
-          PUBLIC_ISL_REQUEST_ENDPOINT: ${{ vars.ISL_REQUEST_ENDPOINT }}
-          PUBLIC_AS_REQUEST_ENDPOINT: ${{ vars.AS_REQUEST_ENDPOINT }}
-          PUBLIC_ADS_REQUEST_ENDPOINT: ${{ vars.ADS_REQUEST_ENDPOINT }}
-          # The chat's job alerts (ISL) and its log of messages it couldn't understand: empty = off
-          PUBLIC_ISL_ALERTS_ENDPOINT: ${{ vars.ISL_ALERTS_ENDPOINT }}
-          PUBLIC_CHAT_MISS_ENDPOINT: ${{ vars.CHAT_MISS_ENDPOINT }}
       # The Squarespace versions of the three sites (shared files, code blocks, fresh job lists),
       # published at /isl-sandbox/sq/<brand>/ for the Squarespace sites to load (scripts/export-squarespace.mjs)
       - run: node scripts/export-squarespace.mjs --publish
+      # Which jobs are new or closed since the site that's live now (Google's Indexing API, sent after
+      # the deploy below). Does nothing until the GOOGLE_INDEXING_KEY secret is set.
+      - run: node scripts/notify-google-jobs.mjs diff
+        env:
+          GOOGLE_INDEXING_KEY: ${{ secrets.GOOGLE_INDEXING_KEY }}
+      - uses: actions/upload-artifact@v4
+        with:
+          name: google-jobs
+          path: .astro/google-jobs.json
+          if-no-files-found: ignore
       - uses: actions/upload-artifact@v4
         with:
           name: job-pay-review
@@ -71,3 +86,29 @@ jobs:
     steps:
       - id: deployment
         uses: actions/deploy-pages@v4
+
+  # Once the new site is live, tell Google which job pages are new and which have closed
+  # (scripts/notify-google-jobs.mjs). A failure here never undoes the deploy.
+  notify-google:
+    needs: deploy
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      actions: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: scripts/notify-google-jobs.mjs
+          sparse-checkout-cone-mode: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .node-version
+      - uses: actions/download-artifact@v4
+        continue-on-error: true # no artifact when the key isn't set
+        with:
+          name: google-jobs
+          path: .astro
+      - run: node scripts/notify-google-jobs.mjs send
+        env:
+          GOOGLE_INDEXING_KEY: ${{ secrets.GOOGLE_INDEXING_KEY }}

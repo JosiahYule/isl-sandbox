@@ -7,6 +7,9 @@
 //
 // It runs on GitHub (.github/workflows/copy-images.yml), because this sandbox can't reach
 // Squarespace. Images already copied are skipped, so a re-run only fetches what's new.
+// Photos are saved compressed (scripts/lib/compress-image.mjs): Squarespace's own files are about ten
+// times heavier than they need to be.
+import { compress, toWebp } from './lib/compress-image.mjs';
 import { readFileSync, writeFileSync, readdirSync, statSync, mkdirSync, existsSync } from 'node:fs';
 import { join } from 'node:path';
 
@@ -53,8 +56,14 @@ for (const [path, widthSet] of found) {
       const res = await fetch(`${CDN}${path}?format=${w}w`, { headers: { 'User-Agent': 'isl-sandbox image copy (github.com/JosiahYule/isl-sandbox)' } });
       const type = (res.headers.get('content-type') || '').split(';')[0];
       if (!res.ok || !EXT[type]) throw new Error(`HTTP ${res.status} ${type}`);
-      entry.ext ||= EXT[type];
-      writeFileSync(join(OUT, `${entry.name}-${w}w.${entry.ext}`), Buffer.from(await res.arrayBuffer()));
+      const original = Buffer.from(await res.arrayBuffer());
+      // Photos become a lighter WebP. An image already saved in another format keeps that format, so
+      // every width of one image shares an extension (src/lib/img.js builds the names from one).
+      const photo = /^image\/(jpeg|png|webp)$/.test(type);
+      let lighter = photo && (!entry.ext || entry.ext === 'webp') ? await compress(original) : null;
+      if (!lighter && photo && entry.ext === 'webp' && type !== 'image/webp') lighter = await toWebp(original);
+      entry.ext ||= lighter ? 'webp' : EXT[type];
+      writeFileSync(join(OUT, `${entry.name}-${w}w.${entry.ext}`), lighter ?? original);
       entry.widths.push(w); fetched++;
     } catch (e) {
       failed++; if (reasons.length < 3) reasons.push(`${path} at ${w}w: ${e.message}${e.cause ? ` (${e.cause.code || e.cause.message})` : ''}`);

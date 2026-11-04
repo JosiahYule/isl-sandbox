@@ -22,11 +22,15 @@
 // Optional:
 //   ANTHROPIC_MODEL     defaults to claude-haiku-5-5 (fast and cheap)
 //   ALLOWED_ORIGINS     comma-separated sites allowed to call this
+//   CHAT_DAILY_LIMIT    messages a day for all visitors combined (default 2000), the ceiling on the bill.
+//                       Also set a monthly spend limit in the Claude Console (Settings > Limits).
+//   CLIENT_IP_HEADER, LOG_IP_HEADERS   see _shared/guard.js
 // =====================================================================
 
 import { normalizeFeed } from "../_shared/jobs.js";
 import { converse, fallbackReply, cleanConversation } from "../_shared/converse.js";
-import { readJson, rateLimiter, BodyError } from "../_shared/http.js";
+import { readJson, BodyError } from "../_shared/http.js";
+import { createGuard, guardEnv } from "../_shared/guard.js";
 import { claudeCaller } from "../_shared/claude.js";
 
 const MODEL = Deno.env.get("ANTHROPIC_MODEL") ?? "claude-haiku-5-5";
@@ -35,10 +39,12 @@ const FEED_URL = Deno.env.get("AVIONTE_FEED_URL") ?? "";
 const ALLOWED = (Deno.env.get("ALLOWED_ORIGINS") ??
   "https://www.integratedstaffing.ca,https://integratedstaffing.ca").split(",").map((s) => s.trim());
 
-// ---- Rate limit: each message costs a Claude call, so one visitor can't run up the bill ----
-// 30 messages per 10 minutes per IP address, counted in memory (resets when the function restarts).
-const RATE = { max: 30, windowMs: 10 * 60 * 1000 };
-const limited = rateLimiter(RATE.max, RATE.windowMs);
+// ---- Rate limits: each message costs a Claude call ----
+// 30 messages per 10 minutes per visitor, and CHAT_DAILY_LIMIT a day for everyone combined, counted in
+// the database so every copy of this function shares them (_shared/guard.js). The combined limit is
+// the one no one can dodge: when it's reached, visitors get the offices' numbers instead of the AI.
+const DAILY = Number(Deno.env.get("CHAT_DAILY_LIMIT")) || 2000;
+const guard = createGuard({ name: "chat", visitor: [30, 600], everyone: [DAILY, 86400], env: guardEnv((k) => Deno.env.get(k)) });
 
 // ---- CORS: the browser rule that decides which websites may call us ----
 function corsHeaders(origin: string | null) {
@@ -78,10 +84,6 @@ Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers });
   if (req.method !== "POST") return new Response(JSON.stringify({ error: "POST only" }), { status: 405, headers });
 
-  const ip = (req.headers.get("x-forwarded-for") || "").split(",")[0].trim() || "unknown";
-  if (limited(ip)) {
-    return new Response(JSON.stringify({ error: "That's a lot of messages in a short time. Please wait a few minutes, or call your nearest ISL office." }), { status: 429, headers });
-  }
 
   let body: any;
   try { body = await readJson(req); }
@@ -89,6 +91,12 @@ Deno.serve(async (req) => {
   if (!body || typeof body !== 'object' || Array.isArray(body)) return new Response(JSON.stringify({ error: 'Send a JSON object.' }), { status: 400, headers });
   // Check the conversation's shape before contacting anyone
   if (!cleanConversation(body.messages)) return new Response(JSON.stringify({ error: "Send messages ending with a user message." }), { status: 400, headers });
+  // Checked after the message's shape, so malformed requests don't use up anyone's allowance
+  const limit = await guard(req);
+  if (limit === "rate") {
+    return new Response(JSON.stringify({ error: "That's a lot of messages in a short time. Please wait a few minutes, or call your nearest ISL office." }), { status: 429, headers });
+  }
+  if (limit === "busy") return new Response(JSON.stringify(fallbackReply()), { headers }); // the day's limit: the offices, as in an outage
   // Not configured yet, or the feed is down: the offices, not an error
   if (!API_KEY || !FEED_URL) return new Response(JSON.stringify(fallbackReply()), { headers });
   let jobs: any[];

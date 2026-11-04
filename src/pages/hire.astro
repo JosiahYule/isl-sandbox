@@ -128,12 +128,20 @@ const afterSteps = [
         <!-- Hidden from people; bots fill it in, and the function ignores anything that does -->
         <label class="hp" aria-hidden="true">Website <input name="website" tabindex="-1" autocomplete="off" /></label>
 
+        <!-- Cloudflare Turnstile, when switched on (forms.turnstileSiteKey): usually invisible; it only shows a
+             box to tick when Cloudflare isn't sure the sender is a person -->
+        {forms.requestEndpoint && forms.turnstileSiteKey && <>
+          <div class="cf-turnstile" data-sitekey={forms.turnstileSiteKey} data-appearance="interaction-only" data-size="flexible"></div>
+          <script is:inline src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+        </>}
+
         <p class="to-line" aria-live="polite"></p>
         <div class="submit">
           <button type="submit">Send request</button>
           <p>We use your details only to respond to this request. <a href={url('/privacy/')}>Privacy</a></p>
         </div>
         <p class="send-err" hidden role="alert">That didn’t send. Please try again, or call us at <a href={tel}>{brand.mainPhone}</a>.</p>
+        <p class="send-err send-err--human" hidden role="alert">Please complete the check above, then send again. Or call us at <a href={tel}>{brand.mainPhone}</a>.</p>
         <div class="sent" hidden tabindex="-1">
           <p class="sent-title">Request sent.</p>
           <p class="sent-who"></p>
@@ -283,7 +291,12 @@ const afterSteps = [
   const errFor = (f: Element) => f.closest('.field')?.querySelector<HTMLElement>('.err');
   required.forEach((f) => f.addEventListener('input', () => { if (f.checkValidity()) { f.removeAttribute('aria-invalid'); const e = errFor(f); if (e) e.hidden = true; } }));
   const endpoint = form.dataset.endpoint;
-  const errBox = form.querySelector<HTMLElement>('.send-err')!;
+  const errBox = form.querySelector<HTMLElement>('.send-err:not(.send-err--human)')!;
+  const humanBox = form.querySelector<HTMLElement>('.send-err--human')!;
+  // Turnstile (when on) adds its answer to the form as cf-turnstile-response. Each answer works once, so
+  // it's kept out of the retry fingerprint below and fetched fresh for every attempt.
+  const TOKEN = 'cf-turnstile-response';
+  const turnstile = () => (window as unknown as { turnstile?: { reset: (el?: Element) => void } }).turnstile;
   const button = form.querySelector<HTMLButtonElement>('button[type="submit"]')!;
   let started = false, sending = false, completed = false;
   let leadId = '', lastPayload = '';
@@ -304,12 +317,14 @@ const afterSteps = [
     required.forEach((f) => { const ok = !bad.includes(f); if (ok) f.removeAttribute('aria-invalid'); else f.setAttribute('aria-invalid', 'true'); const e = errFor(f); if (!e) return; e.hidden = ok;
       if (e.dataset.bad) e.textContent = (f as HTMLInputElement).value.trim() ? e.dataset.bad : e.dataset.empty!; });
     if (bad.length) { track('form_error', { ...eventContext(), error_type: 'validation' }); bad[0].focus(); return; }
-    errBox.hidden = true;
+    errBox.hidden = true; humanBox.hidden = true;
     let receivedLeadId = '';
     if (endpoint) {
       sending = true;
       button.disabled = true; button.textContent = 'Sending…';
       const data = Object.fromEntries(new FormData(form).entries());
+      const token = String(data[TOKEN] || '');
+      delete data[TOKEN];
       const signature = JSON.stringify(data);
       if (!leadId || signature !== lastPayload) { leadId = 'lead_' + crypto.randomUUID(); lastPayload = signature; pendingPayload = null; }
       track('form_submit', eventContext());
@@ -317,11 +332,18 @@ const afterSteps = [
         // A retry uses the exact same payload as well as the same idempotency key.
         pendingPayload ||= { ...data, brand: said.brand, page: location.pathname, lead_id: leadId, attribution: getAttribution(), measurement: await getMeasurementContext() };
         const res = await fetch(endpoint, { method: 'POST', signal: AbortSignal.timeout(15000), headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(pendingPayload) });
+          body: JSON.stringify({ ...pendingPayload, ...(token ? { turnstile: token } : {}) }) });
         const result = await res.json();
+        if (result?.error === 'human') {
+          turnstile()?.reset(); // a fresh check for the next try
+          sending = false; button.disabled = false; button.textContent = 'Send request';
+          humanBox.hidden = false; track('form_error', { ...eventContext(), error_type: 'human_check' });
+          return;
+        }
         if (!res.ok || result.ok !== true || result.accepted !== true || result.lead_id !== leadId) throw new Error('Request was not accepted');
         receivedLeadId = result.lead_id || leadId;
       } catch {
+        if (token) turnstile()?.reset(); // the answer was used; get a fresh one for the retry
         sending = false; button.disabled = false; button.textContent = 'Send request';
         errBox.hidden = false; track('form_error', { ...eventContext(), error_type: 'delivery' });
         return;

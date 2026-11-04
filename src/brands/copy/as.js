@@ -36,7 +36,9 @@ export const copy = {
 
   // The roles at each level (EXACT, homepage list)
   levels: [
-    { name: 'Junior', roles: ['Junior & Senior Accounting Clerks', 'Junior Accountant', 'Accounting Technician', 'Accounts Payable / Accounts Receivable Specialist', 'Payroll Clerk', 'Tax Clerk', 'Data Entry Clerk'] },
+    // "Junior & Senior Accounting Clerks" on the live page: a senior clerk is still clerk-level, but "Senior" in the
+    // Junior column read as a mistake, so here it's one plain title
+    { name: 'Junior', roles: ['Accounting Clerk', 'Junior Accountant', 'Accounting Technician', 'Accounts Payable / Accounts Receivable Specialist', 'Payroll Clerk', 'Tax Clerk', 'Data Entry Clerk'] },
     { name: 'Intermediate', roles: ['General Accountant', 'Property Accountant', 'Bookkeeper', 'Office Manager', 'Financial Analyst / Budget Analyst', 'AR/AP Supervisor', 'Payroll Specialist', 'Part-time Bookkeeper', 'Procurement Manager'] },
     { name: 'Senior', roles: ['CFO', 'VP Finance', 'Director of Finance', 'Controller', 'Accounting Manager', 'Assistant Controller', 'Senior Level Accountant', 'Senior Financial Analyst', 'Internal Auditor', 'Financial Reporting Officer'] },
   ],

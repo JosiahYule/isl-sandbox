@@ -101,3 +101,10 @@ test('the chat window runs job alerts as a preview until switched on, and report
     assert.deepEqual(events.filter((e) => e !== 'chat_open'), ['chat_fallback', 'chat_intent', 'job_alert_signup']);
   } finally { w.close(); }
 });
+
+test('the consent record stored with a sign-up is the wording the chat shows', async () => {
+  const { consentWording } = await import('../assistant/supabase/functions/_shared/alerts.js');
+  const widget = await fs.readFile(new URL('../assistant/widget/widget.js', import.meta.url), 'utf8');
+  const shown = [...widget.matchAll(/consent: \(b\) => `([^`]+)`/g)].map((m) => m[1].replace('${b}', 'Integrated Staffing'));
+  assert.deepEqual(shown, [consentWording('en'), consentWording('fr')]);
+});

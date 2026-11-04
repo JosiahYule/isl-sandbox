@@ -22,7 +22,17 @@ import { resolve } from 'node:path';
 // live: the whole page is built from data that changes (the jobs report, pay on open jobs); on Squarespace
 //   the page is refreshed from the latest build every time it loads (src/squarespace/core.js)
 // schema: optional structured data (an object or a list) that search engines read, e.g. an office's address
-const { title, description = brand.scope, assistantMode, assistantJob, footerOffices = true, schema, live = false } = Astro.props;
+const { title, description: fullDescription = brand.scope, assistantMode, assistantJob, footerOffices = true, schema, live = false } = Astro.props;
+// Search results and link previews show about 160 characters. A longer description (some are built from
+// page copy) is cut at the last full sentence that fits, or else at a word, so it never stops mid-word.
+function fit(text, max = 160) {
+  const t = String(text).replace(/\s+/g, ' ').trim();
+  if (t.length <= max) return t;
+  const sentence = t.slice(0, max).match(/^.*[.!?](?=\s|$)/)?.[0];
+  if (sentence && sentence.length >= 80) return sentence;
+  return t.slice(0, max - 1).replace(/\s+\S*$/, '').replace(/[,;:]$/, '') + '…';
+}
+const description = fit(fullDescription);
 const assistant = (Astro.props.assistant ?? true) && brand.assistant;
 // While the chat is paused, the AI pilot still loads it for testers who open a page with ?pilot
 // (see assistant/demo-mode.js). Sandbox and ISL only; the public sandbox stays chat-free.

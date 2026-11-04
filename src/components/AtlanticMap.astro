@@ -22,11 +22,13 @@ const townDots = towns.map((t) => ({ ...t, ...project(t.lon, t.lat) }));
 
 // Which side of the pin each label sits on, so nearby labels don't collide.
 const labelSide = { Halifax: 'right', Moncton: 'left', 'Saint John': 'right', Charlottetown: 'right', "St. John's": 'left' };
+// Phones: Moncton's label, on the left, ran into the screen's edge, so there it sits above the pin
+const aboveOnPhones = new Set(['Moncton']);
 
 const pins = map.offices.filter((p) => offices.some((x) => x.city === p.city)).map((p) => {
   const o = offices.find((x) => x.city === p.city);
   const key = brand.officePages ? areas.find((a) => a.label === p.city)?.key : undefined;
-  return { ...o, key, left: (p.x / map.width) * 100, top: (p.y / map.height) * 100, side: labelSide[p.city] ?? 'right' };
+  return { ...o, key, left: (p.x / map.width) * 100, top: (p.y / map.height) * 100, side: labelSide[p.city] ?? 'right', above: aboveOnPhones.has(p.city) };
 });
 const sel = Math.max(0, pins.findIndex((p) => p.city === selected));
 const tel = (n) => `tel:+1${n.replaceAll('-', '')}`;
@@ -42,7 +44,7 @@ const tel = (n) => `tel:+1${n.replaceAll('-', '')}`;
   <ul class="pins" aria-label="Our offices">
     {pins.map((p, i) => (
       <li style={`left:${p.left}%;top:${p.top}%;--o:${i}`}>
-        <button type="button" class:list={['pin', `pin--${p.side}`]} aria-pressed={i === sel ? 'true' : 'false'} data-index={i} data-href={p.key ? url(`/offices/${p.key}/`) : undefined}>
+        <button type="button" class:list={['pin', `pin--${p.side}`, p.above && 'pin--above-phone']} aria-pressed={i === sel ? 'true' : 'false'} data-index={i} data-href={p.key ? url(`/offices/${p.key}/`) : undefined}>
           <span class="dot" aria-hidden="true"></span>
           <span class="label">{p.city}</span>
         </button>
@@ -149,6 +151,8 @@ const tel = (n) => `tel:+1${n.replaceAll('-', '')}`;
   @media (max-width: 640px) {
     .label { font-size: var(--fs-tiny); padding: 4px 6px; }
     .dot { width: 14px; height: 14px; border-width: 3px; }
+    /* Label above the pin (aboveOnPhones). The dot stays exactly on the town: 13px = 6px padding + half the 14px dot. */
+    .pin--above-phone { flex-direction: column-reverse; gap: 4px; transform: translate(-50%, calc(-100% + 13px)); }
     .card { position: static; width: auto; margin-top: var(--s4); }
   }
 </style>

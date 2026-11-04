@@ -30,8 +30,11 @@ const local = [['NS', 'Halifax', 'halifax'], ['NB', 'Moncton', 'moncton'], ['PE'
 local.push({ key: 'direct', label: 'Permanent, all of Canada', ...route({ audience: 'employer', service: 'direct', place: null }) });
 const tel = (n) => `tel:+1${n.replace(/\D/g, '')}`;
 const services = [['Contract staffing', '/contract/'], ['Direct hire', '/direct-hire/']];
+// Search results show about 160 characters: three example roles, or two when the industry's name is long
+const describe = (n) => `${ind.name} staffing: ${ind.roles.slice(0, n).join(', ').toLowerCase()} and more, on contract and permanently, anywhere in Canada.`;
+const metaDescription = describe(3).length <= 160 ? describe(3) : describe(2);
 ---
-<Base title={`${ind.name} staffing`} description={`${ind.name} staffing: ${ind.roles.slice(0, 3).join(', ').toLowerCase()} and more, on contract and permanently, anywhere in Canada.`} assistantMode="employer">
+<Base title={`${ind.name} staffing`} description={metaDescription} assistantMode="employer">
   <PageHero compact title={`${ind.name}.`} lead={ind.note}>
     <Button href={hireHref}>Request workers</Button>
     <Button href={`/find-work/?industry=${ind.slug}`} variant="outline">See open jobs</Button>

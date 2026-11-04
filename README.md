@@ -253,6 +253,9 @@ Request forms: ISL's form sends through `assistant/supabase/functions/isl-reques
 
 Images: `.github/workflows/copy-images.yml` copies every Squarespace-hosted image into `public/images/cms/` and lists it in `src/data/cms-images.json`; `src/lib/img.js` then serves the copies (189 files, 45 images, copied October 26). The chat assistant's recruiter headshots still load from Squarespace; they move to the live domain's copies at launch. Run it again (Actions tab) after adding Squarespace images, and before cancelling Squarespace.
 
+- **Compressed on the way in.** Squarespace's files are about ten times heavier than they need to be (a 500px headshot was 330 KB). The copy script saves each photo as a WebP at quality 80 (`scripts/lib/compress-image.mjs`), which looks the same and weighs about 30 KB. `node scripts/compress-images.mjs` re-saves any older copies that are still heavy; it skips light ones, so running it twice changes nothing.
+- **Each build ships only the images it uses.** Astro copies all of `public/` into every build, which put six copies of the photo library in one deploy. After each build, `astro.config.mjs` (`pruneImages`) removes the image files no page names. The deploy went from about 414 MB to about 44 MB.
+
 ## Running it on your own computer (optional)
 
 You don't need this to use the sandbox, but it gives instant previews while you edit. You'll need [Node.js](https://nodejs.org) (the LTS version) installed. Then, in a terminal inside this folder:
@@ -265,9 +268,28 @@ npm run dev      # starts a local preview at http://localhost:4321
 Leave `npm run dev` running. Every time you save a file, the browser updates.
 
 
+## Figures waiting to be confirmed
+
+The retention rate, average time to fill and Google review count in `src/brands/isl.js` (`stats`) are marked `confirmed: false` until they're checked against ISL's records (advertised performance claims need proof on file). The sandbox shows them with a small "unconfirmed" tag; live and Squarespace builds leave them out, and the page uses wording that needs no number. Set `confirmed: true` once a figure is checked and it appears everywhere.
+
+## Google for Jobs
+
+Every job page carries JobPosting data built from the same cleaned text as the page (no tracking codes or standard closing), with the brand's logo. On Squarespace every job shares one page address, which Google finds slowly on its own, so the deploy also tells Google's Indexing API which jobs opened and which closed (`scripts/notify-google-jobs.mjs`). It does nothing until the `GOOGLE_INDEXING_KEY` secret is set; the top of that script lists the three steps to switch it on at launch.
+
+## Protecting the forms and the chat
+
+Every function a visitor's browser can call (the chat, both request forms, job alerts, the chat's miss log) uses `assistant/supabase/functions/_shared/guard.js`:
+
+- **A limit for everyone combined,** counted in the database (`rate_limits`, migration `20261104120000`), so it holds across every copy of a function and can't be dodged by changing address. It caps the Claude bill (`CHAT_DAILY_LIMIT`, 2,000 chat messages a day by default) and the emails a flood could send. Also set a monthly spend limit in the Claude Console.
+- **A limit per visitor,** in memory and in the database. Supabase doesn't document which header holds the visitor's real address, so read the steps in `guard.js` (`LOG_IP_HEADERS`, then `CLIENT_IP_HEADER`) once the functions are deployed.
+- **At most three job-alert confirmation emails to one address a day,** so the sign-up can't be used to fill a stranger's inbox. The consent record is the wording the chat shows, kept on the server.
+- **Cloudflare Turnstile** on the request forms, when switched on: the `TURNSTILE_SITE_KEY` GitHub variable for the site, and `TURNSTILE_SECRET` in Supabase.
+
+"Deploy the chat" creates the `rate_limits` table before deploying. For the other functions, run the migration once in the Supabase SQL editor.
+
 ## Search, pay review and enquiry measurement
 
-Job-board searches match individual words across the role, skills and location. Keywords and all filters stay in the URL, including job type, and Clear search removes all of them without deleting campaign tags.
+Job-board searches match individual words across the role, skills and location. A job also matches its office area and province by name, so "Halifax" finds the Dartmouth, Bedford and Timberlea jobs, and "Nova Scotia" or "PEI" work. "Part time" and "full time" are searched as one term however they're written. Keywords and all filters stay in the URL, including job type, and Clear search removes all of them without deleting campaign tags.
 
 The pay resolver compares the feed with the complete set of advertised base-pay tiers. Consistent ranges stay visible. Conflicting numerical rates are withheld across listings, job pages, pay tools and the assistant; candidates see **Confirm pay with recruiter**. Correct the original fields or ad in Avionte and the next refresh restores the rate. The saved snapshot is not rewritten to guess the answer. Every build produces `.astro/pay-review.json`, the GitHub Actions summary lists the affected job IDs, and the `job-pay-review` workflow artifact is available for download.
 

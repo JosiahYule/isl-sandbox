@@ -12,6 +12,14 @@ export const SENDER = {
   address: '99 Wyse Road, Suite 1320, Dartmouth, NS B3A 4S5',
 };
 
+// The consent wording beside the chat's tick box (assistant/widget/widget.js shows the same words;
+// test/chat-learning.test.mjs checks the two match). The sign-up stores this as the consent record.
+export function consentWording(lang = 'en', brand = SENDER.name) {
+  return lang === 'fr'
+    ? `Oui, envoyez-moi par courriel les nouveaux emplois d’${brand} qui correspondent à cette recherche. Je peux me désabonner en tout temps.`
+    : `Yes, email me new jobs from ${brand} that match this search. I can unsubscribe at any time.`;
+}
+
 const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const T = (lang, en, fr) => (lang === 'fr' ? fr : en);
 

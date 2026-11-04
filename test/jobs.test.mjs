@@ -18,6 +18,21 @@ test('a role and city match regardless of order or intervening title words', () 
   assert(matchesJobQuery(text(forklift), ''));
 });
 
+test('part time and full time are searched as one term, however they are written', () => {
+  for (const q of ['part time', 'part-time', 'parttime', 'Part Time']) assert(matchesJobQuery('Bookkeeper, part-time hours', q), q);
+  assert(!matchesJobQuery('Full-time role. Report to the partner.', 'part time'));
+  assert(!matchesJobQuery('Full-time role', 'time'), 'a full-time posting no longer matches "time" on its own');
+  assert(matchesJobQuery('Full time warehouse', 'full-time'));
+});
+
+test('a job row can be found by its office area and its province name', () => {
+  const html = fs.readFileSync(new URL('../dist/find-work/index.html', import.meta.url), 'utf8');
+  const row = html.match(new RegExp(`data-job-id="${forklift.id}"[^>]*data-search="([^"]*)"`))?.[1] ?? '';
+  assert.equal(forklift.city, 'Dartmouth');
+  assert(matchesJobQuery(row, 'forklift Halifax'), 'a Dartmouth job turns up when searching Halifax');
+  assert(matchesJobQuery(row, 'nova scotia'));
+});
+
 test('a conflicting rate is withheld across published copy, salary data and pay tools', () => {
   const before = JSON.stringify(forklift);
   const published = resolveCompensation(forklift);

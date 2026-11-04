@@ -1,7 +1,7 @@
 // Astro's settings file.
 // `site` + `base` tell Astro where the site is hosted: the sandbox preview, or (SITE_MODE=live) each brand's own domain.
 import { defineConfig } from 'astro/config';
-import { writeFileSync, renameSync, existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
+import { writeFileSync, renameSync, existsSync, readFileSync, readdirSync, statSync, rmSync } from 'node:fs';
 import { join, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -103,10 +103,37 @@ const typography = {
   },
 };
 
+// IMAGES: Astro copies all of public/ into every build, so each brand's build (and each Squarespace
+// build) used to carry the whole photo library, about six copies in one deploy. After the build, any
+// file in images/ that no built page, script or style names is removed from that build's output.
+// (public/images/ itself is untouched.) Every image path is written out in full at build time
+// (src/lib/img.js), so a page that uses a photo always names it.
+const pruneImages = {
+  name: 'isl-prune-images',
+  hooks: {
+    'astro:build:done': ({ dir }) => {
+      const root = fileURLToPath(dir);
+      const images = join(root, 'images');
+      if (!existsSync(images)) return;
+      const walk = (d) => readdirSync(d).flatMap((f) => { const p = join(d, f); return statSync(p).isDirectory() ? walk(p) : [p]; });
+      const text = walk(root)
+        .filter((f) => !f.startsWith(images) && /\.(html|js|mjs|css|json|xml|txt)$/.test(f))
+        .map((f) => readFileSync(f, 'utf8')).join('\n');
+      let removed = 0, bytes = 0;
+      for (const file of walk(images)) {
+        const name = relative(root, file).replace(/\\/g, '/'); // images/cms/name-500w.webp
+        if (text.includes(name)) continue;
+        bytes += statSync(file).size; rmSync(file); removed++;
+      }
+      console.log(`[isl-prune-images] removed ${removed} unused image files (${(bytes / 1e6).toFixed(1)} MB) from this build`);
+    },
+  },
+};
+
 export default defineConfig({
   site, base, outDir,
   ...(SQ && { build: { assetsPrefix: SQ_ASSETS } }), // Squarespace: Astro's own files load from GitHub Pages
-  integrations: [brandPages, sitemap, typography],
+  integrations: [brandPages, sitemap, typography, pruneImages],
   // __BRAND__ ('isl', 'as' or 'ads') can be read in any page, component or script
   // __LIVE__ is true in a live build (see SANDBOX OR LIVE above)
   // __SQ__ is true in a Squarespace build (a Squarespace build is also a live one: no sandbox links)

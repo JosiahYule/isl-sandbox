@@ -24,8 +24,9 @@
 // =====================================================================
 
 import { restClient } from "../_shared/db.js";
-import { readJson, rateLimiter, BodyError } from "../_shared/http.js";
-import { alertPage, confirmEmail, searchKey } from "../_shared/alerts.js";
+import { readJson, BodyError } from "../_shared/http.js";
+import { createGuard, limitFor, guardEnv } from "../_shared/guard.js";
+import { alertPage, confirmEmail, searchKey, consentWording } from "../_shared/alerts.js";
 
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL") ?? "";
 const rest = restClient(SUPABASE_URL, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "");
@@ -38,7 +39,12 @@ const ALLOWED = (Deno.env.get("ALLOWED_ORIGINS") ??
 const MAX_PER_EMAIL = 5;
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
-const tooMany = rateLimiter(5, 60 * 60 * 1000);
+// 5 sign-ups per visitor an hour and 300 a day in all (_shared/guard.js). And at most 3 confirmation
+// emails to any one address a day: without it, asking again and again from different places could
+// fill a stranger's inbox with our confirmation emails.
+const ENV = guardEnv((k) => Deno.env.get(k));
+const guard = createGuard({ name: "job-alerts", visitor: [5, 3600], everyone: [300, 86400], env: ENV });
+const tooManyToAddress = limitFor({ name: "alert-email", max: 3, windowSeconds: 86400, env: ENV });
 const clean = (v: unknown, max: number) => (typeof v === "string" ? v : "").replace(/[\u0000-\u001f\u007f]/g, " ").trim().slice(0, max);
 
 async function sendEmail(msg: Record<string, unknown>) {
@@ -97,18 +103,22 @@ Deno.serve(async (req) => {
   let body: Record<string, unknown>;
   try { body = await readJson(req, 8192); } catch (e) { return json({ ok: false, error: e instanceof BodyError ? e.message : "json" }, e instanceof BodyError ? e.status : 400); }
   if (!body || typeof body !== "object" || Array.isArray(body)) return json({ ok: false, error: "json" }, 400);
-  const ip = req.headers.get("x-forwarded-for")?.split(",")[0].trim() ?? "unknown";
-  if (tooMany(ip)) return json({ ok: false, error: "rate" }, 429);
+  const limit = await guard(req);
+  if (limit) return json({ ok: false, error: limit }, limit === "rate" ? 429 : 503);
 
   const email = clean(body.email, 200).toLowerCase();
-  const consentText = clean(body.consentText, 400);
+  const lang = body.lang === "fr" ? "fr" : "en";
+  // The consent record is the wording the chat shows (_shared/alerts.js), kept here rather than taken
+  // from the request, so a record always says what the person actually agreed to
+  const consentText = consentWording(lang);
   const search = body.search && typeof body.search === "object" && !Array.isArray(body.search) ? body.search : null;
-  if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email) || body.consent !== true || !consentText || !search || JSON.stringify(search).length > 4000) {
+  if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email) || body.consent !== true || !search || JSON.stringify(search).length > 4000) {
     return json({ ok: false, error: "invalid" }, 400);
   }
+  if (await tooManyToAddress(email)) return json({ ok: false, error: "rate" }, 429);
   const row = {
     brand: "isl",
-    lang: body.lang === "fr" ? "fr" : "en",
+    lang,
     email,
     search,
     search_key: await searchKey(search),
