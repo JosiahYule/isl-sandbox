@@ -6,8 +6,7 @@
 //
 // <Reviews />   shown only for a brand with reviews (ISL today)
 import { reviews, stat, showFigure } from '../data/site.js';
-import Unconfirmed from './Unconfirmed.astro';
-// The review count shows once confirmed (src/brands/isl.js, stats); the sandbox marks it
+// The review count shows once confirmed on live sites (src/brands/isl.js, stats)
 const count = stat('reviews');
 const showCount = showFigure(count);
 const items = reviews?.items ?? [];
@@ -39,7 +38,7 @@ const many = items.length > 3;
     <div class="side">
       {showCount && <div class="total">
         <p class="figure total-n">{count.value}</p>
-        <p>five-star reviews on Google from clients and candidates.<Unconfirmed figure={count} /></p>
+        <p>five-star reviews on Google from clients and candidates.</p>
       </div>}
       {[1, 2].map((n) => (
         <figure class="mini" data-slot={n}>

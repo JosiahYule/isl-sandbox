@@ -13,11 +13,10 @@ import PersonCard from '../../components/PersonCard.astro';
 import { stock } from '../../data/photos.js';
 import { team } from '../../data/team.js';
 import { stat, showFigure } from '../../data/site.js';
-import Unconfirmed from '../../components/Unconfirmed.astro';
 
 const recruiters = team.filter((p) => p.team === 'Direct Hire');
-// Retention and time to hire appear only once confirmed (src/brands/isl.js): the sandbox shows them
-// tagged, live sites leave the chart and the figure out
+// Retention and time to hire appear on live sites only once confirmed (src/brands/isl.js): until then
+// live builds leave the chart and the figure out
 const retention = stat('retention');
 const retentionN = showFigure(retention) ? parseInt(retention.value, 10) : 0;
 const fill = stat('timeToFill');
@@ -58,11 +57,11 @@ const terms = [
           <div>
             <div class="section-head">
               <h2>Hires that last.</h2>
-              <p class="lead">Of every 100 people we place permanently, {retentionN} stay.<Unconfirmed figure={retention} /></p>
+              <p class="lead">Of every 100 people we place permanently, {retentionN} stay.</p>
             </div>
             <!-- The 90-day guarantee is step 05 above; the time to hire is said here only -->
             {showFill && <ul class="figs" data-stagger>
-              <li><span class="figure" data-countup>{fill.value}</span>days, on average, from brief to hire<Unconfirmed figure={fill} /></li>
+              <li><span class="figure" data-countup>{fill.value}</span>days, on average, from brief to hire</li>
             </ul>}
           </div>
         </div>

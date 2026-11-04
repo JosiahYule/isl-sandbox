@@ -12,7 +12,7 @@ export const links = current.links;
 export const images = current.images;
 export const stats = current.stats ?? [];
 // A figure by its key (src/brands/isl.js), and whether this build may show it. Unconfirmed figures
-// show in the sandbox only (marked with <Unconfirmed />), never on a live or Squarespace site.
+// show in the sandbox only, never on a live or Squarespace site.
 const LIVE_BUILD = typeof __LIVE__ !== 'undefined' && __LIVE__;
 export const stat = (key) => stats.find((s) => s.key === key);
 export const showFigure = (s) => !!s && (s.confirmed !== false || !LIVE_BUILD);

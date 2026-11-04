@@ -17,8 +17,8 @@ const facts = [
   [String(years), 'years in Atlantic Canada'],
   [String(offices.length), 'local offices'],
   [String(team.length), 'recruiters and staff'],
-  // the review count appears once confirmed (src/brands/isl.js); the sandbox marks it
-  ...(showFigure(reviews) ? [[reviews.value, reviews.confirmed === false ? 'five-star Google reviews (unconfirmed)' : 'five-star Google reviews']] : []),
+  // the review count appears on live sites once confirmed (src/brands/isl.js)
+  ...(showFigure(reviews) ? [[reviews.value, 'five-star Google reviews']] : []),
 ];
 const values = [
   ['Impact', 'A placement should make a measurable difference for the employer and the person hired.'],
