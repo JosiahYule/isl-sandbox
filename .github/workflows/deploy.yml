@@ -97,9 +97,12 @@ jobs:
       contents: read
       actions: read
     steps:
+      # Only the two files this job needs: the script, and .node-version (setup-node reads it)
       - uses: actions/checkout@v4
         with:
-          sparse-checkout: scripts/notify-google-jobs.mjs
+          sparse-checkout: |
+            scripts/notify-google-jobs.mjs
+            .node-version
           sparse-checkout-cone-mode: false
       - uses: actions/setup-node@v4
         with:
