@@ -10,7 +10,7 @@ import { stat, showFigure } from '../data/site.js';
 // The average search time is shown only once it's confirmed (src/brands/isl.js); until then, live
 // sites say where the search reaches instead
 const fill = stat('timeToFill');
-const fillFig = showFigure(fill) ? [`${fill.value} days`, 'average search, brief to hire', fill] : ['Nationwide', 'permanent searches across Canada'];
+const fillFig = showFigure(fill) ? [`${fill.value} days`, 'average search, brief to hire'] : ['Nationwide', 'permanent searches across Canada'];
 const {
   title = ['We recruit.', 'It’s that simple.'],
   // What "simple" means, by service: each block is the way into that service's page.

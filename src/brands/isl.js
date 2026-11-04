@@ -72,7 +72,7 @@ export const offices = [
 ];
 
 // The figures the site quotes. `confirmed: false` = not yet checked against ISL's own records: the
-// sandbox shows it with an "unconfirmed" tag, and live and Squarespace builds leave it out (advertised
+// sandbox still shows it, and live and Squarespace builds leave it out (advertised
 // performance claims need proof on file under the Competition Act). Once a figure is checked, set
 // confirmed: true (or delete the line) and it appears everywhere.
 // TODO: confirm. The live site quotes both 92% and 88% retention, and both 200+ and 150+ reviews.

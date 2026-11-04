@@ -270,7 +270,7 @@ Leave `npm run dev` running. Every time you save a file, the browser updates.
 
 ## Figures waiting to be confirmed
 
-The retention rate, average time to fill and Google review count in `src/brands/isl.js` (`stats`) are marked `confirmed: false` until they're checked against ISL's records (advertised performance claims need proof on file). The sandbox shows them with a small "unconfirmed" tag; live and Squarespace builds leave them out, and the page uses wording that needs no number. Set `confirmed: true` once a figure is checked and it appears everywhere.
+The retention rate, average time to fill and Google review count in `src/brands/isl.js` (`stats`) are marked `confirmed: false` until they're checked against ISL's records (advertised performance claims need proof on file). The sandbox shows them as usual; live and Squarespace builds leave them out, and the page uses wording that needs no number. Set `confirmed: true` once a figure is checked and it appears everywhere.
 
 ## Google for Jobs
 
