@@ -1,0 +1,16 @@
+---
+// UNCONFIRMED: a small tag beside a figure that ISL hasn't confirmed yet (src/brands/isl.js, stats).
+// Sandbox only: live and Squarespace builds leave the figure out, so this never reaches the public.
+// <Unconfirmed figure={stat('retention')} />
+const { figure } = Astro.props;
+---
+{figure?.confirmed === false && <span class="unconfirmed" title="Sandbox only: this figure needs confirming before launch. Live builds leave it out.">unconfirmed</span>}
+
+<style>
+  .unconfirmed {
+    display: inline-block; vertical-align: middle; margin-left: 0.5em;
+    font-size: 0.7rem; font-weight: var(--fw-bold); letter-spacing: 0.04em; line-height: 1; text-transform: uppercase;
+    padding: 3px 6px; border: 1px dashed currentColor; color: #8a5a00; background: #fff8e6;
+    font-variant-numeric: normal;
+  }
+</style>

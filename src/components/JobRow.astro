@@ -2,6 +2,8 @@
 // JOB ROW: one real posting. The coloured edge says contract (near-black) or permanent (ISL blue).
 // The title opens the job's page here (/find-work/<slug>/); Apply goes straight to the application.
 import { BRAND } from '../data/site.js';
+import { areas } from '../data/areas.js';
+import { provinces } from '../data/jobs.js';
 const { job } = Astro.props;
 // AS and ADS: Tracker postings don't carry pay yet, so no "Pay discussed at interview" on every row.
 // The empty cell keeps the columns lined up.
@@ -11,16 +13,21 @@ const posted = job.posted
   : '';
 const where = [job.city, job.province].filter(Boolean).join(', ');
 const field = [job.category, job.subcategory].filter(Boolean).join(', ');
+// What the search reads. Besides the posting itself: the office area the town is in, so "Halifax"
+// also finds Dartmouth, Bedford and Timberlea (the feed names the town, and most of the Halifax
+// area's jobs are listed under one of them), and the province's full name, so "Nova Scotia" works.
+const areaLabel = areas.find((a) => a.key === job.area)?.label ?? '';
+const searchable = [job.title, field, job.city, areaLabel, job.province, provinces[job.province], job.province === 'PE' && 'PEI', job.description || job.snippet].filter(Boolean).join(' ');
 ---
 <article class:list={['job', `job--${job.type}`]} data-job-id={job.id}
   data-type={job.type} data-province={job.province} data-area={job.area} data-industry={job.industry}
-  data-search={`${job.title} ${field} ${job.city} ${job.province} ${job.description || job.snippet || ''}`}>
+  data-search={searchable}>
   <div class="main">
     <h3><a href={job.url}>{job.title}</a></h3>
     <p class="where">{where}</p>
   </div>
   <p class:list={['svc', `svc--${job.type}`]}>{job.typeLabel}</p>
-  <p class:list={['pay', !job.pay && 'pay--none']}>{payText}</p>
+  <p class:list={['pay', !job.pay && 'pay--none']}>{payText}{job.pay && job.payNote && <span class="pay-note">{job.payNote}</span>}</p>
   <div class="end">
     {posted && <p class="posted">Posted {posted}</p>}
     <a class="apply" href={job.applyUrl}>Apply<span class="visually-hidden"> for {job.title}</span></a>
@@ -47,6 +54,7 @@ const field = [job.category, job.subcategory].filter(Boolean).join(', ');
   .where { color: var(--ink-soft); font-size: var(--fs-small); margin-top: var(--s1); }
   .pay { font-weight: var(--fw-bold); font-variant-numeric: tabular-nums; }
   .pay--none { color: var(--ink-soft); font-weight: var(--fw-text); }
+  .pay-note { display: block; font-size: var(--fs-tiny, 0.8rem); color: var(--ink-soft); font-weight: var(--fw-text); }
   .end { display: flex; align-items: center; gap: var(--s5); justify-content: flex-end; padding-right: var(--s4); }
   .posted { font-size: var(--fs-small); color: var(--ink-soft); white-space: nowrap; }
   .apply {

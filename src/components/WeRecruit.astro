@@ -6,6 +6,11 @@
 //
 // <WeRecruit title={['One field.', 'Every level.']} services={[...]} />
 import ServiceBlocks from './ServiceBlocks.astro';
+import { stat, showFigure } from '../data/site.js';
+// The average search time is shown only once it's confirmed (src/brands/isl.js); until then, live
+// sites say where the search reaches instead
+const fill = stat('timeToFill');
+const fillFig = showFigure(fill) ? [`${fill.value} days`, 'average search, brief to hire', fill] : ['Nationwide', 'permanent searches across Canada'];
 const {
   title = ['We recruit.', 'It’s that simple.'],
   // What "simple" means, by service: each block is the way into that service's page.
@@ -14,7 +19,7 @@ const {
     { key: 'contract', name: 'Contract staffing', href: '/contract/', go: 'How contract staffing works',
       figs: [['One rate', 'per worker, payroll included'], ['Temp to perm', 'try someone, then hire them']] },
     { key: 'direct', name: 'Direct hire', href: '/direct-hire/', go: 'How direct hire works',
-      figs: [['47 days', 'average search, brief to hire'], ['90 days', 'replacement guarantee']] },
+      figs: [fillFig, ['90 days', 'replacement guarantee']] },
   ],
 } = Astro.props;
 ---

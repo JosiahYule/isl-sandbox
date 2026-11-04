@@ -8,16 +8,17 @@ import Photo from '../../components/Photo.astro';
 import { url } from '../../lib/url.js';
 import { asset } from '../../lib/img.js';
 import { photos } from '../../data/photos.js';
-import { brand, images, offices, stats } from '../../data/site.js';
+import { brand, images, offices, stat, showFigure } from '../../data/site.js';
 import { team } from '../../data/team.js';
 
 const years = new Date().getFullYear() - brand.since;
-const reviews = stats.find((s) => s.label.includes('reviews'))?.value ?? '200+';
+const reviews = stat('reviews');
 const facts = [
   [String(years), 'years in Atlantic Canada'],
   [String(offices.length), 'local offices'],
   [String(team.length), 'recruiters and staff'],
-  [reviews, 'five-star Google reviews'],
+  // the review count appears once confirmed (src/brands/isl.js); the sandbox marks it
+  ...(showFigure(reviews) ? [[reviews.value, reviews.confirmed === false ? 'five-star Google reviews (unconfirmed)' : 'five-star Google reviews']] : []),
 ];
 const values = [
   ['Impact', 'A placement should make a measurable difference for the employer and the person hired.'],

@@ -17,6 +17,9 @@
 //   REQUEST_CC        comma-separated addresses copied on every request (e.g. info@)
 //   REQUEST_FALLBACK  who gets requests routed to an office line (default info@integratedstaffing.ca)
 //   ALLOWED_ORIGINS   comma-separated sites allowed to post here
+//   TURNSTILE_SECRET  Cloudflare Turnstile's secret key: the form must then prove the sender is a person
+//                     (set PUBLIC_TURNSTILE_SITE_KEY for the site build at the same time)
+//   CLIENT_IP_HEADER, LOG_IP_HEADERS   see _shared/guard.js
 //
 // Deploy:  supabase functions deploy isl-request --no-verify-jwt
 // Then paste the function's URL into src/data/site.js (forms.requestEndpoint).
@@ -24,7 +27,8 @@
 
 import { route, placeFrom, provinceName } from "../_shared/routing.js";
 import { isLeadId, sanitizeAttribution, attributionRows, pagePath, sanitizeMeasurement } from "../_shared/lead-context.js";
-import { readJson, rateLimiter, BodyError } from "../_shared/http.js";
+import { readJson, BodyError } from "../_shared/http.js";
+import { createGuard, guardEnv, verifyTurnstile, clientIp } from "../_shared/guard.js";
 
 const RESEND_KEY = Deno.env.get("RESEND_API_KEY") ?? "";
 const FROM = Deno.env.get("REQUEST_FROM") ?? "";
@@ -46,8 +50,10 @@ function corsHeaders(origin: string | null) {
   };
 }
 
-// A light brake on repeat sends from one address (resets when the function restarts)
-const tooMany = rateLimiter(5, 10 * 60 * 1000);
+// 5 sends per visitor in 10 minutes, and 200 a day for everyone combined, shared by every copy of this
+// function (_shared/guard.js). A real day is a handful of requests; a flood stops at 200.
+const ENV = guardEnv((k) => Deno.env.get(k));
+const guard = createGuard({ name: "isl-request", visitor: [5, 600], everyone: [200, 86400], env: ENV });
 
 const clean = (v: unknown, max: number) => (typeof v === 'string' ? v : '').replace(/[\u0000-\u001f\u007f]/g, " ").trim().slice(0, max);
 const esc = (s: string) => s.replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]!));
@@ -65,8 +71,8 @@ Deno.serve(async (req) => {
   // Bots fill every field, including the hidden "website" one people never see
   if (!body || typeof body !== 'object' || Array.isArray(body)) return new Response(JSON.stringify({ ok: false, error: 'json' }), { status: 400, headers });
   if (clean(body.website, 10)) return new Response(JSON.stringify({ ok: true, accepted: false }), { headers });
-  const ip = req.headers.get("x-forwarded-for")?.split(",")[0].trim() ?? "unknown";
-  if (tooMany(ip)) return new Response(JSON.stringify({ ok: false, error: "rate" }), { status: 429, headers });
+  const limit = await guard(req);
+  if (limit) return new Response(JSON.stringify({ ok: false, error: limit }), { status: limit === "rate" ? 429 : 503, headers });
 
   const f = {
     service: SERVICES[clean(body.service, 20)] ? clean(body.service, 20) : "unsure",
@@ -85,6 +91,9 @@ Deno.serve(async (req) => {
   if (missing.length || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(f.email)) {
     return new Response(JSON.stringify({ ok: false, error: "invalid", missing }), { status: 400, headers });
   }
+
+  // Turnstile (when switched on): the page's "are you a person" check, confirmed with Cloudflare
+  if (!(await verifyTurnstile(body.turnstile, clientIp(req, ENV), ENV))) return new Response(JSON.stringify({ ok: false, error: "human" }), { status: 400, headers });
 
   // Same routing as the page's "Who'll reply" card
   // (contract can't be staffed outside Atlantic Canada, so that request goes to a permanent search)

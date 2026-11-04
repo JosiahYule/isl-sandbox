@@ -22,6 +22,9 @@
 //   REQUEST_FALLBACK  where a request goes if its office has no address in REQUEST_TO
 //   REQUEST_CC        comma-separated addresses copied on every request
 //   ALLOWED_ORIGINS   comma-separated sites allowed to post here
+//   TURNSTILE_SECRET  Cloudflare Turnstile's secret key: the form must then prove the sender is a person
+//                     (set PUBLIC_TURNSTILE_SITE_KEY for the site builds at the same time)
+//   CLIENT_IP_HEADER, LOG_IP_HEADERS   see _shared/guard.js
 //
 // Deploy:  supabase functions deploy specialist-request --no-verify-jwt
 // Then set the function's URL as AS_REQUEST_ENDPOINT and ADS_REQUEST_ENDPOINT (GitHub > Settings >
@@ -29,7 +32,8 @@
 // =====================================================================
 
 import { isLeadId, sanitizeAttribution, attributionRows, pagePath, sanitizeMeasurement } from "../_shared/lead-context.js";
-import { readJson, rateLimiter, BodyError } from "../_shared/http.js";
+import { readJson, BodyError } from "../_shared/http.js";
+import { createGuard, guardEnv, verifyTurnstile, clientIp } from "../_shared/guard.js";
 
 const RESEND_KEY = Deno.env.get("RESEND_API_KEY") ?? "";
 const FROM: Record<string, string> = { as: Deno.env.get("REQUEST_FROM_AS") ?? "", ads: Deno.env.get("REQUEST_FROM_ADS") ?? "" };
@@ -61,7 +65,9 @@ function corsHeaders(origin: string | null) {
   const ok = origin && ALLOWED.includes(origin);
   return { "Access-Control-Allow-Origin": ok ? origin! : ALLOWED[0], "Access-Control-Allow-Methods": "POST, OPTIONS", "Access-Control-Allow-Headers": "content-type", "Vary": "Origin" };
 }
-const tooMany = rateLimiter(5, 10 * 60 * 1000);
+// 5 sends per visitor in 10 minutes, 200 a day for both brands combined (_shared/guard.js)
+const ENV = guardEnv((k) => Deno.env.get(k));
+const guard = createGuard({ name: "specialist-request", visitor: [5, 600], everyone: [200, 86400], env: ENV });
 const clean = (v: unknown, max: number) => (typeof v === "string" ? v : "").replace(/[\u0000-\u001f\u007f]/g, " ").trim().slice(0, max);
 const esc = (s: string) => s.replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]!));
 
@@ -76,8 +82,8 @@ Deno.serve(async (req) => {
   try { body = await readJson(req, 16384); } catch (e) { return new Response(JSON.stringify({ ok: false, error: e instanceof BodyError ? e.message : "json" }), { status: e instanceof BodyError ? e.status : 400, headers }); }
   if (!body || typeof body !== "object" || Array.isArray(body)) return new Response(JSON.stringify({ ok: false, error: "json" }), { status: 400, headers });
   if (clean(body.website, 10)) return new Response(JSON.stringify({ ok: true, accepted: false }), { headers }); // the hidden field only bots fill in
-  const ip = req.headers.get("x-forwarded-for")?.split(",")[0].trim() ?? "unknown";
-  if (tooMany(ip)) return new Response(JSON.stringify({ ok: false, error: "rate" }), { status: 429, headers });
+  const limit = await guard(req);
+  if (limit) return new Response(JSON.stringify({ ok: false, error: limit }), { status: limit === "rate" ? 429 : 503, headers });
 
   // The brand: from the live site, or (sandbox only) from the page
   const brandKey = (origin && SITES[origin]) || (origin === SANDBOX || !origin ? clean(body.brand, 5) : "");
@@ -101,6 +107,9 @@ Deno.serve(async (req) => {
   if (missing.length || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(f.email)) {
     return new Response(JSON.stringify({ ok: false, error: "invalid", missing }), { status: 400, headers });
   }
+
+  // Turnstile (when switched on): the page's "are you a person" check, confirmed with Cloudflare
+  if (!(await verifyTurnstile(body.turnstile, clientIp(req, ENV), ENV))) return new Response(JSON.stringify({ ok: false, error: "human" }), { status: 400, headers });
 
   // The office that covers the province; anywhere outside Atlantic Canada goes to Halifax
   const officeKey = PROVINCE_OFFICE[f.location] ?? "halifax";

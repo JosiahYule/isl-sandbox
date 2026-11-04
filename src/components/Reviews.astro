@@ -5,7 +5,11 @@
 // two beside the featured review are always the next two, never a repeat of it.
 //
 // <Reviews />   shown only for a brand with reviews (ISL today)
-import { reviews } from '../data/site.js';
+import { reviews, stat, showFigure } from '../data/site.js';
+import Unconfirmed from './Unconfirmed.astro';
+// The review count shows once confirmed (src/brands/isl.js, stats); the sandbox marks it
+const count = stat('reviews');
+const showCount = showFigure(count);
 const items = reviews?.items ?? [];
 const label = (r) => (r.who ? `${r.who} · Google review` : 'Google review');
 const side = (r) => (r.who ? r.who : 'Google review');
@@ -31,18 +35,19 @@ const many = items.length > 3;
       </figcaption>
     </figure>
 
-    <aside class="side">
-      <div class="total">
-        <p class="figure total-n">{reviews.count}</p>
-        <p>five-star reviews on Google from clients and candidates.</p>
-      </div>
+    <!-- A div, not an aside: an aside inside <main> is a landmark screen readers list separately -->
+    <div class="side">
+      {showCount && <div class="total">
+        <p class="figure total-n">{count.value}</p>
+        <p>five-star reviews on Google from clients and candidates.<Unconfirmed figure={count} /></p>
+      </div>}
       {[1, 2].map((n) => (
         <figure class="mini" data-slot={n}>
           <blockquote data-r="short">“{at(n).short}”</blockquote>
           <figcaption><strong data-r="name">{at(n).name}</strong> · <span data-r="side">{side(at(n))}</span></figcaption>
         </figure>
       ))}
-    </aside>
+    </div>
   </div>
   {many && <script type="application/json" data-reviews-list set:html={JSON.stringify(items.map((r) => ({ ...r, label: label(r), side: side(r) })))} />}
 </section>}

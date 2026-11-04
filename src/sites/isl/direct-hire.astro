@@ -12,11 +12,16 @@ import Proof from '../../components/Proof.astro';
 import PersonCard from '../../components/PersonCard.astro';
 import { stock } from '../../data/photos.js';
 import { team } from '../../data/team.js';
-import { stats } from '../../data/site.js';
+import { stat, showFigure } from '../../data/site.js';
+import Unconfirmed from '../../components/Unconfirmed.astro';
 
 const recruiters = team.filter((p) => p.team === 'Direct Hire');
-const retention = stats.find((s) => s.label.includes('retention'))?.value ?? '92%';
-const retentionN = parseInt(retention, 10);
+// Retention and time to hire appear only once confirmed (src/brands/isl.js): the sandbox shows them
+// tagged, live sites leave the chart and the figure out
+const retention = stat('retention');
+const retentionN = showFigure(retention) ? parseInt(retention.value, 10) : 0;
+const fill = stat('timeToFill');
+const showFill = showFigure(fill);
 // A real sequence, so it's numbered.
 const steps = [
   ['Brief', 'We learn the role, the team and what you need from the hire.'],
@@ -47,19 +52,26 @@ const terms = [
 
   <section class="section section--tint">
     <div class="wrap">
-      <div class="stay">
-        <UnitChart value={retentionN} label={`${retentionN} of every 100 direct hire placements stay`} />
-        <div>
-          <div class="section-head">
-            <h2>Hires that last.</h2>
-            <p class="lead">Of every 100 people we place permanently, {retentionN} stay.</p>
+      {retentionN > 0 ? (
+        <div class="stay">
+          <UnitChart value={retentionN} label={`${retentionN} of every 100 direct hire placements stay`} />
+          <div>
+            <div class="section-head">
+              <h2>Hires that last.</h2>
+              <p class="lead">Of every 100 people we place permanently, {retentionN} stay.<Unconfirmed figure={retention} /></p>
+            </div>
+            <!-- The 90-day guarantee is step 05 above; the time to hire is said here only -->
+            {showFill && <ul class="figs" data-stagger>
+              <li><span class="figure" data-countup>{fill.value}</span>days, on average, from brief to hire<Unconfirmed figure={fill} /></li>
+            </ul>}
           </div>
-          <!-- The 90-day guarantee is step 05 above; the time to hire is said here only -->
-          <ul class="figs" data-stagger>
-            <li><span class="figure" data-countup>47</span>days, on average, from brief to hire</li>
-          </ul>
         </div>
-      </div>
+      ) : (
+        <div class="section-head">
+          <h2>Hires that last.</h2>
+          <p class="lead">If a hire doesn’t work out within 90 days, we find a replacement.</p>
+        </div>
+      )}
       <ul class="items">
         {terms.map(([t, d]) => <li class="item item--blue"><h3>{t}</h3><p>{d}</p></li>)}
       </ul>

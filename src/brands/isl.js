@@ -71,12 +71,16 @@ export const offices = [
   { city: "St. John's", province: 'NL', phone: '709-800-2454', address: "120 Torbay Rd, Suite E115, St. John's, NL A1A 2G8" },
 ];
 
-// TODO: confirm these. The live site quotes 92% and 88% retention, 200+ and 150+ reviews.
+// The figures the site quotes. `confirmed: false` = not yet checked against ISL's own records: the
+// sandbox shows it with an "unconfirmed" tag, and live and Squarespace builds leave it out (advertised
+// performance claims need proof on file under the Competition Act). Once a figure is checked, set
+// confirmed: true (or delete the line) and it appears everywhere.
+// TODO: confirm. The live site quotes both 92% and 88% retention, and both 200+ and 150+ reviews.
 export const stats = [
-  { value: '200+', label: 'five-star Google reviews' },
-  { value: '92%', label: 'retention on direct hire placements' },
-  { value: '47', label: 'day average time to fill (direct hire)' },
-  { value: `${new Date().getFullYear() - 2013}+`, label: 'years placing people in Atlantic Canada' },
+  { key: 'reviews', value: '200+', label: 'five-star Google reviews', confirmed: false },
+  { key: 'retention', value: '92%', label: 'retention on direct hire placements', confirmed: false },
+  { key: 'timeToFill', value: '47', label: 'day average time to fill (direct hire)', confirmed: false },
+  { key: 'years', value: `${new Date().getFullYear() - brand.since}+`, label: 'years placing people in Atlantic Canada' },
 ];
 
 export const testimonials = [
@@ -99,7 +103,7 @@ export const testimonials = [
 // end of a sentence only. People appear as first name and last initial unless they signed with more.
 //   who: Employer or Job seeker, when the review makes it clear; '' shows just "Google review"
 export const reviews = {
-  count: '200+',
+  // (the count shown beside them is stats' 'reviews' figure, above)
   items: [
     {
       name: 'Michelle, Charlottetown Bottle & Metal', who: 'Employer',
@@ -158,28 +162,7 @@ export const tools = {
     text: 'With contract staffing, the worker is on our payroll. Wages, CPP, EI, workers’ comp, vacation pay and recruiting are in one hourly rate.',
     details: 'Contract worker', // pre-fills the request form: "Contract worker at about $20.00/hour, ..."
   },
-  ad: {
-    text: 'We write the ad, post it, screen everyone who applies and send you the people worth meeting.',
-    label: 'Request workers',
-    // A weak example, so a visitor can see what the tool does before pasting their own
-    sample: `WAREHOUSE ROCKSTAR WANTED!!!
-
-We are a fast-paced environment looking for a young, energetic self-starter to join our family. Competitive pay.
-
-Must have 3 years experience
-Must have forklift ticket
-Must have WHMIS
-Must be able to lift 50 lbs
-Must have own vehicle
-Must have Canadian experience
-Must be available evenings
-Other duties as assigned.
-
-Send your resume to jobs@example.ca`,
-  },
 };
-
-// The job board's footnote
 
 export const social = [
   { label: 'LinkedIn', href: 'https://www.linkedin.com/company/integratedstaffing' },

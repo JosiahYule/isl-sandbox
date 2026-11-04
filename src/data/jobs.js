@@ -24,6 +24,7 @@ import { url } from '../lib/url.js';
 import { jobSummary } from '../lib/jobtext.js';
 import { industryOf } from './industries.js';
 import { BRAND, services } from './site.js';
+import { MIN_WAGE } from '../lib/minwage.js';
 import { resolveCompensation } from '../../assistant/supabase/functions/_shared/compensation.js';
 
 const source = { isl: { jobs: islSnapshot, saved: islMeta.fetched }, as: { jobs: asSample.jobs, saved: asSample.saved }, ads: { jobs: adsSample.jobs, saved: adsSample.saved } }[BRAND];
@@ -52,6 +53,19 @@ function tidyPay(pay) {
 const slugify = (s) => String(s).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '')
   .replace(/['’]/g, '').replace(/&/g, ' and ').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
 
+// A yearly salary below what full-time minimum wage pays over a year (2,080 hours) can't be for full-time
+// hours, so on its own it reads as underpaid (a seasonal tax preparer at "$25,000 to $30,000/year").
+// Those jobs carry a short note beside the pay, worded from the posting itself.
+function payNoteFor(pay, province, description = '', note = '') {
+  const m = String(pay).match(/^\$([\d,]+)(?: to \$([\d,]+))?\/year$/);
+  const floor = MIN_WAGE[province]?.rate;
+  if (!m || !floor) return '';
+  const top = Number((m[2] || m[1]).replace(/,/g, ''));
+  if (top >= floor * 2080) return '';
+  const text = `${description} ${note}`;
+  return /season/i.test(text) ? 'Seasonal hours' : /part[\s-]*time/i.test(text) ? 'Part-time hours' : 'Not full-time hours';
+}
+
 export const jobs = snapshot
   .map(resolveCompensation)
   .map((j) => {
@@ -62,8 +76,11 @@ export const jobs = snapshot
       ...j,
       title: tidyTitle(j.title, j.city),
       pay: tidyPay(j.pay),
+      payNote: payNoteFor(tidyPay(j.pay), j.province, j.description, j.note),
       slug,
-      payLabel: j.payLabel || (j.description ? '' : 'Pay on the posting'),
+      // No pay: ISL says it's discussed at interview (JobRow, the job page); AS and ADS postings from
+      // Tracker carry none yet, so their rows leave the cell empty (the posting has none to point to)
+      payLabel: j.payLabel || '',
       url: url(`/find-work/${slug}/`),
       area: areaFor(j.city),
       industry: BRAND === 'isl' ? industryOf(j.title) : '', // '' when it's none of ISL's six industry pages
