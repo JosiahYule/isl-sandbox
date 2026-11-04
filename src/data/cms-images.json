@@ -211,6 +211,7 @@
   "name": "integrated-staffing-shane-ico-854d545a",
   "ext": "webp",
   "widths": [
+   300,
    500,
    750,
    1000,
@@ -221,6 +222,7 @@
   "name": "d247e9aa-54c1-4a72-b108-ab50880696c2-967f478a",
   "ext": "webp",
   "widths": [
+   300,
    500,
    750,
    1000,
@@ -241,6 +243,7 @@
   "name": "headshot-megan-ferguson-e09b703e",
   "ext": "webp",
   "widths": [
+   300,
    500,
    750,
    1000,
@@ -251,6 +254,7 @@
   "name": "ashton-murray-bc129d0d",
   "ext": "webp",
   "widths": [
+   300,
    500,
    750,
    1000,
@@ -261,6 +265,7 @@
   "name": "brady-w-headshot-78143d58",
   "ext": "webp",
   "widths": [
+   300,
    500,
    750,
    1000,
@@ -271,6 +276,7 @@
   "name": "headshot-g-white-347a41ba",
   "ext": "webp",
   "widths": [
+   300,
    500,
    750,
    1000,
@@ -281,6 +287,7 @@
   "name": "integrated-2024-1723web-1-4bb0b36f",
   "ext": "webp",
   "widths": [
+   300,
    500,
    750,
    1000,
@@ -291,6 +298,7 @@
   "name": "img-0975-768d3e2a",
   "ext": "webp",
   "widths": [
+   300,
    500,
    750,
    1000,
@@ -321,6 +329,7 @@
   "name": "websized-mdwed-2022-0128-1-ef4581bc",
   "ext": "webp",
   "widths": [
+   300,
    500,
    750,
    1000,
@@ -331,6 +340,7 @@
   "name": "screenshot-2025-08-05-111222-0-89e129a9",
   "ext": "webp",
   "widths": [
+   300,
    500,
    750,
    1000,
@@ -341,6 +351,7 @@
   "name": "marine-migliore-2dfb87e4",
   "ext": "webp",
   "widths": [
+   300,
    500,
    750,
    1000,
@@ -351,6 +362,7 @@
   "name": "headshot-nicole-robertson-copy-0-41de8177",
   "ext": "webp",
   "widths": [
+   300,
    500,
    750,
    1000,
@@ -361,6 +373,7 @@
   "name": "2-eb9a76cf",
   "ext": "webp",
   "widths": [
+   300,
    500,
    750,
    1000,
@@ -371,6 +384,7 @@
   "name": "sonja-headshot-1-12ae6951",
   "ext": "webp",
   "widths": [
+   300,
    500,
    750,
    1000,
@@ -381,6 +395,7 @@
   "name": "untitled-instagram-post-45-4-1-0f317710",
   "ext": "webp",
   "widths": [
+   300,
    500,
    750,
    1000,
@@ -391,6 +406,7 @@
   "name": "headshot-n-bailey-e18bddfe",
   "ext": "webp",
   "widths": [
+   300,
    500,
    750,
    1000,
@@ -401,6 +417,7 @@
   "name": "carrie-f-headshot-d54271f1",
   "ext": "webp",
   "widths": [
+   300,
    500,
    750,
    1000,
@@ -411,6 +428,7 @@
   "name": "screenshot-2025-08-05-110436-27e2cd83",
   "ext": "webp",
   "widths": [
+   300,
    500,
    750,
    1000,
@@ -421,6 +439,7 @@
   "name": "julia-p-headshot-9f67fad0",
   "ext": "webp",
   "widths": [
+   300,
    500,
    750,
    1000,
@@ -442,6 +461,7 @@
   "name": "2-a4eaa1f0",
   "ext": "webp",
   "widths": [
+   300,
    500,
    750,
    1000,
@@ -452,6 +472,40 @@
   "name": "1-e87ae312",
   "ext": "webp",
   "widths": [
+   300,
+   500,
+   750,
+   1000,
+   1500
+  ]
+ },
+ "3be903e7-f0fd-423d-8b33-5562545360b9/integrated_sept2026_0229.jpg": {
+  "name": "integrated-sept2026-0229-3be903e7",
+  "ext": "webp",
+  "widths": [
+   300,
+   500,
+   750,
+   1000,
+   1500
+  ]
+ },
+ "a6378644-c150-49a8-a96c-c60c80b5e6b5/integrated_sept2026_0480.jpg": {
+  "name": "integrated-sept2026-0480-a6378644",
+  "ext": "webp",
+  "widths": [
+   300,
+   500,
+   750,
+   1000,
+   1500
+  ]
+ },
+ "4eec9320-8900-4e0f-9881-d3a8ccdc1506/integrated_sept2026_0391.jpg": {
+  "name": "integrated-sept2026-0391-4eec9320",
+  "ext": "webp",
+  "widths": [
+   300,
    500,
    750,
    1000,
