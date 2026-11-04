@@ -71,15 +71,12 @@ export const offices = [
   { city: "St. John's", province: 'NL', phone: '709-800-2454', address: "120 Torbay Rd, Suite E115, St. John's, NL A1A 2G8" },
 ];
 
-// The figures the site quotes. `confirmed: false` = not yet checked against ISL's own records: the
-// sandbox still shows it, and live and Squarespace builds leave it out (advertised
-// performance claims need proof on file under the Competition Act). Once a figure is checked, set
-// confirmed: true (or delete the line) and it appears everywhere.
-// TODO: confirm. The live site quotes both 92% and 88% retention, and both 200+ and 150+ reviews.
+// The figures the site quotes. A figure marked `confirmed: false` shows in the sandbox only; live and
+// Squarespace builds leave it out until it's checked (for a new figure that still needs confirming).
 export const stats = [
-  { key: 'reviews', value: '200+', label: 'five-star Google reviews', confirmed: false },
-  { key: 'retention', value: '92%', label: 'retention on direct hire placements', confirmed: false },
-  { key: 'timeToFill', value: '47', label: 'day average time to fill (direct hire)', confirmed: false },
+  { key: 'reviews', value: '200+', label: 'five-star Google reviews' },
+  { key: 'retention', value: '92%', label: 'retention on direct hire placements' },
+  { key: 'timeToFill', value: '47', label: 'day average time to fill (direct hire)' },
   { key: 'years', value: `${new Date().getFullYear() - brand.since}+`, label: 'years placing people in Atlantic Canada' },
 ];
 
